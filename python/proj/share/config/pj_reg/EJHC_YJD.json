@@ -160,7 +160,7 @@
                 "RW": "NA",
                 "definition": "RESET_PF_DISTANCE_THRESHOLD",
                 "description": "动态预取距离重置阈值",
-                "reset_value": "5'h0",
+                "reset_value": "5'h10",
                 "ucode_reset_value": "NA"
             },
             "[9:5]": {
@@ -721,6 +721,450 @@
                 "ucode_reset_value": "1'b0"
             }
          }
-      }
+      },
+  "apic_evt_status": {
+        "SW_visible": "yes",
+        "MSR_address": "32'h925",
+        "global_address": "11'h482",
+        "local_address": "11'h482",
+        "32bit/64bit": "32bit",
+        "ST/MT": "MT",
+        "fields": {
+            "[14]": {
+                "RW": "RW",
+                "definition": "uncore_trap",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[11]": {
+                "RW": "RW",
+                "definition": "mca",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[10]": {
+                "RW": "RW",
+                "definition": "preq",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[9]": {
+                "RW": "RW",
+                "definition": "vmx",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[7]": {
+                "RW": "RW",
+                "definition": "sipi",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[6]": {
+                "RW": "RW",
+                "definition": "monitor",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[4]": {
+                "RW": "RW",
+                "definition": "smi",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[3]": {
+                "RW": "RW",
+                "definition": "nmi",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[2]": {
+                "RW": "RW",
+                "definition": "init",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[1]": {
+                "RW": "RW",
+                "definition": "a20m",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[0]": {
+                "RW": "RW",
+                "definition": "intr",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            }
+         }
+  },
+  "apic_evt_inhibit": {
+        "SW_visible": "yes",
+        "MSR_address": "NA",
+        "global_address": "11'h480",
+        "local_address": "11'h480",
+        "32bit/64bit": "32bit",
+        "ST/MT": "MT",
+        "fields": {
+            "[14]": {
+                "RW": "RW",
+                "definition": "uncore_trap",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[11]": {
+                "RW": "RW",
+                "definition": "mca",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[10]": {
+                "RW": "RW",
+                "definition": "preq",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[9]": {
+                "RW": "RW",
+                "definition": "vmx",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[7]": {
+                "RW": "RW",
+                "definition": "sipi",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[6]": {
+                "RW": "RW",
+                "definition": "monitor",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[4]": {
+                "RW": "RW",
+                "definition": "smi",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[3]": {
+                "RW": "RW",
+                "definition": "nmi",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[2]": {
+                "RW": "RW",
+                "definition": "init",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[1]": {
+                "RW": "RW",
+                "definition": "a20m",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[0]": {
+                "RW": "RW",
+                "definition": "intr",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            }
+         }
+  },
+  "apic_evt_set": {
+        "SW_visible": "yes",
+        "MSR_address": "32'h926",
+        "global_address": "11'h483",
+        "local_address": "11'h483",
+        "32bit/64bit": "32bit",
+        "ST/MT": "MT",
+        "fields": {
+            "[14]": {
+                "RW": "RW",
+                "definition": "uncore_trap",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[11]": {
+                "RW": "RW",
+                "definition": "mca",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[10]": {
+                "RW": "RW",
+                "definition": "preq",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[9]": {
+                "RW": "RW",
+                "definition": "vmx",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[7]": {
+                "RW": "RW",
+                "definition": "sipi",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[6]": {
+                "RW": "RW",
+                "definition": "monitor",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[4]": {
+                "RW": "RW",
+                "definition": "smi",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[3]": {
+                "RW": "RW",
+                "definition": "nmi",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[2]": {
+                "RW": "RW",
+                "definition": "init",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[1]": {
+                "RW": "RW",
+                "definition": "a20m",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[0]": {
+                "RW": "RW",
+                "definition": "intr",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            }
+         }
+  },
+  "apic_evt_rst": {
+        "SW_visible": "yes",
+        "MSR_address": "32'h927",
+        "global_address": "11'h484",
+        "local_address": "11'h484",
+        "32bit/64bit": "32bit",
+        "ST/MT": "MT",
+        "fields": {
+            "[14]": {
+                "RW": "RW",
+                "definition": "uncore_trap",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[11]": {
+                "RW": "RW",
+                "definition": "mca",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[10]": {
+                "RW": "RW",
+                "definition": "preq",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[9]": {
+                "RW": "RW",
+                "definition": "vmx",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[7]": {
+                "RW": "RW",
+                "definition": "sipi",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[6]": {
+                "RW": "RW",
+                "definition": "monitor",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[4]": {
+                "RW": "RW",
+                "definition": "smi",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[3]": {
+                "RW": "RW",
+                "definition": "nmi",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[2]": {
+                "RW": "RW",
+                "definition": "init",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[1]": {
+                "RW": "RW",
+                "definition": "a20m",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[0]": {
+                "RW": "RW",
+                "definition": "intr",
+                "description": "Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            }
+         }
+  },
+  "apic_uncore_trap_evt_status": {
+        "SW_visible": "yes",
+        "MSR_address": "32'h92c",
+        "global_address": "11'h486",
+        "local_address": "11'h486",
+        "32bit/64bit": "32bit",
+        "ST/MT": "MT",
+        "fields": {
+            "[3]": {
+                "RW": "RW",
+                "definition": "llbreaker",
+                "description": "Uncore Trap Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[1]": {
+                "RW": "RW",
+                "definition": "uncore_trap",
+                "description": "Uncore Trap Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            }
+         }
+  },
+  "apic_uncore_trap_evt_inhibit": {
+        "SW_visible": "yes",
+        "MSR_address": "32'h92b",
+        "global_address": "11'h485",
+        "local_address": "11'h485",
+        "32bit/64bit": "32bit",
+        "ST/MT": "MT",
+        "fields": {
+            "[3]": {
+                "RW": "RW",
+                "definition": "llbreaker",
+                "description": "Uncore Trap Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[1]": {
+                "RW": "RW",
+                "definition": "uncore_trap",
+                "description": "Uncore Trap Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            }
+         }
+  },
+  "apic_uncore_trap_evt_set": {
+        "SW_visible": "yes",
+        "MSR_address": "32'h92d",
+        "global_address": "11'h487",
+        "local_address": "11'h487",
+        "32bit/64bit": "32bit",
+        "ST/MT": "MT",
+        "fields": {
+            "[3]": {
+                "RW": "RW",
+                "definition": "llbreaker",
+                "description": "Uncore Trap Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[1]": {
+                "RW": "RW",
+                "definition": "uncore_trap",
+                "description": "Uncore Trap Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            }
+         }
+  },
+  "apic_uncore_trap_evt_rst": {
+        "SW_visible": "yes",
+        "MSR_address": "32'h92e",
+        "global_address": "11'h488",
+        "local_address": "11'h488",
+        "32bit/64bit": "32bit",
+        "ST/MT": "MT",
+        "fields": {
+            "[3]": {
+                "RW": "RW",
+                "definition": "llbreaker",
+                "description": "Uncore Trap Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            },
+            "[1]": {
+                "RW": "RW",
+                "definition": "uncore_trap",
+                "description": "Uncore Trap Event",
+                "reset_value": "1'b0",
+                "ucode_reset_value": "1'b0"
+            }
+         }
+  }
 
 }

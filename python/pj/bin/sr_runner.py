@@ -14,6 +14,7 @@ import env_booter
 import makefile_gen
 import fpga_signals_gen
 import sim_log_parser
+import cache_init
 
 LOG = pcom.gen_logger(__name__)
 
@@ -48,6 +49,8 @@ class SRProc(object):
             self.ow_dic["ae"]["custom_elab_opts"] = self.run_dic["elab_opts"].strip()
         if self.run_dic["simu_opts"]:
             self.ow_dic["su"]["custom_simu_opts"] = self.run_dic["simu_opts"].strip()
+        if self.run_dic["verdi_opts"]:
+            self.ow_dic["su"]["verdi_simu_opts"] = self.run_dic["verdi_opts"].strip()
         if self.run_dic["simv"]:
             self.ow_dic["su"]["simv"] = self.run_dic["simv"].strip()
     def gen_ow_dic_nopts1(self):
@@ -84,6 +87,8 @@ class SRProc(object):
             self.ow_dic["ae"]["upf"] = "on"
         if self.run_dic["fpga"]:
             self.ow_dic["ae"]["fpga"] = "on"
+        if self.run_dic["sem_key"]:
+            self.ow_dic["su"]["sem_key"] = "on"
     @classmethod
     def update_status(cls, case_dic):
         """to update case simulation status"""
@@ -136,6 +141,11 @@ class SRProc(object):
         case_dir = os.path.join(
             self.ced["MODULE_OUTPUT"], case_dic["name"], f"{case_dic['simv']}__{case_dic['seed']}")
         os.makedirs(case_dir, exist_ok=True)
+        os.makedirs(f"{case_dir}{os.sep}cache_data", exist_ok=True)
+        if self.run_dic["init_cache"]:
+            cache_init.CacheInit(
+                case_dic["seed"], f"{case_dir}{os.sep}cache_data",
+                self.cfg_dic, case_dic["name"]).init_cache()
         with open(f"{case_dir}{os.sep}case_info.json", "w") as cjf:
             json.dump(
                 {"pub_date": dt.datetime.timestamp(self.ced["TIME"]),
@@ -249,7 +259,8 @@ class SRProc(object):
         self.gen_ow_dic_nopts1()
         self.gen_ow_dic_nopts2()
         mkg = makefile_gen.MakefileGen(self.ced, self.cfg_dic, {
-            "ow_dic": self.ow_dic, "regr_flg": self.regr_flg, "fresh_flg": self.run_dic["fresh"]})
+            "ow_dic": self.ow_dic, "regr_flg": self.regr_flg,
+            "fresh_flg": self.run_dic["fresh"], "sem_flg": self.run_dic["sem_key"]})
         case_dic_dic = mkg.gen_case_dic_dic()
         if self.run_dic["list"]:
             str_lst = [f"{os.linesep}all cases of module {self.ced['MODULE']}"]
@@ -284,7 +295,9 @@ def run_sr(args):
     if args.run_module or args.run_case_lst or args.regr_type_lst:
         SRProc(
             {"module": args.run_module,
+             "init_cache": args.run_init_cache,
              "case_lst": args.run_case_lst,
+             "sem_key": args.run_sem_key,
              "regr_type_lst": args.regr_type_lst,
              "all": args.run_all,
              "check_rtl": args.run_check_rtl,
@@ -310,7 +323,8 @@ def run_sr(args):
              "dut_ana_opts": args.run_dut_ana_opts,
              "tb_ana_opts": args.run_tb_ana_opts,
              "elab_opts": args.run_elab_opts,
-             "simu_opts": args.run_simu_opts}).proc_sr()
+             "simu_opts": args.run_simu_opts,
+             "verdi_opts": args.run_verdi_opts}).proc_sr()
         LOG.info("running module %s done", args.run_module)
     else:
         raise Exception("missing main arguments")

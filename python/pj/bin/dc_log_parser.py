@@ -195,8 +195,9 @@ class DcLogParser(object):
                 self.parse_dc_tm_rpt()
                 self.parse_dc_qor_rpt()
                 self.parse_dc_pw_rpt()
-            query_url = "http://172.51.13.205:8000/pj_app/dc/db_query/query_insert_case/"
-            requests.post(query_url, json=self.dc_dic)
+            query_url = f"{pcom.BE_URL}/pj_app/dc/db_query/query_insert_case/"
+            if pcom.BACKEND:
+                requests.post(query_url, json=self.dc_dic)
             return self.dc_dic
         else:
             LOG.info("No dc.log file, please check dc flow!")

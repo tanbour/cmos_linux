@@ -42,8 +42,9 @@ def proc_fm(ced, fm_cfg_dic):
         "user": ced["USER_NAME"],
         "run_time": dt.datetime.timestamp(ced["TIME"]),
         "status": "passed" if os.path.isfile(f"{fm_time_dir}{os.sep}passed") else "failed"}
-    query_url = "http://172.51.13.205:8000/pj_app/fm/db_query/query_insert_case/"
-    requests.post(query_url, json=parse_rlt_dic)
+    query_url = f"{pcom.BE_URL}/pj_app/fm/db_query/query_insert_case/"
+    if pcom.BACKEND:
+        requests.post(query_url, json=parse_rlt_dic)
 
 def gen_fmfile(fm_file):
     """to generate fm ref and tar file"""

@@ -176,13 +176,13 @@ class VPlanProc(object):
         w_s.column_dimensions["b"].width = w_s.column_dimensions["a"].width
     def proc_tc_sheet(self, w_s):
         """to process generated vplan test case sheet"""
-        query_url = "http://172.51.13.205:8000/pj_app/regr/db_query/query_case_dic/"
+        query_url = f"{pcom.BE_URL}/pj_app/regr/db_query/query_case_dic/"
         query_param = {
             "date": dt.datetime.now().strftime("%Y_%m_%d"),
             "proj": self.ced["PROJ_NAME"],
             "module": self.ced["MODULE"],
             "days": self.days}
-        case_pr_dic = requests.get(query_url, params=query_param).json()
+        case_pr_dic = requests.get(query_url, params=query_param).json() if pcom.BACKEND else {}
         tc_col_lst = pcom.rd_cfg(self.cfg_dic["proj"], "vplan_sheets", "test_case")
         index_dic = {
             "c": tc_col_lst.index("Case Name"),

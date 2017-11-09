@@ -224,6 +224,7 @@ class LogParser(object):
         fin_dic.update(self.sc_dic["c"])
         with open(case_info_json) as cjf:
             fin_dic["pj_props"] = json.load(cjf)
-        query_url = "http://172.51.13.205:8000/pj_app/regr/db_query/query_insert_case/"
-        requests.post(query_url, json=fin_dic)
+        query_url = f"{pcom.BE_URL}/pj_app/regr/db_query/query_insert_case/"
+        if pcom.BACKEND:
+            requests.post(query_url, json=fin_dic)
         return fin_dic

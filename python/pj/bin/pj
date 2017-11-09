@@ -103,6 +103,12 @@ def gen_run_parser(subparsers):
         "-verdi", dest="run_verdi", default=False, action="store_true",
         help="toggle to kick off verdi to open simulation waveform")
     run_parser.add_argument(
+        "-sem_key", dest="run_sem_key", default=False, action="store_true",
+        help="toggle to kick off generate key during simulation")
+    run_parser.add_argument(
+        "-init_cache", dest="run_init_cache", default=False, action="store_true",
+        help="toggle to init cache")
+    run_parser.add_argument(
         "-gui", dest="run_gui", default=False, action="store_true",
         help="toggle to kick off GUI during simulation")
     run_parser.add_argument(
@@ -141,6 +147,9 @@ def gen_run_parser(subparsers):
     run_parser.add_argument(
         "-S", dest="run_simu_opts", default="",
         help="input simulation options")
+    run_parser.add_argument(
+        "-V", dest="run_verdi_opts", default="",
+        help="input verdi options")
     run_parser.add_argument(
         "-fresh", dest="run_fresh", default=False, action="store_true",
         help="toggle to compilation from fresh")

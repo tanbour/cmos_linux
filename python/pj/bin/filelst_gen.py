@@ -62,9 +62,15 @@ class FilelstGen(object):
                         raise Exception(f"file line {new_line} in flist {fff} is NA")
                     file_name = os.path.basename(new_line)
                     if file_name in self.file_dic:
-                        LOG.info(
-                            "duplicated files %s and %s, taking the former "
-                            "which is the first met one", self.file_dic[file_name], new_line)
+                        if os.path.dirname(new_line) != os.path.dirname(self.file_dic[file_name]):
+                            LOG.warning(
+                                f"duplicated files {self.file_dic[file_name]} and {new_line}, "
+                                f"which has different path, "
+                                f"and taking the former which is the first met one")
+                        else:
+                            LOG.info(
+                                f"duplicated files {self.file_dic[file_name]} and {new_line}, "
+                                f"taking the former which is the first met one")
                         continue
                     self.file_dic[file_name] = new_line
         os.chdir(self.nwd_lst.pop())

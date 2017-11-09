@@ -14,6 +14,8 @@ import psutil
 import jinja2
 
 FLAG_FILE = ".cas_proj_root_flg"
+BACKEND = True
+BE_URL = "http://172.51.13.205:8000"
 
 def gen_logger(logger_name, file_flg=False):
     """to generate system loggers"""

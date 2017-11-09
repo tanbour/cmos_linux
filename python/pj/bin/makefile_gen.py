@@ -5,10 +5,12 @@ Description: MakefileGen class for sim/regr simv/case makefile generation
 """
 
 import os
+import re
 import random
 import json
 import pickle
 import collections
+import subprocess
 import pcom
 import env_booter
 import filelst_gen
@@ -239,9 +241,31 @@ class MakefileGen(object):
         prof_time_su_lst = pcom.rd_cfg(
             self.cfg_dic["case"], c_n, "prof_time_simu_opts") if pcom.rd_cfg(
                 self.cfg_dic["case"], c_n, "prof_time") == ["on"] else []
+        sem_key_su_lst = pcom.rd_cfg(self.cfg_dic["case"], c_n, "sem_key_simu_opts")
         return " ".join(
             su_opts_lst+cov_su_lst+wave_su_lst+wg_su_lst+seed_su_lst+uvm_su_lst+gui_su_lst+
-            prof_mem_su_lst+prof_time_su_lst)
+            prof_mem_su_lst+prof_time_su_lst+sem_key_su_lst)
+    def gen_sem_key(self):
+        """to generate sem_key"""
+        sk_dic = {"range_str": "", "m_cont": "", "s_cont": "", "line_lst": [], "key_lst": []}
+        sk_dic["range_str"] = pcom.rd_cfg(self.cfg_dic["proj"], "proj", "sem_key_range", True)
+        sk_dic["m_cont"] = subprocess.run(
+            "ipcs -m", shell=True, check=True, stdout=subprocess.PIPE).stdout.decode()
+        sk_dic["s_cont"] = subprocess.run(
+            "ipcs -s", shell=True, check=True, stdout=subprocess.PIPE).stdout.decode()
+        sk_dic["line_lst"].extend(re.split(r"\n", sk_dic["m_cont"]))
+        sk_dic["line_lst"].extend(re.split(r"\s+", sk_dic["s_cont"]))
+        for line in sk_dic["line_lst"]:
+            line = line.strip()
+            if line.startswith("0x"):
+                sk_dic["key_lst"].append(int(re.split(r"\s+", line)[0].strip(), 16))
+        while True:
+            rand_v = random.randrange(1, 2147483648-int(sk_dic["range_str"]))
+            for key in range(rand_v, rand_v+int(sk_dic["range_str"])):
+                if key in sk_dic["key_lst"]:
+                    break
+            else:
+                return rand_v
     def gen_case_dic(self, c_n):
         """to generate case related dic to render jinja2"""
         case_dic = {"name": c_n}
@@ -259,9 +283,12 @@ class MakefileGen(object):
             self.cfg_dic["case"], c_n, "wave_mem") == ["on"] else False
         case_dic["wave_glitch"] = True if pcom.rd_cfg(
             self.cfg_dic["case"], c_n, "wave_glitch") == ["on"] else False
+        case_dic["sem_key"] = True if pcom.rd_cfg(
+            self.cfg_dic["case"], c_n, "sem_key", True) == "on" else False
         case_dic["su_opts"] = self.gen_su_opts(c_n, case_dic)
-        case_dic["w_opts"] = " ".join(pcom.rd_cfg(
-            self.cfg_dic["simv"], case_dic["simv"], "verdi_opts"))
+        case_dic["w_opts"] = " ".join(
+            pcom.rd_cfg(self.cfg_dic["simv"], case_dic["simv"], "verdi_opts")+
+            pcom.rd_cfg(self.cfg_dic["case"], c_n, "verdi_simu_opts"))
         case_dic["pre_cmd_lst"] = pcom.rd_cfg(self.cfg_dic["case"], c_n, "pre_cmd")
         case_dic["post_cmd_lst"] = pcom.rd_cfg(self.cfg_dic["case"], c_n, "post_cmd")
         case_dic["file_dic"] = {}
@@ -289,6 +316,8 @@ class MakefileGen(object):
             else:
                 seed_set.add(1)
         case_dic["seed_set"] = seed_set
+        if self.mkg_dic["sem_flg"]:
+            case_dic["sem_key"] = self.gen_sem_key()
         return case_dic
     def gen_makefile(self):
         """to generate top makefile"""
@@ -330,7 +359,7 @@ class MakefileGen(object):
     def gen_case_makefile(self, case_dic):
         """to generate case makefile"""
         mc_dic = {"CED": self.ced, "case_dic": case_dic, "ed": {
-            "case": case_dic["name"], "seed": case_dic["seed"]}}
+            "case": case_dic["name"], "seed": case_dic["seed"], "sem_key": case_dic["sem_key"]}}
         mc_dic["clib_flg"] = self.mkg_dic["clib_flg"]
         mc_dir = (
             f"{self.ced['MODULE_OUTPUT']}{os.sep}{case_dic['name']}{os.sep}"

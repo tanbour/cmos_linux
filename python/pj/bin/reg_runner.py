@@ -273,9 +273,10 @@ class RegProc(object):
             with open(reg_cfg_json, encoding="gb18030") as file:
                 data = json.load(file)
             data_dic = self.expand_data(data)
+            rtl_file = f"{sin_dic['rtl_dir']}{os.sep}{sin_dic['module_name']}.v"
+            LOG.info(f"generating reg rtl file {rtl_file}")
             pcom.ren_tempfile(
-                f"{proc_dic['reg_temp_dir']}{os.sep}reg_base.v",
-                f"{sin_dic['rtl_dir']}{os.sep}{sin_dic['module_name']}.v",
+                f"{proc_dic['reg_temp_dir']}{os.sep}reg_base.v", rtl_file,
                 {"module_name": sin_dic["module_name"], "data": self.fmt_v_data(data_dic)})
             self.gen_xls(data_dic, sin_dic["sheet_hw"], sin_dic["format_hw"])
             self.fmt_sw_data(data_dic)
@@ -285,9 +286,10 @@ class RegProc(object):
             self.check_public_register(
                 proc_dic["public_reg_dic"], proc_dic["ralf_dic"], ralf_data_dic)
         os.makedirs(proc_dic["reg_ralf_dir"], exist_ok=True)
+        ralf_file = f"{proc_dic['reg_ralf_dir']}{os.sep}reg.ralf"
+        LOG.info(f"generating reg ralf file {ralf_file}")
         pcom.ren_tempfile(
-            f"{proc_dic['reg_temp_dir']}{os.sep}reg_base.ralf",
-            f"{proc_dic['reg_ralf_dir']}{os.sep}reg.ralf",
+            f"{proc_dic['reg_temp_dir']}{os.sep}reg_base.ralf", ralf_file,
             {"public_data": proc_dic["public_reg_dic"], "data": proc_dic["ralf_dic"]})
         sw_data_dic = OrderedDict(self.sw_rtl_dic["NA"])
         self.sw_rtl_dic["MSR"] = OrderedDict(
@@ -295,6 +297,7 @@ class RegProc(object):
                    key=lambda reg: int(f'0x{reg[1]["MSR_address"].split("h")[1]}', 16)))
         sw_data_dic.update(self.sw_rtl_dic["MSR"])
         self.gen_xls(sw_data_dic, proc_dic["sheet_sw"], proc_dic["format_sw"])
+        LOG.info(f"generating reg doc file in {proc_dic['reg_doc_dir']}")
         os.makedirs(proc_dic["reg_doc_dir"], exist_ok=True)
         proc_dic["workbook_sw"].close()
         proc_dic["workbook_hw"].close()

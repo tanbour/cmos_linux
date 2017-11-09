@@ -39,8 +39,8 @@ def np_check_out(sub_dir_lst, repo_base, u_n, p_w):
 def sp_check_out(proj_name, sub_dir_lst, repo_base, u_n, p_w):
     """to process svn project checking out dir actions"""
     dir_query_url = (
-        f"http://172.51.13.205:8000/user_info/svn/query_dir_lst/?user={u_n}&proj={proj_name}")
-    avail_dir_lst = requests.get(dir_query_url).json()
+        f"{pcom.BE_URL}/user_info/svn/query_dir_lst/?user={u_n}&proj={proj_name}")
+    avail_dir_lst = requests.get(dir_query_url).json() if pcom.BACKEND else []
     if sub_dir_lst:
         check_out_dir(repo_base, "share", u_n, p_w)
         for s_d in sub_dir_lst:

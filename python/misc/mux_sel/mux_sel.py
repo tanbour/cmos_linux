@@ -11,6 +11,7 @@ import argparse
 import itertools
 import pprint
 import jinja2
+import copy
 
 def gen_args_top():
     """to parse mux_sel top arguments"""
@@ -94,10 +95,11 @@ class InsProc(object):
         self.con_lst = [c_c for c_c in self.ins_cfg.sections() if c_c.startswith("con_")]
         self.top_dic = {}
         self.wire_lst = []
+        self.input_lst = []
+        self.output_lst = []
         self.assign_dic = {}
-    def proc_sin_range(self, ins_dic, var_dic_lst, sec_tup):
+    def proc_sin_range(self, ins_dic, var_dic_lst, sec_tup, new_ins_dic):
         """to process range condition single cycle"""
-        ins_dic = {"con_str": "", "ins": {}}
         m_p = MuxProc(self.mux_cfg_file)
         mapping_cfg = (
             self.ins_cfg["mapping"] if self.ins_cfg.has_section("mapping") else
@@ -110,7 +112,7 @@ class InsProc(object):
             ins_dic["con_str"] += (f" & {am_k}")
             self.assign_dic[am_k] = am_v
             self.wire_lst.append(am_k)
-            for ins_k, ins_v in self.ins_cfg["ins"].items():
+            for ins_k, ins_v in new_ins_dic.items():
                 if var_dic["name"] not in ins_v:
                     continue
                 ins_v = ins_v.replace(var_dic["name"], str(sec_tup[v_i]))
@@ -120,9 +122,9 @@ class InsProc(object):
                     continue
                 ins_dic["ins"][ins_k] = mapping_cfg[ins_v]
         node_lst, con_str = m_p.proc_ins_dic(ins_dic)
-        self.wire_lst.extend(node_lst)
+        self.output_lst.extend(node_lst)
         in_k = os.path.splitext(os.path.basename(self.ins_file))[0]
-        self.wire_lst.append(in_k)
+        self.input_lst.append(in_k)
         self.top_dic[f"{in_k}{con_str}"] = node_lst
     def proc_range(self):
         """to process range condition"""
@@ -135,32 +137,38 @@ class InsProc(object):
             var_dic_lst.append({"name": sec_k, "width": sec_v_lst[2], "v_name": v_name})
         for sec_tup in itertools.product(*range_lst):
             if not self.con_lst:
-                self.proc_sin_range({"con_str": "", "ins": {}}, var_dic_lst, sec_tup)
+                self.proc_sin_range(
+                    {"con_str": "", "ins": {}}, var_dic_lst, sec_tup, self.ins_cfg["ins"])
             else:
+                self.proc_sin_range(
+                    {"con_str": "", "ins": {}}, var_dic_lst, sec_tup, self.ins_cfg["ins"])
                 for con in self.con_lst:
                     pre_con = self.ins_cfg[con].pop("con_str")
-                    self.ins_cfg["ins"].update(self.ins_cfg[con])
+                    new_ins_dic = copy.copy(dict(self.ins_cfg["ins"]))
+                    new_ins_dic.update(dict(self.ins_cfg[con]))
                     self.proc_sin_range(
-                        {"con_str": f" & ({pre_con})", "ins": {}}, var_dic_lst, sec_tup)
+                        {"con_str": f" & ({pre_con})", "ins": {}},
+                        var_dic_lst, sec_tup, new_ins_dic)
                     self.ins_cfg[con]["con_str"] = pre_con
     def proc_con(self):
         """to process con condition"""
         for con in self.con_lst:
             ins_dic = {"con_str": f" & ({self.ins_cfg[con].pop('con_str')})", "ins": {}}
-            self.ins_cfg["ins"].update(self.ins_cfg[con])
+            new_ins_dic = copy.copy(dict(self.ins_cfg["ins"]))
+            new_ins_dic.update(dict(self.ins_cfg[con]))
             m_p = MuxProc(self.mux_cfg_file)
             mapping_cfg = (
                 self.ins_cfg["mapping"] if self.ins_cfg.has_section("mapping") else
                 m_p.mapping_cfg)
-            for ins_k, ins_v in self.ins_cfg["ins"].items():
+            for ins_k, ins_v in new_ins_dic.items():
                 if ins_v not in mapping_cfg:
                     print(f"Warning: node {ins_v} not in mapping range")
                     continue
                 ins_dic["ins"][ins_k] = mapping_cfg[ins_v]
             node_lst, con_str = m_p.proc_ins_dic(ins_dic)
-            self.wire_lst.extend(node_lst)
+            self.output_lst.extend(node_lst)
             in_k = os.path.splitext(os.path.basename(self.ins_file))[0]
-            self.wire_lst.append(in_k)
+            self.input_lst.append(in_k)
             self.top_dic[f"{in_k}{con_str}"] = node_lst
     def proc_normal(self):
         """to process normal condition"""
@@ -174,28 +182,37 @@ class InsProc(object):
                 continue
             ins_dic["ins"][ins_k] = mapping_cfg[ins_v]
         node_lst, con_str = m_p.proc_ins_dic(ins_dic)
-        self.wire_lst.extend(node_lst)
+        self.output_lst.extend(node_lst)
         in_k = os.path.splitext(os.path.basename(self.ins_file))[0]
-        self.wire_lst.append(in_k)
+        self.input_lst.append(in_k)
         self.top_dic[f"{in_k}{con_str}"] = node_lst
     def proc_ins_cfg(self):
         """top function to process ins file config"""
         if self.ins_cfg.has_section("range"):
             self.proc_range()
         elif self.con_lst:
+            self.proc_normal()
             self.proc_con()
         else:
             self.proc_normal()
-        return self.top_dic, self.wire_lst, self.assign_dic
+        return self.top_dic, self.wire_lst, self.input_lst, self.output_lst, self.assign_dic
 
 class CodeGen(object):
     """code generator class"""
-    def __init__(self, top_dic, wire_lst, assign_dic):
+    def __init__(self, top_dic, wire_lst, input_lst, output_lst, assign_dic):
         self.top_dic = top_dic
         self.wire_lst = []
         for wire_name in wire_lst:
             if wire_name not in self.wire_lst:
                 self.wire_lst.append(wire_name)
+        self.input_lst = []
+        for input_name in input_lst:
+            if input_name not in self.input_lst:
+                self.input_lst.append(input_name)
+        self.output_lst = []
+        for output_name in output_lst:
+            if output_name not in self.output_lst:
+                self.output_lst.append(output_name)
         self.assign_dic = assign_dic
     def gen_temp_dic(self):
         """to re-org node dic into template dic"""
@@ -212,7 +229,8 @@ class CodeGen(object):
         exec_dir = os.path.dirname(__file__)
         ren_tempfile(
             f"{exec_dir}{os.sep}temp_in.v", f"{exec_dir}{os.sep}temp_out.v",
-            {"wire_lst": self.wire_lst, "assign_dic": self.assign_dic})
+            {"wire_lst": self.wire_lst, "input_lst": self.input_lst,
+             "output_lst": self.output_lst, "assign_dic": self.assign_dic})
 
 def main():
     """mux_sel main entrance"""
@@ -221,15 +239,20 @@ def main():
         os.sys.exit(f"mux config file {args.mux_file} is NA")
     top_dic = {}
     wire_lst = []
+    input_lst = []
+    output_lst = []
     assign_dic = {}
     for i_file in args.ins_file_lst:
+        print(f"processing ins cfg file {i_file}")
         if not os.path.isfile(i_file):
             print(f"Warning: ins config file {i_file} is NA")
-        t_d, w_l, am_d = InsProc(args.mux_file, i_file).proc_ins_cfg()
+        t_d, w_l, i_l, o_l, am_d = InsProc(args.mux_file, i_file).proc_ins_cfg()
         top_dic.update(t_d)
         wire_lst.extend(w_l)
+        input_lst.extend(i_l)
+        output_lst.extend(o_l)
         assign_dic.update(am_d)
-    CodeGen(top_dic, wire_lst, assign_dic).gen_code()
+    CodeGen(top_dic, wire_lst, input_lst, output_lst, assign_dic).gen_code()
 
 if __name__ == "__main__":
     main()

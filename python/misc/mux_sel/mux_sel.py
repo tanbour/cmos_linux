@@ -140,8 +140,6 @@ class InsProc(object):
                 self.proc_sin_range(
                     {"con_str": "", "ins": {}}, var_dic_lst, sec_tup, self.ins_cfg["ins"])
             else:
-                self.proc_sin_range(
-                    {"con_str": "", "ins": {}}, var_dic_lst, sec_tup, self.ins_cfg["ins"])
                 for con in self.con_lst:
                     pre_con = self.ins_cfg[con].pop("con_str")
                     new_ins_dic = copy.copy(dict(self.ins_cfg["ins"]))
@@ -191,7 +189,6 @@ class InsProc(object):
         if self.ins_cfg.has_section("range"):
             self.proc_range()
         elif self.con_lst:
-            self.proc_normal()
             self.proc_con()
         else:
             self.proc_normal()

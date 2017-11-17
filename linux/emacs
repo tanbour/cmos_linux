@@ -41,6 +41,7 @@
 ;; cmos_conf
 (setq-default indent-tabs-mode nil)
 (setq default-frame-alist '((height . 60) (width . 90) (font . "DejaVu Sans Mono-10")))
+(setq require-final-newline t)
 (setq ido-enable-flex-matching t)
 (setq ido-everywhere t)
 (setq mouse-yank-at-point t)
@@ -88,6 +89,7 @@
             (setq dirtrack-list '(": \\(.*?\\)[]${]" 1))
             (shell-dirtrack-mode nil)
             (dirtrack-mode t)))
+(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 
 (defun my-comint-init ()
   (setq comint-process-echoes t))

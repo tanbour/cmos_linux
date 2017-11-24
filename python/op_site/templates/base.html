@@ -25,10 +25,10 @@
                 <Icon type="ios-albums-outline" :size="iconSize"></Icon>
                 <a href="#" class="layout-text">FE Reports</a>
               </menu-item>
-              <menu-item name="3">
-                <Icon type="ios-analytics" :size="iconSize"></Icon>
-                <a href="#" class="layout-text">AI Analytics</a>
-              </menu-item>
+              <!-- <menu-item name="3">
+                   <Icon type="ios-analytics" :size="iconSize"></Icon>
+                   <a href="#" class="layout-text">AI Analytics</a>
+                   </menu-item> -->
             </i-menu>
           </i-col>
           <i-col :span="spanRight">
@@ -49,13 +49,13 @@
               </div>
             </div>
             <div class="layout-breadcrumb">
-              <breadcrumb>
-                {% block bc %}
-                {% endblock %}
-                <!-- <breadcrumb-item href="#">Index</breadcrumb-item> -->
-                <!-- <breadcrumb-item href="#">Apps</breadcrumb-item> -->
-                <!-- <breadcrumb-item>App</breadcrumb-item> -->
-              </breadcrumb>
+              {% block bc %}
+              {% endblock %}
+              <!-- <breadcrumb>
+                   <breadcrumb-item href="#">Index</breadcrumb-item>
+                   <breadcrumb-item href="#">Apps</breadcrumb-item>
+                   <breadcrumb-item>App</breadcrumb-item>
+                   </breadcrumb> -->
             </div>
             <div class="layout-content">
               <div class="layout-content-main">
@@ -72,38 +72,42 @@
       </div>
     </div>
 
+    {% block template %}
+    {% endblock %}
+
     <script src="{% static 'npm/node_modules/vue/dist/vue.js' %}"></script>
     <script src="{% static 'npm/node_modules/iview/dist/iview.js' %}"></script>
-    <script>
-      var Main = {
-      data () {
-      return {
-      spanLeft: 5,
-      spanRight: 19
-      }
-      },
-      computed: {
-      iconSize () {
-      return this.spanLeft === 5 ? 14 : 24;
-      }
-      },
-      methods: {
-      toggleClick () {
-      if (this.spanLeft === 5) {
-      this.spanLeft = 2;
-      this.spanRight = 22;
-      } else {
-      this.spanLeft = 5;
-      this.spanRight = 19;
-      }
-      }
-      }
-      }
-      var Component = Vue.extend(Main)
-      new Component().$mount('#op_site_base')
-    </script>
 
     {% block js %}
     {% endblock %}
+
+    <script>
+     var Main = {
+       data () {
+         return {
+           spanLeft: 5,
+           spanRight: 19
+         }
+       },
+       computed: {
+         iconSize () {
+           return this.spanLeft === 5 ? 14 : 24;
+         }
+       },
+       methods: {
+         toggleClick () {
+           if (this.spanLeft === 5) {
+             this.spanLeft = 2;
+             this.spanRight = 22;
+           } else {
+             this.spanLeft = 5;
+             this.spanRight = 19;
+           }
+         }
+       }
+     }
+     var Component = Vue.extend(Main)
+     new Component().$mount('#op_site_base')
+    </script>
   </body>
 </html>

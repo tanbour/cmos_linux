@@ -25,7 +25,7 @@ beautifulsoup4, diff-match-patch, Django, djangorestframework, httpie, django-bo
 ** npm
 vue, iview
 ** emacs
-ascii-art-to-unicode, auctex, gnugo, paredit
+ascii-art-to-unicode, auctex, gnugo, paredit, web-mode
 ** web static
 bootstrap3, DataTables
 ** local linux

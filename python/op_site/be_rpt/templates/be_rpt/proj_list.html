@@ -12,24 +12,76 @@ projects list
 {% endblock %}
 
 {% block content %}
-<table>
-  <thead>
-    <tr>
-      <th>Project Name</th>
-      {% for proj_head in proj_head_lst %}
-      <th>{{ proj_head }}</th>
-      {% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for proj in object_list %}
-    <tr align="center">
-      <td>{{ proj.name }}</td>
-      {% for proj_head in proj_head_lst %}
-      <td>{{ proj.data|get_value:proj_head }}</td>
-      {% endfor %}
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<proj_table></proj_table>
+{% endblock %}
+
+{% block template %}
+<template id="proj_table">
+  <div>
+    <i-table :columns="proj_col" :data="proj_data" size="small" ref="table"></i-table>
+    <br>
+    <i-button type="primary" size="large" @click="exportData(1)"><icon type="ios-download-outline"></icon> Export source data</i-button>
+    <i-button type="primary" size="large" @click="exportData(2)"><icon type="ios-download-outline"></icon> Export sorting and filtered data</i-button>
+    <i-button type="primary" size="large" @click="exportData(3)"><icon type="ios-download-outline"></icon> Export custom data</i-button>
+  </div>
+</template>
+{% endblock %}
+
+{% block js %}
+<script>
+ Vue.component("proj_table", {
+   template: "#proj_table",
+   data () {
+     return {
+       proj_col: [
+         {
+           "title": "Project Name",
+           "key": "proj_name",
+           "fixed": "left",
+           "width": 200
+         },
+         {% for proj_head in proj_head_lst %}
+         {
+           "title": "{{ proj_head }}",
+           "key": "{{ proj_head|to_underscore }}",
+           "width": 150,
+           "sortable": true
+         },
+         {% endfor %}
+       ],
+       proj_data: [
+         {% for proj in object_list %}
+         {
+           "proj_name": "{{ proj.name }}",
+           {% for proj_head in proj_head_lst %}
+           "{{ proj_head|to_underscore }}": "{{ proj.data|get_value:proj_head }}",
+           {% endfor %}
+         },
+         {% endfor %}
+       ]
+     }
+   },
+   methods: {
+     exportData (type) {
+       if (type === 1) {
+         this.$refs.table.exportCsv({
+           filename: "the_original_data"
+         });
+         
+       } else if (type === 2) {
+         this.$refs.table.exportCsv({
+           filename: 'sorting_and_filtering_data',
+           original: false
+         });
+       } else if (type === 3) {
+         this.$refs.table.exportCsv({
+           filename: 'custom_data',
+           columns: this.columns8.filter((col, index) => index < 4),
+           data: this.data7.filter((data, index) => index < 4)
+         });
+       }
+     }
+   }
+ })
+</script>
 {% endblock %}

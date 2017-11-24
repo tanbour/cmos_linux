@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block title %}
+Vue Example
+{% endblock %}
+
+{% block content %}
+<app1_comp></app1_comp>
+{% endblock %}
+
+{% block template %}
+<template id="app1_comp">
+  <div>
+    {% verbatim %}
+    <p>{{message}}</p>
+    {% endverbatim %}
+    <button v-on:click="reverseMessage">逆转消息</button>
+  </div>
+</template>
+{% endblock %}
+
+{% block js %}
+<script>
+ Vue.component("app1_comp", {
+   template: "#app1_comp",
+   data () {
+     return {
+       message: "hello vue.js"
+     }
+   },
+   methods: {
+     reverseMessage () {
+       this.message = this.message.split('').reverse().join('')
+     }
+   }
+ })
+</script>
+{% endblock %}

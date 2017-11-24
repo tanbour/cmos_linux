@@ -14,7 +14,7 @@ class is Noun, function is verb_noun, variable is name_type
 * pkg list
 ** linux
 *** program
-linux, linux-headers, base-devel, grub, memtest86+, xterm, pacman, ntp, gparted, gcc, gcc-fortran, gdb, strace, nvidia, vulkan, gtk, qt, clisp, python, perl, tcl, tk, git, subversion, openjdk, icedtea-web, ttf-dejavu, chromium, pepper-flash, rsync, transmission, wget, axel, gftp, p7zip, unrar, mksh, tcsh, gvim, emacs, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, recordmydesktop, gv, xchm, calc, gnuplot, graphviz, cups-pdf, mplayer, smplayer, gstreamer, portmidi, x264, ffmpeg, bchunk, flac, aspell-en, hunspell-en, tigervnc, freerdp, vpnc, openconnect, openvpn, pptpclient, celestia, gnugo, sudo, acpi, fuse, libreoffice, nginx, postgresql, mariadb, libdvdread, libdvdcss, libdvdnav, networkmanager, gnome, dosfstools, curl, blas, lapack, shotwell, openssh, xorg-server, xf86-input-libinput, xz
+linux, linux-headers, base-devel, grub, memtest86+, xterm, pacman, ntp, gparted, gcc, gcc-fortran, gdb, strace, nvidia, vulkan, gtk, qt, clisp, python, nodejs, npm, perl, tcl, tk, git, subversion, openjdk, icedtea-web, ttf-dejavu, chromium, pepper-flash, rsync, transmission, wget, axel, gftp, p7zip, unrar, mksh, tcsh, gvim, emacs, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, recordmydesktop, gv, xchm, calc, gnuplot, graphviz, cups-pdf, mplayer, smplayer, gstreamer, portmidi, x264, ffmpeg, bchunk, flac, aspell-en, hunspell-en, tigervnc, freerdp, vpnc, openconnect, openvpn, pptpclient, celestia, gnugo, sudo, acpi, fuse, libreoffice, nginx, postgresql, mariadb, libdvdread, libdvdcss, libdvdnav, networkmanager, gnome, dosfstools, curl, blas, lapack, shotwell, openssh, xorg-server, xf86-input-libinput, xz
 *** multimedia
 blender, cinelerra-cv, subtitleeditor, audacity, puddletag
 ** chinese and ibus
@@ -22,6 +22,8 @@ adobe-source-han-sans-cn-fonts
 ibus, ibus-sunpinyin
 ** python
 beautifulsoup4, diff-match-patch, Django, djangorestframework, httpie, django-bootstrap3, django-ckeditor, django-registration-redux, django-reversion, ipython, jupyter, Jinja2, matplotlib, networkx, nltk, numpy, openpyxl, cython, pandas, Pillow, pip, psycopg2, mysqlclient, pytz, pyverilog, scikit-learn, scipy, setuptools, sympy, uwsgi, xlrd, xlutils, xlwt, sphinx, jieba, SQLAlchemy, texttable, nested-dict, gitpython, line_profiler, memory_profiler, pycurl, flask, paramiko, psutil, virtualenv, tox, pylint, pylint-django
+** npm
+vue, iview
 ** emacs
 ascii-art-to-unicode, auctex, gnugo, paredit
 ** web static

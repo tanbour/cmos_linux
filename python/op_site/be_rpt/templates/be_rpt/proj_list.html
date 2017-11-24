@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load staticfiles %}
+{% load be_rpt_extras %}
+
+{% block title %}
+projects list
+{% endblock %}
+
+{% block bc %}
+<breadcrumb-item>Index</breadcrumb-item>
+{% endblock %}
+
+{% block content %}
+<table>
+  <thead>
+    <tr>
+      <th>Project Name</th>
+      {% for proj_head in proj_head_lst %}
+      <th>{{ proj_head }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for proj in object_list %}
+    <tr align="center">
+      <td>{{ proj.name }}</td>
+      {% for proj_head in proj_head_lst %}
+      <td>{{ proj.data|get_value:proj_head }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

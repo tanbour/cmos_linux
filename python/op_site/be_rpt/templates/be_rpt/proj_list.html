@@ -91,7 +91,7 @@ Alchip projects list
      {% endfor %}
      {% for proj_key, proj_value in proj.data.items %}
      {% if proj_key|to_lu not in proj_head_lst %}
-     {{proj_key|to_lu}}: {{proj_value}}
+     {{proj_key|to_lu}}: "{{proj_value}}"
      {% endif %}
      {% endfor %}
    },

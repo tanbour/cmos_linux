@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load staticfiles %}
+{% load be_rpt_extras %}
+
+{% block content %}
+<base_table></base_table>
+{% endblock %}
+
+{% block template %}
+<template id="base_table">
+  <div>
+    <div style="margin: 10px">
+      Display border <i-switch v-model="showBorder" style="margin-right: 5px"></i-switch>
+      Display stripe <i-switch v-model="showStripe" style="margin-right: 5px"></i-switch>
+      Display index <i-switch v-model="showIndex" style="margin-right: 5px"></i-switch>
+      Display multi choice <i-switch v-model="showCheckbox" style="margin-right: 5px"></i-switch>
+      Display header <i-switch v-model="showHeader" style="margin-right: 5px"></i-switch>
+      Table scrolling <i-switch v-model="fixedHeader" style="margin-right: 5px"></i-switch>
+      <br>
+      <br>
+      Table size
+      <Radio-group v-model="tableSize" type="button">
+        <Radio label="large">large</Radio>
+        <Radio label="default">medium</Radio>
+        <Radio label="small">small(default)</Radio>
+      </Radio-group>
+    </div>
+    <i-table :border="showBorder" :stripe="showStripe" :show-header="showHeader" :height="fixedHeader?300:''" :columns="table_col" :data="table_data" :size="tableSize" ref="table"></i-table>
+    <div style="margin: 10px;overflow: hidden">
+      <div style="float: right;">
+        <Page :total="100" :current="1" @on-change="changePage"></Page>
+      </div>
+    </div>
+    <br>
+    <i-button @click="handleSelectAll(true)">Set all selected</i-button>
+    <i-button @click="handleSelectAll(false)">Cancel all selected</i-button>
+    <i-button @click="deleteSelections()">Delete selected</i-button>
+    <br>
+    <br>
+    <i-button type="primary" size="large" @click="exportData(1)"><icon type="ios-download-outline"></icon> Export source data</i-button>
+    <i-button type="primary" size="large" @click="exportData(2)"><icon type="ios-download-outline"></icon> Export sorting and filtered data</i-button>
+    <i-button type="primary" size="large" @click="exportData(3)"><icon type="ios-download-outline"></icon> Export custom data</i-button>
+  </div>
+</template>
+{% endblock %}
+
+{% block js %}
+{% block js_table %}
+{% endblock %}
+
+<script>
+ Vue.component("base_table", {
+   template: "#base_table",
+   data () {
+     return {
+       table_data: db_data_ary,
+       showBorder: false,
+       showStripe: false,
+       showHeader: true,
+       showIndex: false,
+       showCheckbox: true,
+       fixedHeader: false,
+       tableSize: "small"
+     }
+   },
+   computed: {
+     table_col() {
+       let columns = [];
+       if (this.showCheckbox) {
+         columns.push({
+           type: "selection",
+           width: 60,
+           align: "center"
+         })
+       }
+       if (this.showIndex) {
+         columns.push({
+           type: "index",
+           width: 60,
+           align: "center"
+         })
+       }
+       for (var i = 0; i < db_col_ary.length; i++)
+         columns.push(db_col_ary[i]);
+       columns.push({
+         title: "Action",
+         key: "action",
+         width: 150,
+         align: "center",
+         fixed: "right",
+         render: (h, params) => {
+           return h("div", [
+             h("Button", {
+               props: {
+                 type: "primary",
+                 size: "small"
+               },
+               style: {
+                 marginRight: "5px"
+               },
+               on: {
+                 click: () => {
+                   this.show(params.index)
+                 }
+               }
+             }, "View"),
+             h("Button", {
+               props: {
+                 type: "error",
+                 size: "small"
+               },
+               on: {
+                 click: () => {
+                   this.remove(params.index)
+                 }
+               }
+             }, "Delete"),
+           ]);
+         }
+       });
+       return columns;
+     },
+   },
+   methods: {
+     exportData (type) {
+       if (type === 1) {
+         this.$refs.table.exportCsv({
+           filename: "the_original_data"
+         });
+       } else if (type === 2) {
+         this.$refs.table.exportCsv({
+           filename: "sorting_and_filtering_data",
+           original: false
+         });
+       } else if (type === 3) {
+         this.$refs.table.exportCsv({
+           filename: "custom_data",
+           columns: this.columns8.filter((col, index) => index < 4),
+           data: this.data7.filter((data, index) => index < 4)
+         });
+       }
+     },
+     handleSelectAll (status) {
+       this.$refs.table.selectAll(status);
+     },
+     deleteSelections () {
+       var sel_dic = this.$refs.table.getSelection();
+       for (var i = sel_dic.length-1; i >= 0; i--)
+         this.table_data.splice(sel_dic[i], 1);
+     },
+     show (index) {
+       var content = ``;
+       for (var td_key in this.table_data[index]) {
+         content += `${td_key}: ${this.table_data[index][td_key]}<br>`
+       }
+       this.$Modal.info({
+         title: "Detailed Info",
+         content: content
+       })
+     },
+     remove (index) {
+       this.table_data.splice(index, 1);
+     },
+     changePage () {
+       this.table_data = this.table_data;
+     }
+   }
+ })
+</script>
+{% endblock %}

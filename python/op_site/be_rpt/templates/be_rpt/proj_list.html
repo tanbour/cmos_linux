@@ -1,87 +1,101 @@
-{% extends "base.html" %}
+{% extends "base_table.html" %}
 {% load i18n %}
 {% load staticfiles %}
 {% load be_rpt_extras %}
 
 {% block title %}
-projects list
+Alchip projects list
 {% endblock %}
 
 {% block bc %}
-<breadcrumb-item>Index</breadcrumb-item>
+<breadcrumb>
+  <breadcrumb-item>Index</breadcrumb-item>
+</breadcrumb>
 {% endblock %}
 
-{% block content %}
-<proj_table></proj_table>
-{% endblock %}
-
-{% block template %}
-<template id="proj_table">
-  <div>
-    <i-table :columns="proj_col" :data="proj_data" size="small" ref="table"></i-table>
-    <br>
-    <i-button type="primary" size="large" @click="exportData(1)"><icon type="ios-download-outline"></icon> Export source data</i-button>
-    <i-button type="primary" size="large" @click="exportData(2)"><icon type="ios-download-outline"></icon> Export sorting and filtered data</i-button>
-    <i-button type="primary" size="large" @click="exportData(3)"><icon type="ios-download-outline"></icon> Export custom data</i-button>
-  </div>
-</template>
-{% endblock %}
-
-{% block js %}
+{% block js_table %}
 <script>
- Vue.component("proj_table", {
-   template: "#proj_table",
-   data () {
-     return {
-       proj_col: [
-         {
-           "title": "Project Name",
-           "key": "proj_name",
-           "fixed": "left",
-           "width": 200
-         },
-         {% for proj_head in proj_head_lst %}
-         {
-           "title": "{{ proj_head }}",
-           "key": "{{ proj_head|to_underscore }}",
-           "width": 150,
-           "sortable": true
-         },
-         {% endfor %}
-       ],
-       proj_data: [
-         {% for proj in object_list %}
-         {
-           "proj_name": "{{ proj.name }}",
-           {% for proj_head in proj_head_lst %}
-           "{{ proj_head|to_underscore }}": "{{ proj.data|get_value:proj_head }}",
-           {% endfor %}
-         },
-         {% endfor %}
-       ]
+ var db_col_ary = [
+   {
+     title: "Project Name",
+     key: "proj_name",
+     /* "fixed": "left",*/
+     width: 200,
+     sortable: true,
+     render: (h, params) => {
+       const row = params.row;
+       const text = row.proj_name
+       return h("a", {
+         attrs: {
+           href: "{% url 'be_rpt:block_list' 'djst_var' %}".replace("djst_var", text)
+         }
+       }, text);
      }
    },
-   methods: {
-     exportData (type) {
-       if (type === 1) {
-         this.$refs.table.exportCsv({
-           filename: "the_original_data"
-         });
-         
-       } else if (type === 2) {
-         this.$refs.table.exportCsv({
-           filename: 'sorting_and_filtering_data',
-           original: false
-         });
-       } else if (type === 3) {
-         this.$refs.table.exportCsv({
-           filename: 'custom_data',
-           columns: this.columns8.filter((col, index) => index < 4),
-           data: this.data7.filter((data, index) => index < 4)
-         });
+   {% for proj_head in proj_head_lst %}
+   {% if proj_head|to_lu == "status" %}
+   {
+     title: "Status",
+     key: {{proj_head|to_lu}},
+     width: 150,
+     sortable: true,
+     render: (h, params) => {
+       const row = params.row;
+       const color = row.status === "running" ? "yellow" : row.status === "passed" ? "green" : "red";
+       const text = row.status
+       return h("Tag", {
+         props: {
+           type: "dot",
+           color: color
+         }
+       }, text);
+     }
+   },
+   {% else %}
+   {
+     title: "{{ proj_head }}",
+     key: "{{ proj_head|to_lu }}",
+     width: 200,
+     sortable: true,
+     {% if proj_head|to_lu == "prop2" %}
+     filters: [
+       {
+         label: "value is available",
+         value: 1
+       },
+       {
+         label: "value is NA",
+         value: 2
+       }
+     ],
+     filterMultiple: false,
+     filterMethod (value, row) {
+       if (value === 1) {
+         return row.{{proj_head|to_lu}} !== "None";
+       } else if (value === 2) {
+         return row.{{proj_head|to_lu}} === "None";
        }
      }
-   }
- })
+     {% endif %}
+   },
+   {% endif %}
+   {% endfor %}
+ ];
+
+ var db_data_ary = [
+   {% for proj in object_list %}
+   {
+     proj_name: "{{ proj.name }}",
+     {% for proj_head in proj_head_lst %}
+     {{ proj_head|to_lu }}: "{{ proj.data|get_value:proj_head }}",
+     {% endfor %}
+     {% for proj_key, proj_value in proj.data.items %}
+     {% if proj_key|to_lu not in proj_head_lst %}
+     {{proj_key|to_lu}}: {{proj_value}}
+     {% endif %}
+     {% endfor %}
+   },
+   {% endfor %}
+ ];
 </script>
 {% endblock %}

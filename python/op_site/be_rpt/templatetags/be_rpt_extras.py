@@ -18,7 +18,7 @@ def get_value(value, arg):
     """custom filter to get dict value"""
     return value.get(arg)
 
-@register.filter(name="to_underscore")
-def to_underscore(value):
+@register.filter(name="to_lu")
+def to_lu(value):
     """custom filter to replace spaces with underscores"""
-    return value.replace(" ", "_")
+    return value.replace(" ", "_").lower()

@@ -4,12 +4,13 @@
 {% load be_rpt_extras %}
 
 {% block title %}
-Alchip projects list
+Alchip block list
 {% endblock %}
 
 {% block bc %}
 <breadcrumb>
-  <breadcrumb-item>Projects</breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{proj_name}}</a></breadcrumb-item>
+  <breadcrumb-item>blocks</breadcrumb-item>
 </breadcrumb>
 {% endblock %}
 
@@ -17,26 +18,26 @@ Alchip projects list
 <script>
  var db_col_ary = [
    {
-     title: "Project Name",
-     key: "proj_name",
+     title: "Block Name",
+     key: "block_name",
      /* "fixed": "left",*/
      width: 200,
      sortable: true,
      render: (h, params) => {
        const row = params.row;
-       const text = row.proj_name
+       const text = row.block_name
        return h("a", {
          attrs: {
-           href: "{% url 'be_rpt:block_list' 'djst_var' %}".replace("djst_var", text)
+           href: "{% url 'be_rpt:version_list' proj_name 'djst_var' %}".replace("djst_var", text)
          }
        }, text);
      }
    },
-   {% for proj_head in proj_head_lst %}
-   {% if proj_head|to_lu == "status" %}
+   {% for block_head in block_head_lst %}
+   {% if block_head|to_lu == "status" %}
    {
      title: "Status",
-     key: "{{proj_head|to_lu}}",
+     key: "{{block_head|to_lu}}",
      width: 150,
      sortable: true,
      render: (h, params) => {
@@ -53,11 +54,11 @@ Alchip projects list
    },
    {% else %}
    {
-     title: "{{ proj_head }}",
-     key: "{{ proj_head|to_lu }}",
+     title: "{{ block_head }}",
+     key: "{{ block_head|to_lu }}",
      width: 200,
      sortable: true,
-     {% if proj_head|to_lu == "prop2" %}
+     {% if block_head|to_lu == "prop2" %}
      filters: [
        {
          label: "value is available",
@@ -71,9 +72,9 @@ Alchip projects list
      filterMultiple: false,
      filterMethod (value, row) {
        if (value === 1) {
-         return row.{{proj_head|to_lu}} !== "None";
+         return row.{{block_head|to_lu}} !== "None";
        } else if (value === 2) {
-         return row.{{proj_head|to_lu}} === "None";
+         return row.{{block_head|to_lu}} === "None";
        }
      }
      {% endif %}
@@ -83,15 +84,15 @@ Alchip projects list
  ];
 
  var db_data_ary = [
-   {% for proj in object_list %}
+   {% for block in object_list %}
    {
-     proj_name: "{{ proj.name }}",
-     {% for proj_head in proj_head_lst %}
-     {{ proj_head|to_lu }}: "{{ proj.data|get_value:proj_head|safe }}",
+     block_name: "{{ block.name }}",
+     {% for block_head in block_head_lst %}
+     {{ block_head|to_lu }}: "{{ block.data|get_value:block_head|safe }}",
      {% endfor %}
-     {% for proj_key, proj_value in proj.data.items %}
-     {% if proj_key|to_lu not in proj_head_lst %}
-     {{proj_key|to_lu}}: "{{proj_value}}"
+     {% for block_key, block_value in block.data.items %}
+     {% if block_key|to_lu not in block_head_lst %}
+     {{block_key|to_lu}}: "{{block_value}}"
      {% endif %}
      {% endfor %}
    },

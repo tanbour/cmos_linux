@@ -136,8 +136,8 @@
        } else if (type === 3) {
          this.$refs.table.exportCsv({
            filename: "custom_data",
-           columns: this.columns8.filter((col, index) => index < 4),
-           data: this.data7.filter((data, index) => index < 4)
+           columns: this.table_col.filter((col, index) => index < this.table_col.length-1),
+           data: this.table_data.filter((data, index) => index >= 0)
          });
        }
      },

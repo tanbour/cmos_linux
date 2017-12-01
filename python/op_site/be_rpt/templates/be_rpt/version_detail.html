@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load staticfiles %}
+{% load be_rpt_extras %}
+
+{% block content %}
+<base_card></base_card>
+{% endblock %}
+
+{% block bc %}
+<breadcrumb>
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{proj_name}}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:block_list' proj_name %}" title="go to blocks list">{{block_name}}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:version_list' proj_name block_name %}" title="go to version list">{{version_name}}</a></breadcrumb-item>
+  <breadcrumb-item>details</breadcrumb-item>
+</breadcrumb>
+{% endblock %}
+
+{% block template %}
+<template id="base_card">
+  <div style="background:#eee;padding: 20px">
+    <Card :bordered="false">
+      <p slot="title">{{object.name}}</p>
+      <p>
+        {% for obj_key, obj_value in object.data.items %}
+        {% if obj_key != "name" %}
+        {{obj_key}}: {{obj_value}}<br>
+        {% endif %}
+        {% endfor %}
+      </p>
+    </Card>
+  </div>
+</template>
+{% endblock %}
+
+{% block js %}
+<script>
+ Vue.component("base_card", {
+   template: "#base_card",
+   data () {
+     return {
+     }
+   },
+   methods: {
+   }
+ })
+</script>
+{% endblock %}

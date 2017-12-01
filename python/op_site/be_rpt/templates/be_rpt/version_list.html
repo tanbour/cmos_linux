@@ -71,7 +71,7 @@ Alchip version list
        }
      ],
      filterMultiple: false,
-     filterMethod (value, row) {
+     filterMethod: function (value, row) {
        if (value === 1) {
          return row.{{version_head|to_lu}} !== "None";
        } else if (value === 2) {

@@ -52,7 +52,7 @@
 <script>
  Vue.component("base_table", {
    template: "#base_table",
-   data () {
+   data: function () {
      return {
        table_data: db_data_ary,
        showBorder: false,
@@ -65,8 +65,8 @@
      }
    },
    computed: {
-     table_col() {
-       let columns = [];
+     table_col: function () {
+       var columns = [];
        if (this.showCheckbox) {
          columns.push({
            type: "selection",
@@ -123,7 +123,7 @@
      },
    },
    methods: {
-     exportData (type) {
+     exportData: function (type) {
        if (type === 1) {
          this.$refs.table.exportCsv({
            filename: "the_original_data"
@@ -141,28 +141,28 @@
          });
        }
      },
-     handleSelectAll (status) {
+     handleSelectAll: function (status) {
        this.$refs.table.selectAll(status);
      },
-     deleteSelections () {
+     deleteSelections: function () {
        var sel_dic = this.$refs.table.getSelection();
        for (var i = sel_dic.length-1; i >= 0; i--)
          this.table_data.splice(sel_dic[i], 1);
      },
-     show (index) {
-       var content = ``;
+     show: function (index) {
+       var content = "";
        for (var td_key in this.table_data[index]) {
-         content += `${td_key}: ${this.table_data[index][td_key]}<br>`
+         content += td_key+": "+this.table_data[index][td_key]+"<br>"
        }
        this.$Modal.info({
          title: "Detailed Info",
          content: content
        })
      },
-     remove (index) {
+     remove: function (index) {
        this.table_data.splice(index, 1);
      },
-     changePage () {
+     changePage: function () {
        this.table_data = this.table_data;
      }
    }

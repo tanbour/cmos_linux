@@ -19,7 +19,7 @@
               <div class="layout-logo-left"></div>
               <menu-item name="1">
                 <Icon type="ios-albums-outline" :size="iconSize"></Icon>
-                <a href="/be_rpt/" class="layout-text">BE Reports</a>
+                <a href="/be_rpt/show/" class="layout-text">BE Reports</a>
               </menu-item>
               <menu-item name="2">
                 <Icon type="ios-albums-outline" :size="iconSize"></Icon>
@@ -83,19 +83,19 @@
 
     <script>
      var Main = {
-       data () {
+       data: function () {
          return {
            spanLeft: 5,
            spanRight: 19
          }
        },
        computed: {
-         iconSize () {
+         iconSize: function () {
            return this.spanLeft === 5 ? 14 : 24;
          }
        },
        methods: {
-         toggleClick () {
+         toggleClick: function () {
            if (this.spanLeft === 5) {
              this.spanLeft = 2;
              this.spanRight = 22;

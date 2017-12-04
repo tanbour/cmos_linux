@@ -28,8 +28,8 @@ class BlockAdmin(admin.ModelAdmin):
 
 class VersionAdmin(admin.ModelAdmin):
     """version admin"""
-    list_display = ("name", "block", "owner")
-    list_filter = ["name"]
+    list_display = ("name", "block", "owner", "created_time")
+    list_filter = ["created_time"]
     search_field = ["name", "data"]
 
 admin.site.register(User, UserAdmin)

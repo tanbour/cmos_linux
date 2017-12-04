@@ -38,9 +38,8 @@ class Version(models.Model):
     """version models"""
     name = models.CharField(max_length=50)
     block = models.ForeignKey(Block, on_delete=models.CASCADE)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_time = models.DateTimeField(auto_now_add=True)
     data = JSONField(default=dict, blank=True)
     def __str__(self):
         return f"{self.name}__{self.block}"
-    class Meta:
-        unique_together = ("name", "block")

@@ -1,0 +1,145 @@
+{% extends "base_table.html" %}
+{% load i18n %}
+{% load staticfiles %}
+{% load be_rpt_extras %}
+
+{% block title %}
+{% if level == "proj" %}
+Alchip projects list
+{% elif level == "block" %}
+Alchip blocks list
+{% elif level == "version" %}
+Alchip versions list
+{% endif %}
+{% endblock %}
+
+{% block bc %}
+<breadcrumb>
+  {% if level == "proj" %}
+  <breadcrumb-item>Projects</breadcrumb-item>
+  {% elif level == "block" %}
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{proj_name}}</a></breadcrumb-item>
+  <breadcrumb-item>blocks</breadcrumb-item>
+  {% elif level == "version" %}
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{proj_name}}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:block_list' proj_name %}" title="go to blocks list">{{block_name}}</a></breadcrumb-item>
+  <breadcrumb-item>versions</breadcrumb-item>
+  {% endif %}
+</breadcrumb>
+{% endblock %}
+
+{% block js_table %}
+<script>
+ var db_col_ary = [
+   {
+     {% if level == "proj" %}
+     title: "Project Name",
+     {% elif level == "block" %}
+     title: "Block Name",
+     {% elif level == "version" %}
+     title: "Version Name",
+     {% endif %}
+     key: "obj_name",
+     /* "fixed": "left",*/
+     width: 150,
+     sortable: true,
+     render: (h, params) => {
+       const row = params.row;
+       const text = row.obj_name
+       return h("a", {
+         attrs: {
+           {% if level == "proj" %}
+           href: "{% url 'be_rpt:block_list' 'djst_var' %}".replace("djst_var", text)
+           {% elif level == "block" %}
+           href: "{% url 'be_rpt:version_list' proj_name 'djst_var' %}".replace("djst_var", text)
+           {% elif level == "version" %}
+           href: "{% url 'be_rpt:version_detail' proj_name block_name 'djst_var' %}".replace("djst_var", text)
+           {% endif %}
+         }
+       }, text);
+     }
+   },
+   {
+     title: "Owner",
+     key: "owner",
+     width: 150,
+     sortable: true,
+     filters: [
+       {% for obj in owner_distinct_lst %}
+       {
+         label: "owner is {{ obj.owner }}",
+         value: "{{ obj.owner }}"
+       },
+       {% endfor %}
+     ],
+     filterMultiple: true,
+     filterMethod: function (value, row) {
+       {% for obj in object_list %}
+       {% if forloop.first %}
+       if (value === "{{ obj.owner }}")
+         {% else %}
+       else if (value === "{{ obj.owner }}")
+         {% endif %}
+       return row.owner === "{{ obj.owner }}";
+       {% endfor %}
+     }
+   },
+   {% if level == "version" %}
+   {
+     title: "Date",
+     key: "created_time",
+     width: 200,
+     sortable: true,
+   },
+   {% endif %}
+   {% for head in head_lst %}
+   {% if head|to_lu == "status" %}
+   {
+     title: "Status",
+     key: "{{ head|to_lu }}",
+     width: 150,
+     sortable: true,
+     render: (h, params) => {
+       const row = params.row;
+       const color = row.status === "running" ? "yellow" : row.status === "passed" ? "green" : "red";
+       const text = row.status
+       return h("Tag", {
+         props: {
+           type: "dot",
+           color: color
+         }
+       }, text);
+     }
+   },
+   {% else %}
+   {
+     title: "{{ head }}",
+     key: "{{ head|to_lu }}",
+     width: 200,
+     sortable: true,
+   },
+   {% endif %}
+   {% endfor %}
+ ];
+
+ var db_data_ary = [
+   {% for obj in object_list %}
+   {
+     obj_name: "{{ obj.name }}",
+     owner: "{{ obj.owner }}",
+     {% if level == "version" %}
+     created_time: "{{ obj.created_time|date:'Y_m_d_H_i_s' }}",
+     {% endif %}
+     {% for head in head_lst %}
+     {{ head|to_lu }}: "{{ obj.data|get_value:head|safe }}",
+     {% endfor %}
+     {% for obj_key, obj_value in obj.data.items %}
+     {% if obj_key|to_lu not in head_lst %}
+     {{obj_key|to_lu}}: "{{ obj_value }}"
+     {% endif %}
+     {% endfor %}
+   },
+   {% endfor %}
+ ];
+</script>
+{% endblock %}

@@ -67,7 +67,7 @@ Alchip versions list
      filters: [
        {% for obj in owner_distinct_lst %}
        {
-         label: "owner is {{ obj.owner }}",
+         label: "{{ obj.owner }}",
          value: "{{ obj.owner }}"
        },
        {% endfor %}

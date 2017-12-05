@@ -430,7 +430,7 @@ uwsgi --reload uwsgi.pid
 * nginx
 nginx -t
 /etc/nginx/nginx.conf:
-    include ./conf.d/*
+    include ./conf.d/*;
 nginx
 nginx -s stop
 nginx -s reload

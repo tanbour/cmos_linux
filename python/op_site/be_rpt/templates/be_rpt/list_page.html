@@ -41,7 +41,7 @@ Alchip versions list
      {% endif %}
      key: "obj_name",
      /* "fixed": "left",*/
-     width: 150,
+     width: 200,
      sortable: true,
      render: (h, params) => {
        const row = params.row;
@@ -58,6 +58,25 @@ Alchip versions list
            {% endif %}
          }
        }, text);
+     },
+     filters: [
+       {% for obj in name_distinct_lst %}
+       {
+         label: "{{ obj.name }}",
+         value: "{{ obj.name }}"
+       },
+       {% endfor %}
+     ],
+     filterMultiple: true,
+     filterMethod: function (value, row) {
+       {% for obj in object_list %}
+       {% if forloop.first %}
+       if (value === "{{ obj.name }}")
+         {% else %}
+       else if (value === "{{ obj.name }}")
+         {% endif %}
+       return row.obj_name === "{{ obj.name }}";
+       {% endfor %}
      }
    },
    {

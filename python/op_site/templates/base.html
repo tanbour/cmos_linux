@@ -12,7 +12,7 @@
 
   <body>
     <div id="op_site_base">
-      <div class="layout" :class="{'layout-hide-text': spanLeft < 5}">
+      <div class="layout" :class="{'layout-hide-text': spanLeft < 2}">
         <row type="flex">
           <i-col :span="spanLeft" class="layout-menu-left">
             <i-menu active-name="1" theme="dark" width="auto">
@@ -87,23 +87,23 @@
      var Main = {
        data: function () {
          return {
-           spanLeft: 5,
-           spanRight: 19
+           spanLeft: 2,
+           spanRight: 22
          }
        },
        computed: {
          iconSize: function () {
-           return this.spanLeft === 5 ? 14 : 24;
+           return this.spanLeft === 2 ? 14 : 24;
          }
        },
        methods: {
          toggleClick: function () {
-           if (this.spanLeft === 5) {
+           if (this.spanLeft === 2) {
+             this.spanLeft = 1;
+             this.spanRight = 23;
+           } else {
              this.spanLeft = 2;
              this.spanRight = 22;
-           } else {
-             this.spanLeft = 5;
-             this.spanRight = 19;
            }
          }
        }

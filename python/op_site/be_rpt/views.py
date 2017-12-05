@@ -19,6 +19,7 @@ class ProjList(ListView):
         context = super(ProjList, self).get_context_data(**kwargs)
         context["head_lst"] = Title.objects.first().proj
         context["owner_distinct_lst"] = Proj.objects.distinct("owner")
+        context["name_distinct_lst"] = Proj.objects.distinct("name")
         context["level"] = "proj"
         return context
 
@@ -29,11 +30,13 @@ class BlockList(ListView):
     def get_queryset(self):
         proj_pk = self.kwargs.get("proj_pk")
         self.proj_obj = Proj.objects.get(pk=proj_pk)
-        return Block.objects.filter(proj_id=proj_pk)
+        self.block_qs = block_qs = Block.objects.filter(proj_id=proj_pk)
+        return block_qs
     def get_context_data(self, **kwargs):
         context = super(BlockList, self).get_context_data(**kwargs)
         context["head_lst"] = Title.objects.first().block
-        context["owner_distinct_lst"] = Block.objects.distinct("owner")
+        context["owner_distinct_lst"] = self.block_qs.distinct("owner")
+        context["name_distinct_lst"] = self.block_qs.distinct("name")
         context["level"] = "block"
         context["proj_obj"] = self.proj_obj
         return context
@@ -46,11 +49,13 @@ class VersionList(ListView):
         block_pk = self.kwargs.get("block_pk")
         self.block_obj = block_obj = Block.objects.get(pk=block_pk)
         self.proj_obj = block_obj.proj
-        return Version.objects.filter(block_id=block_pk)
+        self.version_qs = version_qs = Version.objects.filter(block_id=block_pk)
+        return version_qs
     def get_context_data(self, **kwargs):
         context = super(VersionList, self).get_context_data(**kwargs)
         context["head_lst"] = Title.objects.first().version
-        context["owner_distinct_lst"] = Version.objects.distinct("owner")
+        context["owner_distinct_lst"] = self.version_qs.distinct("owner")
+        context["name_distinct_lst"] = self.version_qs.distinct("name")
         context["level"] = "version"
         context["block_obj"] = self.block_obj
         context["proj_obj"] = self.proj_obj

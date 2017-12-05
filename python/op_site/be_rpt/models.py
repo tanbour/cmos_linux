@@ -14,6 +14,8 @@ class Title(models.Model):
     proj = JSONField(default=list, blank=True)
     block = JSONField(default=list, blank=True)
     version = JSONField(default=list, blank=True)
+    flow = JSONField(default=list, blank=True)
+    stage = JSONField(default=list, blank=True)
 
 class Proj(models.Model):
     """project models"""
@@ -28,6 +30,7 @@ class Block(models.Model):
     name = models.CharField(max_length=20)
     proj = models.ForeignKey(Proj, on_delete=models.CASCADE)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    milestone = models.ForeignKey("Stage", on_delete=models.CASCADE, blank=True, null=True)
     data = JSONField(default=dict, blank=True)
     def __str__(self):
         return f"{self.name}__{self.proj}"
@@ -43,3 +46,27 @@ class Version(models.Model):
     data = JSONField(default=dict, blank=True)
     def __str__(self):
         return f"{self.name}__{self.block}"
+    class Meta:
+        unique_together = ("name", "block", "owner")
+
+class Flow(models.Model):
+    """Stage models"""
+    name = models.CharField(max_length=50)
+    version = models.ForeignKey(Version, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_time = models.DateTimeField(auto_now_add=True)
+    data = JSONField(default=dict, blank=True)
+    def __str__(self):
+        return f"{self.name}__{self.version}"
+    class Meta:
+        unique_together = ("name", "version", "owner")
+
+class Stage(models.Model):
+    """Stage models"""
+    name = models.CharField(max_length=50)
+    flow = models.ForeignKey(Flow, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_time = models.DateTimeField(auto_now_add=True)
+    data = JSONField(default=dict, blank=True)
+    def __str__(self):
+        return f"{self.name}__{self.flow}"

@@ -27,14 +27,15 @@ class BlockList(ListView):
     model = Block
     template_name = "be_rpt/list_page.html"
     def get_queryset(self):
-        self.proj_name = self.kwargs.get("proj_name")
-        return Block.objects.filter(proj__name=self.proj_name)
+        proj_pk = self.kwargs.get("proj_pk")
+        self.proj_obj = Proj.objects.get(pk=proj_pk)
+        return Block.objects.filter(proj_id=proj_pk)
     def get_context_data(self, **kwargs):
         context = super(BlockList, self).get_context_data(**kwargs)
         context["head_lst"] = Title.objects.first().block
         context["owner_distinct_lst"] = Block.objects.distinct("owner")
         context["level"] = "block"
-        context["proj_name"] = self.proj_name
+        context["proj_obj"] = self.proj_obj
         return context
 
 class VersionList(ListView):
@@ -42,17 +43,17 @@ class VersionList(ListView):
     model = Version
     template_name = "be_rpt/list_page.html"
     def get_queryset(self):
-        self.proj_name = self.kwargs.get("proj_name")
-        self.block_name = self.kwargs.get("block_name")
-        return Version.objects.filter(
-            block__name=self.block_name, block__proj__name=self.proj_name)
+        block_pk = self.kwargs.get("block_pk")
+        self.block_obj = block_obj = Block.objects.get(pk=block_pk)
+        self.proj_obj = block_obj.proj
+        return Version.objects.filter(block_id=block_pk)
     def get_context_data(self, **kwargs):
         context = super(VersionList, self).get_context_data(**kwargs)
         context["head_lst"] = Title.objects.first().version
         context["owner_distinct_lst"] = Version.objects.distinct("owner")
         context["level"] = "version"
-        context["proj_name"] = self.proj_name
-        context["block_name"] = self.block_name
+        context["block_obj"] = self.block_obj
+        context["proj_obj"] = self.proj_obj
         return context
 
 class VersionDetail(DetailView):
@@ -60,16 +61,15 @@ class VersionDetail(DetailView):
     model = Version
     template_name = "be_rpt/detail_page.html"
     def get_object(self):
-        self.proj_name = self.kwargs.get("proj_name")
-        self.block_name = self.kwargs.get("block_name")
-        self.version_name = self.kwargs.get("version_name")
-        return Version.objects.get(
-            name=self.version_name, block__name=self.block_name, block__proj__name=self.proj_name)
+        version_pk = self.kwargs.get("version_pk")
+        version_obj = Version.objects.get(pk=version_pk)
+        self.block_obj = block_obj = version_obj.block
+        self.proj_obj = block_obj.proj
+        return version_obj
     def get_context_data(self, **kwargs):
         context = super(VersionDetail, self).get_context_data(**kwargs)
-        context["proj_name"] = self.proj_name
-        context["block_name"] = self.block_name
-        context["version_name"] = self.version_name
+        context["block_obj"] = self.block_obj
+        context["proj_obj"] = self.proj_obj
         return context
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -108,13 +108,7 @@ class BlockPost(View):
         if not block_dic:
             return HttpResponseBadRequest("input block_dic is NA")
         proj_name = block_dic.get("proj")
-        try:
-            proj_obj = Proj.objects.get(name=proj_name)
-        except ObjectDoesNotExist:
-            return HttpResponseBadRequest(f"project object named {proj_name} is NA")
-        except MultipleObjectsReturned:
-            return HttpResponseBadRequest(
-                f"multiple project object named {proj_name} is returned")
+        proj_obj, _ = Proj.objects.get_or_create({"name": proj_name}, name=proj_name)
         block_name = block_dic.get("name")
         block_obj, create_flg = Block.objects.update_or_create(
             {"name": block_name, "proj": proj_obj, "data": block_dic.get("data")},
@@ -132,20 +126,9 @@ class VersionPost(View):
             return HttpResponseBadRequest("input version_dic is NA")
         proj_name = version_dic.get("proj")
         block_name = version_dic.get("block")
-        try:
-            proj_obj = Proj.objects.get(name=proj_name)
-        except ObjectDoesNotExist:
-            return HttpResponseBadRequest(f"project object named {proj_name} is NA")
-        except MultipleObjectsReturned:
-            return HttpResponseBadRequest(
-                f"multiple project object named {proj_name} is returned")
-        try:
-            block_obj = Block.objects.get(name=block_name, proj=proj_obj)
-        except ObjectDoesNotExist:
-            return HttpResponseBadRequest(f"block object named {block_name} is NA")
-        except MultipleObjectsReturned:
-            return HttpResponseBadRequest(
-                f"multiple block object named {block_name} is returned")
+        proj_obj, _ = Proj.objects.get_or_create({"name": proj_name}, name=proj_name)
+        block_obj, _ = Block.objects.get_or_create(
+            {"name": block_name, "proj": proj_obj}, name=block_name, proj=proj_obj)
         owner_name = version_dic.get("owner")
         owner_obj, _ = User.objects.get_or_create({"name": owner_name}, name=owner_name)
         version_obj = Version.objects.create(name=version_dic.get("name"), block=block_obj, owner=owner_obj, data=version_dic.get("data"))

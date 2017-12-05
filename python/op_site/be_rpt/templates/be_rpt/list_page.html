@@ -18,11 +18,11 @@ Alchip versions list
   {% if level == "proj" %}
   <breadcrumb-item>Projects</breadcrumb-item>
   {% elif level == "block" %}
-  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{proj_name}}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{ proj_obj.name }}</a></breadcrumb-item>
   <breadcrumb-item>blocks</breadcrumb-item>
   {% elif level == "version" %}
-  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{proj_name}}</a></breadcrumb-item>
-  <breadcrumb-item><a href="{% url 'be_rpt:block_list' proj_name %}" title="go to blocks list">{{block_name}}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{ proj_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:block_list' proj_obj.pk %}" title="go to blocks list">{{ block_obj.name }}</a></breadcrumb-item>
   <breadcrumb-item>versions</breadcrumb-item>
   {% endif %}
 </breadcrumb>
@@ -45,15 +45,16 @@ Alchip versions list
      sortable: true,
      render: (h, params) => {
        const row = params.row;
-       const text = row.obj_name
+       const pk = row.obj_pk;
+       const text = row.obj_name;
        return h("a", {
          attrs: {
            {% if level == "proj" %}
-           href: "{% url 'be_rpt:block_list' 'djst_var' %}".replace("djst_var", text)
+           href: "{% url 'be_rpt:block_list' 'djst_var' %}".replace("djst_var", pk)
            {% elif level == "block" %}
-           href: "{% url 'be_rpt:version_list' proj_name 'djst_var' %}".replace("djst_var", text)
+           href: "{% url 'be_rpt:version_list' 'djst_var' %}".replace("djst_var", pk)
            {% elif level == "version" %}
-           href: "{% url 'be_rpt:version_detail' proj_name block_name 'djst_var' %}".replace("djst_var", text)
+           href: "{% url 'be_rpt:version_detail' 'djst_var' %}".replace("djst_var", pk)
            {% endif %}
          }
        }, text);
@@ -125,6 +126,7 @@ Alchip versions list
  var db_data_ary = [
    {% for obj in object_list %}
    {
+     obj_pk: "{{ obj.pk }}",
      obj_name: "{{ obj.name }}",
      owner: "{{ obj.owner }}",
      {% if level == "version" %}
@@ -135,7 +137,7 @@ Alchip versions list
      {% endfor %}
      {% for obj_key, obj_value in obj.data.items %}
      {% if obj_key|to_lu not in head_lst %}
-     {{obj_key|to_lu}}: "{{ obj_value }}"
+     {{ obj_key|to_lu }}: "{{ obj_value }}"
      {% endif %}
      {% endfor %}
    },

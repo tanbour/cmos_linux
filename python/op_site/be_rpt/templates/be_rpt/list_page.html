@@ -75,8 +75,8 @@ Alchip {{level}}s list
      filters: [
        {% for obj in name_distinct_lst %}
        {
-         label: "{{ obj.name }}",
-         value: "{{ obj.name }}"
+         label: "{{ obj.name|escapejs }}",
+         value: "{{ obj.name|escapejs }}"
        },
        {% endfor %}
      ],
@@ -84,11 +84,11 @@ Alchip {{level}}s list
      filterMethod: function (value, row) {
        {% for obj in object_list %}
        {% if forloop.first %}
-       if (value === "{{ obj.name }}")
+       if (value === "{{ obj.name|escapejs }}")
          {% else %}
-       else if (value === "{{ obj.name }}")
+       else if (value === "{{ obj.name|escapejs }}")
          {% endif %}
-       return row.obj_name === "{{ obj.name }}";
+       return row.obj_name === "{{ obj.name|escapejs }}";
        {% endfor %}
      }
    },
@@ -177,17 +177,17 @@ Alchip {{level}}s list
    {% for obj in object_list %}
    {
      obj_pk: "{{ obj.pk }}",
-     obj_name: "{{ obj.name }}",
+     obj_name: "{{ obj.name|escapejs }}",
      owner: "{{ obj.owner }}",
      {% if level == "version" or level == "flow" or level == "stage" %}
      created_time: "{{ obj.created_time|date:'Y_m_d_H_i_s' }}",
      {% endif %}
      {% if level == "block" %}
      ms_pk: "{{ obj.milestone.pk }}",
-     milestone: "{{ obj.milestone.name }}",
+     milestone: "{{ obj.milestone.name|escapejs }}",
      {% endif %}
      {% for head in head_lst %}
-     {{ head|to_lu }}: "{{ obj.data|get_value:head }}",
+     {{ head|to_lu }}: "{{ obj.data|get_value:head|escapejs }}",
      {% endfor %}
      {% for obj_key, obj_value in obj.data.items %}
      {% if obj_key|to_lu not in head_lst %}

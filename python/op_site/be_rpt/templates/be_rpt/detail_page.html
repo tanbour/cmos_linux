@@ -25,12 +25,12 @@ Alchip stage details
 {% block template %}
 <template id="base_card">
   <div style="background:#eee;padding: 20px;">
-    <Card :bordered="false">
+    <Card :bordered="false" style="font-family:monospace">
       <p slot="title">{{ object.name }}</p>
-      <p style="font-family:monospace">
+      <p>
         {% for obj_key, obj_value in object.data.items %}
         {% if obj_key != "name" %}
-        {{ obj_key }}: {{ obj_value|linebreaks }}<br>
+        <pre>{{ obj_key }}: {{ obj_value|linebreaks }}<br></pre>
         {% endif %}
         {% endfor %}
       </p>

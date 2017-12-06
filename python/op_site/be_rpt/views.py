@@ -131,7 +131,7 @@ class StageDetail(DetailView):
 class UserPost(View):
     """be report post user data"""
     def post(self, request, *args, **kwargs):
-        user_dic = json.loads(request.body.decode()).get("user_dic", {})
+        user_dic = json.loads(request.body.decode())
         if not user_dic:
             return HttpResponseBadRequest("input user_dic is NA")
         user_name = user_dic.get("name")
@@ -145,7 +145,7 @@ class UserPost(View):
 class ProjPost(View):
     """be report post project data"""
     def post(self, request, *args, **kwargs):
-        proj_dic = json.loads(request.body.decode()).get("proj_dic", {})
+        proj_dic = json.loads(request.body.decode())
         if not proj_dic:
             return HttpResponseBadRequest("input proj_dic is NA")
         proj_name = proj_dic.get("name")
@@ -159,7 +159,7 @@ class ProjPost(View):
 class BlockPost(View):
     """be report post block data"""
     def post(self, request, *args, **kwargs):
-        block_dic = json.loads(request.body.decode()).get("block_dic")
+        block_dic = json.loads(request.body.decode())
         if not block_dic:
             return HttpResponseBadRequest("input block_dic is NA")
         proj_name = block_dic.get("proj")
@@ -176,7 +176,7 @@ class BlockPost(View):
 class VersionPost(View):
     """be report post version data"""
     def post(self, request, *args, **kwargs):
-        version_dic = json.loads(request.body.decode()).get("version_dic")
+        version_dic = json.loads(request.body.decode())
         if not version_dic:
             return HttpResponseBadRequest("input version_dic is NA")
         owner_name = version_dic.get("owner")
@@ -195,7 +195,7 @@ class VersionPost(View):
 class FlowPost(View):
     """be report post flow data"""
     def post(self, request, *args, **kwargs):
-        flow_dic = json.loads(request.body.decode()).get("flow_dic")
+        flow_dic = json.loads(request.body.decode())
         if not flow_dic:
             return HttpResponseBadRequest("input flow_dic is NA")
         owner_name = flow_dic.get("owner")
@@ -219,7 +219,7 @@ class FlowPost(View):
 class StagePost(View):
     """be report post stage data"""
     def post(self, request, *args, **kwargs):
-        stage_dic = json.loads(request.body.decode()).get("stage_dic")
+        stage_dic = json.loads(request.body.decode())
         if not stage_dic:
             return HttpResponseBadRequest("input stage_dic is NA")
         owner_name = stage_dic.get("owner")

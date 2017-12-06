@@ -191,7 +191,7 @@ Alchip {{level}}s list
      {% endfor %}
      {% for obj_key, obj_value in obj.data.items %}
      {% if obj_key|to_lu not in head_lst %}
-     {{ obj_key|to_lu }}: "{{ obj_value|escapejs }}"
+     {{ obj_key|to_lu }}: "{{ obj_value|escapejs }}",
      {% endif %}
      {% endfor %}
    },

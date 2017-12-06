@@ -1,5 +1,6 @@
 """custom template filters"""
 from django import template
+import re
 
 register = template.Library()
 
@@ -21,4 +22,4 @@ def get_value(value, arg):
 @register.filter(name="to_lu")
 def to_lu(value):
     """custom filter to replace spaces with underscores"""
-    return value.replace(" ", "_").lower()
+    return re.sub(r"\W", "_", value).lower()

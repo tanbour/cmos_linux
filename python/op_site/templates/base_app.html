@@ -329,10 +329,11 @@ op platform --- alchip
      content_id: function () {
        console.log(this.content_id)
        if (this.content_id === "be_rpt") {
-         axios.get("/be_rpt/block")
+         axios.get("/be_rpt/proj")
               .then(function (response) {
-                console.log(response);
-                this.qs_data = response.data
+                console.log(response.data);
+                this.qs_data = response.data;
+                console.log(this.qs_data);
               })
               .catch(function (error) {
                 console.log(error);
@@ -347,7 +348,8 @@ op platform --- alchip
      procColAry: function () {
      },
      procDataAry: function () {
-       this.data_ary = []
+       this.data_ary = [];
+       console.log(this.qs_data);
        for (var i = 0; i < this.qs_data.qs_dic_lst.length; i++) {
          data_dic = {
            obj_pk: this.qs_data.qs_dic_lst[i].id,
@@ -357,7 +359,7 @@ op platform --- alchip
          if (this.qs_data.level === "version" || this.qs_data.level === "flow" || this.qs_data.level === "stage")
            data_dic["created_time"] = this.qs_data.qs_dic_lst[i].created_time
          if (this.qs_data.level === "block") {
-           /* data_dic["ms_pk"] = this.qs_data.qs_dic_lst[i].milestone.pk*/
+           data_dic["ms_pk"] = this.qs_data.qs_dic_lst[i].milestone_id
          }
          this.data_ary.push(data_dic);
        };

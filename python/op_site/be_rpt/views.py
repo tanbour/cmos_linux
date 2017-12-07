@@ -38,12 +38,12 @@ class AProjList(generics.ListAPIView):
         return Response(rsp_dic)
 
 class ABlockList(generics.ListAPIView):
-    """be report project list"""
+    """be report block list"""
     queryset = Block.objects.all()
-    serializer_class = ProjSerializer
+    serializer_class = BlockSerializer
     def list(self, request, *args, **kwargs):
         q_s = self.get_queryset()
-        qs_slz = ProjSerializer(q_s, many=True)
+        qs_slz = BlockSerializer(q_s, many=True)
         rsp_dic = {"head_lst": Title.objects.first().block, "qs_dic_lst": qs_slz.data, "level": "block"}
         return Response(rsp_dic)
 

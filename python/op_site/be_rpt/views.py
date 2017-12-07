@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views import View
@@ -7,6 +7,10 @@ from django.views.generic.detail import DetailView
 from django.utils.decorators import method_decorator
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from .models import User, Title, Proj, Block, Version, Flow, Stage
+from .serializers import UserSerializer, TitleSerializer, ProjSerializer, BlockSerializer, VersionSerializer, FlowSerializer, StageSerializer
+from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework import status
 from django.utils import timezone as tz
 import json
 
@@ -22,6 +26,40 @@ class ProjList(ListView):
         context["name_distinct_lst"] = Proj.objects.distinct("name")
         context["level"] = "proj"
         return context
+
+class AProjList(generics.ListAPIView):
+    """be report project list"""
+    queryset = Proj.objects.all()
+    serializer_class = ProjSerializer
+    def list(self, request, *args, **kwargs):
+        q_s = self.get_queryset()
+        qs_slz = ProjSerializer(q_s, many=True)
+        rsp_dic = {"head_lst": Title.objects.first().proj, "qs_dic_lst": qs_slz.data, "level": "proj"}
+        return Response(rsp_dic)
+
+class ABlockList(generics.ListAPIView):
+    """be report project list"""
+    queryset = Block.objects.all()
+    serializer_class = ProjSerializer
+    def list(self, request, *args, **kwargs):
+        q_s = self.get_queryset()
+        qs_slz = ProjSerializer(q_s, many=True)
+        rsp_dic = {"head_lst": Title.objects.first().block, "qs_dic_lst": qs_slz.data, "level": "block"}
+        return Response(rsp_dic)
+
+# @method_decorator(csrf_exempt, name="dispatch")
+# class ProjPost(View):
+#     """be report post project data"""
+#     def post(self, request, *args, **kwargs):
+#         proj_dic = json.loads(request.body.decode())
+#         if not proj_dic:
+#             return HttpResponseBadRequest("input proj_dic is NA")
+#         proj_name = proj_dic.get("name")
+#         proj_obj, create_flg = Proj.objects.update_or_create(
+#             {"name": proj_name, "data": proj_dic.get("data")}, name=proj_name)
+#         return HttpResponse(
+#             json.dumps({"proj_name": proj_obj.name, "create_flg": create_flg}),
+#             content_type="application/json")
 
 class BlockList(ListView):
     """be report block list"""

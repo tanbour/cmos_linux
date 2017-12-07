@@ -1,11 +1,14 @@
 """be report url"""
 from django.urls import include, path
+from rest_framework.urlpatterns import format_suffix_patterns
 from . import views
 
 app_name = "be_rpt"
 urlpatterns = [
     path("projs/", views.ProjList.as_view(), name="proj_list"),
+    path("proj/", views.AProjList.as_view(), name="ajax_proj_list"),
     path("blocks/<proj_pk>/", views.BlockList.as_view(), name="block_list"),
+    path("block/", views.ABlockList.as_view(), name="ajax_block_list"),
     path("versions/<block_pk>/", views.VersionList.as_view(), name="version_list"),
     path("flows/<version_pk>/", views.FlowList.as_view(), name="flow_list"),
     path("stages/<flow_pk>/", views.StageList.as_view(), name="stage_list"),
@@ -17,3 +20,5 @@ urlpatterns = [
     path("post/flow/", views.FlowPost.as_view(), name="post_flow"),
     path("post/stage/", views.StagePost.as_view(), name="post_stage"),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)

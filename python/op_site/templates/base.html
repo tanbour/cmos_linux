@@ -12,22 +12,22 @@
 
   <body>
     <div id="op_site_base">
-      <div class="layout" :class="{'layout-hide-text': spanLeft < 5}">
+      <div class="layout" :class="{'layout-hide-text': spanLeft < 2}">
         <row type="flex">
           <i-col :span="spanLeft" class="layout-menu-left">
-            <i-menu active-name="1" theme="dark" width="auto">
+            <i-menu active-name="be_rpt" theme="dark" width="auto" @on-select="changeContent">
               <div class="layout-logo-left"></div>
-              <menu-item name="1">
+              <menu-item name="be_rpt">
                 <Icon type="ios-albums-outline" :size="iconSize"></Icon>
-                <a href="/be_rpt/show/" class="layout-text">BE Reports</a>
+                <span class="layout-text">BE Reports</span>
               </menu-item>
-              <menu-item name="2">
+              <menu-item name="fe_rpt">
                 <Icon type="ios-albums-outline" :size="iconSize"></Icon>
-                <a href="#" class="layout-text">FE Reports</a>
+                <span class="layout-text">FE Reports</span>
               </menu-item>
               <!-- <menu-item name="3">
                    <Icon type="ios-analytics" :size="iconSize"></Icon>
-                   <a href="#" class="layout-text">AI Analytics</a>
+                   <span class="layout-text">AI Analytics</span>
                    </menu-item> -->
             </i-menu>
           </i-col>
@@ -37,15 +37,10 @@
                 <Icon type="navicon" size="32"></Icon>
               </i-button>
               <div class="layout-ceiling-main">
-                <a href="/">Home</a> |
+                <a @click="changeContent('index')">Home</a> |
                 <a href="#">Documents</a> |
                 <a href="#">Contact Us</a> |
                 <a href="#">Sign In</a>
-              </div>
-            </div>
-            <div class="layout-header">
-              <div class="layout-logo">
-                <img src="{% static 'images/alchip_83x50.png' %}">
               </div>
             </div>
             <div class="layout-breadcrumb">
@@ -58,14 +53,14 @@
                    </breadcrumb> -->
             </div>
             <div class="layout-content">
-              <div class="layout-content-main">
+              <div class="layout-content-main" style="background-image:url({% static 'images/background_1200x600.jpg' %})">
                 {% block content %}
                 {% endblock %}
               </div>
               <!-- <div style="height: 300px"></div> -->
             </div>
             <div class="layout-copy">
-              2017 &copy; Alchip
+              2017 &copy; Alchip. Trusted Silicon Partner Realizing Innovations.
             </div>
           </i-col>
         </row>
@@ -76,6 +71,7 @@
     {% endblock %}
 
     <script src="{% static 'npm/node_modules/vue/dist/vue.js' %}"></script>
+    <script src="{% static 'npm/node_modules/axios/dist/axios.js' %}"></script>
     <script src="{% static 'npm/node_modules/iview/dist/iview.js' %}"></script>
     <script src="{% static 'npm/node_modules/iview/dist/locale/en-US.js' %}"></script>
     <script>iview.lang("en-US");</script>
@@ -87,23 +83,27 @@
      var Main = {
        data: function () {
          return {
-           spanLeft: 5,
-           spanRight: 19
+           spanLeft: 2,
+           spanRight: 22,
+           content_id: "index"
          }
        },
        computed: {
          iconSize: function () {
-           return this.spanLeft === 5 ? 14 : 24;
+           return this.spanLeft === 2 ? 14 : 24;
          }
        },
        methods: {
+         changeContent: function (con) {
+           this.content_id = con
+         },
          toggleClick: function () {
-           if (this.spanLeft === 5) {
+           if (this.spanLeft === 2) {
+             this.spanLeft = 1;
+             this.spanRight = 23;
+           } else {
              this.spanLeft = 2;
              this.spanRight = 22;
-           } else {
-             this.spanLeft = 5;
-             this.spanRight = 19;
            }
          }
        }

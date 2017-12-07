@@ -106,7 +106,7 @@ dia/*.dia~
 
 # pg db
 python/cas_site/pg_data/
-python/op_site/op_data/
+python/op_site/pg_data/
 
 # sim output
 output/

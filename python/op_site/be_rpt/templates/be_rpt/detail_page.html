@@ -4,7 +4,7 @@
 {% load be_rpt_extras %}
 
 {% block title %}
-Alchip versions details
+Alchip stage details
 {% endblock %}
 
 {% block content %}
@@ -13,22 +13,24 @@ Alchip versions details
 
 {% block bc %}
 <breadcrumb>
-  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{proj_name}}</a></breadcrumb-item>
-  <breadcrumb-item><a href="{% url 'be_rpt:block_list' proj_name %}" title="go to blocks list">{{block_name}}</a></breadcrumb-item>
-  <breadcrumb-item><a href="{% url 'be_rpt:version_list' proj_name block_name %}" title="go to version list">{{version_name}}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{ proj_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:block_list' proj_obj.pk %}" title="go to blocks list">{{ block_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:version_list' block_obj.pk %}" title="go to version list">{{ version_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:flow_list' version_obj.pk %}" title="go to flow list">{{ flow_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:stage_list' flow_obj.pk %}" title="go to stage list">{{ object.name }}</a></breadcrumb-item>
   <breadcrumb-item>details</breadcrumb-item>
 </breadcrumb>
 {% endblock %}
 
 {% block template %}
 <template id="base_card">
-  <div style="background:#eee;padding: 20px">
-    <Card :bordered="false">
-      <p slot="title">{{object.name}}</p>
+  <div style="background:#eee;padding: 20px;">
+    <Card :bordered="false" style="font-family:monospace">
+      <p slot="title">{{ object.name }}</p>
       <p>
         {% for obj_key, obj_value in object.data.items %}
         {% if obj_key != "name" %}
-        {{obj_key}}: {{obj_value}}<br>
+        <pre>{{ obj_key }}: {{ obj_value|linebreaks }}<br></pre>
         {% endif %}
         {% endfor %}
       </p>

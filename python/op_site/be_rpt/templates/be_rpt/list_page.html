@@ -4,13 +4,7 @@
 {% load be_rpt_extras %}
 
 {% block title %}
-{% if level == "proj" %}
-Alchip projects list
-{% elif level == "block" %}
-Alchip blocks list
-{% elif level == "version" %}
-Alchip versions list
-{% endif %}
+Alchip {{level}}s list
 {% endblock %}
 
 {% block bc %}
@@ -18,12 +12,23 @@ Alchip versions list
   {% if level == "proj" %}
   <breadcrumb-item>Projects</breadcrumb-item>
   {% elif level == "block" %}
-  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{proj_name}}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{ proj_obj.name }}</a></breadcrumb-item>
   <breadcrumb-item>blocks</breadcrumb-item>
   {% elif level == "version" %}
-  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{proj_name}}</a></breadcrumb-item>
-  <breadcrumb-item><a href="{% url 'be_rpt:block_list' proj_name %}" title="go to blocks list">{{block_name}}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{ proj_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:block_list' proj_obj.pk %}" title="go to blocks list">{{ block_obj.name }}</a></breadcrumb-item>
   <breadcrumb-item>versions</breadcrumb-item>
+  {% elif level == "flow" %}
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{ proj_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:block_list' proj_obj.pk %}" title="go to blocks list">{{ block_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:version_list' block_obj.pk %}" title="go to version list">{{ version_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item>flows</breadcrumb-item>
+  {% elif level == "stage" %}
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{ proj_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:block_list' proj_obj.pk %}" title="go to blocks list">{{ block_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:version_list' block_obj.pk %}" title="go to version list">{{ version_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:flow_list' version_obj.pk %}" title="go to flow list">{{ flow_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item>stages</breadcrumb-item>
   {% endif %}
 </breadcrumb>
 {% endblock %}
@@ -38,25 +43,53 @@ Alchip versions list
      title: "Block Name",
      {% elif level == "version" %}
      title: "Version Name",
+     {% elif level == "flow" %}
+     title: "Flow Name",
+     {% elif level == "stage" %}
+     title: "Stage Name",
      {% endif %}
      key: "obj_name",
      /* "fixed": "left",*/
-     width: 150,
+     width: 200,
      sortable: true,
      render: (h, params) => {
        const row = params.row;
-       const text = row.obj_name
+       const pk = row.obj_pk;
+       const text = row.obj_name;
        return h("a", {
          attrs: {
            {% if level == "proj" %}
-           href: "{% url 'be_rpt:block_list' 'djst_var' %}".replace("djst_var", text)
+           href: "{% url 'be_rpt:block_list' 'djst_var' %}".replace("djst_var", pk)
            {% elif level == "block" %}
-           href: "{% url 'be_rpt:version_list' proj_name 'djst_var' %}".replace("djst_var", text)
+           href: "{% url 'be_rpt:version_list' 'djst_var' %}".replace("djst_var", pk)
            {% elif level == "version" %}
-           href: "{% url 'be_rpt:version_detail' proj_name block_name 'djst_var' %}".replace("djst_var", text)
+           href: "{% url 'be_rpt:flow_list' 'djst_var' %}".replace("djst_var", pk)
+           {% elif level == "flow" %}
+           href: "{% url 'be_rpt:stage_list' 'djst_var' %}".replace("djst_var", pk)
+           {% elif level == "stage" %}
+           href: "{% url 'be_rpt:stage_detail' 'djst_var' %}".replace("djst_var", pk)
            {% endif %}
          }
        }, text);
+     },
+     filters: [
+       {% for obj in name_distinct_lst %}
+       {
+         label: "{{ obj.name|escapejs }}",
+         value: "{{ obj.name|escapejs }}"
+       },
+       {% endfor %}
+     ],
+     filterMultiple: true,
+     filterMethod: function (value, row) {
+       {% for obj in object_list %}
+       {% if forloop.first %}
+       if (value === "{{ obj.name|escapejs }}")
+         {% else %}
+       else if (value === "{{ obj.name|escapejs }}")
+         {% endif %}
+       return row.obj_name === "{{ obj.name|escapejs }}";
+       {% endfor %}
      }
    },
    {
@@ -84,12 +117,30 @@ Alchip versions list
        {% endfor %}
      }
    },
-   {% if level == "version" %}
+   {% if level == "version" or level == "flow" or level == "stage" %}
    {
      title: "Date",
      key: "created_time",
      width: 200,
      sortable: true,
+   },
+   {% endif %}
+   {% if level == "block" %}
+   {
+     title: "Milestone",
+     key: "milestone",
+     width: 150,
+     sortable: true,
+     render: (h, params) => {
+       const row = params.row;
+       const ms_pk = row.ms_pk;
+       const text = row.milestone;
+       return h("a", {
+         attrs: {
+           href: "{% url 'be_rpt:stage_detail' 'djst_var' %}".replace("djst_var", ms_pk)
+         }
+       }, text);
+     }
    },
    {% endif %}
    {% for head in head_lst %}
@@ -125,17 +176,22 @@ Alchip versions list
  var db_data_ary = [
    {% for obj in object_list %}
    {
-     obj_name: "{{ obj.name }}",
+     obj_pk: "{{ obj.pk }}",
+     obj_name: "{{ obj.name|escapejs }}",
      owner: "{{ obj.owner }}",
-     {% if level == "version" %}
+     {% if level == "version" or level == "flow" or level == "stage" %}
      created_time: "{{ obj.created_time|date:'Y_m_d_H_i_s' }}",
      {% endif %}
+     {% if level == "block" %}
+     ms_pk: "{{ obj.milestone.pk }}",
+     milestone: "{{ obj.milestone.name|escapejs }}",
+     {% endif %}
      {% for head in head_lst %}
-     {{ head|to_lu }}: "{{ obj.data|get_value:head|safe }}",
+     {{ head|to_lu }}: "{{ obj.data|get_value:head|escapejs }}",
      {% endfor %}
      {% for obj_key, obj_value in obj.data.items %}
      {% if obj_key|to_lu not in head_lst %}
-     {{obj_key|to_lu}}: "{{ obj_value }}"
+     {{ obj_key|to_lu }}: "{{ obj_value|escapejs }}",
      {% endif %}
      {% endfor %}
    },

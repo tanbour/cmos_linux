@@ -8,6 +8,7 @@ Vue Example
 
 {% block content %}
 <app1_comp></app1_comp>
+<example-1></example-1>
 {% endblock %}
 
 {% block template %}
@@ -17,6 +18,12 @@ Vue Example
     <p>{{message}}</p>
     {% endverbatim %}
     <button v-on:click="reverseMessage">逆转消息</button>
+  </div>
+</template>
+<template id="example-1">
+  <div>
+    <button v-on:click="counter += 1">Add 1</button>
+    <p>The button above has been clicked {{ counter }} times.</p>
   </div>
 </template>
 {% endblock %}
@@ -36,5 +43,13 @@ Vue Example
      }
    }
  })
+ Vue.component("example-1", {
+   template: '#example-1',
+   data () {
+     return {
+       counter: 0
+     }
+   }
+})
 </script>
 {% endblock %}

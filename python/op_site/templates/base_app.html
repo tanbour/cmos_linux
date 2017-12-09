@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load staticfiles %}
-{% load be_rpt_extras %}
 
 {% block title %}
 op platform --- alchip
@@ -16,19 +15,26 @@ op platform --- alchip
   <breadcrumb-item>blocks</breadcrumb-item>
   {% elif level == "version" %}
   <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{ proj_obj.name }}</a></breadcrumb-item>
-  <breadcrumb-item><a href="{% url 'be_rpt:block_list' proj_obj.pk %}" title="go to blocks list">{{ block_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_detail' 'djst_var' %}" title="go to blocks list">{{ block_obj.name }}</a></breadcrumb-item>
   <breadcrumb-item>versions</breadcrumb-item>
   {% elif level == "flow" %}
   <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{ proj_obj.name }}</a></breadcrumb-item>
-  <breadcrumb-item><a href="{% url 'be_rpt:block_list' proj_obj.pk %}" title="go to blocks list">{{ block_obj.name }}</a></breadcrumb-item>
-  <breadcrumb-item><a href="{% url 'be_rpt:version_list' block_obj.pk %}" title="go to version list">{{ version_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_detail' 'djst_var' %}" title="go to blocks list">{{ block_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:block_detail' 'djst_var' %}" title="go to version list">{{ version_obj.name }}</a></breadcrumb-item>
   <breadcrumb-item>flows</breadcrumb-item>
   {% elif level == "stage" %}
   <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{ proj_obj.name }}</a></breadcrumb-item>
-  <breadcrumb-item><a href="{% url 'be_rpt:block_list' proj_obj.pk %}" title="go to blocks list">{{ block_obj.name }}</a></breadcrumb-item>
-  <breadcrumb-item><a href="{% url 'be_rpt:version_list' block_obj.pk %}" title="go to version list">{{ version_obj.name }}</a></breadcrumb-item>
-  <breadcrumb-item><a href="{% url 'be_rpt:flow_list' version_obj.pk %}" title="go to flow list">{{ flow_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_detail' 'djst_var' %}" title="go to blocks list">{{ block_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:block_detail' 'djst_var' %}" title="go to version list">{{ version_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:version_detail' 'djst_var' %}" title="go to flow list">{{ flow_obj.name }}</a></breadcrumb-item>
   <breadcrumb-item>stages</breadcrumb-item>
+  {% else %}
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_list' %}" title="go to projects list">{{ proj_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:proj_detail' 'djst_var' %}" title="go to blocks list">{{ block_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:block_detail' 'djst_var' %}" title="go to version list">{{ version_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:version_detail' 'djst_var' %}" title="go to flow list">{{ flow_obj.name }}</a></breadcrumb-item>
+  <breadcrumb-item><a href="{% url 'be_rpt:flow_detail' 'djst_var' %}" title="go to stage list">{{ object.name }}</a></breadcrumb-item>
+  <breadcrumb-item>details</breadcrumb-item>
   {% endif %}
 </breadcrumb>
 {% endblock %}
@@ -83,6 +89,18 @@ op platform --- alchip
     <i-button type="primary" size="large" @click="exportData(2)"><icon type="ios-download-outline"></icon> Export sorting and filtered data</i-button>
     <i-button type="primary" size="large" @click="exportData(3)"><icon type="ios-download-outline"></icon> Export custom data</i-button>
   </div>
+  <div v-else-if="content_id === 'stage_detail'" style="background:#eee;padding: 20px;">
+    <Card :bordered="false" style="font-family:monospace">
+      <p slot="title">{{ object.name }}</p>
+      <p>
+        {% for obj_key, obj_value in object.data.items %}
+        {% if obj_key != "name" %}
+        <pre>{{ obj_key }}: {{ obj_value|linebreaks }}<br></pre>
+        {% endif %}
+        {% endfor %}
+      </p>
+    </Card>
+  </div>
 </template>
 {% endblock %}
 
@@ -93,167 +111,9 @@ op platform --- alchip
    props: ["content_id"],
    data: function () {
      return {
-       col_ary: [
-         {
-           {% if level == "proj" %}
-           title: "Project Name",
-           {% elif level == "block" %}
-           title: "Block Name",
-           {% elif level == "version" %}
-           title: "Version Name",
-           {% elif level == "flow" %}
-           title: "Flow Name",
-           {% elif level == "stage" %}
-           title: "Stage Name",
-           {% endif %}
-           key: "obj_name",
-           /* "fixed": "left",*/
-           width: 200,
-           sortable: true,
-           render: (h, params) => {
-             const row = params.row;
-             const pk = row.obj_pk;
-             const text = row.obj_name;
-             return h("a", {
-               attrs: {
-                 {% if level == "proj" %}
-                 href: "{% url 'be_rpt:block_list' 'djst_var' %}".replace("djst_var", pk)
-                 {% elif level == "block" %}
-                 href: "{% url 'be_rpt:version_list' 'djst_var' %}".replace("djst_var", pk)
-                 {% elif level == "version" %}
-                 href: "{% url 'be_rpt:flow_list' 'djst_var' %}".replace("djst_var", pk)
-                 {% elif level == "flow" %}
-                 href: "{% url 'be_rpt:stage_list' 'djst_var' %}".replace("djst_var", pk)
-                 {% elif level == "stage" %}
-                 href: "{% url 'be_rpt:stage_detail' 'djst_var' %}".replace("djst_var", pk)
-                 {% endif %}
-               }
-             }, text);
-           },
-           filters: [
-             {% for obj in name_distinct_lst %}
-             {
-               label: "{{ obj.name|escapejs }}",
-               value: "{{ obj.name|escapejs }}"
-             },
-             {% endfor %}
-           ],
-           filterMultiple: true,
-           filterMethod: function (value, row) {
-             {% for obj in object_list %}
-             {% if forloop.first %}
-             if (value === "{{ obj.name|escapejs }}")
-               {% else %}
-             else if (value === "{{ obj.name|escapejs }}")
-               {% endif %}
-             return row.obj_name === "{{ obj.name|escapejs }}";
-             {% endfor %}
-           }
-         },
-         {
-           title: "Owner",
-           key: "owner",
-           width: 150,
-           sortable: true,
-           filters: [
-             {% for obj in owner_distinct_lst %}
-             {
-               label: "{{ obj.owner }}",
-               value: "{{ obj.owner }}"
-             },
-             {% endfor %}
-           ],
-           filterMultiple: true,
-           filterMethod: function (value, row) {
-             {% for obj in object_list %}
-             {% if forloop.first %}
-             if (value === "{{ obj.owner }}")
-               {% else %}
-             else if (value === "{{ obj.owner }}")
-               {% endif %}
-             return row.owner === "{{ obj.owner }}";
-             {% endfor %}
-           }
-         },
-         {% if level == "version" or level == "flow" or level == "stage" %}
-         {
-           title: "Date",
-           key: "created_time",
-           width: 200,
-           sortable: true,
-         },
-         {% endif %}
-         {% if level == "block" %}
-         {
-           title: "Milestone",
-           key: "milestone",
-           width: 150,
-           sortable: true,
-           render: (h, params) => {
-             const row = params.row;
-             const ms_pk = row.ms_pk;
-             const text = row.milestone;
-             return h("a", {
-               attrs: {
-                 href: "{% url 'be_rpt:stage_detail' 'djst_var' %}".replace("djst_var", ms_pk)
-               }
-             }, text);
-           }
-         },
-         {% endif %}
-         {% for head in head_lst %}
-         {% if head|to_lu == "status" %}
-         {
-           title: "Status",
-           key: "{{ head|to_lu }}",
-           width: 150,
-           sortable: true,
-           render: (h, params) => {
-             const row = params.row;
-             const color = row.status === "running" ? "yellow" : row.status === "passed" ? "green" : "red";
-             const text = row.status
-             return h("Tag", {
-               props: {
-                 type: "dot",
-                 color: color
-               }
-             }, text);
-           }
-         },
-         {% else %}
-         {
-           title: "{{ head }}",
-           key: "{{ head|to_lu }}",
-           width: 200,
-           sortable: true,
-         },
-         {% endif %}
-         {% endfor %}
-       ],
-       data_ary: [
-         {% for obj in object_list %}
-         {
-           obj_pk: "{{ obj.pk }}",
-           obj_name: "{{ obj.name|escapejs }}",
-           owner: "{{ obj.owner }}",
-           {% if level == "version" or level == "flow" or level == "stage" %}
-           created_time: "{{ obj.created_time|date:'Y_m_d_H_i_s' }}",
-           {% endif %}
-           {% if level == "block" %}
-           ms_pk: "{{ obj.milestone.pk }}",
-           milestone: "{{ obj.milestone.name|escapejs }}",
-           {% endif %}
-           {% for head in head_lst %}
-           {{ head|to_lu }}: "{{ obj.data|get_value:head|escapejs }}",
-           {% endfor %}
-           {% for obj_key, obj_value in obj.data.items %}
-           {% if obj_key|to_lu not in head_lst %}
-           {{ obj_key|to_lu }}: "{{ obj_value|escapejs }}",
-           {% endif %}
-           {% endfor %}
-         },
-         {% endfor %}
-       ],
+       col_ary: [],
+       data_ary: [],
+       filter_ary_obj: {},
        table_data: [],
        showBorder: false,
        showStripe: false,
@@ -264,7 +124,13 @@ op platform --- alchip
        tableSize: "small",
        dataCount: 0,
        pageSize: 10,
-       qs_data: {},
+       rsp_data: {},
+       rsp_title: {},
+       level: "",
+       next_url: "",
+       next_level: "",
+       cur_title: [],
+       cur_data: [],
      }
    },
    computed: {
@@ -325,44 +191,188 @@ op platform --- alchip
        return columns;
      },
    },
-   watch:{
-     content_id: function () {
-       console.log(this.content_id)
-       if (this.content_id === "be_rpt") {
-         axios.get("/be_rpt/proj")
-              .then(function (response) {
-                console.log(response.data);
-                this.qs_data = response.data;
-                console.log(this.qs_data);
-              })
-              .catch(function (error) {
-                console.log(error);
-              });
-       }
-       this.procColAry();
-       this.procDataAry();
-       this.pageTableData();
-     }
+   watch: {
+     content_id: "changeContent"
    },
    methods: {
+     changeContent: function() {
+       console.log(this.content_id);
+       if (this.content_id === "be_rpt") {
+         this.procTable({
+           method: "get",
+           url: "{% url 'be_rpt:proj_list' %}"
+         }, "proj");
+       }
+     },
+     procTable: function(ajax_cfg, level) {
+       axios(ajax_cfg).then((response) => {
+         this.rsp_data = response.data;
+         console.log(this.rsp_data);
+         this.level = level;
+         this.procTitle({
+           method: "get",
+           url: "{% url 'be_rpt:title_detail' '1' %}"
+         });
+       }).catch((error) => {
+         console.log(error);
+       });
+     },
+     procTitle: function(ajax_cfg) {
+       axios(ajax_cfg).then((response) => {
+         this.rsp_title = response.data;
+         console.log(this.rsp_title);
+         this.procLevel();
+         this.procDataAry();
+         this.procColAry();
+         this.pageTableData();
+       }).catch((error) => {
+         console.log(error);
+       });
+     },
+     procLevel: function () {
+       if (this.level === "proj") {
+         this.next_url = "{% url 'be_rpt:proj_detail' 'djst_var' %}";
+         this.next_level = "block";
+         this.cur_data = this.rsp_data;
+       } else if (this.level == "block") {
+         this.next_url = "{% url 'be_rpt:block_detail' 'djst_var' %}";
+         this.next_level = "version";
+         this.cur_data = this.rsp_data.block_proj;
+       } else if (this.level == "version") {
+         this.next_url = "{% url 'be_rpt:version_detail' 'djst_var' %}";
+         this.next_level = "flow";
+         this.cur_data = this.rsp_data.version_block;
+       } else if (this.level == "flow") {
+         this.next_url = "{% url 'be_rpt:flow_detail' 'djst_var' %}";
+         this.next_level = "stage";
+         this.cur_data = this.rsp_data.flow_version;
+       } else if (this.level == "stage") {
+         this.next_url = "{% url 'be_rpt:stage_detail' 'djst_var' %}";
+         this.next_level = "";
+         this.cur_data = this.rsp_data.stage_flow;
+       }
+       this.cur_title = this.rsp_title[this.level]
+     },
      procColAry: function () {
+       this.col_ary = [
+         {
+           title: this.level + " name",
+           key: "obj_name",
+           /* "fixed": "left",*/
+           width: 200,
+           sortable: true,
+           render: (h, params) => {
+             const row = params.row;
+             const pk = row.obj_pk;
+             const text = row.obj_name;
+             return h("a", {
+               on: {
+                 click: () => {
+                   this.procTable({
+                     method: "get",
+                     url: this.next_url.replace("djst_var", pk)}, this.next_level)
+                 }
+               }
+             }, text);
+           },
+           filters: this.filter_ary_obj.obj_name,
+           filterMultiple: true,
+           filterMethod: function (value, row) {
+             return row.obj_name === value;
+           }
+         },
+         {
+           title: "Owner",
+           key: "owner",
+           width: 150,
+           sortable: true,
+           filters: this.filter_ary_obj.owner,
+           filterMultiple: true,
+           filterMethod: function (value, row) {
+             return row.obj_name === value;
+           }
+         },
+       ];
+       if (this.level === "version"  || this.level === "flow" || this.level === "stage")
+         this.col_ary.push({
+           title: "Date",
+           key: "created_time",
+           width: 200,
+           sortable: true,
+         });
+       if (this.level === "block")
+         this.col_ary.push({
+           title: "Milestone",
+           key: "milestone",
+           width: 150,
+           sortable: true,
+           render: (h, params) => {
+             const row = params.row;
+             const ms_pk = row.ms_pk;
+             const text = row.milestone;
+             return h("a", {
+               attrs: {
+                 href: "{% url 'be_rpt:stage_detail' 'djst_var' %}".replace("djst_var", ms_pk)
+               }
+             }, text);
+           }
+         });
+       for (var i = 0; i < this.cur_title.length; i++) {
+         var head = this.cur_title[i];
+         if (head === "status")
+           this.col_ary.push({
+             title: head,
+             key: head,
+             width: 150,
+             sortable: true,
+             render: (h, params) => {
+               const row = params.row;
+               const color = row.status === "running" ? "yellow" : row.status === "passed" ? "green" : "red";
+               const text = row.status
+               return h("Tag", {
+                 props: {
+                   type: "dot",
+                   color: color
+                 }
+               }, text);
+             }
+           });
+         else
+           this.col_ary.push({
+             title: head,
+             key: head,
+             width: 200,
+             sortable: true,
+           });
+       }
      },
      procDataAry: function () {
        this.data_ary = [];
-       console.log(this.qs_data);
-       for (var i = 0; i < this.qs_data.qs_dic_lst.length; i++) {
+       this.filter_ary_obj = {obj_name: [], owner: []};
+       for (var i = 0; i < this.cur_data.length; i++) {
+         var qs_obj = this.cur_data[i];
          data_dic = {
-           obj_pk: this.qs_data.qs_dic_lst[i].id,
-           obj_name: this.qs_data.qs_dic_lst[i].name,
-           owner: this.qs_data.qs_dic_lst[i].owner,
+           obj_pk: qs_obj.id,
+           obj_name: qs_obj.name,
+           owner: qs_obj.owner.name,
          };
-         if (this.qs_data.level === "version" || this.qs_data.level === "flow" || this.qs_data.level === "stage")
-           data_dic["created_time"] = this.qs_data.qs_dic_lst[i].created_time
-         if (this.qs_data.level === "block") {
-           data_dic["ms_pk"] = this.qs_data.qs_dic_lst[i].milestone_id
+         if (this.level === "version" || this.level === "flow" || this.level === "stage")
+           data_dic["created_time"] = qs_obj.created_time;
+         if (this.level === "block") {
+           data_dic["milestone"] = qs_obj.milestone;
+         }
+         for (var key in qs_obj.data) {
+           data_dic[key] = qs_obj.data[key]
          }
          this.data_ary.push(data_dic);
-       };
+         this.filter_ary_obj.obj_name.push({"label": qs_obj.name, "value": qs_obj.name})
+         this.filter_ary_obj.owner.push({"label": qs_obj.owner.name, "value": qs_obj.owner.name})
+       }
+       for (var key in this.filter_ary_obj) {
+         this.filter_ary_obj[key] = this.filter_ary_obj[key].filter(function (elem, index, self) {
+           return index === self.indexOf(elem);
+         })
+       }
      },
      pageTableData: function () {
        this.dataCount = this.data_ary.length;
@@ -418,7 +428,6 @@ op platform --- alchip
      }
    },
    /* created: function () {
-    *   this.pageTableData();
     * }*/
  })
 </script>

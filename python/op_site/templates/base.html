@@ -43,22 +43,8 @@
                 <a href="#">Sign In</a>
               </div>
             </div>
-            <div class="layout-breadcrumb">
-              {% block bc %}
-              {% endblock %}
-              <!-- <breadcrumb>
-                   <breadcrumb-item href="#">Index</breadcrumb-item>
-                   <breadcrumb-item href="#">Apps</breadcrumb-item>
-                   <breadcrumb-item>App</breadcrumb-item>
-                   </breadcrumb> -->
-            </div>
-            <div class="layout-content">
-              <div class="layout-content-main" style="background-image:url({% static 'images/background_1200x600.jpg' %})">
-                {% block content %}
-                {% endblock %}
-              </div>
-              <!-- <div style="height: 300px"></div> -->
-            </div>
+            {% block content %}
+            {% endblock %}
             <div class="layout-copy">
               2017 &copy; Alchip. Trusted Silicon Partner Realizing Innovations.
             </div>

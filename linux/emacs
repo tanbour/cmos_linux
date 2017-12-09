@@ -26,7 +26,7 @@
  '(inhibit-startup-screen t)
  '(package-selected-packages
    (quote
-    (web-mode ascii-art-to-unicode paredit gnugo auctex)))
+    (ascii-art-to-unicode auctex web-mode paredit gnugo)))
  '(show-paren-mode t)
  '(tool-bar-mode nil)
  '(tramp-default-proxies-alist

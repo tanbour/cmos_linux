@@ -2,7 +2,7 @@
         name = cmos3511
         email = gary3511@gmail.com
 [core]
-        editor = ec
+        editor = emacsclient -c -a emacs
 [color]
         status = auto
         branch = auto

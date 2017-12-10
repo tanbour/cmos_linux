@@ -15,8 +15,8 @@ class StageSerializer(serializers.ModelSerializer):
 class StageDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stage
-        fields = ("id", "name", "data")
-        depth = 1
+        fields = ("id", "name", "flow", "data")
+        depth = 5
 
 class FlowSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,8 +28,8 @@ class FlowRelatedSerializer(serializers.ModelSerializer):
     stage_flow = StageSerializer(many=True, read_only=True)
     class Meta:
         model = Flow
-        fields = ("id", "name", "stage_flow")
-        depth = 1
+        fields = ("id", "name", "version", "stage_flow")
+        depth = 4
 
 class VersionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,8 +41,8 @@ class VersionRelatedSerializer(serializers.ModelSerializer):
     flow_version = FlowSerializer(many=True, read_only=True)
     class Meta:
         model = Version
-        fields = ("id", "name", "flow_version")
-        depth = 1
+        fields = ("id", "name", "block", "flow_version")
+        depth = 3
 
 class BlockSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,8 +54,8 @@ class BlockRelatedSerializer(serializers.ModelSerializer):
     version_block = VersionSerializer(many=True, read_only=True)
     class Meta:
         model = Block
-        fields = ("id", "name", "version_block")
-        depth = 1
+        fields = ("id", "name", "proj", "version_block")
+        depth = 2
 
 class ProjSerializer(serializers.ModelSerializer):
     class Meta:
@@ -74,7 +74,6 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "name", "data")
-        depth = 1
 
 class UserRelatedSerializer(serializers.ModelSerializer):
     proj_owner = ProjSerializer(many=True, read_only=True)

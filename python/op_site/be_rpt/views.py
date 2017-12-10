@@ -21,6 +21,9 @@ class ProjList(generics.ListAPIView):
     """be report project list"""
     queryset = Proj.objects.all()
     serializer_class = ProjSerializer
+    def get_queryset(self, *args, **kwargs):
+        name = self.request.data.get("name")
+        return self.queryset.filter(name=name) if name else self.queryset.all()
 
 class ProjDetail(generics.RetrieveAPIView):
     """be report project detail"""
@@ -67,16 +70,19 @@ class StageDetail(generics.RetrieveAPIView):
     queryset = Stage.objects.all()
     serializer_class = StageDetailSerializer
 
-class UserList(generics.ListAPIView):
+class UserList(generics.ListCreateAPIView):
     """be report user list"""
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    def get_queryset(self, *args, **kwargs):
+        name = self.request.data.get("name")
+        return self.queryset.filter(name=name) if name else self.queryset.all()
 
 class UserDetail(generics.RetrieveAPIView):
     """be report user detail"""
     queryset = User.objects.all()
     serializer_class = UserRelatedSerializer
-
+    lookup_field = "name"
 
 # @method_decorator(csrf_exempt, name="dispatch")
 # class UserPost(View):

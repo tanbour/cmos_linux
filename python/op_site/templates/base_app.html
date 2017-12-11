@@ -310,7 +310,7 @@ op platform --- alchip
            filters: this.filter_ary_obj.owner,
            filterMultiple: true,
            filterMethod: function (value, row) {
-             return row.obj_name === value;
+             return row.owner === value;
            }
          },
        ];
@@ -370,6 +370,7 @@ op platform --- alchip
      procDataAry: function () {
        this.data_ary = [];
        this.filter_ary_obj = {obj_name: [], owner: []};
+       var unique_ary_obj = {obj_name: [], owner: []};
        for (var i = 0; i < this.cur_data.length; i++) {
          var qs_obj = this.cur_data[i];
          data_dic = {
@@ -386,16 +387,15 @@ op platform --- alchip
            data_dic.milestone = qs_obj.milestone;
          }
          for (var key in qs_obj.data) {
-           data_dic[key] = qs_obj.data[key]
+           data_dic[key] = qs_obj.data[key];
          }
          this.data_ary.push(data_dic);
-         this.filter_ary_obj.obj_name.push({"label": data_dic.obj_name, "value": data_dic.obj_name})
-         this.filter_ary_obj.owner.push({"label": data_dic.owner, "value": data_dic.owner})
-       }
-       for (var key in this.filter_ary_obj) {
-         this.filter_ary_obj[key] = this.filter_ary_obj[key].filter(function (elem, index, self) {
-           return index === self.indexOf(elem);
-         })
+         for (var key in this.filter_ary_obj) {
+           if (unique_ary_obj[key].indexOf(data_dic[key]) === -1) {
+             this.filter_ary_obj[key].push({"label": data_dic[key], "value": data_dic[key]});
+             unique_ary_obj[key].push(data_dic[key]);
+           }
+         }
        }
      },
      pageTableData: function () {

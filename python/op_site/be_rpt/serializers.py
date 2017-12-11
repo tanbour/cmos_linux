@@ -9,7 +9,7 @@ class TitleSerializer(serializers.ModelSerializer):
 class StageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stage
-        fields = ("id", "name", "flow", "owner", "created_time")
+        fields = ("id", "name", "flow", "owner", "created_time", "data")
         depth = 1
 
 class StageDetailSerializer(serializers.ModelSerializer):

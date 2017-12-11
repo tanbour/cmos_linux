@@ -30,7 +30,7 @@ class Block(models.Model):
     name = models.CharField(max_length=20)
     proj = models.ForeignKey(Proj, on_delete=models.CASCADE, related_name="block_proj")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="block_owner", blank=True, null=True)
-    milestone = models.ForeignKey("Stage", on_delete=models.CASCADE, related_name="block_milestone", blank=True, null=True)
+    milestone = models.ForeignKey("Stage", on_delete=models.SET_NULL, related_name="block_milestone", blank=True, null=True)
     data = JSONField(default=dict, blank=True)
     def __str__(self):
         return f"{self.name}__{self.proj}"

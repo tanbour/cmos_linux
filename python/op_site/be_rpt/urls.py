@@ -19,12 +19,11 @@ urlpatterns = [
     path("users/<pk>", views.UserDetail.as_view(), name="user_detail"),
     path("titles/", views.TitleList.as_view(), name="title_list"),
     path("titles/<pk>", views.TitleDetail.as_view(), name="title_detail"),
-    # path("post/user/", views.UserPost.as_view(), name="post_user"),
-    # path("post/project/", views.ProjPost.as_view(), name="post_project"),
-    # path("post/block/", views.BlockPost.as_view(), name="post_block"),
-    # path("post/version/", views.VersionPost.as_view(), name="post_version"),
-    # path("post/flow/", views.FlowPost.as_view(), name="post_flow"),
-    # path("post/stage/", views.StagePost.as_view(), name="post_stage"),
+    path("op/projs/", views.OpProj.as_view(), name="op_proj"),
+    path("op/blocks/", views.OpBlock.as_view(), name="op_block"),
+    path("op/versions/", views.OpVersion.as_view(), name="op_version"),
+    path("op/flows/", views.OpFlow.as_view(), name="op_flow"),
+    path("op/stages/", views.OpStage.as_view(), name="op_stage"),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

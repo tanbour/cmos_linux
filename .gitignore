@@ -108,5 +108,8 @@ dia/*.dia~
 python/cas_site/pg_data/
 python/op_site/pg_data/
 
-# sim output
-output/
+# pj temp
+*/proj/**/output/
+
+# op temp
+*/op/**/lib_test/

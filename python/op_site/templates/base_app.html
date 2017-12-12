@@ -25,13 +25,13 @@ op platform --- alchip
       <breadcrumb v-else-if="level === 'version'">
         <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.index}, 'proj')" title="go to project list">{{ rsp_data.proj.name }}</a></breadcrumb-item>
         <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.proj.replace('djst_var', rsp_data.proj.id)}, 'block')" title="go to block list">{{ rsp_data.name }}</a></breadcrumb-item>
-        <breadcrumb-item><breadcrumb-item><a @click="procTable({method: 'get', url: level_url.block.replace('djst_var', rsp_data.id)}, 'version')" title="refresh version list">versions</a></breadcrumb-item>
-        </breadcrumb>
-        <breadcrumb v-else-if="level === 'flow'">
-          <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.index}, 'proj')" title="go to project list">{{ rsp_data.block.proj.name }}</a></breadcrumb-item>
-          <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.proj.replace('djst_var', rsp_data.block.proj.id)}, 'block')" title="go to block list">{{ rsp_data.block.name }}</a></breadcrumb-item>
-          <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.block.replace('djst_var', rsp_data.block.id)}, 'version')" title="go to version list">{{ rsp_data.name }}</a></breadcrumb-item>
-          <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.version.replace('djst_var', rsp_data.id)}, 'flow')" title="refresh flow list">flows</a></breadcrumb-item>
+        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.block.replace('djst_var', rsp_data.id)}, 'version')" title="refresh version list">versions</a></breadcrumb-item>
+      </breadcrumb>
+      <breadcrumb v-else-if="level === 'flow'">
+        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.index}, 'proj')" title="go to project list">{{ rsp_data.block.proj.name }}</a></breadcrumb-item>
+        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.proj.replace('djst_var', rsp_data.block.proj.id)}, 'block')" title="go to block list">{{ rsp_data.block.name }}</a></breadcrumb-item>
+        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.block.replace('djst_var', rsp_data.block.id)}, 'version')" title="go to version list">{{ rsp_data.name }}</a></breadcrumb-item>
+        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.version.replace('djst_var', rsp_data.id)}, 'flow')" title="refresh flow list">flows</a></breadcrumb-item>
       </breadcrumb>
       <breadcrumb v-else-if="level === 'stage'">
         <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.index}, 'proj')" title="go to project list">{{ rsp_data.version.block.proj.name }}</a></breadcrumb-item>
@@ -65,12 +65,20 @@ op platform --- alchip
         </div>
         <div v-else-if="content_id === 'be_rpt'">
           <div v-if="level === 'detail'" style="background:#eee;padding: 20px;">
-            <Card v-for="(value, key) in cur_data.data" :key="key" :bordered="false" style="font-family:monospace">
-              {% verbatim %}
-              <p slot="title">{{ key }}</p>
-              <p><pre>{{ value }}</pre> </p>
-              {% endverbatim %}
-            </Card>
+            <div v-if="cur_data.data">
+              <Card v-for="key in Object.keys(cur_data.data).sort()" v-if="key !== 'status'" :key="key" :bordered="false" style="font-family:monospace; color: black;">
+                {% verbatim %}
+                <div v-if="check_img_key(key)">
+                  <p slot="title">{{ key }}</p>
+                  <p><p v-html="cur_data.data[key]"></p></p>
+                </div>
+                <div v-else>
+                  <p slot="title">{{ key }}</p>
+                  <p><pre>{{ cur_data.data[key] }}</pre></p>
+                </div>
+                {% endverbatim %}
+              </Card>
+            </div>
           </div>
           <div v-else>
             <div style="margin: 10px">
@@ -246,7 +254,6 @@ op platform --- alchip
      procTitle: function(ajax_cfg) {
        axios(ajax_cfg).then((response) => {
          this.rsp_title = response.data;
-         console.log(this.rsp_title);
          this.procLevel();
          if (this.level !== "detail") {
            this.procDataAry();
@@ -282,6 +289,7 @@ op platform --- alchip
            /* "fixed": "left",*/
            width: 200,
            sortable: true,
+           sortType: "asc",
            render: (h, params) => {
              const row = params.row;
              const pk = row.obj_pk;
@@ -362,7 +370,7 @@ op platform --- alchip
            this.col_ary.push({
              title: head,
              key: head,
-             width: 200,
+             width: 150,
              sortable: true,
            });
        }
@@ -449,6 +457,9 @@ op platform --- alchip
      },
      remove: function (index) {
        this.table_data.splice(index, 1);
+     },
+     check_img_key: function (key) {
+       return key.endsWith("img");
      }
    },
    /* created: function () {

@@ -22,14 +22,14 @@
                 <Icon type="ios-albums-outline" :size="iconSize"></Icon>
                 <span class="layout-text">BE Reports</span>
               </menu-item>
-              <menu-item name="fe_rpt">
-                <Icon type="ios-albums-outline" :size="iconSize"></Icon>
-                <span class="layout-text">FE Reports</span>
-              </menu-item>
-              <!-- <menu-item name="3">
-                   <Icon type="ios-analytics" :size="iconSize"></Icon>
-                   <span class="layout-text">AI Analytics</span>
+              <!-- <menu-item name="fe_rpt">
+                   <Icon type="ios-albums-outline" :size="iconSize"></Icon>
+                   <span class="layout-text">FE Reports</span>
                    </menu-item> -->
+              <menu-item name="proj_checker">
+                <Icon type="ios-analytics" :size="iconSize"></Icon>
+                <span class="layout-text">Projects Checker</span>
+              </menu-item>
             </i-menu>
           </i-col>
           <i-col :span="spanRight">
@@ -38,7 +38,7 @@
                 <Icon type="navicon" size="32"></Icon>
               </i-button>
               <div class="layout-ceiling-main">
-                <a @click="changeContent('index')" href="/">Home</a> |
+                <a @click="changeContent('home')" href="/">Home</a> |
                 <a href="#">Documents</a> |
                 <a href="#">Contact Us</a> |
                 <a href="#">Sign In</a>
@@ -54,16 +54,13 @@
       </div>
     </div>
 
-    {% block template %}
-    {% endblock %}
-
     <script src="{% static 'npm/node_modules/vue/dist/vue.js' %}"></script>
     <script src="{% static 'npm/node_modules/axios/dist/axios.js' %}"></script>
     <script src="{% static 'npm/node_modules/iview/dist/iview.js' %}"></script>
     <script src="{% static 'npm/node_modules/iview/dist/locale/en-US.js' %}"></script>
-    <script>iview.lang("en-US");</script>
+    <script>iview.lang("en-US")</script>
 
-    {% block js %}
+    {% block component %}
     {% endblock %}
 
     <script>
@@ -72,12 +69,12 @@
          return {
            spanLeft: 2,
            spanRight: 22,
-           content_id: "index"
+           content_id: "home"
          }
        },
        computed: {
          iconSize: function () {
-           return this.spanLeft === 2 ? 14 : 24;
+           return this.spanLeft === 2 ? 14 : 24
          }
        },
        methods: {
@@ -86,11 +83,11 @@
          },
          toggleClick: function () {
            if (this.spanLeft === 2) {
-             this.spanLeft = 1;
-             this.spanRight = 23;
+             this.spanLeft = 1
+             this.spanRight = 23
            } else {
-             this.spanLeft = 2;
-             this.spanRight = 22;
+             this.spanLeft = 2
+             this.spanRight = 22
            }
          }
        }

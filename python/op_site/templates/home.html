@@ -1,0 +1,26 @@
+{% load i18n %}
+{% load staticfiles %}
+
+<template id="home">
+  <div class="layout-content">
+    <div class="layout-content-main" style="background-image:url({% static 'images/background_1200x600.jpg' %})">
+      <div style="padding-left:40px; display:table-cell; vertical-align:middle; text-align:center; height:400px">
+        <div>
+          <img src="{% static 'images/alchip_190x98.png' %}">
+        </div>
+        <br>
+        <br>
+        <br>
+        <div style="font-size:40px; color:DeepSkyBlue">
+          Welcome to OnePiece Platform!
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+ Vue.component("home", {
+   template: "#home",
+ })
+</script>

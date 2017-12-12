@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block title %}
+op platform --- alchip
+{% endblock %}
+
+{% block content %}
+<home v-show="content_id === 'home'"></home>
+<be_rpt v-show="content_id === 'be_rpt'" :content_id="content_id"></be_rpt>
+<proj_checker v-show="content_id === 'proj_checker'" :content_id="content_id"></proj_checker>
+{% endblock %}
+
+{% block component %}
+{% include "home.html" %}
+{% include "be_rpt.html" %}
+{% include "proj_checker.html" %}
+{% endblock %}

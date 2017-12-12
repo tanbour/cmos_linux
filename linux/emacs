@@ -66,6 +66,7 @@
 (setq user-mail-address "gary3511@gmail.com")
 (setq web-mode-markup-indent-offset 2)
 (setq web-mode-code-indent-offset 2)
+(add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
 
 (add-hook 'dired-mode-hook
           (lambda ()

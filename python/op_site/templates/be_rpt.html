@@ -5,38 +5,13 @@
   <div>
     {% verbatim %}
     <div class="layout-breadcrumb">
-      <breadcrumb v-if="level === 'proj'">
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.index}, 'proj')" title="go to project list">projects</a></breadcrumb-item>
-      </breadcrumb>
-      <breadcrumb v-else-if="level === 'block'">
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.index}, 'proj')" title="go to project list">{{ rsp_data.name }}</a></breadcrumb-item>
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.proj.replace('djst_var', rsp_data.id)}, 'block')" title="refresh blocks list">blocks</a></breadcrumb-item>
-      </breadcrumb>
-      <breadcrumb v-else-if="level === 'version'">
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.index}, 'proj')" title="go to project list">{{ rsp_data.proj.name }}</a></breadcrumb-item>
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.proj.replace('djst_var', rsp_data.proj.id)}, 'block')" title="go to block list">{{ rsp_data.name }}</a></breadcrumb-item>
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.block.replace('djst_var', rsp_data.id)}, 'version')" title="refresh version list">versions</a></breadcrumb-item>
-      </breadcrumb>
-      <breadcrumb v-else-if="level === 'flow'">
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.index}, 'proj')" title="go to project list">{{ rsp_data.block.proj.name }}</a></breadcrumb-item>
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.proj.replace('djst_var', rsp_data.block.proj.id)}, 'block')" title="go to block list">{{ rsp_data.block.name }}</a></breadcrumb-item>
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.block.replace('djst_var', rsp_data.block.id)}, 'version')" title="go to version list">{{ rsp_data.name }}</a></breadcrumb-item>
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.version.replace('djst_var', rsp_data.id)}, 'flow')" title="refresh flow list">flows</a></breadcrumb-item>
-      </breadcrumb>
-      <breadcrumb v-else-if="level === 'stage'">
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.index}, 'proj')" title="go to project list">{{ rsp_data.version.block.proj.name }}</a></breadcrumb-item>
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.proj.replace('djst_var', rsp_data.version.block.proj.id)}, 'block')" title="go to block list">{{ rsp_data.version.block.name }}</a></breadcrumb-item>
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.block.replace('djst_var', rsp_data.version.block.id)}, 'version')" title="go to version list">{{ rsp_data.version.name }}</a></breadcrumb-item>
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.version.replace('djst_var', rsp_data.version.id)}, 'flow')" title="go to flow list">{{ rsp_data.name }}</a></breadcrumb-item>
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.flow.replace('djst_var', rsp_data.id)}, 'stage')" title="refresh stage list">stages</a></breadcrumb-item>
-      </breadcrumb>
-      <breadcrumb v-else-if="level === 'detail'">
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.index}, 'proj')" title="go to project list">{{ rsp_data.flow.version.block.proj.name }}</a></breadcrumb-item>
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.proj.replace('djst_var', rsp_data.flow.version.block.proj.id)}, 'block')" title="go to block list">{{ rsp_data.flow.version.block.name }}</a></breadcrumb-item>
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.block.replace('djst_var', rsp_data.flow.version.block.id)}, 'version')" title="go to version list">{{ rsp_data.flow.version.name }}</a></breadcrumb-item>
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.version.replace('djst_var', rsp_data.flow.version.id)}, 'flow')" title="go to flow list">{{ rsp_data.flow.name }}</a></breadcrumb-item>
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.flow.replace('djst_var', rsp_data.flow.id)}, 'stage')" title="go to stage list">{{ rsp_data.name }}</a></breadcrumb-item>
-        <breadcrumb-item>details</breadcrumb-item>
+      <breadcrumb>
+        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.index}, 'proj')" title="go to project list">{{cb_data.l0.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="level === 'block' || level === 'version' || level === 'flow' || level === 'stage' || level === 'detail'"><a @click="procTable({method: 'get', url: level_url.proj.replace('djst_var', cb_data.l1.url_id)}, 'block')" title="go to block list">{{cb_data.l1.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="level === 'version' || level === 'flow' || level === 'stage' || level === 'detail'"><a @click="procTable({method: 'get', url: level_url.block.replace('djst_var', cb_data.l2.url_id)}, 'version')" title="go to version list">{{cb_data.l2.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="level === 'flow' || level === 'stage' || level === 'detail'"><a @click="procTable({method: 'get', url: level_url.version.replace('djst_var', cb_data.l3.url_id)}, 'flow')" title="go to flow list">{{cb_data.l3.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="level === 'stage' || level === 'detail'"><a @click="procTable({method: 'get', url: level_url.flow.replace('djst_var', cb_data.l4.url_id)}, 'stage')" title="go to stage list">{{cb_data.l4.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="level === 'detail'"><a @click="procTable({method: 'get', url: level_url.stage.replace('djst_var', cb_data.l5.url_id)}, 'detail')" title="refresh detail page">{{cb_data.l5.text}}</a></breadcrumb-item>
       </breadcrumb>
     </div>
     {% endverbatim %}
@@ -103,10 +78,10 @@
    props: ["content_id"],
    data: function () {
      return {
+       table_data: [],
        col_ary: [],
        data_ary: [],
        filter_ary_obj: {},
-       table_data: [],
        showBorder: false,
        showStripe: false,
        showHeader: true,
@@ -127,7 +102,7 @@
          version: "{% url 'be_rpt:version_detail' 'djst_var' %}",
          flow: "{% url 'be_rpt:flow_detail' 'djst_var' %}",
          stage: "{% url 'be_rpt:stage_detail' 'djst_var' %}",
-         detail: "",
+         detail: ""
        },
        level_next: {
          index: "proj",
@@ -136,10 +111,18 @@
          version: "flow",
          flow: "stage",
          stage: "detail",
-         detail: "",
+         detail: ""
        },
        cur_title: [],
        cur_data: [],
+       cb_data: {
+         l0: {},
+         l1: {},
+         l2: {},
+         l3: {},
+         l4: {},
+         l5: {}
+       }
      }
    },
    computed: {
@@ -194,15 +177,15 @@
                    this.remove(params.index)
                  }
                }
-             }, "Delete"),
+             }, "Delete")
            ])
          }
        })
        return columns
-     },
+     }
    },
    watch: {
-     content_id: "changeContent",
+     content_id: "changeContent"
    },
    methods: {
      changeContent: function() {
@@ -242,16 +225,52 @@
      procLevel: function () {
        if (this.level === "proj") {
          this.cur_data = this.rsp_data
+         this.cb_data.l0.text = "projects"
        } else if (this.level === "block") {
          this.cur_data = this.rsp_data.block_proj
+         this.cb_data.l0.text = this.rsp_data.name
+         this.cb_data.l1.url_id = this.rsp_data.id
+         this.cb_data.l1.text = "blocks"
        } else if (this.level === "version") {
          this.cur_data = this.rsp_data.version_block
+         this.cb_data.l0.text = this.rsp_data.proj.name
+         this.cb_data.l1.url_id = this.rsp_data.proj.id
+         this.cb_data.l1.text = this.rsp_data.name
+         this.cb_data.l2.url_id = this.rsp_data.id
+         this.cb_data.l2.text = "versions"
        } else if (this.level === "flow") {
          this.cur_data = this.rsp_data.flow_version
+         this.cb_data.l0.text = this.rsp_data.block.proj.name
+         this.cb_data.l1.url_id = this.rsp_data.block.proj.id
+         this.cb_data.l1.text = this.rsp_data.block.name
+         this.cb_data.l2.url_id = this.rsp_data.block.id
+         this.cb_data.l2.text = this.rsp_data.name
+         this.cb_data.l3.url_id = this.rsp_data.id
+         this.cb_data.l3.text = "flows"
        } else if (this.level === "stage") {
          this.cur_data = this.rsp_data.stage_flow
+         this.cb_data.l0.text = this.rsp_data.version.block.proj.name
+         this.cb_data.l1.url_id = this.rsp_data.version.block.proj.id
+         this.cb_data.l1.text = this.rsp_data.version.block.name
+         this.cb_data.l2.url_id = this.rsp_data.version.block.id
+         this.cb_data.l2.text = this.rsp_data.version.name
+         this.cb_data.l3.url_id = this.rsp_data.version.id
+         this.cb_data.l3.text = this.rsp_data.name
+         this.cb_data.l4.url_id = this.rsp_data.id
+         this.cb_data.l4.text = "stages"
        } else if (this.level == "detail") {
          this.cur_data = this.rsp_data
+         this.cb_data.l0.text = this.rsp_data.flow.version.block.proj.name
+         this.cb_data.l1.url_id = this.rsp_data.flow.version.block.proj.id
+         this.cb_data.l1.text = this.rsp_data.flow.version.block.name
+         this.cb_data.l2.url_id = this.rsp_data.flow.version.block.id
+         this.cb_data.l2.text = this.rsp_data.flow.version.name
+         this.cb_data.l3.url_id = this.rsp_data.flow.version.id
+         this.cb_data.l3.text = this.rsp_data.flow.name
+         this.cb_data.l4.url_id = this.rsp_data.flow.id
+         this.cb_data.l4.text = this.rsp_data.name
+         this.cb_data.l5.url_id = this.rsp_data.id
+         this.cb_data.l5.text = "details"
        }
        if (this.level !== "detail") {
          this.cur_title = this.rsp_title[this.level]
@@ -296,14 +315,14 @@
            filterMethod: function (value, row) {
              return row.owner === value
            }
-         },
+         }
        ]
        if (this.level === "version"  || this.level === "flow" || this.level === "stage")
          this.col_ary.push({
            title: "Date",
            key: "created_time",
            width: 200,
-           sortable: true,
+           sortable: true
          })
        if (this.level === "block")
          this.col_ary.push({
@@ -359,7 +378,7 @@
          var qs_obj = this.cur_data[i]
          data_dic = {
            obj_pk: qs_obj.id,
-           obj_name: qs_obj.name,
+           obj_name: qs_obj.name
          }
          if (qs_obj.owner === null) {
            data_dic.owner = "NA"
@@ -440,7 +459,7 @@
      check_img_key: function (key) {
        return key.endsWith("img")
      }
-   },
+   }
    /* created: function () {
     * }*/
  })

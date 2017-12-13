@@ -50,7 +50,7 @@ class Version(models.Model):
         unique_together = ("name", "block", "owner")
 
 class Flow(models.Model):
-    """Stage models"""
+    """flow models"""
     name = models.CharField(max_length=50)
     version = models.ForeignKey(Version, on_delete=models.CASCADE, related_name="flow_version")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="flow_owner")
@@ -62,7 +62,7 @@ class Flow(models.Model):
         unique_together = ("name", "version", "owner")
 
 class Stage(models.Model):
-    """Stage models"""
+    """stage models"""
     name = models.CharField(max_length=50)
     flow = models.ForeignKey(Flow, on_delete=models.CASCADE, related_name="stage_flow")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="stage_owner")

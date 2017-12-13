@@ -75,7 +75,6 @@
 <script>
  Vue.component("be_rpt", {
    template: "#be_rpt",
-   props: ["content_id"],
    data: function () {
      return {
        table_data: [],
@@ -184,17 +183,12 @@
        return columns
      }
    },
-   watch: {
-     content_id: "changeContent"
-   },
    methods: {
-     changeContent: function() {
-       if (this.content_id === "be_rpt") {
-         this.procTable({
-           method: "get",
-           url: this.level_url.index
-         }, "proj")
-       }
+     init: function() {
+       this.procTable({
+         method: "get",
+         url: this.level_url.index
+       }, "proj")
      },
      procTable: function(ajax_cfg, level) {
        axios(ajax_cfg).then((response) => {
@@ -459,8 +453,11 @@
      check_img_key: function (key) {
        return key.endsWith("img")
      }
-   }
+   },
    /* created: function () {
-    * }*/
+    * },*/
+   mounted: function () {
+     this.init()
+   }
  })
 </script>

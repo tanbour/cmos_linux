@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'be_rpt.apps.BeRptConfig',
+    'proj_checker.apps.ProjCheckerConfig',
     'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',

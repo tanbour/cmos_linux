@@ -6,12 +6,12 @@
     {% verbatim %}
     <div class="layout-breadcrumb">
       <breadcrumb>
-        <breadcrumb-item><a @click="procTable({method: 'get', url: level_url.index}, 'proj')" title="go to project list">{{cb_data.l0.text}}</a></breadcrumb-item>
-        <breadcrumb-item v-if="level === 'block' || level === 'version' || level === 'flow' || level === 'stage' || level === 'detail'"><a @click="procTable({method: 'get', url: level_url.proj.replace('djst_var', cb_data.l1.url_id)}, 'block')" title="go to block list">{{cb_data.l1.text}}</a></breadcrumb-item>
-        <breadcrumb-item v-if="level === 'version' || level === 'flow' || level === 'stage' || level === 'detail'"><a @click="procTable({method: 'get', url: level_url.block.replace('djst_var', cb_data.l2.url_id)}, 'version')" title="go to version list">{{cb_data.l2.text}}</a></breadcrumb-item>
-        <breadcrumb-item v-if="level === 'flow' || level === 'stage' || level === 'detail'"><a @click="procTable({method: 'get', url: level_url.version.replace('djst_var', cb_data.l3.url_id)}, 'flow')" title="go to flow list">{{cb_data.l3.text}}</a></breadcrumb-item>
-        <breadcrumb-item v-if="level === 'stage' || level === 'detail'"><a @click="procTable({method: 'get', url: level_url.flow.replace('djst_var', cb_data.l4.url_id)}, 'stage')" title="go to stage list">{{cb_data.l4.text}}</a></breadcrumb-item>
-        <breadcrumb-item v-if="level === 'detail'"><a @click="procTable({method: 'get', url: level_url.stage.replace('djst_var', cb_data.l5.url_id)}, 'detail')" title="refresh detail page">{{cb_data.l5.text}}</a></breadcrumb-item>
+        <breadcrumb-item><a @click="init({method: 'get', url: level_url.index}, 'proj')" title="go to project list">{{cb_data.l0.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="level === 'block' || level === 'version' || level === 'flow' || level === 'stage' || level === 'detail'"><a @click="init({method: 'get', url: level_url.proj.replace('djst_var', cb_data.l1.url_id)}, 'block')" title="go to block list">{{cb_data.l1.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="level === 'version' || level === 'flow' || level === 'stage' || level === 'detail'"><a @click="init({method: 'get', url: level_url.block.replace('djst_var', cb_data.l2.url_id)}, 'version')" title="go to version list">{{cb_data.l2.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="level === 'flow' || level === 'stage' || level === 'detail'"><a @click="init({method: 'get', url: level_url.version.replace('djst_var', cb_data.l3.url_id)}, 'flow')" title="go to flow list">{{cb_data.l3.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="level === 'stage' || level === 'detail'"><a @click="init({method: 'get', url: level_url.flow.replace('djst_var', cb_data.l4.url_id)}, 'stage')" title="go to stage list">{{cb_data.l4.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="level === 'detail'"><a @click="init({method: 'get', url: level_url.stage.replace('djst_var', cb_data.l5.url_id)}, 'detail')" title="refresh detail page">{{cb_data.l5.text}}</a></breadcrumb-item>
       </breadcrumb>
     </div>
     {% endverbatim %}
@@ -184,34 +184,21 @@
      }
    },
    methods: {
-     init: function() {
-       this.procTable({
-         method: "get",
-         url: this.level_url.index
-       }, "proj")
-     },
-     procTable: function(ajax_cfg, level) {
+     init: function(ajax_cfg = {method: "get", url: this.level_url.index}, level = "proj") {
        axios(ajax_cfg).then((response) => {
          this.rsp_data = response.data
-         console.log(this.rsp_data)
          this.level = level
-         this.procTitle({
-           method: "get",
-           url: this.level_url.title
+         axios({method: "get", url: this.level_url.title}).then((response) => {
+           this.rsp_title = response.data
+           this.procLevel()
+           if (this.level !== "detail") {
+             this.procDataAry()
+             this.procColAry()
+             this.pageTableData()
+           }
+         }).catch((error) => {
+           console.log(error)
          })
-       }).catch((error) => {
-         console.log(error)
-       })
-     },
-     procTitle: function(ajax_cfg) {
-       axios(ajax_cfg).then((response) => {
-         this.rsp_title = response.data
-         this.procLevel()
-         if (this.level !== "detail") {
-           this.procDataAry()
-           this.procColAry()
-           this.pageTableData()
-         }
        }).catch((error) => {
          console.log(error)
        })
@@ -286,7 +273,7 @@
              return h("a", {
                on: {
                  click: () => {
-                   this.procTable({
+                   this.init({
                      method: "get",
                      url: this.level_url[this.level].replace("djst_var", pk)}, this.level_next[this.level])
                  }

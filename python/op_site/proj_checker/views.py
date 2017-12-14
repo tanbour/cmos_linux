@@ -3,7 +3,7 @@ from .models import Proj
 from .serializers import ProjSerializer
 
 # Create your views here.
-class ProjList(generics.ListAPIView):
+class ProjList(generics.ListCreateAPIView):
     """be report project list"""
     queryset = Proj.objects.all()
     serializer_class = ProjSerializer
@@ -11,7 +11,7 @@ class ProjList(generics.ListAPIView):
         name = self.request.data.get("name")
         return self.queryset.filter(name=name) if name else self.queryset.all()
 
-class ProjDetail(generics.RetrieveAPIView):
+class ProjDetail(generics.RetrieveUpdateDestroyAPIView):
     """be report project detail"""
     queryset = Proj.objects.all()
     serializer_class = ProjSerializer

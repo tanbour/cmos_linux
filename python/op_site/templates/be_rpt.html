@@ -23,7 +23,7 @@
               {% verbatim %}
               <div v-if="check_img_key(key)">
                 <p slot="title">{{ key }}</p>
-                <p><p v-html="cur_data.data[key]"></p></p>
+                <p v-html="cur_data.data[key]"></p>
               </div>
               <div v-else>
                 <p slot="title">{{ key }}</p>
@@ -345,7 +345,7 @@
              sortable: true,
              render: (h, params) => {
                const row = params.row
-               const color = row.status === "running" ? "yellow" : row.status === "passed" ? "green" : "red"
+               const color = row.status === "running" ? "yellow" : row.status === "passed" ? "green" : row.status === undefined ? "blue" : "red"
                const text = row.status
                return h("Tag", {
                  props: {

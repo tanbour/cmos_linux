@@ -13,6 +13,7 @@
 
   <body>
     <div id="op_site_base">
+      <back-top></back-top>
       <div class="layout" :class="{'layout-hide-text': spanLeft < 2}">
         <row type="flex">
           <i-col :span="spanLeft" class="layout-menu-left">
@@ -59,6 +60,8 @@
     <script src="{% static 'npm/node_modules/iview/dist/iview.js' %}"></script>
     <script src="{% static 'npm/node_modules/iview/dist/locale/en-US.js' %}"></script>
     <script>iview.lang("en-US")</script>
+    <script src="{% static 'npm/node_modules/ckeditor-full/ckeditor.js' %}"></script>
+    <script src="{% static 'npm/node_modules/js-cookie/src/js.cookie.js' %}"></script>
 
     {% block component %}
     {% endblock %}

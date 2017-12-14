@@ -7,6 +7,6 @@ class Proj(models.Model):
     name = models.CharField(max_length=20, unique=True)
     updated_time = models.DateTimeField(auto_now=True)
     data = JSONField(default=dict, blank=True)
-    text = models.TextField()
+    text = models.TextField(blank=True)
     def __str__(self):
-        return f"{name}"
+        return self.name

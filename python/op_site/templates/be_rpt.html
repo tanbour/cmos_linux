@@ -345,7 +345,7 @@
              sortable: true,
              render: (h, params) => {
                const row = params.row
-               const color = row.status === "running" ? "yellow" : row.status === "passed" ? "green" : row.status === undefined ? "blue" : "red"
+               const color = row.status === "running" ? "yellow" : row.status === "passed" ? "green" : (row.status === undefined || row.status === "") ? "blue" : "red"
                const text = row.status
                return h("Tag", {
                  props: {

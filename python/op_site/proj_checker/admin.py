@@ -4,7 +4,7 @@ from .models import Proj
 # Register your models here.
 class ProjAdmin(admin.ModelAdmin):
     """proj admin"""
-    list_display = ("id", "name", "updated_time")
+    list_display = ("id", "name", "updated_time", "lock")
     list_filter = ["updated_time"]
     search_field = ["name", "data", "text"]
 

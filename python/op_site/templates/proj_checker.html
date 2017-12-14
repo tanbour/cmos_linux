@@ -17,22 +17,21 @@
           <Card :bordered="false" style="font-family:monospace; color:black">
             {% verbatim %}
             <p slot="title">{{ cur_data.name }}</p>
-            <i-input v-if="editable" type="textarea" v-model="cur_data.text" element-id="proj_editor"></i-input>
-            <p v-else v-html="cur_data.text"></p>
+            <p v-if="cur_data.lock || !edit_mode" v-html="cur_data.text"></p>
+            <i-input v-else type="textarea" v-model="cur_data.text" element-id="proj_editor"></i-input>
             {% endverbatim %}
           </Card>
           <br>
           <div style="float:right">
-            <div v-if="editable">
-              <i-button type="primary" @click="toggle_edit">Cancel</i-button>
+            <i-button v-if="cur_data.lock" disabled type="primary">Locked</i-button>
+            <div v-else-if="edit_mode">
+              <i-button type="primary" @click="cancel_edit">Cancel</i-button>
               <i-button type="primary" :loading="loading" icon="checkmark-round" @click="toggle_submit">
                 <span v-if="!loading">Submit</span>
                 <span v-else>Loading...</span>
               </i-button>
             </div>
-            <div v-else>
-              <i-button type="primary" @click="toggle_edit">Edit</i-button>
-            </div>
+            <i-button v-else type="primary" @click="toggle_edit">Edit</i-button>
           </div>
         </div>
         <div v-else>
@@ -41,25 +40,21 @@
           <i-button v-if="add_proj_name" type="success" @click="toggle_add(add_proj_name)">Add</i-button>
           <br>
           Select Project Status to be UPDATED:
-          <i-select v-model="up_proj_index" style="width:200px">
+          <i-select v-model="up_proj_index" clearable style="width:200px">
             {% verbatim %}
             <i-option v-for="(item, index) in cur_data" :value="index" :key="index">{{ item.name }}</i-option>
             {% endverbatim %}
           </i-select>
           <i-input v-if="up_proj_index !== ''" v-model="cur_data[up_proj_index].data.owner" placeholder="Enter new owner name" style="width:200px"></i-input>
-          <i-select v-if="up_proj_index !== ''" v-model="cur_data[up_proj_index].data.status" placeholder="Select status" style="width:200px">
+          <i-select v-if="up_proj_index !== ''" v-model="cur_data[up_proj_index].data.status" clearable placeholder="Select status" style="width:200px">
             {% verbatim %}
             <i-option v-for="(item, index) in status_ary" :value="item" :key="index">{{ item }}</i-option>
             {% endverbatim %}
           </i-select>
           <i-button v-if="up_proj_index !== ''" type="success" @click="toggle_up(up_proj_index)">Update</i-button>
           <br>
-          {% verbatim %}
-          <p>{{ up_proj_index }}</p>
-          <p>{{ cur_data[up_proj_index] }}</p>
-          {% endverbatim %}
           Select Project to be DELETED:
-          <i-select v-model="del_proj_index" style="width:200px">
+          <i-select v-model="del_proj_index" clearable style="width:200px">
             {% verbatim %}
             <i-option v-for="(item, index) in cur_data" :value="index" :key="index">{{ item.name }}</i-option>
             {% endverbatim %}
@@ -123,8 +118,9 @@
        add_proj_name: "",
        up_proj_index: "",
        status_ary: ["on-going", "completed", "pending", "canceled"],
-       editable: false,
-       loading: false
+       edit_mode: false,
+       loading: false,
+       lock_id_ary: []
      }
    },
    methods: {
@@ -139,7 +135,11 @@
          this.rsp_data = response.data
          console.log(this.rsp_data)
          this.level = level
-         this.editable = false,
+         for (var i = 0; i < this.lock_id_ary.length; i++) {
+           this.patch_unlock(this.lock_id_ary[i])
+         }
+         this.lock_id_ary = []
+         this.edit_mode = false,
          this.loading = false,
          this.procLevel()
          if (this.level !== "detail") {
@@ -207,7 +207,7 @@
            sortable: true,
            render: (h, params) => {
              const row = params.row
-             const color = row.status === "on-going" ? "yellow" : row.status === "completed" ? "green" : row.status === undefined ? "blue" : "red"
+             const color = row.status === "on-going" ? "yellow" : row.status === "completed" ? "green" : (row.status === undefined || row.status === "") ? "blue" : "red"
              const text = row.status
              return h("Tag", {
                props: {
@@ -216,6 +216,12 @@
                }
              }, text)
            }
+         },
+         {
+           title: "Locked",
+           key: "lock",
+           width: 200,
+           sortable: true
          }
        ]
      },
@@ -226,7 +232,8 @@
          data_dic = {
            obj_pk: qs_obj.id,
            obj_name: qs_obj.name,
-           updated_time: qs_obj.updated_time.slice(0, 19).replace("T", " ")
+           updated_time: qs_obj.updated_time.slice(0, 19).replace("T", " "),
+           lock: qs_obj.lock
          }
          for (var key in qs_obj.data) {
            data_dic[key] = qs_obj.data[key]
@@ -336,13 +343,56 @@
          }
        })
      },
+     patch_unlock: function (proj_id) {
+       var csrftoken = Cookies.get('csrftoken')
+       axios({
+         method: "patch",
+         url: this.level_url.proj.replace("djst_var", proj_id),
+         headers: {"X-CSRFToken": csrftoken},
+         data: {
+           lock: false
+         }
+       }).then((response) => {
+         console.log("patch_unlock")
+         console.log(response)
+       }).catch((error) => {
+         console.log(error)
+       })
+     },
      toggle_edit: function () {
-       this.editable = !this.editable
-       if (this.editable) {
-         this.$nextTick(function () {
-           CKEDITOR.replace("proj_editor", {})
-         })
-       }
+       var csrftoken = Cookies.get('csrftoken')
+       axios({
+         method: "get",
+         url: this.level_url.proj.replace("djst_var", this.cur_data.id)
+       }).then((response) => {
+         this.cur_data = response.data
+         if (!this.cur_data.lock) {
+           axios({
+             method: "patch",
+             url: this.level_url.proj.replace("djst_var", this.cur_data.id),
+             headers: {"X-CSRFToken": csrftoken},
+             data: {
+               lock: true
+             }
+           }).then((response) => {
+             this.lock_id_ary.push(this.cur_data.id)
+             this.edit_mode = !this.edit_mode
+             if (this.edit_mode) {
+               this.$nextTick(function () {
+                 CKEDITOR.replace("proj_editor", {})
+               })
+             }
+           }).catch((error) => {
+             console.log(error)
+           })
+         }
+       }).catch((error) => {
+         console.log(error)
+       })
+     },
+     cancel_edit: function () {
+       this.edit_mode = false
+       this.patch_unlock(this.cur_data.id)
      },
      toggle_submit: function () {
        this.cur_data.text = CKEDITOR.instances.proj_editor.getData()
@@ -360,7 +410,8 @@
        }).then((response) => {
          this.$Message.success("Project " + this.cur_data.name + " content submitted!")
          this.loading = false
-         this.editable = false
+         this.edit_mode = false
+         this.patch_unlock(this.cur_data.id)
        }).catch((error) => {
          console.log(error)
        })
@@ -370,6 +421,12 @@
     * },*/
    mounted: function () {
      this.init()
+   },
+   destroyed: function () {
+     for (var i = 0; i < this.lock_id_ary.length; i++) {
+       this.patch_unlock(this.lock_id_ary[i])
+     }
+     this.lock_id_ary = []
    }
  })
 </script>

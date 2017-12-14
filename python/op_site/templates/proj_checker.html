@@ -45,13 +45,14 @@
             <i-option v-for="(item, index) in cur_data" :value="index" :key="index">{{ item.name }}</i-option>
             {% endverbatim %}
           </i-select>
-          <i-input v-if="up_proj_index !== ''" v-model="cur_data[up_proj_index].data.owner" placeholder="Enter new owner name" style="width:200px"></i-input>
-          <i-select v-if="up_proj_index !== ''" v-model="cur_data[up_proj_index].data.status" clearable placeholder="Select status" style="width:200px">
+          <i-input v-if="up_proj_index in cur_data" v-model="cur_data[up_proj_index].data.owner" placeholder="Enter new owner name" style="width:200px"></i-input>
+          <i-select v-if="up_proj_index in cur_data" v-model="cur_data[up_proj_index].data.status" clearable placeholder="Select status" style="width:200px">
             {% verbatim %}
             <i-option v-for="(item, index) in status_ary" :value="item" :key="index">{{ item }}</i-option>
             {% endverbatim %}
           </i-select>
-          <i-button v-if="up_proj_index !== ''" type="success" @click="toggle_up(up_proj_index)">Update</i-button>
+          <i-button v-if="up_proj_index in cur_data && cur_data[up_proj_index].lock" disabled type="success">Locked</i-button>
+          <i-button v-else-if="up_proj_index in cur_data" type="success" @click="toggle_up(up_proj_index)">Update</i-button>
           <br>
           Select Project to be DELETED:
           <i-select v-model="del_proj_index" clearable style="width:200px">
@@ -61,7 +62,8 @@
           </i-select>
           {% verbatim %}
           {% endverbatim %}
-          <i-button v-if="del_proj_index !== ''" type="error" @click="show_del_modal(del_proj_index)">Delete</i-button>
+          <i-button v-if="del_proj_index in cur_data && cur_data[del_proj_index].lock" disabled type="error">Locked</i-button>
+          <i-button v-else-if="del_proj_index in cur_data" type="error" @click="show_del_modal(del_proj_index)">Delete</i-button>
           <br>
           <br>
           <div style="margin:10px">
@@ -282,7 +284,7 @@
      },
      toggle_up: function (proj_index) {
        var csrftoken = Cookies.get('csrftoken')
-       if (proj_index !== "") {
+       if (proj_index in this.cur_data) {
          axios({
            method: "put",
            url: this.level_url.proj.replace("djst_var", this.cur_data[proj_index].id),
@@ -353,8 +355,6 @@
            lock: false
          }
        }).then((response) => {
-         console.log("patch_unlock")
-         console.log(response)
        }).catch((error) => {
          console.log(error)
        })

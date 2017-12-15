@@ -130,10 +130,15 @@ class OpProj(views.APIView):
     """op platform post proj info"""
     def post(self, request, format=None):
         proj_name = request.data.get("name")
+        owner_name = request.data.get("owner")
         if not proj_name:
             return Response({"message": "proj name is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        if owner_name:
+            owner_obj, _ = User.objects.get_or_create({"name": owner_name}, name=owner_name)
+        else:
+            owner_obj = None
         proj_obj, created_flg = Proj.objects.update_or_create(
-            {"name": proj_name, "data": request.data.get("data", {})}, name=proj_name)
+            {"name": proj_name, "owner": owner_obj, "data": request.data.get("data", {})}, name=proj_name)
         return Response({"proj_name": proj_obj.name, "created_flg": created_flg})
 
 class OpBlock(views.APIView):
@@ -141,13 +146,18 @@ class OpBlock(views.APIView):
     def post(self, request, format=None):
         block_name = request.data.get("name")
         proj_name = request.data.get("proj")
+        owner_name = request.data.get("owner")
         if not block_name:
             return Response({"message": "block name is NA"}, status=status.HTTP_400_BAD_REQUEST)
         if not proj_name:
             return Response({"message": "proj name is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        if owner_name:
+            owner_obj, _ = User.objects.get_or_create({"name": owner_name}, name=owner_name)
+        else:
+            owner_obj = None
         proj_obj, _ = Proj.objects.get_or_create({"name": proj_name}, name=proj_name)
         block_obj, created_flg = Block.objects.update_or_create(
-            {"name": block_name, "proj": proj_obj, "data": request.data.get("data", {})},
+            {"name": block_name, "owner": owner_obj, "proj": proj_obj, "data": request.data.get("data", {})},
             name=block_name, proj=proj_obj)
         return Response({"block_name": block_obj.name, "created_flg": created_flg})
 

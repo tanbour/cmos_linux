@@ -15,8 +15,9 @@ link_base_dir = f"{exec_dir}{os.sep}link_dir"
 tree_cfg = pcom.gen_cfg([f"{exec_dir}{os.sep}tree.cfg"])
 link_cfg = pcom.gen_cfg([f"{exec_dir}{os.sep}link.cfg"])
 
-lib_path = pcom.rd_cfg(link_cfg, "proj", "lib_path", True)
-tree_map = pcom.rd_cfg(tree_cfg, lib_path, "path_mapping", True)
+lib_sec = pcom.rd_cfg(link_cfg, "proj", "lib_sec", True)
+lib_path = pcom.rd_cfg(tree_cfg, lib_sec, "path_base", True)
+tree_map = pcom.rd_cfg(tree_cfg, lib_sec, "path_mapping", True)
 tm_temp = jinja2.Template(tree_map)
 
 def link_src_dst(src_file, dst_dir):

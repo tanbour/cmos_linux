@@ -21,7 +21,7 @@
           <div v-if="cur_data.data">
             <Card v-for="key in Object.keys(cur_data.data).sort()" v-if="key !== 'status'" :key="key" :bordered="false" style="font-family:monospace; color:black">
               {% verbatim %}
-              <div v-if="check_img_key(key)">
+              <div v-if="check_vhtml_key(key)">
                 <p slot="title">{{ key }}</p>
                 <p v-html="cur_data.data[key]"></p>
               </div>
@@ -49,6 +49,7 @@
               <Radio label="default">medium</Radio>
               <Radio label="small">small(default)</Radio>
             </Radio-group>
+            <i-input placeholder="Search" style="width:200px; float:right"></i-input>
           </div>
           <i-table :border="showBorder" :stripe="showStripe" :show-header="showHeader" :height="fixedHeader?300:''" :columns="table_col" :data="table_data" :size="tableSize" ref="table"></i-table>
           <div style="margin:10px; overflow:hidden">
@@ -437,8 +438,8 @@
      remove: function (index) {
        this.table_data.splice(index, 1)
      },
-     check_img_key: function (key) {
-       return key.endsWith("img")
+     check_vhtml_key: function (key) {
+       return key.endsWith("img") || key.endsWith("link")
      }
    },
    /* created: function () {

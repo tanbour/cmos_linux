@@ -22,8 +22,8 @@ xterm*foreground: rgb:b2/b2/b2
 xterm*background: rgb:08/08/08
 xterm*utf8: true
 xterm*utf8Title: true
-xterm*faceName: DejaVu Sans Mono:style=Book:antialias=true
-xterm*faceNameDoublesize: Noto Sans S Chinese
+xterm*faceName: DejaVu Sans Mono:size=8:style=Book:antialias=true
+xterm*faceNameDoublesize: Source Han Sans CN
 xterm*faceSize: 10
 ! xterm*faceName: Monospace:pixelsize=15
 ! xterm*faceNameDoublesize: WenQuanYi Zen Hei:pixelsize=15

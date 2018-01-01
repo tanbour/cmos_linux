@@ -31,8 +31,8 @@
  '(tool-bar-mode nil)
  '(tramp-default-proxies-alist
    (quote
-    (("cmos" nil "/ssh:cmos@138.128.210.28#27569:")
-     ("ff" nil "/ssh:firefly@115.28.56.168#22:")))))
+    (("cmos" nil "/ssh:cmos@shcmos.com#3511:")
+     ("ff" nil "/ssh:firefly@xsfuture.com#22:")))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -42,7 +42,7 @@
 
 ;; cmos_conf
 (setq-default indent-tabs-mode nil)
-(setq default-frame-alist '((height . 60) (width . 90) (font . "DejaVu Sans Mono-10")))
+(setq default-frame-alist '((height . 60) (width . 90) (font . "DejaVu Sans Mono-8")))
 (setq require-final-newline t)
 (setq ido-enable-flex-matching t)
 (setq ido-everywhere t)

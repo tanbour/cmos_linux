@@ -16,7 +16,7 @@ class is Noun, function is verb_noun, variable is name_type
 linux, linux-headers, base-devel, nftables, pacman, ntp, gcc, gcc-fortran, gdb, strace, amdgpu, clisp, python, nodejs, npm, perl, tcl, git, subversion, openjdk, rsync, transmission-cli, wget, axel, vsftpd, p7zip, unzip, unrar, vim, tree, calc, gstreamer, x264, ffmpeg, sudo, fuse, nginx, postgresql, mariadb, dosfstools, curl, blas, lapack, openssh, xorg-server, xz
 ** linux_client
 *** program
-linux, linux-headers, base-devel, grub, memtest86+, xterm, pacman, ntp, gparted, gcc, gcc-fortran, gdb, strace, nvidia, gtk, qt, clisp, python, nodejs, npm, perl, tcl, tk, git, subversion, openjdk, icedtea-web, ttf-dejavu, chromium, pepper-flash, rsync, transmission-gtk, wget, axel, filezilla, p7zip, unzip, unrar, mksh, tcsh, tree, gvim, emacs, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, recordmydesktop, gv, xchm, calc, gnuplot, graphviz, cups-pdf, mplayer, smplayer, gstreamer, portmidi, x264, ffmpeg, bchunk, flac, aspell-en, hunspell-en, tigervnc, freerdp, vpnc, openconnect, openvpn, pptpclient, celestia, gnugo, sudo, fuse, libreoffice, nginx, postgresql, mariadb, libdvdread, libdvdcss, libdvdnav, networkmanager, gnome, dosfstools, curl, blas, lapack, shotwell, openssh, xorg-server, xf86-input-libinput, xz, android-tools
+linux, linux-headers, base-devel, grub, memtest86+, xterm, i3, pacman, ntp, gparted, gcc, gcc-fortran, gdb, strace, nvidia, clisp, python, nodejs, npm, perl, tcl, tk, git, subversion, openjdk, icedtea-web, ttf-dejavu, chromium, pepper-flash, rsync, transmission-gtk, wget, axel, filezilla, p7zip, unzip, unrar, mksh, tcsh, tree, gvim, emacs, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, recordmydesktop, gv, xchm, calc, gnuplot, graphviz, cups-pdf, mplayer, smplayer, gstreamer, portmidi, x264, ffmpeg, bchunk, flac, aspell-en, hunspell-en, tigervnc, freerdp, vpnc, openconnect, openvpn, pptpclient, celestia, gnugo, sudo, fuse, libreoffice, nginx, postgresql, mariadb, libdvdread, libdvdcss, libdvdnav, networkmanager, dosfstools, curl, blas, lapack, feh, openssh, xorg-server, xf86-input-libinput, xz, android-tools
 *** multimedia
 blender, cinelerra-cv, subtitleeditor, audacity, puddletag
 ** chinese and ibus
@@ -640,3 +640,34 @@ prosodyctl cert generate platform.sari.com
 ** iommu
 enable iommu in uefi
 set extra linux kernel parameter "iommu=pt" to make iommu work in pass through mode
+
+* fstab
+** check disk
+lsblk -f
+mklabel gpt
+mkfs.ext4 /dev/sdb1
+** hdd
+/etc/fstab
+# <file system> <dir> <type> <options> <dump> <pass>
+# /dev/sda2
+UUID=c712efa0-104a-4e98-87a3-a04ca8160164	/         	ext4      	rw,relatime,data=ordered	0 1
+# /dev/sda1
+UUID=EB81-715A      	/boot     	vfat      	rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro	0 2
+# /dev/sda3
+UUID=06582195-b25d-4196-98d4-c775b3cf65bf	none      	swap      	defaults  	0 0
+# /dev/sdb1
+UUID=c83c5c95-caab-4669-a319-dbbc851a70e1	/nas/delft     	ext4      	rw,relatime,data=ordered	0 2
+# /dev/sdc1
+UUID=19a448bc-d923-459e-ac00-bab5a220c3e6	/nas/shanghai  	ext4      	rw,relatime,data=ordered	0 2
+# /dev/sdd1
+UUID=434311c3-7a36-4249-bb91-51cbf518793a	/nas/venus  	ext4      	rw,relatime,data=ordered,nofail,x-systemd.device-timeout=1	0 2
+# /dev/sde1
+UUID=8dffe51b-2326-43fd-8549-1d3a319c71e5	/nas/jupiter  	ext4      	rw,relatime,data=ordered,nofail,x-systemd.device-timeout=1	0 2
+** ssd
+# <file system> <dir> <type> <options> <dump> <pass>
+# /dev/sda2
+UUID=b78d31d2-727f-4034-8016-5c9af69d7d52	/         	ext4      	rw,relatime,discard,data=ordered	0 1
+# /dev/sda1
+UUID=fb432bf1-8dd9-4d6b-9a1c-4601e1996209	/boot     	ext4      	rw,relatime,discard,data=ordered	0 2
+# /dev/sda3
+UUID=6b835efe-6110-46c2-aea3-99d0c169e238	none      	swap      	defaults,discard  	0 0

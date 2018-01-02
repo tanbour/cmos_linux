@@ -7,8 +7,10 @@
 
 # PS1='[\u@\h: \W]\$ '
 PS1='[\u@\h: $(pwd)]\$ '
+
 export TERM=linux
 export EDITOR='emacsclient -c -a emacs'
+export PATH=$PATH:~/eod_c8_64
 
 complete -cf sudo
 

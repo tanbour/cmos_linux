@@ -12,11 +12,13 @@ using proj.cfg to bootenv
 class is Noun, function is verb_noun, variable is name_type
 
 * pkg list
-** linux_server
-linux, linux-headers, base-devel, nftables, pacman, ntp, gcc, gcc-fortran, gdb, strace, amdgpu, clisp, python, nodejs, npm, perl, tcl, git, subversion, openjdk, rsync, transmission-cli, wget, axel, vsftpd, p7zip, unzip, unrar, vim, tree, calc, gstreamer, x264, ffmpeg, sudo, fuse, nginx, postgresql, mariadb, dosfstools, curl, blas, lapack, openssh, xorg-server, xz
-** linux_client
+** common
+linux, linux-headers, base, base-devel, pacman, sudo, ntp, gcc, gcc-fortran, gdb, strace, clisp, python, nodejs, npm, perl, tcl, tk, git, subversion, openjdk, rsync, transmission-cli, wget, axel, p7zip, unzip, unrar, xz, tree, calc, curl, openssh, nginx, postgresql, mariadb, fuse, dosfstools, blas, lapack, xorg-server, xorg-xinit, xorg-xrandr, xterm, i3, gvim, emacs, feh, pulseaudio, pulseaudio-alsa, gstreamer, portmidi, flac, x264, x265, ffmpeg, mplayer, smplayer, volumeicon, chromium, ttf-dejavu
+** linux_server only
+nftables, amdgpu, vsftpd, samba
+** linux_client only
 *** program
-linux, linux-headers, base-devel, grub, memtest86+, xterm, i3, pacman, ntp, gparted, gcc, gcc-fortran, gdb, strace, nvidia, clisp, python, nodejs, npm, perl, tcl, tk, git, subversion, openjdk, icedtea-web, ttf-dejavu, chromium, pepper-flash, rsync, transmission-gtk, wget, axel, filezilla, p7zip, unzip, unrar, mksh, tcsh, tree, gvim, emacs, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, recordmydesktop, gv, xchm, calc, gnuplot, graphviz, cups-pdf, mplayer, smplayer, gstreamer, portmidi, x264, ffmpeg, bchunk, flac, aspell-en, hunspell-en, tigervnc, freerdp, vpnc, openconnect, openvpn, pptpclient, celestia, gnugo, sudo, fuse, libreoffice, nginx, postgresql, mariadb, libdvdread, libdvdcss, libdvdnav, networkmanager, dosfstools, curl, blas, lapack, feh, openssh, xorg-server, xf86-input-libinput, xz, android-tools
+grub, memtest86+, gparted, nvidia, icedtea-web, pepper-flash, filezilla, mksh, tcsh, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, recordmydesktop, gv, xchm, gnuplot, graphviz, cups-pdf, bchunk, aspell-en, hunspell-en, tigervnc, freerdp, celestia, gnugo, libreoffice, networkmanager, network-manager-applet, android-tools, xf86-input-libinput, acpid, mutt, mupdf
 *** multimedia
 blender, cinelerra-cv, subtitleeditor, audacity, puddletag
 ** chinese and ibus
@@ -30,8 +32,6 @@ vue, iview, axios, js-cookie, ckeditor
 ascii-art-to-unicode, auctex, gnugo, paredit, web-mode
 ** jQuery
 bootstrap3, DataTables
-** local linux
-gcc, autoconf, automake, blas, emacs, firefox, flex, freetype, gperf, help2man, jpegsrc, lapack, libtirpc, libtool, libxml2, libxslt, lsof, m4, nginx, perl, postgresql, python, tar, tcl, tk, texinfo, xz
 
 * tools
 ** wiki
@@ -671,3 +671,9 @@ UUID=b78d31d2-727f-4034-8016-5c9af69d7d52	/         	ext4      	rw,relatime,disc
 UUID=fb432bf1-8dd9-4d6b-9a1c-4601e1996209	/boot     	ext4      	rw,relatime,discard,data=ordered	0 2
 # /dev/sda3
 UUID=6b835efe-6110-46c2-aea3-99d0c169e238	none      	swap      	defaults,discard  	0 0
+
+* dhcpcd
+interface enp2s0f0
+static ip_address=xxx.xxx.xx.2/24
+static routers=xxx.xxx.xx.1
+static domain_name_servers=xxx.xxx.xx.1 114.114.114.114 8.8.8.8

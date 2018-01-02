@@ -6,8 +6,6 @@ setenv EDITOR 'emacsclient -c -a emacs'
 
 umask 022
 
-xset -b
-
 alias atu 'echo "\033AnSiTu" $USER'
 alias ath 'echo "\033AnSiTh" $HOST'
 alias atc 'echo "\033AnSiTc" $PWD'

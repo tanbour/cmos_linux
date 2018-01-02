@@ -18,7 +18,7 @@ linux, linux-headers, base, base-devel, pacman, sudo, ntp, gcc, gcc-fortran, gdb
 nftables, amdgpu, vsftpd, samba
 ** linux_client only
 *** program
-grub, memtest86+, gparted, nvidia, icedtea-web, pepper-flash, filezilla, mksh, tcsh, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, recordmydesktop, gv, xchm, gnuplot, graphviz, cups-pdf, bchunk, aspell-en, hunspell-en, tigervnc, freerdp, celestia, gnugo, libreoffice, networkmanager, network-manager-applet, android-tools, xf86-input-libinput, acpid, mutt, mupdf
+grub, memtest86+, gparted, nvidia, icedtea-web, pepper-flash, filezilla, mksh, tcsh, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, recordmydesktop, gv, xchm, gnuplot, graphviz, cups-pdf, bchunk, aspell-en, hunspell-en, tigervnc, freerdp, celestia, gnugo, libreoffice, networkmanager, network-manager-applet, android-tools, xf86-input-libinput, acpid, mupdf
 *** multimedia
 blender, cinelerra-cv, subtitleeditor, audacity, puddletag
 ** chinese and ibus

@@ -13,7 +13,7 @@ class is Noun, function is verb_noun, variable is name_type
 
 * pkg list
 ** common
-linux, linux-headers, base, base-devel, pacman, sudo, ntp, gcc, gcc-fortran, gdb, strace, clisp, python, nodejs, npm, perl, tcl, tk, git, subversion, openjdk, rsync, transmission-cli, wget, axel, p7zip, unzip, unrar, xz, tree, calc, curl, openssh, nginx, postgresql, mariadb, dosfstools, blas, lapack, xorg-server, xorg-xinit, xorg-xrandr, xorg-xprop, xautolock, xterm, i3-wm, i3status, i3lock, gvim, emacs, pulseaudio, pulseaudio-alsa, volumeicon, ponymix, feh, gstreamer, portmidi, flac, x264, x265, ffmpeg, mpv, smplayer, chromium, ttf-dejavu
+linux, linux-headers, base, base-devel, pacman, sudo, ntp, gcc, gcc-fortran, gdb, strace, clisp, python, nodejs, npm, perl, tcl, tk, git, subversion, openjdk, rsync, transmission-cli, wget, axel, p7zip, unzip, unrar, xz, tree, calc, curl, openssh, nginx, postgresql, mariadb, dosfstools, blas, lapack, xorg-server, xorg-xinit, xorg-xrandr, xorg-xprop, xautolock, xterm, i3-wm, i3status, i3lock, gvim, emacs, pulseaudio, pulseaudio-alsa, volumeicon, ponymix, feh, gstreamer, portmidi, flac, x264, x265, ffmpeg, mpv, smplayer, chromium, ttf-dejavu, ttf-font-awesome
 ** linux_server only
 nftables, amdgpu, vsftpd, samba
 ** linux_client only

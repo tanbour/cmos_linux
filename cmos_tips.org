@@ -13,12 +13,12 @@ class is Noun, function is verb_noun, variable is name_type
 
 * pkg list
 ** common
-linux, linux-headers, base, base-devel, pacman, sudo, ntp, gcc, gcc-fortran, gdb, strace, clisp, python, nodejs, npm, perl, tcl, tk, git, subversion, openjdk, rsync, transmission-cli, wget, axel, p7zip, unzip, unrar, xz, tree, calc, curl, openssh, nginx, postgresql, mariadb, fuse, dosfstools, blas, lapack, xorg-server, xorg-xinit, xorg-xrandr, xorg-xprop, xterm, i3-wm, i3status, i3lock, gvim, emacs, pulseaudio, pulseaudio-alsa, volumeicon, ponymix, feh, gstreamer, portmidi, flac, x264, x265, ffmpeg, mplayer, smplayer, chromium, ttf-dejavu
+linux, linux-headers, base, base-devel, pacman, sudo, ntp, gcc, gcc-fortran, gdb, strace, clisp, python, nodejs, npm, perl, tcl, tk, git, subversion, openjdk, rsync, transmission-cli, wget, axel, p7zip, unzip, unrar, xz, tree, calc, curl, openssh, nginx, postgresql, mariadb, fuse, dosfstools, blas, lapack, xorg-server, xorg-xinit, xorg-xrandr, xorg-xprop, xautolock, xterm, i3-wm, i3status, i3lock, gvim, emacs, pulseaudio, pulseaudio-alsa, volumeicon, ponymix, feh, gstreamer, portmidi, flac, x264, x265, ffmpeg, mplayer, smplayer, chromium, ttf-dejavu
 ** linux_server only
 nftables, amdgpu, vsftpd, samba
 ** linux_client only
 *** program
-grub, memtest86+, gparted, nvidia, icedtea-web, pepper-flash, filezilla, mksh, tcsh, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, recordmydesktop, gv, xchm, gnuplot, graphviz, cups-pdf, bchunk, aspell-en, hunspell-en, tigervnc, freerdp, celestia, gnugo, libreoffice, networkmanager, network-manager-applet, android-tools, xf86-input-libinput, acpid, mupdf, dunst, thunderbird
+grub, memtest86+, gparted, nvidia, icedtea-web, pepper-flash, filezilla, mksh, tcsh, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, recordmydesktop, gv, xchm, gnuplot, graphviz, cups-pdf, bchunk, aspell-en, hunspell-en, tigervnc, freerdp, celestia, gnugo, libreoffice, networkmanager, network-manager-applet, android-tools, xf86-input-libinput, acpid, mupdf, dunst, udevil, thunderbird
 *** multimedia
 blender, cinelerra-cv, subtitleeditor, audacity, puddletag
 ** chinese and ibus

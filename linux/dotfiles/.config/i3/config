@@ -173,7 +173,7 @@ bar {
 }
 
 ## Manual management of i3 lock
-set $locker i3lock -i "/home/guanyu_yi/Pictures/i3_wp.png" -t && sleep 1
+set $locker i3lock -i "$HOME/Pictures/i3_wp.png" -t && sleep 1
 set $mode_system System (l) lock, (e) logout, (s) suspend, (r) reboot, (Shift+s) shutdown
 mode "$mode_system" {
     bindsym l exec --no-startup-id $locker, mode "default"

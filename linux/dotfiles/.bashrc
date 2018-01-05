@@ -7,6 +7,7 @@
 
 # PS1='[\u@\h: \W]\$ '
 PS1='[\u@\h: $(pwd)]\$ '
+# csh: set prompt = '[%n@%m: %~]$ '
 
 export TERM=linux
 export EDITOR='emacsclient -c -a emacs'

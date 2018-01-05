@@ -40,7 +40,7 @@ disk "/" {
 }
 
 battery all {
-        format = "&#xf240;%percentage %remaining"
+        format = "&#xf240;%percentage"
 }
 
 tztime local {

@@ -16,8 +16,6 @@ order += "ipv6"
 order += "wireless _first_"
 order += "ethernet _first_"
 order += "load"
-order += "cpu_temperature 0"
-# order += "cpu_usage"
 order += "disk /"
 order += "battery all"
 order += "tztime local"
@@ -33,15 +31,6 @@ ethernet _first_ {
         format_down = "&#xf0c1;: down"
 }
 
-battery all {
-        format = "&#xf240;%percentage %remaining"
-}
-
-tztime local {
-        format = "<span foreground='RoyalBlue'>&#xf073;%time</span>"
-        format_time = "%Y-%m-%d %H:%M"
-}
-
 load {
         format = "&#xf201;%1min"
 }
@@ -50,11 +39,11 @@ disk "/" {
         format = "&#xf0a0;%avail"
 }
 
-cpu_temperature 0 {
-        format = "&#xf2c7;%degrees °C"
-        path = "/sys/devices/platform/coretemp.0/hwmon/hwmon2/temp1_input"
+battery all {
+        format = "&#xf240;%percentage %remaining"
 }
 
-cpu_usage {
-        format = "&#xf2db;%usage"
+tztime local {
+        format = "<span foreground='RoyalBlue'>&#xf073;%time</span>"
+        format_time = "%Y-%m-%d %H:%M"
 }

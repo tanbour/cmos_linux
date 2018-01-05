@@ -1,63 +1,68 @@
-! xft
-xft.dpi: 96
-xft.antialias: true
-xft.rgba: rgb
-xft.hinting: true
-xft.hintstyle: hintslight
+! Xft
+! Xft.dpi: 96
+! Xft.antialias: true
+! Xft.hinting: true
+! Xft.autohint = false
+! Xft.hintstyle: hintslight
+Xft.rgba: rgb
+Xft.lcdfilter: lcddefault
 
-! xterm
-! xterm*VT100.geometry: 125x30
-xterm*locale: true
-xterm*metaSendsEscape: true
-xterm*saveLines: 4096
-xterm*scrollBar: true
-xterm*rightScrollBar: true
-xterm*scrollKey: true
-xterm*scrollTtyOutput: false
-xterm*jumpScroll: true
-xterm*multiScroll: true
-xterm*toolBar: false
-xterm*borderWidth: 0
-xterm*foreground: rgb:b2/b2/b2
-xterm*background: rgb:08/08/08
-xterm*utf8: true
-xterm*utf8Title: true
-xterm*faceName: DejaVu Sans Mono:size=8:style=Book:antialias=true
-xterm*faceNameDoublesize: Source Han Sans CN
-xterm*faceSize: 10
-! xterm*faceName: Monospace:pixelsize=15
-! xterm*faceNameDoublesize: WenQuanYi Zen Hei:pixelsize=15
-! xterm*font: -*-dina-medium-r-*-*-16-*-*-*-*-*-*-*
-xterm*cursorBlink: true
-xterm*bellIsUrgent: true
-xterm*eightBitInput: true
+! UXTerm
+! UXTerm.vt100.geometry: 125x30
+UXTerm.vt100.locale: true
+UXTerm.vt100.metaSendsEscape: true
+UXTerm.vt100.saveLines: 4096
+UXTerm.vt100.scrollBar: true
+UXTerm.vt100.rightScrollBar: true
+UXTerm.vt100.scrollKey: true
+UXTerm.vt100.scrollTtyOutput: false
+UXTerm.vt100.jumpScroll: true
+UXTerm.vt100.multiScroll: true
+UXTerm.vt100.toolBar: false
+UXTerm*faceName: DejaVu Sans Mono
+UXTerm*faceNameDoublesize: Source Han Sans CN
+UXTerm*faceSize: 10
+UXTerm.vt100.cursorBlink: true
+UXTerm.vt100.bellIsUrgent: true
+UXTerm.vt100.eightBitInput: true
 
-! terminal colors
-! tangoesque scheme
-! xterm*background: #111111
-! xterm*foreground: #babdb6
-
-! Black + DarkGrey
-xterm*color0: #000000
-xterm*color8: #555753
-! DarkRed + Red
-xterm*color1: #ff6565
-xterm*color9: #ff8d8d
-! DarkGreen + Green
-xterm*color2: #93d44f
-xterm*color10: #c8e7a8
-! DarkYellow + Yellow
-xterm*color3: #eab93d
-xterm*color11: #ffc123
-! DarkBlue + Blue
-xterm*color4: #204a87
-xterm*color12: #3465a4
-! DarkMagenta + Magenta
-xterm*color5: #ce5c00
-xterm*color13: #f57900
-! DarkCyan + Cyan
-xterm*color6: #89b6e2
-xterm*color14: #46a4ff
-! LightGrey + White
-xterm*color7: #cccccc
-xterm*color15: #ffffff
+!TomorrowNightEighties
+#define t_foreground   #cccccc
+#define t_background   #2d2d2d
+#define t_current_line #393939
+#define t_selection    #515151
+#define t_comment      #999999
+#define t_red          #f2777a
+#define t_orange       #f99157
+#define t_yellow       #ffcc66
+#define t_green        #99cc99
+#define t_aqua         #66cccc
+#define t_blue         #6699cc
+#define t_purple       #cc99cc
+*.foreground:   t_foreground
+*.background:   t_background
+*.cursorColor:  #aeafad
+! Black + Grey
+*.color0:       #000000
+*.color8:       #666666
+! Red + Bright Red
+*.color1:       t_red
+*.color9:       #FF3334
+! Green + Bright Green
+*.color2:       t_green
+*.color10:      #9ec400
+! Yellow (Orange) + Bright Yellow (Yellow)
+*.color3:       t_orange
+*.color11:      t_yellow
+! Blue + Bright Blue
+*.color4:       t_blue
+*.color12:      t_blue
+! Magenta (Purple) + Bright Magenta
+*.color5:       t_purple
+*.color13:      #b777e0
+! Cyan (Aqua) + Bright Cyan
+*.color6:       t_aqua
+*.color14:      #54ced6
+! Light Grey (Selection) + White (Current Line)
+*.color7:       t_selection
+*.color15:      t_current_line

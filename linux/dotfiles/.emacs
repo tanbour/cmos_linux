@@ -42,7 +42,7 @@
 
 ;; cmos_conf
 (setq-default indent-tabs-mode nil)
-(setq default-frame-alist '((height . 60) (width . 90) (font . "DejaVu Sans Mono-8")))
+(setq default-frame-alist '((height . 60) (width . 90) (font . "DejaVu Sans Mono-10")))
 (setq require-final-newline t)
 (setq ido-enable-flex-matching t)
 (setq ido-everywhere t)

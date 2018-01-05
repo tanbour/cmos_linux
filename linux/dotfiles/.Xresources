@@ -21,7 +21,7 @@ UXTerm.vt100.multiScroll: true
 UXTerm.vt100.toolBar: false
 UXTerm*faceName: DejaVu Sans Mono
 UXTerm*faceNameDoublesize: Source Han Sans CN
-UXTerm*faceSize: 8
+UXTerm*faceSize: 10
 UXTerm.vt100.cursorBlink: true
 UXTerm.vt100.bellIsUrgent: true
 UXTerm.vt100.eightBitInput: true

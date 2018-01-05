@@ -1,0 +1,10 @@
+cp ~/.emacs ~/ws/cmos_linux/linux/dotfiles/.emacs
+cp ~/.bashrc ~/ws/cmos_linux/linux/dotfiles/.bashrc
+cp ~/.bash_profile ~/ws/cmos_linux/linux/dotfiles/.bash_profile
+cp ~/.vimrc ~/ws/cmos_linux/linux/dotfiles/.vimrc
+cp ~/.xinitrc ~/ws/cmos_linux/linux/dotfiles/.xinitrc
+cp ~/.Xresources ~/ws/cmos_linux/linux/dotfiles/.Xresources
+cp ~/.gitconfig ~/ws/cmos_linux/linux/dotfiles/.gitconfig
+cp ~/.config/i3/config ~/ws/cmos_linux/linux/dotfiles/.config/i3/config
+cp ~/.config/i3status/config ~/ws/cmos_linux/linux/dotfiles/.config/i3status/config
+cp ~/.config/dunst/dunstrc ~/ws/cmos_linux/linux/dotfiles/.config/dunst/dunstrc

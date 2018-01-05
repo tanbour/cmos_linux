@@ -288,9 +288,15 @@ chsh -s <shell> <user>
 pwck
 grpck
 
-* nvidia X11
-nvidia-xconfig
-/etc/X11/xorg.conf
+* nvidia
+** correct DPI
+/etc/X11/xorg.conf.d/20-nvidia.conf
+Section "Device"
+    Identifier     "Nvidia Card"
+    Driver         "nvidia"
+    VendorName     "NVIDIA Corporation"
+    Option         "DPI" "96 x 96"
+EndSection
 
 * latex cjk
 ** encapsulated

@@ -19,6 +19,7 @@ order += "load"
 order += "disk /"
 order += "battery all"
 order += "tztime local"
+order += "volume master"
 
 wireless _first_ {
         format_up = "&#xf1eb;: %quality&#xf1fa;%ip"
@@ -46,4 +47,10 @@ battery all {
 tztime local {
         format = "<span foreground='RoyalBlue'>&#xf073;%time</span>"
         format_time = "%Y-%m-%d %H:%M"
+}
+
+volume master {
+        format = "♪: %volume"
+        format_muted = "♪: muted (%volume)"
+        device = "pulse"
 }

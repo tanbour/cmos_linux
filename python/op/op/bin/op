@@ -9,7 +9,7 @@ import os
 import argparse
 import pcom
 import init_runner
-import dc_runner
+import flow_runner
 
 LOG = pcom.gen_logger(__name__)
 
@@ -19,57 +19,45 @@ def gen_init_parser(subparsers):
         "init",
         help="sub cmd about generating initial project directories")
     init_parser.add_argument(
-        "-list", dest="proj_list", default=False, action="store_true",
+        "-list", dest="init_proj_list", action="store_true",
         help="toggle to list all currently available proj names")
     init_parser.add_argument(
-        "-proj", dest="proj_name", default="",
+        "-list_env", dest="init_env_list", action="store_true",
+        help="toggle to list all internal environment variables")
+    init_parser.add_argument(
+        "-p", dest="init_proj_name", default="",
         help="input the proj name which will be check out from repository")
     init_parser.add_argument(
-        "-dir", dest="sub_dir", default=[], nargs="+",
-        help="input the directory name from repository")
+        "-b", dest="init_block_lst", default=[], nargs="+",
+        help="input the block names to be check out in the specified project")
+    init_parser.add_argument(
+        "-d", dest="init_dir", default="",
+        help="input the directory name used to contain the project")
     init_parser.set_defaults(func=main_init)
 
 def main_init(args):
     """init sub cmd top function"""
     init_runner.run_init(args)
 
-def gen_dc_parser(subparsers):
-    """to generate dc parser"""
-    dc_parser = subparsers.add_parser(
-        "dc",
-        help="sub cmd about run dc")
-    dc_parser.add_argument(
-        "-gen_tcl", dest="dc_gen_tcl", default=False, action="store_true",
-        help="toggle to generate dc tcl files")
-    dc_parser.add_argument(
-        "-d", dest="dc_dir", default="",
-        help="input existed dc directory")
-    dc_parser.add_argument(
-        "-run", dest="dc_run", default=False, action="store_true",
-        help="toggle to run dc")
-    dc_parser.add_argument(
-        "-topo", dest="dc_topo", default=False, action="store_true",
-        help="toggle to run dc in topographical mode")
-    dc_parser.add_argument(
-        "-s", dest="dc_src", default="",
-        help="input dc source files directory")
-    dc_parser.add_argument(
-        "-tm", dest="dc_tm_flg", default=False, action="store_true",
-        help="toggle to parse dc timing report automatically")
-    dc_parser.add_argument(
-        "-l", dest="dc_tm_level", type=int, default=1,
-        help="input the statistics level to parse dc timing report")
-    dc_parser.add_argument(
-        "-fm", dest="dc_formality", default=False, action="store_true",
-        help="toggle to run formality automatically")
-    dc_parser.add_argument(
-        "-cp_rtl", dest="dc_cp_rtl", default=False, action="store_true",
-        help="toggle to copy all rtl filelist file into timestamp dir")
-    dc_parser.set_defaults(func=main_dc)
+def gen_flow_parser(subparsers):
+    """to generate flow parser"""
+    flow_parser = subparsers.add_parser(
+        "flow",
+        help="sub cmd about run flow")
+    flow_parser.add_argument(
+        "-gen_tcl", dest="flow_gen_tcl", action="store_true",
+        help="toggle to generate flow tcl files")
+    flow_parser.add_argument(
+        "-d", dest="flow_dir", default="",
+        help="input existed flow directory")
+    flow_parser.add_argument(
+        "-run", dest="flow_run", action="store_true",
+        help="toggle to run flow")
+    flow_parser.set_defaults(func=main_flow)
 
-def main_dc(args):
-    """dc sub cmd top function"""
-    dc_runner.run_dc(args)
+def main_flow(args):
+    """flow sub cmd top function"""
+    flow_runner.run_flow(args)
 
 def gen_args_top():
     """to generate top args help for op"""
@@ -79,7 +67,7 @@ def gen_args_top():
         help="show op version info and exit")
     subparsers = parser.add_subparsers()
     gen_init_parser(subparsers)
-    gen_dc_parser(subparsers)
+    gen_flow_parser(subparsers)
     return parser.parse_args()
 
 def main():

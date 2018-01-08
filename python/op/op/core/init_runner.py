@@ -1,13 +1,12 @@
 """
-Author: Junxiu Liu @ CPU Verification Platform Group
-Email: liujx@cpu.com.cn
-Description: pj init sub cmd entrence
+Author: Guanyu Yi @ OnePiece Platform Group
+Email: guanyu_yi@alchip.com
+Description: projects initialization and related features
 """
 
 import os
 import getpass
-import svn.remote
-import svn.exception
+import git
 import requests
 import pcom
 
@@ -56,25 +55,24 @@ def sp_check_out(proj_name, sub_dir_lst, repo_base, u_n, p_w):
 
 def run_init(args):
     """to run init sub cmd"""
-    normal_proj_dic = {"cpu0": "http://svn1/proj/cpu0/trunk",
-                       "cpu1_pre": "http://svn1/proj/cpu1_pre/trunk",
-                       "cpu1_proto": "http://svn1/proj/cpu1_proto",
-                       "tools": "http://svn1/tools/tools"}
-    svn_proj_dic = {"cpu1": "http://svn1/proj/cpu1"}
+    git_proj_dic = {
+        "ff": "git@xsfuture.com:/srv/ff_git.git",
+        "hosts": "https://github.com/googlehosts/hosts.git"
+    }
     all_proj_dic = {}
-    all_proj_dic.update(normal_proj_dic)
-    all_proj_dic.update(svn_proj_dic)
-    if args.proj_list:
-        proj_lst = sorted(list(all_proj_dic))
+    all_proj_dic.update(git_proj_dic)
+    proj_lst = sorted(list(all_proj_dic))
+    if args.init_proj_list:
         str_lst = [f"{os.linesep}all available projects"]
         str_lst.append("*"*30)
         str_lst.extend(proj_lst)
         str_lst.append("*"*30)
         LOG.info(os.linesep.join(str_lst))
         return
-    elif args.proj_name:
-        if args.proj_name not in all_proj_dic:
-            raise Exception(f"proj name must be one of {proj_lst}")
+    elif args.init_proj_name:
+        if args.init_proj_name not in all_proj_dic:
+            LOG.error(f"proj name must be one of {proj_lst}")
+            os.sys.exit()
         repo_base = all_proj_dic[args.proj_name]
         try:
             repo = svn.remote.RemoteClient(repo_base)

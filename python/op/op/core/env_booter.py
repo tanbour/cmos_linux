@@ -15,7 +15,8 @@ LOG = pcom.gen_logger(__name__)
 def find_proj_root(path_str):
     """to find project root directory according to specified file"""
     if path_str == "/":
-        raise Exception("it's not in a working copy from a project repository")
+        LOG.error("it's not in a project repository")
+        os.sys.exit()
     elif os.path.isfile(f"{path_str}{os.sep}{pcom.FLAG_FILE}"):
         return path_str
     else:

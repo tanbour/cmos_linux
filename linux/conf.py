@@ -20,6 +20,9 @@ def gen_args_top():
 
 args = gen_args_top()
 
+if not args.apply_mode and not args.backup_mode and not args.check_mode:
+    os.sys.exit("no action to be execuated")
+
 exec_path = os.path.realpath(__file__)
 exec_dir = os.path.dirname(exec_path)
 

@@ -7,9 +7,9 @@ Description: op platform main entrence
 
 import os
 import argparse
-import pcom
-import init_runner
-import flow_runner
+from op.core import pcom
+from op.core import init_runner
+from op.core import flow_runner
 
 LOG = pcom.gen_logger(__name__)
 

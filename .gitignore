@@ -105,11 +105,7 @@ latex/**/auto
 dia/*.dia~
 
 # pg db
-python/cas_site/pg_data/
-python/op_site/pg_data/
+python/**/*_site/pg_data/
 
-# pj temp
-*/proj/**/output/
-
-# op temp
-*/op/**/lib_test/
+# proj temp
+**/proj/**/output/

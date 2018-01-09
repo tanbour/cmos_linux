@@ -14,3 +14,8 @@ FLAG_FILE = ".alchip_proj_root_flg"
 OP_ROOT = os.path.dirname(os.path.realpath(__file__))
 OP_CFG = f"{OP_ROOT}{os.sep}config"
 OP_TEMPLATES = f"{OP_ROOT}{os.sep}templates"
+
+tree_ignore_lst = ["share"]
+
+proj_cmn_cfg = "$PROJ_ROOT/share/config/proj_cmn.cfg"
+blk_cmn_cfg = "$BLK_ROOT/share/config/blk_cmn.cfg"

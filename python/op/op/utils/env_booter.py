@@ -9,6 +9,7 @@ import datetime as dt
 import subprocess
 import copy
 from utils import pcom
+from utils import settings
 
 LOG = pcom.gen_logger(__name__)
 
@@ -24,14 +25,15 @@ def find_proj_root(path_str):
 
 def find_module_dir(ced, cfg_dic, module):
     """to find verification module dir according to their subdir config"""
-    for module_dir in pcom.find_iter(ced["PROJ_VERIF"], module, True):
-        if os.path.isdir(f"{module_dir}{os.sep}config"):
+    if module not in settings.tree_ignore_lst:
+        for module_dir in pcom.find_iter(ced["PROJ_VERIF"], module, True, True):
             return module_dir
-    tree_ignore_str = "|".join(pcom.rd_cfg(cfg_dic["proj"], "proj", "tree_ignore"))
-    run_str = f"tree -d -I '(|{tree_ignore_str}|)' {ced['PROJ_VERIF']}"
+    tree_ignore_str = "|".join(settings.tree_ignore_lst)
+    run_str = f"tree -L 1 -d -I '(|{tree_ignore_str}|)' {ced['PROJ_ROOT']}"
     tree_str = subprocess.run(
         run_str, shell=True, check=True, stdout=subprocess.PIPE).stdout.decode()
-    raise Exception(f"module {module} is NA; the possible module is {os.linesep}{tree_str}")
+    LOG.error(f"module {module} is NA; the possible module is {os.linesep}{tree_str}")
+    os.sys.exit()
 
 class EnvBooter(object):
     """environment booter for pj"""
@@ -39,15 +41,16 @@ class EnvBooter(object):
         self.ced = {}
         self.cfg_dic = {}
     def boot_env(self):
-        """to boot top environments used only by pj"""
+        """to boot environments used only by op"""
         os.environ["PROJ_ROOT"] = find_proj_root(os.getcwd())
         self.ced = {
             "PROJ_ROOT": os.environ["PROJ_ROOT"],
             "TIME": dt.datetime.now(),
             "USER_NAME": os.environ["USER"]}
-        proj_cfg = os.path.expandvars("$PROJ_ROOT/share/config/proj.cfg")
+        proj_cmn_cfg = os.path.expandvars(settings.proj_cmn_cfg)
         if not os.path.isfile(proj_cfg):
-            raise Exception(f"proj config file {proj_cfg} is NA")
+            LOG.error(f"proj config file {proj_cfg} is NA")
+            os.sys.exit()
         self.cfg_dic = {"proj": pcom.gen_cfg([proj_cfg])}
         for env_key, env_value in (
                 self.cfg_dic["proj"]["boot_env"] if "boot_env" in self.cfg_dic["proj"]

@@ -5,7 +5,7 @@ import re
 import itertools
 import glob
 import jinja2
-import pcom
+from utils import pcom
 
 exec_path = os.path.realpath(__file__)
 exec_dir = os.path.dirname(exec_path)

@@ -8,7 +8,7 @@ import os
 import getpass
 import git
 import requests
-import pcom
+from utils import pcom
 
 LOG = pcom.gen_logger(__name__)
 

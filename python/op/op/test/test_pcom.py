@@ -6,7 +6,7 @@ pcom.py test cases
 import os
 import unittest
 import shutil
-import pcom
+from utils import pcom
 
 class TestGenCfg(unittest.TestCase):
     """test case class for gen_cfg function"""

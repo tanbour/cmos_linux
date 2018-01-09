@@ -23,7 +23,7 @@ def gen_logger(logger_name, file_flg=False):
                 "format": "{asctime} {levelname} [{name}] {message}",
                 "datefmt": "%H:%M:%S",
                 "style": "{",
-                "class": "pcom.ColoredFormatter"},
+                "class": "utils.pcom.ColoredFormatter"},
             },
         "handlers": {
             "console": {

@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 """
 Author: Guanyu Yi @ OnePiece Platform Group
 Email: guanyu_yi@alchip.com
@@ -7,9 +6,9 @@ Description: op platform main entrence
 
 import os
 import argparse
-from op.core import pcom
-from op.core import init_runner
-from op.core import flow_runner
+from utils import pcom
+from core import init_runner
+from core import flow_runner
 
 LOG = pcom.gen_logger(__name__)
 
@@ -82,6 +81,3 @@ def main():
         LOG.info("op complete")
     else:
         LOG.critical("sub cmd is NA, please use -h to check all sub cmds")
-
-if __name__ == "__main__":
-    main()

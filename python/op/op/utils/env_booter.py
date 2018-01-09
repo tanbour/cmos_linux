@@ -8,7 +8,7 @@ import os
 import datetime as dt
 import subprocess
 import copy
-import pcom
+from utils import pcom
 
 LOG = pcom.gen_logger(__name__)
 

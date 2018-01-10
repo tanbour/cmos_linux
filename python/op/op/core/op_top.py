@@ -31,7 +31,7 @@ def gen_init_parser(subparsers):
         help="input the block names to be check out in the specified project")
     init_parser.add_argument(
         "-d", dest="init_dir", default="",
-        help="input the directory name used to contain the project")
+        help="input the directory used to contain the project")
     init_parser.set_defaults(func=main_init)
 
 def main_init(args):

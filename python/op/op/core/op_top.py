@@ -4,13 +4,30 @@ Email: guanyu_yi@alchip.com
 Description: op platform main entrence
 """
 
-import os
 import argparse
 from utils import pcom
-from core import init_runner
-from core import flow_runner
+from core import runner_admin
+from core import runner_init
+from core import runner_flow
 
 LOG = pcom.gen_logger(__name__)
+
+def gen_admin_parser(subparsers):
+    """to generate admin parser"""
+    admin_parser = subparsers.add_parser(
+        "admin",
+        help="sub cmd about kicking off project related actions")
+    admin_parser.add_argument(
+        "-p", dest="admin_proj_name", default="",
+        help="input the proj name which will be kicked off")
+    admin_parser.add_argument(
+        "-b", dest="admin_block_lst", default=[], nargs="+",
+        help="input the block names to be initialized in the specified project")
+    admin_parser.set_defaults(func=main_admin)
+
+def main_admin(args):
+    """init sub cmd top function"""
+    runner_admin.run_admin(args)
 
 def gen_init_parser(subparsers):
     """to generate init parser"""
@@ -21,22 +38,16 @@ def gen_init_parser(subparsers):
         "-list", dest="init_proj_list", action="store_true",
         help="toggle to list all currently available proj names")
     init_parser.add_argument(
-        "-list_env", dest="init_env_list", action="store_true",
-        help="toggle to list all internal environment variables")
-    init_parser.add_argument(
         "-p", dest="init_proj_name", default="",
         help="input the proj name which will be check out from repository")
-    init_parser.add_argument(
-        "-b", dest="init_block_lst", default=[], nargs="+",
-        help="input the block names to be check out in the specified project")
-    init_parser.add_argument(
-        "-d", dest="init_dir", default="",
-        help="input the directory used to contain the project")
+    # init_parser.add_argument(
+    #     "-d", dest="init_dir", default="",
+    #     help="input the directory used to contain the project")
     init_parser.set_defaults(func=main_init)
 
 def main_init(args):
     """init sub cmd top function"""
-    init_runner.run_init(args)
+    runner_init.run_init(args)
 
 def gen_flow_parser(subparsers):
     """to generate flow parser"""
@@ -47,6 +58,9 @@ def gen_flow_parser(subparsers):
         "-gen_tcl", dest="flow_gen_tcl", action="store_true",
         help="toggle to generate flow tcl files")
     flow_parser.add_argument(
+        "-list_env", dest="init_env_list", action="store_true",
+        help="toggle to list all internal environment variables")
+    flow_parser.add_argument(
         "-d", dest="flow_dir", default="",
         help="input existed flow directory")
     flow_parser.add_argument(
@@ -56,7 +70,7 @@ def gen_flow_parser(subparsers):
 
 def main_flow(args):
     """flow sub cmd top function"""
-    flow_runner.run_flow(args)
+    runner_flow.run_flow(args)
 
 def gen_args_top():
     """to generate top args help for op"""
@@ -65,6 +79,7 @@ def gen_args_top():
         "-v", dest="version", default=False, action="store_true",
         help="show op version info and exit")
     subparsers = parser.add_subparsers()
+    gen_admin_parser(subparsers)
     gen_init_parser(subparsers)
     gen_flow_parser(subparsers)
     return parser.parse_args()

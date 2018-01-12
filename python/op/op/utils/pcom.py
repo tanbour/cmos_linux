@@ -9,7 +9,6 @@ import re
 import logging.config
 import fnmatch
 import configparser
-import subprocess
 import psutil
 import jinja2
 
@@ -23,36 +22,45 @@ def gen_logger(logger_name, file_flg=False):
                 "format": "{asctime} {levelname} [{name}] {message}",
                 "datefmt": "%H:%M:%S",
                 "style": "{",
-                "class": "utils.pcom.ColoredFormatter"},
+                "class": "utils.pcom.ColoredFormatter"
             },
+        },
         "handlers": {
             "console": {
                 "level": "INFO",
                 "class": "logging.StreamHandler",
-                "formatter": "color"},
+                "formatter": "color"
             },
+        },
         "loggers": {
             "": {
                 "handlers": ["console"],
-                "level": "DEBUG"}}}
+                "level": "DEBUG"
+            }
+        }
+    }
     if file_flg:
-        logging_dic["formatters"].update(
-            {"common": {
+        logging_dic["formatters"].update({
+            "common": {
                 "format": "{asctime} {name} {funcName} {lineno} [{levelname}] {message}",
-                "style": "{"}})
-        logging_dic["handlers"].update(
-            {"file": {
+                "style": "{"
+            }
+        })
+        logging_dic["handlers"].update({
+            "file": {
                 "level": "DEBUG",
                 "class": "logging.handlers.RotatingFileHandler",
                 "formatter": "common",
-                "filename": "pj.log"}})
+                "filename": "op.log"
+            }
+        })
         logging_dic["loggers"][""]["handlers"].append("file")
     logging.config.dictConfig(logging_dic)
     logger = logging.getLogger(logger_name)
     return logger
 
 def gen_cfg(cfg_file_iter, dlts=("=", ":")):
-    """to generate pj system config by reading config files"""
+    """to generate op system config by reading config files"""
     config = configparser.ConfigParser(allow_no_value=True, delimiters=dlts)
     config.optionxform = str
     config.SECTCRE = re.compile(r"\[\s*(?P<header>[^]]+?)\s*\]")
@@ -94,6 +102,10 @@ def find_iter(path, pattern, dir_flg=False, cur_flg=False, i_str=""):
                 if os.access(root_find_name, os.R_OK):
                     yield root_find_name
 
+def re_str(i_str):
+    """to convert any string into re [A-Za-z0-9_] string"""
+    return re.sub(r"\W", "_", i_str)
+
 def pterminate(proc_pid):
     """to terminate specified process according to pid"""
     proc = psutil.Process(proc_pid)
@@ -108,13 +120,6 @@ def pkill(proc_pid):
         sub_proc.kill()
     proc.kill()
 
-def gen_svn_ver(path):
-    """to generate current svn version"""
-    svn_log_str = subprocess.run(
-        f"svn log {path} --limit 1", shell=True, check=True,
-        stdout=subprocess.PIPE).stdout.decode()
-    return re.search(r"---\n(r\d+)\s|\s", svn_log_str).group(1)
-
 def ren_tempfile(temp_in, temp_out, temp_dic):
     """to render jinja2 template files"""
     template_loader = jinja2.FileSystemLoader(os.path.dirname(temp_in))
@@ -124,30 +129,31 @@ def ren_tempfile(temp_in, temp_out, temp_dic):
         ttf.write(template.render(temp_dic))
 
 class ColoredFormatter(logging.Formatter):
-    """pj colored logging formatter"""
+    """op colored logging formatter"""
     def format(self, record):
         log_colors = {
             "DEBUG": "\033[1;35m[DEBUG]\033[1;0m",
             "INFO": "\033[1;34m[INFO]\033[1;0m",
             "WARNING": "\033[1;33m[WARNING]\033[1;0m",
             "ERROR": "\033[1;31m[ERROR]\033[1;0m",
-            "CRITICAL": "\033[1;31m[CRITICAL]\033[1;0m"}
+            "CRITICAL": "\033[1;31m[CRITICAL]\033[1;0m"
+        }
         level_name = record.levelname
         msg = logging.Formatter.format(self, record)
         return msg.replace(level_name, log_colors.get(level_name, level_name))
 
 class REOpter(object):
     """customized class for reusing regex matching pattern groups"""
-    def __init__(self, re_str):
-        self.re_str = re_str
+    def __init__(self, i_str):
+        self.i_str = i_str
         self.re_result = None
     def match(self, re_pat):
         """to reuse regex match method"""
-        self.re_result = re_pat.match(self.re_str)
+        self.re_result = re_pat.match(self.i_str)
         return bool(self.re_result)
     def search(self, re_pat):
         """to reuse regex search method"""
-        self.re_result = re_pat.search(self.re_str)
+        self.re_result = re_pat.search(self.i_str)
         return bool(self.re_result)
     def group(self, i):
         """to invoke regex matched group content"""

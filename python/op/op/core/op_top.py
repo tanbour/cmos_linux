@@ -1,7 +1,7 @@
 """
 Author: Guanyu Yi @ OnePiece Platform Group
 Email: guanyu_yi@alchip.com
-Description: op platform main entrence
+Description: op platform top entrence
 """
 
 import argparse
@@ -17,6 +17,9 @@ def gen_admin_parser(subparsers):
     admin_parser = subparsers.add_parser(
         "admin",
         help="sub cmd about kicking off project related actions")
+    admin_parser.add_argument(
+        "-list", dest="admin_proj_list", action="store_true",
+        help="toggle to list all currently available proj names")
     admin_parser.add_argument(
         "-p", dest="admin_proj_name", default="",
         help="input the proj name which will be kicked off")
@@ -40,9 +43,6 @@ def gen_init_parser(subparsers):
     init_parser.add_argument(
         "-p", dest="init_proj_name", default="",
         help="input the proj name which will be check out from repository")
-    # init_parser.add_argument(
-    #     "-d", dest="init_dir", default="",
-    #     help="input the directory used to contain the project")
     init_parser.set_defaults(func=main_init)
 
 def main_init(args):
@@ -54,6 +54,9 @@ def gen_flow_parser(subparsers):
     flow_parser = subparsers.add_parser(
         "flow",
         help="sub cmd about run flow")
+    flow_parser.add_argument(
+        "-b", dest="flow_block", default="",
+        help="input block name for running flows")
     flow_parser.add_argument(
         "-gen_tcl", dest="flow_gen_tcl", action="store_true",
         help="toggle to generate flow tcl files")

@@ -1,11 +1,10 @@
 """
 Author: Guanyu Yi @ OnePiece Platform Group
 Email: guanyu_yi@alchip.com
-Description: base class of projects from code repo
+Description: base class for processing projects from code repo
 """
 
 import os
-import getpass
 import git
 from utils import pcom
 from utils import settings
@@ -18,7 +17,16 @@ class ProjRepo(object):
         self.all_proj_dic = all_proj_dic = settings.ALL_PROJ_DIC
         self.all_proj_lst = sorted(list(all_proj_dic))
         self.repo_dic = {}
+    def list_proj(self):
+        """to list all projects registered in op"""
+        str_lst = [f"{os.linesep}all available projects"]
+        str_lst.append("*"*30)
+        str_lst.extend(self.all_proj_lst)
+        str_lst.append("*"*30)
+        LOG.info(os.linesep.join(str_lst))
+        LOG.info("list all available projects done")
     def check_proj(self):
+        """to check initial project name and dir permissions"""
         if self.repo_dic["init_proj_name"] not in self.all_proj_dic:
             LOG.error(f"project name must be one of {self.all_proj_lst}")
             raise SystemExit()
@@ -29,24 +37,25 @@ class ProjRepo(object):
             )
             raise SystemExit()
     def git_proj(self):
-        try:
-            self.repo_dic["repo"] = repo = git.Repo.init(self.repo_dic["repo_dir"])
-            rmt = repo.remote() if repo.remotes else repo.create_remote(
-                "origin", self.repo_dic["repo_url"])
-            LOG.info(
-                f"git pulling project {self.repo_dic['init_proj_name']} "
-                f"from repository to {self.repo_dic['repo_dir']} ..."
-            )
-            pcom.cfm()
-            rmt.pull("master")
-            LOG.info("done")
-            LOG.info(f"please run op cmds under the project dir {self.repo_dic['repo_dir']}")
-        except git.exc.CheckoutError:
-            u_n = getpass.getuser()
-            p_w = getpass.getpass("git password: ")
+        """to check out project by using git"""
+        self.repo_dic["repo"] = repo = git.Repo.init(self.repo_dic["repo_dir"])
+        rmt = repo.remote() if repo.remotes else repo.create_remote(
+            "origin", self.repo_dic["repo_url"])
+        LOG.info(
+            f"git pulling project {self.repo_dic['init_proj_name']} "
+            f"from repository to {self.repo_dic['repo_dir']} ..."
+        )
+        pcom.cfm()
+        rmt.pull("master")
+        LOG.info("done")
+        LOG.info(f"please run op cmds under the project dir {self.repo_dic['repo_dir']}")
+        # u_n = getpass.getuser()
+        # p_w = getpass.getpass("git password: ")
     def svn_proj(self):
+        """to check out project by using svn"""
         pass
     def repo_proj(self, init_proj_name):
+        """to operate project from code repo"""
         self.repo_dic["init_proj_name"] = init_proj_name
         self.repo_dic["repo_url"] = self.all_proj_dic[init_proj_name]
         self.repo_dic["repo_dir"] = os.getcwd()

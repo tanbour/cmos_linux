@@ -2,7 +2,7 @@
 """
 Author: Guanyu Yi @ OnePiece Platform Group
 Email: guanyu_yi@alchip.com
-Description: op platform unique entrance
+Description: op platform main entrance
 """
 
 from core import op_top

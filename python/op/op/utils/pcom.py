@@ -113,12 +113,6 @@ def cfm(exit_str="action aborted"):
     if apply_rsp.strip() not in ("yes", "ye", "y"):
         raise SystemExit(exit_str)
 
-def cfm_copytree(src, dst):
-    """to prompt confirm and perform copytree action"""
-    cfm()
-    shutil.rmtree(dst, True)
-    shutil.copytree(src, dst)
-
 def pterminate(proc_pid):
     """to terminate specified process according to pid"""
     proc = psutil.Process(proc_pid)

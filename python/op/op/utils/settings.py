@@ -1,7 +1,7 @@
 """
 Author: Guanyu Yi @ OnePiece Platform Group
 Email: guanyu_yi@alchip.com
-Description: op basic settings
+Description: op settings
 """
 
 import os

@@ -39,7 +39,7 @@ class CfgProc(env_boot.EnvBoot):
                 continue
             for proj_tmp in pcom.find_iter(
                     f"{self.ced['PROJ_SHARE_TMP']}{os.sep}{cfg_k}", "*"):
-                tar_file = proj_tmp.replace(
+                dst_file = proj_tmp.replace(
                     self.ced["PROJ_SHARE_TMP"], self.ced["OUTPUT_SRC"])
                 pcom.ren_tempfile(
-                    proj_tmp, tar_file, {"CED": self.ced, "cfg": cfg_v})
+                    proj_tmp, dst_file, {"CED": self.ced, "cfg": cfg_v})

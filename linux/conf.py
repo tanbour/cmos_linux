@@ -21,7 +21,7 @@ def gen_args_top():
 args = gen_args_top()
 
 if not args.apply_mode and not args.backup_mode and not args.check_mode:
-    os.sys.exit("no action to be execuated")
+    raise SystemExit("no action to be execuated")
 
 exec_path = os.path.realpath(__file__)
 exec_dir = os.path.dirname(exec_path)
@@ -30,7 +30,7 @@ if args.apply_mode:
     print("CAUTION: this dotfiles applying action will overwrite your home cfg")
     apply_rsp = input("--> yes or no? ")
     if apply_rsp.strip() not in ("yes", "y"):
-        os.sys.exit("never mind")
+        raise SystemExit("never mind")
 
 for root_name, _, file_name_lst in os.walk(f"{exec_dir}{os.sep}dotfiles", followlinks=False):
     for find_name in fnmatch.filter(file_name_lst, "*"):

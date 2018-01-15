@@ -9,6 +9,7 @@ import re
 import logging.config
 import fnmatch
 import configparser
+import shutil
 import psutil
 import jinja2
 
@@ -105,6 +106,18 @@ def find_iter(path, pattern, dir_flg=False, cur_flg=False, i_str=""):
 def re_str(i_str):
     """to convert any string into re [A-Za-z0-9_] string"""
     return re.sub(r"\W", "_", i_str)
+
+def cfm(exit_str="action aborted"):
+    """to prompt in stdout about the confirmation of actions"""
+    apply_rsp = input("--> yes or no? ")
+    if apply_rsp.strip() not in ("yes", "ye", "y"):
+        raise SystemExit(exit_str)
+
+def cfm_copytree(src, dst):
+    """to prompt confirm and perform copytree action"""
+    cfm()
+    shutil.rmtree(dst, True)
+    shutil.copytree(src, dst)
 
 def pterminate(proc_pid):
     """to terminate specified process according to pid"""

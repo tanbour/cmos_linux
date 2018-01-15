@@ -31,17 +31,16 @@ class ProjRepo(object):
     def git_proj(self):
         try:
             self.repo_dic["repo"] = repo = git.Repo.init(self.repo_dic["repo_dir"])
-            rmt = repo.create_remote("origin", self.repo_dic["repo_url"])
+            rmt = repo.remote() if repo.remotes else repo.create_remote(
+                "origin", self.repo_dic["repo_url"])
             LOG.info(
                 f"git pulling project {self.repo_dic['init_proj_name']} "
                 f"from repository to {self.repo_dic['repo_dir']} ..."
             )
+            pcom.cfm()
             rmt.pull("master")
             LOG.info("done")
-            LOG.info(
-                "Please cd into the dir, make project level configuration, "
-                "and then perform next op actions"
-            )
+            LOG.info(f"please run op cmds under the project dir {self.repo_dic['repo_dir']}")
         except git.exc.CheckoutError:
             u_n = getpass.getuser()
             p_w = getpass.getpass("git password: ")

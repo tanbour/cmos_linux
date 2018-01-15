@@ -132,6 +132,7 @@ def ren_tempfile(temp_in, temp_out, temp_dic):
     template_loader = jinja2.FileSystemLoader(os.path.dirname(temp_in))
     template_env = jinja2.Environment(loader=template_loader)
     template = template_env.get_template(os.path.basename(temp_in))
+    os.makedirs(os.path.dirname(temp_out), exist_ok=True)
     with open(temp_out, "w") as ttf:
         ttf.write(template.render(temp_dic))
 

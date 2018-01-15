@@ -75,6 +75,9 @@ class EnvBoot(object):
         """to process project and block global cfg dic used only by op"""
         for proj_cfg in pcom.find_iter(self.ced["PROJ_SHARE_CFG"], "proj_*", cur_flg=True):
             cfg_kw = os.path.splitext(os.path.basename(proj_cfg))[0][5:]
+            if cfg_kw == "cmn":
+                LOG.warning("config file postfix cmn and dir are forbidden to use")
+                continue
             blk_cfg = f"{self.ced['BLK_CFG']}{os.sep}blk_{cfg_kw}.cfg"
             if self.admin_flg:
                 os.makedirs(os.path.dirname(blk_cfg), exist_ok=True)

@@ -18,7 +18,7 @@ def gen_admin_parser(subparsers):
         "admin",
         help="sub cmd about kicking off project related actions")
     admin_parser.add_argument(
-        "-list", dest="admin_proj_list", action="store_true",
+        "-list", dest="admin_list_proj", action="store_true",
         help="toggle to list all currently available proj names")
     admin_parser.add_argument(
         "-p", dest="admin_proj_name", default="",
@@ -38,7 +38,7 @@ def gen_init_parser(subparsers):
         "init",
         help="sub cmd about generating initial project directories")
     init_parser.add_argument(
-        "-list", dest="init_proj_list", action="store_true",
+        "-list", dest="init_list_proj", action="store_true",
         help="toggle to list all currently available proj names")
     init_parser.add_argument(
         "-p", dest="init_proj_name", default="",
@@ -58,14 +58,11 @@ def gen_flow_parser(subparsers):
         "-b", dest="flow_block", default="",
         help="input block name for running flows")
     flow_parser.add_argument(
-        "-gen_tcl", dest="flow_gen_tcl", action="store_true",
-        help="toggle to generate flow tcl files")
+        "-gen_run", dest="flow_gen_run", action="store_true",
+        help="toggle to generate flow run files")
     flow_parser.add_argument(
-        "-list_env", dest="init_env_list", action="store_true",
+        "-list_env", dest="flow_list_env", action="store_true",
         help="toggle to list all internal environment variables")
-    flow_parser.add_argument(
-        "-d", dest="flow_dir", default="",
-        help="input existed flow directory")
     flow_parser.add_argument(
         "-run", dest="flow_run", action="store_true",
         help="toggle to run flow")

@@ -47,7 +47,7 @@ class ProjAdminProc(proj_repo.ProjRepo):
 
 def run_admin(args):
     """to run admin sub cmd"""
-    if args.admin_proj_list:
+    if args.admin_list_proj:
         ProjAdminProc().list_proj()
     elif args.admin_proj_name:
         proj_admin_proc = ProjAdminProc()

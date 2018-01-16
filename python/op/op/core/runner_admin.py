@@ -18,12 +18,12 @@ class ProjAdminProc(proj_repo.ProjRepo):
     def fill_proj(self):
         """to fill project config and template dir after initialization"""
         proj_flg_file = f"{self.repo_dic['repo_dir']}{os.sep}{settings.FLG_FILE}"
-        LOG.info(f"generating op project flag file {settings.FLG_FILE}...")
+        LOG.info(f"generating op project flag file {settings.FLG_FILE} ...")
         if not os.path.isfile(proj_flg_file):
             with open(proj_flg_file, "w") as f_f:
                 f_f.write(self.repo_dic["init_proj_name"])
         LOG.info("done")
-        LOG.info("generating op project level configs and templates...")
+        LOG.info("generating op project level configs and templates ...")
         env_boot.EnvBoot()
         dst_cfg_dir = os.path.expandvars(settings.ADMIN_CFG_DIR)
         if os.path.isdir(dst_cfg_dir):

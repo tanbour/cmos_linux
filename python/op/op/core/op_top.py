@@ -58,14 +58,14 @@ def gen_flow_parser(subparsers):
         "-b", dest="flow_block", default="",
         help="input block name for running flows")
     flow_parser.add_argument(
-        "-gen_run", dest="flow_gen_run", action="store_true",
-        help="toggle to generate flow run files")
-    flow_parser.add_argument(
         "-list_env", dest="flow_list_env", action="store_true",
         help="toggle to list all internal environment variables")
     flow_parser.add_argument(
-        "-run", dest="flow_run", action="store_true",
-        help="toggle to run flow")
+        "-gen", dest="flow_gen", action="store_true",
+        help="toggle to generate flow run files")
+    flow_parser.add_argument(
+        "-run", dest="flow_run_lst", default=None, nargs="*",
+        help="toggle and input steps to run flow")
     flow_parser.set_defaults(func=main_flow)
 
 def main_flow(args):
@@ -91,7 +91,7 @@ def main():
         print("OnePiece Platform Version: op 4.0.0")
         return
     if hasattr(args, "func"):
-        LOG.info("op commence...")
+        LOG.info("op commence ...")
         args.func(args)
         LOG.info("op complete")
     else:

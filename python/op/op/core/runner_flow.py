@@ -15,8 +15,9 @@ LOG = pcom.gen_logger(__name__)
 class FlowProc(env_boot.EnvBoot, lib_proc.LibProc):
     """flow processor for blocks"""
     def __init__(self, blk_name):
-        super(FlowProc, self).__init__(blk_name)
+        env_boot.EnvBoot.__init__(self, blk_name)
         self.boot_env()
+        lib_proc.LibProc.__init__(self)
     def list_env(self):
         """to list all current project or block op environment variables"""
         LOG.info(f"{os.linesep}all op internal env variables")
@@ -36,7 +37,7 @@ class FlowProc(env_boot.EnvBoot, lib_proc.LibProc):
         LOG.info("done")
     def proc_lib_wrap(self):
         """a function wrapper for inherited LibProc function"""
-        self.proc_lib(self.cfg_dic["lib"])
+        self.proc_lib(self.ced["LIB"], self.cfg_dic["lib"])
     def proc_tmp(self):
         """to process project and block templates to generate output files"""
         for cfg_k, cfg_v in self.cfg_dic.items():

@@ -5,25 +5,40 @@ Description: flow related features
 """
 
 import os
-import pprint
 import subprocess
 from utils import pcom
 from utils import env_boot
+from core import lib_proc
 
 LOG = pcom.gen_logger(__name__)
 
-class FlowProc(env_boot.EnvBoot):
+class FlowProc(env_boot.EnvBoot, lib_proc.LibProc):
     """flow processor for blocks"""
     def __init__(self, blk_name):
         super(FlowProc, self).__init__(blk_name)
         self.boot_env()
     def list_env(self):
-        """to list all current op environment variables"""
+        """to list all current project or block op environment variables"""
         LOG.info(f"{os.linesep}all op internal env variables")
-        pprint.pprint(self.ced)
+        pcom.pp_list(self.ced)
         LOG.info("done")
+    def list_stage(self):
+        """to list all current project or block available stages"""
+        LOG.info(f"{os.linesep}all current available stages")
+        stage_dic = {}
+        for cfg_k, cfg_v in self.cfg_dic.items():
+            if cfg_k == "cmn":
+                continue
+            cfg_v_lst = list(dict(cfg_v))
+            cfg_v_lst.remove("DEFAULT")
+            stage_dic[cfg_k] = cfg_v_lst
+        pcom.pp_list(stage_dic)
+        LOG.info("done")
+    def proc_lib_wrap(self):
+        """a function wrapper for inherited LibProc function"""
+        self.proc_lib(self.cfg_dic["lib"])
     def proc_tmp(self):
-        """to process project templates to generate output files"""
+        """to process project and block templates to generate output files"""
         for cfg_k, cfg_v in self.cfg_dic.items():
             if cfg_k == "cmn":
                 continue
@@ -36,7 +51,9 @@ class FlowProc(env_boot.EnvBoot):
                 if dst_sec in cfg_v:
                     cfg_sec = cfg_v[dst_sec]
                     pcom.ren_tempfile(
-                        proj_tmp, dst_file, {"CED": self.ced, "cfg": cfg_sec})
+                        proj_tmp, dst_file,
+                        {"cmn": self.cfg_dic["cmn"], "CED": self.ced, "cfg": cfg_sec}
+                    )
                     if "_exec_tool" in cfg_sec:
                         with open(f"{dst_file}.oprun", "w") as orf:
                             orf.write(
@@ -50,6 +67,7 @@ class FlowProc(env_boot.EnvBoot):
                         f"in config {cfg_k}"
                     )
     def proc_run(self, run_lst):
+        """to process generated oprun files for running flows"""
         oprun_file_lst = []
         if run_lst == []:
             oprun_file_lst.extend(list(pcom.find_iter(self.ced["OUTPUT_SRC"], "*.oprun")))
@@ -67,16 +85,21 @@ class FlowProc(env_boot.EnvBoot):
 
 def run_flow(args):
     """to run flow sub cmd"""
-    if args.flow_block:
-        f_p = FlowProc(args.flow_block)
-        f_p.proc_cfg()
-        if args.flow_list_env:
-            f_p.list_env()
-        elif args.flow_gen:
-            f_p.proc_tmp()
-        elif args.flow_run_lst != None:
-            f_p.proc_tmp()
-            f_p.proc_run(args.flow_run_lst)
+    f_p = FlowProc(args.flow_block)
+    f_p.proc_cfg()
+    if args.flow_list_env:
+        f_p.list_env()
+    elif args.flow_list_stage:
+        f_p.list_stage()
+    elif args.flow_lib:
+        f_p.proc_lib_wrap()
+    elif args.flow_gen and args.flow_block:
+        f_p.proc_lib_wrap()
+        f_p.proc_tmp()
+    elif args.flow_run_lst != None and args.flow_block:
+        f_p.proc_lib_wrap()
+        f_p.proc_tmp()
+        f_p.proc_run(args.flow_run_lst)
     else:
         LOG.critical("op init sub cmd missing main arguments")
         raise SystemExit()

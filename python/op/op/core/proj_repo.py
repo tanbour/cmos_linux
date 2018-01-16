@@ -19,11 +19,8 @@ class ProjRepo(object):
         self.repo_dic = {}
     def list_proj(self):
         """to list all projects registered in op"""
-        str_lst = [f"{os.linesep}all available projects"]
-        str_lst.append("*"*30)
-        str_lst.extend(self.all_proj_lst)
-        str_lst.append("*"*30)
-        LOG.info(os.linesep.join(str_lst))
+        LOG.info(f"{os.linesep}all available projects")
+        pcom.pp_list(self.all_proj_lst)
         LOG.info("list all available projects done")
     def check_proj(self):
         """to check initial project name and dir permissions"""

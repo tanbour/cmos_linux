@@ -61,6 +61,12 @@ def gen_flow_parser(subparsers):
         "-list_env", dest="flow_list_env", action="store_true",
         help="toggle to list all internal environment variables")
     flow_parser.add_argument(
+        "-list_stage", dest="flow_list_stage", action="store_true",
+        help="toggle to list all available stages")
+    flow_parser.add_argument(
+        "-lib", dest="flow_lib", action="store_true",
+        help="toggle to generate library mapping links")
+    flow_parser.add_argument(
         "-gen", dest="flow_gen", action="store_true",
         help="toggle to generate flow run files")
     flow_parser.add_argument(

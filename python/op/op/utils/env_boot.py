@@ -39,7 +39,7 @@ def find_blk_dir(proj_root, blk):
 
 class EnvBoot(object):
     """a base class to boot project environments used only by op"""
-    def __init__(self, blk_name=None, admin_flg=False):
+    def __init__(self, blk_name="", admin_flg=False):
         proj_root_dir = find_proj_root(os.getcwd())
         os.environ["PROJ_ROOT"] = proj_root_dir
         with open(f"{proj_root_dir}{os.sep}{settings.FLG_FILE}") as f_f:
@@ -57,6 +57,7 @@ class EnvBoot(object):
             self.ced["BLK_NAME"] = os.environ["BLK_NAME"] = blk_name
             self.ced["BLK_ROOT"] = os.environ["BLK_ROOT"] = find_blk_dir(
                 self.ced["PROJ_ROOT"], blk_name)
+        self.blk_name = blk_name
         self.admin_flg = admin_flg
     def proc_ced(self):
         """to process project and block global env dic used only by op"""
@@ -68,6 +69,8 @@ class EnvBoot(object):
         for cmn_sec, cmn_sec_dic in self.cfg_dic["cmn"].items():
             if not cmn_sec.startswith("env_"):
                 continue
+            if not self.blk_name and cmn_sec == "env_blk":
+                continue
             for env_key, env_value in cmn_sec_dic.items():
                 os.environ[env_key] = os.path.expandvars(env_value)
                 self.ced[env_key] = os.path.expandvars(env_value)
@@ -78,16 +81,19 @@ class EnvBoot(object):
             if cfg_kw == "cmn":
                 LOG.warning("config file postfix cmn and dir are forbidden to use")
                 continue
-            blk_cfg = f"{self.ced['BLK_CFG']}{os.sep}blk_{cfg_kw}.cfg"
-            if self.admin_flg:
-                os.makedirs(os.path.dirname(blk_cfg), exist_ok=True)
-                with open(proj_cfg) as pcf, open(blk_cfg, "w") as bcf:
-                    for line in pcf:
-                        bcf.write(f"# {line}")
+            if self.blk_name:
+                blk_cfg = f"{self.ced['BLK_CFG']}{os.sep}blk_{cfg_kw}.cfg"
+                if self.admin_flg:
+                    os.makedirs(os.path.dirname(blk_cfg), exist_ok=True)
+                    with open(proj_cfg) as pcf, open(blk_cfg, "w") as bcf:
+                        for line in pcf:
+                            bcf.write(f"# {line}")
+                else:
+                    if not os.path.isfile(blk_cfg):
+                        LOG.warning(f"block config file {blk_cfg} is NA")
+                    self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg, blk_cfg])
             else:
-                if not os.path.isfile(blk_cfg):
-                    LOG.warning(f"block config file {blk_cfg} is NA")
-                self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg, blk_cfg])
+                self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg])
     def boot_env(self):
         """class top exec function"""
         self.proc_ced()

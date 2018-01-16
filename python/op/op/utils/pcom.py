@@ -9,7 +9,7 @@ import re
 import logging.config
 import fnmatch
 import configparser
-import shutil
+import pprint
 import psutil
 import jinja2
 
@@ -112,6 +112,13 @@ def cfm(exit_str="action aborted"):
     apply_rsp = input("--> yes or no? ")
     if apply_rsp.strip() not in ("yes", "ye", "y"):
         raise SystemExit(exit_str)
+
+def pp_list(pp_obj):
+    """to pretty print list infomation"""
+    appfix_str = '*'*30
+    print(appfix_str)
+    pprint.pprint(pp_obj)
+    print(appfix_str)
 
 def pterminate(proc_pid):
     """to terminate specified process according to pid"""

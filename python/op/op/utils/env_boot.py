@@ -39,11 +39,15 @@ def find_blk_dir(proj_root, blk):
 
 class EnvBoot(object):
     """a base class to boot project environments used only by op"""
-    def __init__(self, blk_name="", admin_flg=False):
+    def __init__(self, proj_name="", blk_name="", admin_flg=False):
         proj_root_dir = find_proj_root(os.getcwd())
         os.environ["PROJ_ROOT"] = proj_root_dir
-        with open(f"{proj_root_dir}{os.sep}{settings.FLG_FILE}") as f_f:
-            os.environ["PROJ_NAME"] = pcom.re_str(f_f.read().strip())
+        if proj_name:
+            os.environ["PROJ_NAME"] = proj_name
+            # to check proj validation
+        else:
+            with open(f"{proj_root_dir}{os.sep}{settings.FLG_FILE}") as f_f:
+                os.environ["PROJ_NAME"] = pcom.re_str(f_f.read().strip())
         self.ced = {
             "TIME": dt.datetime.now(),
             "USER": os.environ["USER"],
@@ -65,24 +69,23 @@ class EnvBoot(object):
         if not os.path.isfile(boot_cfg):
             LOG.error(f"boot config file {boot_cfg} is NA")
             raise SystemExit()
-        self.cfg_dic = {"cmn": pcom.gen_cfg([boot_cfg])}
-        for cmn_sec, cmn_sec_dic in self.cfg_dic["cmn"].items():
-            if not cmn_sec.startswith("env_"):
+        self.cfg_dic = {"proj": pcom.gen_cfg([boot_cfg])}
+        for proj_sec, proj_sec_dic in self.cfg_dic["proj"].items():
+            if not proj_sec.startswith("env_"):
                 continue
-            if not self.blk_name and cmn_sec == "env_blk":
+            if not self.blk_name and proj_sec == "env_blk":
                 continue
-            for env_key, env_value in cmn_sec_dic.items():
+            for env_key, env_value in proj_sec_dic.items():
                 os.environ[env_key] = os.path.expandvars(env_value)
                 self.ced[env_key] = os.path.expandvars(env_value)
     def proc_cfg(self):
         """to process project and block global cfg dic used only by op"""
-        for proj_cfg in pcom.find_iter(self.ced["PROJ_SHARE_CFG"], "proj_*", cur_flg=True):
-            cfg_kw = os.path.splitext(os.path.basename(proj_cfg))[0][5:]
-            if cfg_kw == "cmn":
-                LOG.warning("config file postfix cmn and dir are forbidden to use")
+        for proj_cfg in pcom.find_iter(self.ced["PROJ_SHARE_CFG"], "*.cfg", cur_flg=True):
+            cfg_kw = os.path.splitext(os.path.basename(proj_cfg))[0]
+            if cfg_kw == "proj":
                 continue
             if self.blk_name:
-                blk_cfg = f"{self.ced['BLK_CFG']}{os.sep}blk_{cfg_kw}.cfg"
+                blk_cfg = proj_cfg.replace(self.ced["PROJ_SHARE_CFG"], self.ced["BLK_CFG"])
                 if self.admin_flg:
                     os.makedirs(os.path.dirname(blk_cfg), exist_ok=True)
                     with open(proj_cfg) as pcf, open(blk_cfg, "w") as bcf:
@@ -90,7 +93,7 @@ class EnvBoot(object):
                             bcf.write(f"# {line}")
                 else:
                     if not os.path.isfile(blk_cfg):
-                        LOG.warning(f"block config file {blk_cfg} is NA")
+                        LOG.debug(f"block config file {blk_cfg} is NA")
                     self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg, blk_cfg])
             else:
                 self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg])

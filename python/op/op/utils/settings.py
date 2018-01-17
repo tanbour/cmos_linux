@@ -18,12 +18,13 @@ OP_TMP = f"{OP_ROOT}{os.sep}templates"
 FLG_FILE = ".alchip_proj_root_flg"
 TREE_IGNORE_LST = ["share", "lib"]
 
-BOOT_CFG = "$PROJ_ROOT/share/config/cmn.cfg"
+BOOT_CFG = "$PROJ_ROOT/share/config/proj.cfg"
 
 ADMIN_CFG_DIR = "$PROJ_ROOT/share/config"
 ADMIN_TMP_DIR = "$PROJ_ROOT/share/templates"
 
 PROJ_REPO = "git"
+# to obtain projects list from server
 if PROJ_REPO == "git":
     ALL_PROJ_DIC = {
         "ff": "git@xsfuture.com:/srv/ff_git.git",

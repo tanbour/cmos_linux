@@ -17,5 +17,5 @@ def run_init(args):
     elif args.init_proj_name:
         init_repo.repo_proj(args.init_proj_name)
     else:
-        LOG.critical("op init sub cmd missing main arguments")
+        LOG.critical("no actions specified in op init sub cmd")
         raise SystemExit()

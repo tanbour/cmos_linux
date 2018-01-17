@@ -21,7 +21,6 @@ class ProjRepo(object):
         """to list all projects registered in op"""
         LOG.info(f"{os.linesep}all available projects")
         pcom.pp_list(self.all_proj_lst)
-        LOG.info("list all available projects done")
     def check_proj(self):
         """to check initial project name and dir permissions"""
         if self.repo_dic["init_proj_name"] not in self.all_proj_dic:
@@ -46,6 +45,7 @@ class ProjRepo(object):
         rmt.pull("master")
         LOG.info("done")
         LOG.info(f"please run op cmds under the project dir {self.repo_dic['repo_dir']}")
+        # to process user auth actions
         # u_n = getpass.getuser()
         # p_w = getpass.getpass("git password: ")
     def svn_proj(self):

@@ -15,45 +15,45 @@ LOG = pcom.gen_logger(__name__)
 class FlowProc(env_boot.EnvBoot, lib_proc.LibProc):
     """flow processor for blocks"""
     def __init__(self, blk_name):
-        env_boot.EnvBoot.__init__(self, blk_name)
+        env_boot.EnvBoot.__init__(self, blk_name=blk_name)
         self.boot_env()
         lib_proc.LibProc.__init__(self)
     def list_env(self):
         """to list all current project or block op environment variables"""
         LOG.info(f"{os.linesep}all op internal env variables")
         pcom.pp_list(self.ced)
-        LOG.info("done")
     def list_stage(self):
         """to list all current project or block available stages"""
         LOG.info(f"{os.linesep}all current available stages")
         stage_dic = {}
         for cfg_k, cfg_v in self.cfg_dic.items():
-            if cfg_k == "cmn":
+            if cfg_k == "proj" or cfg_k.startswith("lib_"):
                 continue
             cfg_v_lst = list(dict(cfg_v))
             cfg_v_lst.remove("DEFAULT")
             stage_dic[cfg_k] = cfg_v_lst
         pcom.pp_list(stage_dic)
-        LOG.info("done")
     def proc_lib_wrap(self):
         """a function wrapper for inherited LibProc function"""
-        self.proc_lib(self.ced["LIB"], self.cfg_dic["lib"])
+        lib_link_cfg_lst = [ccv for cck, ccv in self.cfg_dic.items() if cck.startswith("lib_")]
+        self.proc_link_cfg(self.ced["LIB"], lib_link_cfg_lst)
+        self.proc_lib_cfg(self.cfg_dic["lib"])
     def proc_tmp(self):
         """to process project and block templates to generate output files"""
         for cfg_k, cfg_v in self.cfg_dic.items():
-            if cfg_k == "cmn":
+            if cfg_k == "proj":
                 continue
             for proj_tmp in pcom.find_iter(
                     f"{self.ced['PROJ_SHARE_TMP']}{os.sep}{cfg_k}", "*"):
                 dst_file = proj_tmp.replace(
                     self.ced["PROJ_SHARE_TMP"], self.ced["OUTPUT_SRC"])
-                LOG.info(f"generating run file {dst_file} ...")
                 dst_sec = os.path.basename(proj_tmp)
                 if dst_sec in cfg_v:
+                    LOG.info(f"generating run file {dst_file} ...")
                     cfg_sec = cfg_v[dst_sec]
                     pcom.ren_tempfile(
                         proj_tmp, dst_file,
-                        {"cmn": self.cfg_dic["cmn"], "CED": self.ced, "cfg": cfg_sec}
+                        {"proj": self.cfg_dic["proj"], "CED": self.ced, "cfg": cfg_sec}
                     )
                     if "_exec_tool" in cfg_sec:
                         with open(f"{dst_file}.oprun", "w") as orf:
@@ -94,13 +94,19 @@ def run_flow(args):
         f_p.list_stage()
     elif args.flow_lib:
         f_p.proc_lib_wrap()
-    elif args.flow_gen and args.flow_block:
+    elif args.flow_gen:
+        if not args.flow_block:
+            LOG.critical("-b argument MUST be used together with -gen")
+            raise SystemExit()
         f_p.proc_lib_wrap()
         f_p.proc_tmp()
-    elif args.flow_run_lst != None and args.flow_block:
+    elif args.flow_run_lst != None:
+        if not args.flow_block:
+            LOG.critical("-b argument MUST be used together with -run")
+            raise SystemExit()
         f_p.proc_lib_wrap()
         f_p.proc_tmp()
         f_p.proc_run(args.flow_run_lst)
     else:
-        LOG.critical("op init sub cmd missing main arguments")
+        LOG.critical("no actions specified in op flow sub cmd")
         raise SystemExit()

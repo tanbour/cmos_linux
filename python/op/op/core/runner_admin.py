@@ -56,12 +56,12 @@ def run_admin(args):
     elif args.admin_block_lst:
         LOG.info(
             f"generating block level directories and configs of {args.admin_block_lst}, "
-            f"which will overwrite all the existed block level configs"
+            f"which will overwrite all the existed block level configs ..."
         )
         pcom.cfm()
         for admin_blk_name in args.admin_block_lst:
-            env_boot.EnvBoot(admin_blk_name, True).boot_env()
+            env_boot.EnvBoot(blk_name=admin_blk_name, admin_flg=True).boot_env()
         LOG.info("done")
     else:
-        LOG.critical("op admin sub cmd missing main arguments")
+        LOG.critical("no actions specified in op admin sub cmd")
         raise SystemExit()

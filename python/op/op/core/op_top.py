@@ -17,13 +17,14 @@ def gen_admin_parser(subparsers):
     admin_parser = subparsers.add_parser(
         "admin",
         help="sub cmd about kicking off project related actions")
-    admin_parser.add_argument(
+    me_group = admin_parser.add_mutually_exclusive_group()
+    me_group.add_argument(
         "-list", dest="admin_list_proj", action="store_true",
         help="toggle to list all currently available proj names")
-    admin_parser.add_argument(
+    me_group.add_argument(
         "-p", dest="admin_proj_name", default="",
         help="input the proj name which will be kicked off")
-    admin_parser.add_argument(
+    me_group.add_argument(
         "-b", dest="admin_block_lst", default=[], nargs="+",
         help="input the block names to be initialized in the specified project")
     admin_parser.set_defaults(func=main_admin)
@@ -37,10 +38,11 @@ def gen_init_parser(subparsers):
     init_parser = subparsers.add_parser(
         "init",
         help="sub cmd about generating initial project directories")
-    init_parser.add_argument(
+    me_group = init_parser.add_mutually_exclusive_group()
+    me_group.add_argument(
         "-list", dest="init_list_proj", action="store_true",
         help="toggle to list all currently available proj names")
-    init_parser.add_argument(
+    me_group.add_argument(
         "-p", dest="init_proj_name", default="",
         help="input the proj name which will be check out from repository")
     init_parser.set_defaults(func=main_init)
@@ -54,22 +56,23 @@ def gen_flow_parser(subparsers):
     flow_parser = subparsers.add_parser(
         "flow",
         help="sub cmd about run flow")
+    me_group = flow_parser.add_mutually_exclusive_group()
     flow_parser.add_argument(
         "-b", dest="flow_block", default="",
         help="input block name for running flows")
-    flow_parser.add_argument(
+    me_group.add_argument(
         "-list_env", dest="flow_list_env", action="store_true",
         help="toggle to list all internal environment variables")
-    flow_parser.add_argument(
+    me_group.add_argument(
         "-list_stage", dest="flow_list_stage", action="store_true",
         help="toggle to list all available stages")
-    flow_parser.add_argument(
+    me_group.add_argument(
         "-lib", dest="flow_lib", action="store_true",
         help="toggle to generate library mapping links")
-    flow_parser.add_argument(
+    me_group.add_argument(
         "-gen", dest="flow_gen", action="store_true",
         help="toggle to generate flow run files")
-    flow_parser.add_argument(
+    me_group.add_argument(
         "-run", dest="flow_run_lst", default=None, nargs="*",
         help="toggle and input steps to run flow")
     flow_parser.set_defaults(func=main_flow)

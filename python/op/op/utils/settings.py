@@ -11,12 +11,12 @@ BACKEND = True
 BE_URL = "http://op.alchip.com.cn:8000"
 
 OP_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-OP_CFG = f"{OP_ROOT}{os.sep}config"
-OP_TMP = f"{OP_ROOT}{os.sep}templates"
+OP_CFG = f"{OP_ROOT}{os.sep}proj_share{os.sep}config"
+OP_TMP = f"{OP_ROOT}{os.sep}proj_share{os.sep}templates"
 
 # project related settings
 FLG_FILE = ".alchip_proj_root_flg"
-TREE_IGNORE_LST = ["share", "lib"]
+TREE_IGNORE_LST = ["share"]
 
 BOOT_CFG = "$PROJ_ROOT/share/config/proj.cfg"
 

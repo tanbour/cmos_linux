@@ -44,6 +44,10 @@ class ProjAdminProc(proj_repo.ProjRepo):
             shutil.rmtree(dst_tmp_dir)
         shutil.copytree(settings.OP_TMP, dst_tmp_dir)
         LOG.info("done")
+        LOG.info(
+            "please perform the git commit and git push actions "
+            "after project and block items are settled down"
+        )
 
 def run_admin(args):
     """to run admin sub cmd"""

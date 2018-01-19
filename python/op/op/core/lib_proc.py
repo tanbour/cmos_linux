@@ -21,14 +21,14 @@ class LibProc(object):
         """to check whether particular options in the section or not"""
         for str_item in str_lst:
             if str_item not in sec:
-                LOG.critical(f"option {str_item} not in section {sec}")
+                LOG.error(f"option {str_item} not in section {sec}")
                 raise SystemExit()
     @classmethod
     def check_str(cls, key_str, str_lst):
         """to check whether unassigned variables in search path or not"""
         for str_item in str_lst:
             if key_str in str_item:
-                LOG.critical(f"search path {str_item} has unassigned variable")
+                LOG.error(f"search path {str_item} has unassigned variable")
                 raise SystemExit()
     def link_src_dst(self, src_file, dst_dir, src_base):
         """to perform source to destination link action"""
@@ -66,7 +66,7 @@ class LibProc(object):
                 opt_v_lst = []
                 for opt_k, opt_v in link_sec.items():
                     if not opt_v:
-                        LOG.critical(f"option value of {opt_k} from link {sec_name} is NA")
+                        LOG.error(f"option value of {opt_k} from link {sec_name} is NA")
                         raise SystemExit()
                     opt_k_lst.append(opt_k)
                     opt_v_lst.append(pcom.rd_cfg(lib_link_cfg, sec_name, opt_k))

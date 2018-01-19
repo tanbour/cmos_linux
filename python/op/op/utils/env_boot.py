@@ -6,7 +6,6 @@ Description: base class for booting inital project and block env variables
 
 import os
 import datetime as dt
-import subprocess
 from utils import pcom
 from utils import settings
 
@@ -25,29 +24,30 @@ def find_proj_root(path_str):
     else:
         return find_proj_root(os.path.dirname(path_str))
 
-def find_blk_dir(proj_root, blk):
+def find_blk_root(path_str, proj_root):
     """to find project block dir according to their dir hierarchy"""
-    if blk not in settings.TREE_IGNORE_LST:
-        for blk_dir in pcom.find_iter(proj_root, blk, True, True):
-            return blk_dir
-    tree_ignore_str = "|".join(settings.TREE_IGNORE_LST)
-    run_str = f"tree -L 1 -d -I '(|{tree_ignore_str}|)' {proj_root}"
-    tree_str = subprocess.run(
-        run_str, shell=True, check=True, stdout=subprocess.PIPE).stdout.decode()
-    LOG.error(f"block {blk} is NA; the possible blocks are {os.linesep}{tree_str}")
-    raise SystemExit()
+    path_str = path_str.rstrip(os.sep)
+    if proj_root not in path_str:
+        LOG.error(
+            "it's not in a project repository, please cd into one. "
+            "If no project initialized, please use op init cmd to initialize one."
+        )
+        raise SystemExit()
+    blk_name = path_str.replace(proj_root, "").strip(os.sep).split(os.sep)[0]
+    if proj_root == path_str or blk_name in settings.TREE_IGNORE_LST:
+        LOG.info("not in a block directory, block level features off")
+        return ""
+    return f"{proj_root}{os.sep}{blk_name}"
 
 class EnvBoot(object):
     """a base class to boot project environments used only by op"""
-    def __init__(self, proj_name="", blk_name="", admin_flg=False):
-        proj_root_dir = find_proj_root(os.getcwd())
+    def __init__(self):
+        env_path = os.getcwd()
+        proj_root_dir = find_proj_root(env_path)
+        blk_root_dir = find_blk_root(env_path, proj_root_dir)
         os.environ["PROJ_ROOT"] = proj_root_dir
-        if proj_name:
-            os.environ["PROJ_NAME"] = proj_name
-            # to check proj validation
-        else:
-            with open(f"{proj_root_dir}{os.sep}{settings.FLG_FILE}") as f_f:
-                os.environ["PROJ_NAME"] = pcom.re_str(f_f.read().strip())
+        with open(f"{proj_root_dir}{os.sep}{settings.FLG_FILE}") as f_f:
+            os.environ["PROJ_NAME"] = pcom.re_str(f_f.read().strip())
         self.ced = {
             "TIME": dt.datetime.now(),
             "USER": os.environ["USER"],
@@ -55,14 +55,13 @@ class EnvBoot(object):
             "PROJ_NAME": os.environ["PROJ_NAME"]
         }
         self.cfg_dic = {}
-        if blk_name:
-            if admin_flg:
-                os.makedirs(f"{self.ced['PROJ_ROOT']}{os.sep}{blk_name}", exist_ok=True)
-            self.ced["BLK_NAME"] = os.environ["BLK_NAME"] = blk_name
-            self.ced["BLK_ROOT"] = os.environ["BLK_ROOT"] = find_blk_dir(
-                self.ced["PROJ_ROOT"], blk_name)
-        self.blk_name = blk_name
-        self.admin_flg = admin_flg
+        if blk_root_dir:
+            self.blk_flg = True
+            self.ced["BLK_NAME"] = os.environ["BLK_NAME"] = os.path.basename(blk_root_dir)
+            self.ced["BLK_ROOT"] = os.environ["BLK_ROOT"] = blk_root_dir
+        else:
+            self.blk_flg = False
+        self.proj_cfg_lst = []
     def proc_ced(self):
         """to process project and block global env dic used only by op"""
         boot_cfg = os.path.expandvars(f"{settings.BOOT_CFG}")
@@ -73,7 +72,7 @@ class EnvBoot(object):
         for proj_sec, proj_sec_dic in self.cfg_dic["proj"].items():
             if not proj_sec.startswith("env_"):
                 continue
-            if not self.blk_name and proj_sec == "env_blk":
+            if not self.blk_flg and proj_sec == "env_blk":
                 continue
             for env_key, env_value in proj_sec_dic.items():
                 os.environ[env_key] = os.path.expandvars(env_value)
@@ -84,17 +83,12 @@ class EnvBoot(object):
             cfg_kw = os.path.splitext(os.path.basename(proj_cfg))[0]
             if cfg_kw == "proj":
                 continue
-            if self.blk_name:
+            self.proj_cfg_lst.append(proj_cfg)
+            if self.blk_flg:
                 blk_cfg = proj_cfg.replace(self.ced["PROJ_SHARE_CFG"], self.ced["BLK_CFG"])
-                if self.admin_flg:
-                    os.makedirs(os.path.dirname(blk_cfg), exist_ok=True)
-                    with open(proj_cfg) as pcf, open(blk_cfg, "w") as bcf:
-                        for line in pcf:
-                            bcf.write(f"# {line}")
-                else:
-                    if not os.path.isfile(blk_cfg):
-                        LOG.debug(f"block config file {blk_cfg} is NA")
-                    self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg, blk_cfg])
+                if not os.path.isfile(blk_cfg):
+                    LOG.warning(f"block config file {blk_cfg} is NA")
+                self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg, blk_cfg])
             else:
                 self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg])
     def boot_env(self):

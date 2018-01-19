@@ -13,7 +13,7 @@ from core import proj_repo
 
 LOG = pcom.gen_logger(__name__)
 
-class ProjAdminProc(proj_repo.ProjRepo):
+class AdminProc(proj_repo.ProjRepo, env_boot.EnvBoot):
     """admin processor for start up projects"""
     def fill_proj(self):
         """to fill project config and template dir after initialization"""
@@ -24,7 +24,7 @@ class ProjAdminProc(proj_repo.ProjRepo):
                 f_f.write(self.repo_dic["init_proj_name"])
         LOG.info("done")
         LOG.info("generating op project level configs and templates ...")
-        env_boot.EnvBoot()
+        env_boot.EnvBoot.__init__(self)
         dst_cfg_dir = os.path.expandvars(settings.ADMIN_CFG_DIR)
         if os.path.isdir(dst_cfg_dir):
             LOG.info(
@@ -48,23 +48,56 @@ class ProjAdminProc(proj_repo.ProjRepo):
             "please perform the git commit and git push actions "
             "after project and block items are settled down"
         )
+    def fill_blocks(self, blk_lst):
+        """to fill blocks config dir after initialization"""
+        env_boot.EnvBoot.__init__(self)
+        self.boot_env()
+        for blk_name in blk_lst:
+            os.environ["BLK_NAME"] = blk_name
+            os.environ["BLK_ROOT"] = blk_root_dir = f"{self.ced['PROJ_ROOT']}{os.sep}{blk_name}"
+            os.makedirs(blk_root_dir, exist_ok=True)
+            blk_cfg_dir = os.path.expandvars(settings.ADMIN_BLK_CFG_DIR)
+            for proj_cfg in self.proj_cfg_lst:
+                blk_cfg = proj_cfg.replace(self.ced["PROJ_SHARE_CFG"], blk_cfg_dir)
+                os.makedirs(os.path.dirname(blk_cfg), exist_ok=True)
+                with open(proj_cfg) as pcf, open(blk_cfg, "w") as bcf:
+                    for line in pcf:
+                        bcf.write(f"# {line}")
+    def fill_lib(self):
+        """a function wrapper for inherited LibProc function"""
+        env_boot.EnvBoot.__init__(self)
+        self.boot_env()
+        pcom.chk_wok(self.ced["PROJ_LIB"])
+        lib_cfg_list = []
+        for lib_cfg in pcom.find_iter(self.ced["PROJ_SHARE_CFG_LIB"], "*.cfg", cur_flg=True):
+            cfg_kw = os.path.splitext(os.path.basename(proj_cfg))[0]
+            lib_cfg_dic[cfg_kw] = pcom.gen_cfg([lib_cfg])
+        self.proc_link_cfg(self.ced["LIB"], lib_cfg_dic)
+        self.proc_lib_cfg(self.cfg_dic.get("lib", {}))
 
 def run_admin(args):
     """to run admin sub cmd"""
+    admin_proc = AdminProc()
     if args.admin_list_proj:
-        ProjAdminProc().list_proj()
+        admin_proc.list_proj()
     elif args.admin_proj_name:
-        proj_admin_proc = ProjAdminProc()
-        proj_admin_proc.repo_proj(args.admin_proj_name)
-        proj_admin_proc.fill_proj()
+        admin_proc.repo_proj(args.admin_proj_name)
+        admin_proc.fill_proj()
     elif args.admin_block_lst:
         LOG.info(
             f"generating block level directories and configs of {args.admin_block_lst}, "
             f"which will overwrite all the existed block level configs ..."
         )
         pcom.cfm()
-        for admin_blk_name in args.admin_block_lst:
-            env_boot.EnvBoot(blk_name=admin_blk_name, admin_flg=True).boot_env()
+        admin_proc.fill_blocks(args.admin_block_lst)
+        LOG.info("done")
+    elif args.admin_lib:
+        LOG.info(
+            f"generating library mapping links and files, "
+            f"which will overwrite all the existed library mapping links and files ..."
+        )
+        pcom.cfm()
+        admin_proc.fill_lib()
         LOG.info("done")
     else:
         LOG.critical("no actions specified in op admin sub cmd")

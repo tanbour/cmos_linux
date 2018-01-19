@@ -27,6 +27,9 @@ def gen_admin_parser(subparsers):
     me_group.add_argument(
         "-b", dest="admin_block_lst", default=[], nargs="+",
         help="input the block names to be initialized in the specified project")
+    me_group.add_argument(
+        "-lib", dest="admin_lib", action="store_true",
+        help="toggle to generate library mapping links and related files")
     admin_parser.set_defaults(func=main_admin)
 
 def main_admin(args):
@@ -57,18 +60,15 @@ def gen_flow_parser(subparsers):
         "flow",
         help="sub cmd about run flow")
     me_group = flow_parser.add_mutually_exclusive_group()
-    flow_parser.add_argument(
-        "-b", dest="flow_block", default="",
-        help="input block name for running flows")
     me_group.add_argument(
         "-list_env", dest="flow_list_env", action="store_true",
         help="toggle to list all internal environment variables")
     me_group.add_argument(
+        "-list_blk", dest="flow_list_blk", action="store_true",
+        help="toggle to list all available blocks")
+    me_group.add_argument(
         "-list_stage", dest="flow_list_stage", action="store_true",
         help="toggle to list all available stages")
-    me_group.add_argument(
-        "-lib", dest="flow_lib", action="store_true",
-        help="toggle to generate library mapping links")
     me_group.add_argument(
         "-gen", dest="flow_gen", action="store_true",
         help="toggle to generate flow run files")

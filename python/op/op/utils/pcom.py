@@ -113,12 +113,24 @@ def cfm(exit_str="action aborted"):
     if apply_rsp.strip() not in ("yes", "ye", "y"):
         raise SystemExit(exit_str)
 
-def pp_list(pp_obj):
+def pp_list(pp_obj, str_flg=False):
     """to pretty print list infomation"""
     appfix_str = '*'*30
     print(appfix_str)
-    pprint.pprint(pp_obj)
+    if str_flg:
+        print(pp_obj)
+    else:
+        pprint.pprint(pp_obj, width=-1)
     print(appfix_str)
+
+def chk_wok(log, path):
+    """to check write permissions of path"""
+    if not os.path.exists(path):
+        log.error(f"path {path} is NA")
+        raise SystemExit()
+    if not os.access(path, os.W_OK):
+        log.error(f"no write permission in dir {path} for you")
+        raise SystemExit()
 
 def pterminate(proc_pid):
     """to terminate specified process according to pid"""

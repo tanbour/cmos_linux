@@ -7,6 +7,7 @@ Description: flow related features
 import os
 import subprocess
 from utils import pcom
+from utils import settings
 from utils import env_boot
 from core import lib_proc
 
@@ -14,14 +15,22 @@ LOG = pcom.gen_logger(__name__)
 
 class FlowProc(env_boot.EnvBoot, lib_proc.LibProc):
     """flow processor for blocks"""
-    def __init__(self, blk_name):
-        env_boot.EnvBoot.__init__(self, blk_name=blk_name)
+    def __init__(self):
+        env_boot.EnvBoot.__init__(self)
         self.boot_env()
         lib_proc.LibProc.__init__(self)
     def list_env(self):
         """to list all current project or block op environment variables"""
         LOG.info(f"{os.linesep}all op internal env variables")
         pcom.pp_list(self.ced)
+    def list_blk(self):
+        """to list all possible blocks according to project root dir"""
+        tree_ignore_str = "|".join(settings.TREE_IGNORE_LST)
+        run_str = f"tree -L 1 -d -I '(|{tree_ignore_str}|)' {self.ced['PROJ_ROOT']}"
+        tree_str = subprocess.run(
+            run_str, shell=True, check=True, stdout=subprocess.PIPE).stdout.decode()
+        LOG.info(f"{os.linesep}all available blocks")
+        pcom.pp_list(tree_str, True)
     def list_stage(self):
         """to list all current project or block available stages"""
         LOG.info(f"{os.linesep}all current available stages")
@@ -33,11 +42,6 @@ class FlowProc(env_boot.EnvBoot, lib_proc.LibProc):
             cfg_v_lst.remove("DEFAULT")
             stage_dic[cfg_k] = cfg_v_lst
         pcom.pp_list(stage_dic)
-    def proc_lib_wrap(self):
-        """a function wrapper for inherited LibProc function"""
-        lib_link_cfg_lst = [ccv for cck, ccv in self.cfg_dic.items() if cck.startswith("lib_")]
-        self.proc_link_cfg(self.ced["LIB"], lib_link_cfg_lst)
-        self.proc_lib_cfg(self.cfg_dic["lib"])
     def proc_tmp(self):
         """to process project and block templates to generate output files"""
         for cfg_k, cfg_v in self.cfg_dic.items():
@@ -53,7 +57,7 @@ class FlowProc(env_boot.EnvBoot, lib_proc.LibProc):
                     cfg_sec = cfg_v[dst_sec]
                     pcom.ren_tempfile(
                         proj_tmp, dst_file,
-                        {"proj": self.cfg_dic["proj"], "CED": self.ced, "cfg": cfg_sec}
+                        {"proj": self.cfg_dic.get("proj", {}), "CED": self.ced, "cfg": cfg_sec}
                     )
                     if "_exec_tool" in cfg_sec:
                         with open(f"{dst_file}.oprun", "w") as orf:
@@ -86,25 +90,16 @@ class FlowProc(env_boot.EnvBoot, lib_proc.LibProc):
 
 def run_flow(args):
     """to run flow sub cmd"""
-    f_p = FlowProc(args.flow_block)
-    f_p.proc_cfg()
+    f_p = FlowProc()
     if args.flow_list_env:
         f_p.list_env()
+    elif args.flow_list_blk:
+        f_p.list_blk()
     elif args.flow_list_stage:
         f_p.list_stage()
-    elif args.flow_lib:
-        f_p.proc_lib_wrap()
     elif args.flow_gen:
-        if not args.flow_block:
-            LOG.critical("-b argument MUST be used together with -gen")
-            raise SystemExit()
-        f_p.proc_lib_wrap()
         f_p.proc_tmp()
     elif args.flow_run_lst != None:
-        if not args.flow_block:
-            LOG.critical("-b argument MUST be used together with -run")
-            raise SystemExit()
-        f_p.proc_lib_wrap()
         f_p.proc_tmp()
         f_p.proc_run(args.flow_run_lst)
     else:

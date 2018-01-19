@@ -109,3 +109,6 @@ python/**/*_site/pg_data/
 
 # proj temp
 **/proj/**/output/
+
+# test
+!**/tests/**/lib/

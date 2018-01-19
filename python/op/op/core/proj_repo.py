@@ -26,12 +26,7 @@ class ProjRepo(object):
         if self.repo_dic["init_proj_name"] not in self.all_proj_dic:
             LOG.error(f"project name must be one of {self.all_proj_lst}")
             raise SystemExit()
-        if not os.access(self.repo_dic["repo_dir"], os.W_OK):
-            LOG.error(
-                f"it has no permission to write in project dir "
-                f"{self.repo_dic['repo_dir']} for you"
-            )
-            raise SystemExit()
+        pcom.chk_wok(LOG, self.repo_dic["repo_dir"])
     def git_proj(self):
         """to check out project by using git"""
         self.repo_dic["repo"] = repo = git.Repo.init(self.repo_dic["repo_dir"])

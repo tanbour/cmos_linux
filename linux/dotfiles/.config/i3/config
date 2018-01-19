@@ -177,11 +177,10 @@ set $d_p LVDS-0
 set $d_e1 VGA-0
 set $d_e2 DP-0
 set $wp ~/.fehbg
-set $l_wp "$HOME/Pictures/i3_wp.png"
 set $i_msg "workspace 2; exec emacs; workspace 1; exec chromium"
 
 # Manual management of i3 lock
-set $locker i3lock -i $l_wp -t && sleep 1
+set $locker i3lock -i "$HOME/Pictures/i3_wp.png" -t && sleep 1
 set $mode_system System (l) lock, (e) logout, (s) suspend, (r) reboot, (Shift+s) shutdown
 mode "$mode_system" {
     bindsym l exec --no-startup-id $locker, mode "default"
@@ -196,21 +195,19 @@ mode "$mode_system" {
 bindsym $mod+z mode "$mode_system"
 
 # Manual management of external displays
-set $mode_display Ext Screen (v) VGA ON, (d) DP ON, (Shift+v) VGA OFF, (Shift+d) DP OFF
+set $mode_display Ext Screen (c) OFF (v) VGA ON, (d) DP ON, (Shift+v) VGA OFF, (Shift+d) DP OFF
 mode "$mode_display" {
-    bindsym v exec --no-startup-id xrandr --output $d_e1 --auto --right-of $d_p && $wp, mode "default"
-    bindsym d exec --no-startup-id xrandr --output $d_e2 --auto --right-of $d_p && $wp, mode "default"
-    bindsym Shift+v exec --no-startup-id xrandr --output $d_e1 --auto --off && $wp, mode "default"
-    bindsym Shift+d exec --no-startup-id xrandr --output $d_e2 --auto --off && $wp, mode "default"
+    bindsym c exec --no-startup-id xrandr --output $d_p --primary --auto --output $d_e1 --auto --off --output $d_e2 --auto --off && $wp, mode "default"
+    bindsym v exec --no-startup-id xrandr --output $d_p --primary --auto --output $d_e1 --auto --right-of $d_p && $wp, mode "default"
+    bindsym d exec --no-startup-id xrandr --output $d_p --primary --auto --output $d_e2 --auto --right-of $d_p && $wp, mode "default"
+    bindsym Shift+v exec --no-startup-id xrandr --output $d_p --primary --auto --output $d_e1 --auto --off && $wp, mode "default"
+    bindsym Shift+d exec --no-startup-id xrandr --output $d_p --primary --auto --output $d_e2 --auto --off && $wp, mode "default"
     # back to normal: Enter or Escape
     bindsym Return mode "default"
     bindsym Escape mode "default"
 }
 # Declare here the shortcut to bring the display selection menu
 bindsym $mod+x mode "$mode_display"
-
-set $xrandr_cmd xrandr --output $d_p --primary --auto && $wp
-bindsym $mod+Shift+x exec $xrandr_cmd
 
 bindsym XF86AudioMute exec ponymix toggle
 bindsym XF86AudioRaiseVolume exec ponymix increase 5
@@ -219,7 +216,7 @@ bindsym XF86Calculator exec uxterm calc
 
 for_window [title=".*"] border pixel 2
 for_window [title="Ediff.*"] floating enable
+exec --no-startup-id xrandr --output $d_p --primary --auto && $wp
 exec --no-startup-id nm-applet &
 exec --no-startup-id xautolock -time 15 -locker "$locker" &
-exec --no-startup-id $xrandr_cmd
 exec --no-startup-id i3-msg $i_msg

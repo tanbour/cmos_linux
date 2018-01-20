@@ -17,7 +17,7 @@ linux, linux-headers, base, base-devel, pacman, sudo, ntp, gcc, gcc-fortran, gdb
 ** common gui
 xorg-server, xorg-xinit, xorg-xrandr, xorg-xprop, xautolock, xterm, i3-wm, i3status, i3lock, gvim, emacs, tk, openjdk, feh, pulseaudio, pulseaudio-alsa, ponymix, gstreamer, portmidi, flac, x264, x265, ffmpeg, mpv, smplayer, chromium, ttf-dejavu, ttf-font-awesome
 ** linux_server only
-nftables, amdgpu, vsftpd, samba
+nftables, amdgpu, vsftpd, samba, qvkbd
 ** linux_client only
 *** program
 grub, memtest86+, gparted, nvidia, icedtea-web, pepper-flash, filezilla, tcsh, mksh, zsh, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, recordmydesktop, gv, xchm, gnuplot, graphviz, cups-pdf, bchunk, aspell-en, hunspell-en, tigervnc, freerdp, celestia, gnugo, libreoffice, networkmanager, network-manager-applet, android-tools, xf86-input-libinput, acpid, mupdf, dunst, udevil, thunderbird
@@ -279,6 +279,9 @@ export LD_RUN_PATH
 smb://<ip_addr>
 # usermod --shell /usr/bin/nologin --lock username
 # smbpasswd -a samba_user
+/etc/samba/smb.conf:
+    [global]
+    server min protocol = SMB2
 
 * locale
 en_US.UTF-8
@@ -634,6 +637,10 @@ crontab -l
 crontab -e
 # using absolute path both in crontab -e and scripts
 */3 * * * * /usr/local/bin/python3.5 /home/firefly/ff_server/svn_monitor.py
+@daily rsync -a /nas/delft/cmos/ /nas/venus/cmos/nas_temp/
+@daily rsync -a /nas/delft/irabbi/ /nas/venus/irabbi/nas_temp/
+@weekly rsync -a --delete /nas/venus/cmos/ /nas/jupiter/cmos/
+@weekly rsync -a --delete /nas/venus/irabbi/ /nas/jupiter/irabbi/
 
 * android
 ** nexus
@@ -681,6 +688,10 @@ UUID=b78d31d2-727f-4034-8016-5c9af69d7d52	/         	ext4      	rw,relatime,disc
 UUID=fb432bf1-8dd9-4d6b-9a1c-4601e1996209	/boot     	ext4      	rw,relatime,discard,data=ordered	0 2
 # /dev/sda3
 UUID=6b835efe-6110-46c2-aea3-99d0c169e238	none      	swap      	defaults,discard  	0 0
+
+//192.168.50.2/nas	/mnt/samba/nas		cifs	credentials=/mnt/samba/smbcredentials,x-systemd.automount	0 0
+
+//192.168.50.2/public	/mnt/samba/public	cifs	credentials=/mnt/samba/smbcredentials,uid=cmos,gid=users,x-systemd.automount	0 0
 
 * dhcpcd
 interface enp2s0f0

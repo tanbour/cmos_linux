@@ -46,4 +46,5 @@ for root_name, _, file_name_lst in os.walk(f"{exec_dir}{os.sep}dotfiles", follow
         elif args.backup_mode:
             shutil.copyfile(home_file, repo_file)
         elif args.apply_mode:
+            os.makedirs(os.path.dirname(home_file), exist_ok=True)
             shutil.copyfile(repo_file, home_file)

@@ -15,7 +15,7 @@ class is Noun, function is verb_noun, variable is name_type
 ** common cli
 linux, linux-headers, base, base-devel, pacman, sudo, ntp, gcc, gcc-fortran, gdb, strace, clisp, python, nodejs, npm, perl, tcl, git, subversion, rsync, transmission-cli, wget, axel, p7zip, unzip, unrar, xz, tree, calc, curl, openssh, nginx, postgresql, mariadb, dosfstools, blas, lapack, vim, cronie
 ** common gui
-xorg-server, xorg-xinit, xorg-xrandr, xorg-xprop, xautolock, xterm, i3-wm, i3status, i3lock, gvim, emacs, tk, openjdk, feh, pulseaudio, pulseaudio-alsa, ponymix, gstreamer, portmidi, flac, x264, x265, ffmpeg, mpv, smplayer, chromium, ttf-dejavu, ttf-font-awesome
+xorg-server, xorg-xinit, xorg-xrandr, xorg-xprop, xautolock, xterm, i3-wm, i3status, i3lock, dmenu, gvim, emacs, tk, openjdk, feh, pulseaudio, pulseaudio-alsa, ponymix, gstreamer, portmidi, flac, x264, x265, ffmpeg, mpv, smplayer, chromium, ttf-dejavu, ttf-font-awesome
 ** linux_server only
 nftables, amdgpu, vsftpd, samba, qvkbd
 ** linux_client only
@@ -297,12 +297,19 @@ grpck
 
 * nvidia
 ** correct DPI
-/etc/X11/xorg.conf.d/20-nvidia.conf
+/etc/X11/xorg.conf.d/20-nvidia.conf:
 Section "Device"
     Identifier     "Nvidia Card"
     Driver         "nvidia"
     VendorName     "NVIDIA Corporation"
     Option         "DPI" "96 x 96"
+EndSection
+
+* amdgpu
+/etc/X11/xorg.conf.d/20-amdgpu.conf:
+Section "Device"
+    Identifier "AMD"
+    Driver "amdgpu"
 EndSection
 
 * latex cjk

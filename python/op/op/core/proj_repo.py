@@ -40,7 +40,7 @@ class ProjRepo(object):
         rmt.pull("master")
         LOG.info("done")
         LOG.info(f"please run op cmds under the project dir {self.repo_dic['repo_dir']}")
-        # to process user auth actions
+        #TODO to process user auth actions
         # u_n = getpass.getuser()
         # p_w = getpass.getpass("git password: ")
     def svn_proj(self):

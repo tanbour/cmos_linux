@@ -7,29 +7,16 @@ Description: base class for processing library mapping
 import os
 import itertools
 import fnmatch
+import json
 import jinja2
 from utils import pcom
 
 LOG = pcom.gen_logger(__name__)
 
-class LibProc(object):
+class LibMap(object):
     """base class of library mapping processor"""
     def __init__(self):
         self.match_lst = []
-    @classmethod
-    def check_sec(cls, str_lst, sec):
-        """to check whether particular options in the section or not"""
-        for str_item in str_lst:
-            if str_item not in sec:
-                LOG.error(f"option {str_item} not in section {sec}")
-                raise SystemExit()
-    @classmethod
-    def check_str(cls, key_str, str_lst):
-        """to check whether unassigned variables in search path or not"""
-        for str_item in str_lst:
-            if key_str in str_item:
-                LOG.error(f"search path {str_item} has unassigned variable")
-                raise SystemExit()
     def link_src_dst(self, src_file, dst_dir, src_base):
         """to perform source to destination link action"""
         dst_file = f"{dst_dir}{os.sep}{src_file.replace(src_base, '')}"
@@ -43,10 +30,10 @@ class LibProc(object):
         os.symlink(src_file, dst_file)
         LOG.info(f"linked src file {src_file} as dst file {dst_file}")
         self.match_lst.append(dst_file)
-    def proc_link_cfg(self, lib_src_root, lib_link_cfg_lst):
+    def link_lib(self, lib_src_root, lib_dst_root, lib_link_cfg_dic):
         """to process project or block lib mapping links"""
         can_lst = list(pcom.find_iter(lib_src_root, "*"))
-        for lib_link_cfg in lib_link_cfg_lst:
+        for lib_link_name, lib_link_cfg in lib_link_cfg_dic.items():
             sec_dic = {}
             for sec_name, link_sec in lib_link_cfg.items():
                 if sec_name == "DEFAULT":
@@ -55,13 +42,11 @@ class LibProc(object):
                     LOG.error(f"section {sec_name} is duplicated")
                     raise SystemExit()
                 sec_dic[sec_name] = lib_link_cfg
-                self.check_sec(["_path_search", "_pattern_search", "_path_dst"], link_sec)
-                path_search = pcom.rd_cfg(
-                    lib_link_cfg, sec_name, "_path_search", True, r_flg=True)
+                if "_pattern_search" not in link_sec:
+                    LOG.error(f"option _pattern_search not in section {sec_name}")
+                    raise SystemExit()
                 pattern_search = pcom.rd_cfg(
                     lib_link_cfg, sec_name, "_pattern_search", True, r_flg=True)
-                path_dst = pcom.rd_cfg(
-                    lib_link_cfg, sec_name, "_path_dst", True, r_flg=True)
                 opt_k_lst = []
                 opt_v_lst = []
                 for opt_k, opt_v in link_sec.items():
@@ -74,25 +59,13 @@ class LibProc(object):
                     var_glob_dic = {}
                     for index, opt_v in enumerate(opt_tup):
                         var_glob_dic[opt_k_lst[index]] = opt_v
-                    path_search_str = jinja2.Template(path_search).render(var_glob_dic)
                     pattern_search_str = jinja2.Template(pattern_search).render(var_glob_dic)
-                    path_dst_str = jinja2.Template(path_dst).render(var_glob_dic)
-                    match_str = f"{path_search_str}{os.sep}{pattern_search_str}"
-                    self.check_str(
-                        "{{", [path_search_str, pattern_search_str, path_dst_str, match_str])
-                    for match_file in fnmatch.filter(can_lst, match_str):
-                        self.link_src_dst(match_file, path_dst_str, path_search_str)
-    def proc_lib_cfg(self, lib_cfg):
-        """to process project or block lib mapping cfg"""
-        LOG.info("processing library mapping cfg ...")
-        for sec_name, map_sec in lib_cfg.items():
-            if sec_name == "DEFAULT":
-                continue
-            for opt_k in map_sec:
-                if not opt_k.startswith("_"):
-                    continue
-                opt_v_lst = []
-                for opt_v in pcom.rd_cfg(lib_cfg, sec_name, opt_k):
-                    opt_v_lst.extend(fnmatch.filter(self.match_lst, opt_v))
-                lib_cfg[sec_name][opt_k] = ", ".join(opt_v_lst)
-        LOG.info("done")
+                    if "{{" in pattern_search_str:
+                        LOG.error(f"search path {pattern_search_str} has unassigned variable")
+                        raise SystemExit()
+                    for match_file in fnmatch.filter(
+                            can_lst, f"{lib_src_root}{os.sep}{pattern_search_str}"):
+                        self.link_src_dst(
+                            match_file, f"{lib_dst_root}{os.sep}{lib_link_name}", lib_src_root)
+        with open(f"{lib_dst_root}{os.sep}.match_lst", "w") as mlf:
+            json.dump(self.match_lst, mlf)

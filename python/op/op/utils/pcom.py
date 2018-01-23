@@ -80,6 +80,18 @@ def rd_cfg(cfg, sec, opt, s_flg=False, fbk="", r_flg=False):
     cfg_lst = [cc.strip() for cc in re.split(split_str, value_str) if cc]
     return cfg_lst if not s_flg else (cfg_lst[0] if cfg_lst else "")
 
+def ch_cfg(cfg):
+    """to change cfg into nested dict and making possible lists"""
+    cfg_dic = {}
+    for sec_k, sec_v in cfg.items():
+        cfg_dic[sec_k] = {}
+        for opt_k, opt_v in sec_v.items():
+            cfg_dic[sec_k][opt_k] = (
+                opt_v if "," not in opt_v and os.linesep not in opt_v
+                else rd_cfg(cfg, sec_k, opt_k)
+            )
+    return cfg_dic
+
 def find_iter(path, pattern, dir_flg=False, cur_flg=False, i_str=""):
     """to find dirs and files in specified path recursively"""
     if cur_flg:
@@ -126,9 +138,12 @@ def pp_list(pp_obj, str_flg=False):
 def chk_wok(log, path):
     """to check write permissions of path"""
     if not os.path.exists(path):
-        log.error(f"path {path} is NA")
-        raise SystemExit()
-    if not os.access(path, os.W_OK):
+        try:
+            os.makedirs(path, exist_ok=True)
+        except PermissionError:
+            log.error(f"dir {path} is NA, and no permission for you to create it")
+            raise SystemExit()
+    elif not os.access(path, os.W_OK):
         log.error(f"no write permission in dir {path} for you")
         raise SystemExit()
 

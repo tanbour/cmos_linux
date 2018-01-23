@@ -111,4 +111,5 @@ python/**/*_site/pg_data/
 **/proj/**/output/
 
 # test
+**/tests/LIB/
 !**/tests/**/lib/

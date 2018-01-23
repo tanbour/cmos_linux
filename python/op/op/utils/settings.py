@@ -25,7 +25,7 @@ ADMIN_TMP_DIR = "$PROJ_ROOT/share/templates"
 ADMIN_BLK_CFG_DIR = "$BLK_ROOT/config"
 
 PROJ_REPO = "git"
-# to obtain projects list from server
+#TODO to obtain projects list from server
 if PROJ_REPO == "git":
     ALL_PROJ_DIC = {
         "ff": "git@xsfuture.com:/srv/ff_git.git",

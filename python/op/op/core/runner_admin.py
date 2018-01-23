@@ -10,11 +10,15 @@ from utils import pcom
 from utils import settings
 from utils import env_boot
 from core import proj_repo
+from core import lib_map
 
 LOG = pcom.gen_logger(__name__)
 
-class AdminProc(proj_repo.ProjRepo, env_boot.EnvBoot):
+class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
     """admin processor for start up projects"""
+    def __init__(self):
+        proj_repo.ProjRepo.__init__(self)
+        lib_map.LibMap.__init__(self)
     def fill_proj(self):
         """to fill project config and template dir after initialization"""
         proj_flg_file = f"{self.repo_dic['repo_dir']}{os.sep}{settings.FLG_FILE}"
@@ -67,13 +71,11 @@ class AdminProc(proj_repo.ProjRepo, env_boot.EnvBoot):
         """a function wrapper for inherited LibProc function"""
         env_boot.EnvBoot.__init__(self)
         self.boot_env()
-        pcom.chk_wok(self.ced["PROJ_LIB"])
-        lib_cfg_list = []
-        for lib_cfg in pcom.find_iter(self.ced["PROJ_SHARE_CFG_LIB"], "*.cfg", cur_flg=True):
-            cfg_kw = os.path.splitext(os.path.basename(proj_cfg))[0]
-            lib_cfg_dic[cfg_kw] = pcom.gen_cfg([lib_cfg])
-        self.proc_link_cfg(self.ced["LIB"], lib_cfg_dic)
-        self.proc_lib_cfg(self.cfg_dic.get("lib", {}))
+        pcom.chk_wok(LOG, self.ced["PROJ_LIB"])
+        if "lib" not in self.dir_cfg_dic:
+            LOG.error(f"lib directory is NA in {self.ced['PROJ_SHARE_CFG']}")
+            raise SystemExit()
+        self.link_lib(self.ced["LIB"], self.ced["PROJ_LIB"], self.dir_cfg_dic["lib"])
 
 def run_admin(args):
     """to run admin sub cmd"""

@@ -55,14 +55,16 @@ class EnvBoot(object):
             "PROJ_NAME": os.environ["PROJ_NAME"]
         }
         self.cfg_dic = {}
+        self.dir_cfg_dic = {}
         if blk_root_dir:
             self.blk_flg = True
             self.ced["BLK_NAME"] = os.environ["BLK_NAME"] = os.path.basename(blk_root_dir)
             self.ced["BLK_ROOT"] = os.environ["BLK_ROOT"] = blk_root_dir
         else:
             self.blk_flg = False
+        # used to provide the default comment options for blocks
         self.proj_cfg_lst = []
-    def proc_ced(self):
+    def boot_ced(self):
         """to process project and block global env dic used only by op"""
         boot_cfg = os.path.expandvars(f"{settings.BOOT_CFG}")
         if not os.path.isfile(boot_cfg):
@@ -77,7 +79,7 @@ class EnvBoot(object):
             for env_key, env_value in proj_sec_dic.items():
                 os.environ[env_key] = os.path.expandvars(env_value)
                 self.ced[env_key] = os.path.expandvars(env_value)
-    def proc_cfg(self):
+    def boot_cfg(self):
         """to process project and block global cfg dic used only by op"""
         for proj_cfg in pcom.find_iter(self.ced["PROJ_SHARE_CFG"], "*.cfg", cur_flg=True):
             cfg_kw = os.path.splitext(os.path.basename(proj_cfg))[0]
@@ -91,7 +93,14 @@ class EnvBoot(object):
                 self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg, blk_cfg])
             else:
                 self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg])
+        # dir cfgs of project level invisible to blocks
+        for proj_cfg_dir in pcom.find_iter(self.ced["PROJ_SHARE_CFG"], "*", True, True):
+            cfg_dir_kw = os.path.basename(proj_cfg_dir)
+            self.dir_cfg_dic[cfg_dir_kw] = {}
+            for proj_cfg in pcom.find_iter(proj_cfg_dir, "*.cfg", cur_flg=True):
+                cfg_kw = os.path.splitext(os.path.basename(proj_cfg))[0]
+                self.dir_cfg_dic[cfg_dir_kw][cfg_kw] = pcom.gen_cfg([proj_cfg])
     def boot_env(self):
         """class top exec function"""
-        self.proc_ced()
-        self.proc_cfg()
+        self.boot_ced()
+        self.boot_cfg()

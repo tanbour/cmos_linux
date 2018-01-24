@@ -59,11 +59,11 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         for blk_name in blk_lst:
             os.environ["BLK_NAME"] = blk_name
             os.environ["BLK_ROOT"] = blk_root_dir = f"{self.ced['PROJ_ROOT']}{os.sep}{blk_name}"
-            os.makedirs(blk_root_dir, exist_ok=True)
+            pcom.mkdir(LOG, blk_root_dir)
             blk_cfg_dir = os.path.expandvars(settings.ADMIN_BLK_CFG_DIR)
             for proj_cfg in self.proj_cfg_lst:
                 blk_cfg = proj_cfg.replace(self.ced["PROJ_SHARE_CFG"], blk_cfg_dir)
-                os.makedirs(os.path.dirname(blk_cfg), exist_ok=True)
+                pcom.mkdir(LOG, os.path.dirname(blk_cfg))
                 with open(proj_cfg) as pcf, open(blk_cfg, "w") as bcf:
                     for line in pcf:
                         bcf.write(f"# {line}")
@@ -71,15 +71,11 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         """a function wrapper for inherited LibProc function"""
         env_boot.EnvBoot.__init__(self)
         self.boot_env()
-        try:
-            os.makedirs(self.ced["PROJ_LIB"], exist_ok=True)
-        except PermissionError as err:
-            LOG.error(err)
-            raise SystemExit()
+        pcom.mkdir(LOG, self.ced["PROJ_LIB"])
         if "lib" not in self.dir_cfg_dic:
             LOG.error(f"lib directory is NA in {self.ced['PROJ_SHARE_CFG']}")
             raise SystemExit()
-        self.link_lib(
+        self.link_file(
             self.ced["LIB"], self.ced["PROJ_LIB"],
             self.dir_cfg_dic["lib"], self.cfg_dic)
         self.gen_liblist(

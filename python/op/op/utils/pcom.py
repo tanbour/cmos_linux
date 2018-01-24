@@ -9,6 +9,7 @@ import re
 import logging.config
 import fnmatch
 import configparser
+import itertools
 import pprint
 import psutil
 import jinja2
@@ -102,6 +103,19 @@ def ch_cfg(cfg):
                 else rd_cfg(cfg, sec_k, opt_k))
     return cfg_dic
 
+def prod_sec_iter(sec):
+    """to change section to item dictionary list by product loop"""
+    k_lst = []
+    v_lst = []
+    for opt_k, opt_v in sec.items():
+        k_lst.append(opt_k)
+        v_lst.append(rd_sec(sec, opt_k))
+    for opt_tup in itertools.product(*v_lst):
+        item_dic = {}
+        for index, opt_v in enumerate(opt_tup):
+            item_dic[k_lst[index]] = opt_v
+        yield item_dic
+
 def find_iter(path, pattern, dir_flg=False, cur_flg=False, i_str=""):
     """to find dirs and files in specified path recursively"""
     if cur_flg:
@@ -190,6 +204,14 @@ def ren_tempstr(log, temp_in, temp_dic):
         raise SystemExit()
     else:
         return temp_out
+
+def mkdir(log, path):
+    """to mkdir for common usage"""
+    try:
+        os.makedirs(path, exist_ok=True)
+    except PermissionError as err:
+        log.error(err)
+        raise SystemExit()
 
 class ColoredFormatter(logging.Formatter):
     """op colored logging formatter"""

@@ -71,14 +71,14 @@ class EnvBoot(object):
             LOG.error(f"boot config file {boot_cfg} is NA")
             raise SystemExit()
         self.cfg_dic = {"proj": pcom.gen_cfg([boot_cfg])}
-        for proj_sec, proj_sec_dic in self.cfg_dic["proj"].items():
-            if not proj_sec.startswith("env_"):
+        for proj_sec_k, proj_sec_v in self.cfg_dic["proj"].items():
+            if not proj_sec_k.startswith("env_"):
                 continue
-            if not self.blk_flg and proj_sec == "env_blk":
+            if not self.blk_flg and proj_sec_k == "env_blk":
                 continue
-            for env_key, env_value in proj_sec_dic.items():
-                os.environ[env_key] = os.path.expandvars(env_value)
-                self.ced[env_key] = os.path.expandvars(env_value)
+            for env_opt_k, env_opt_v in proj_sec_v.items():
+                os.environ[env_opt_k] = os.path.expandvars(env_opt_v)
+                self.ced[env_opt_k] = os.path.expandvars(env_opt_v)
     def boot_cfg(self):
         """to process project and block global cfg dic used only by op"""
         for proj_cfg in pcom.find_iter(self.ced["PROJ_SHARE_CFG"], "*.cfg", cur_flg=True):

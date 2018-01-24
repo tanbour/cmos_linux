@@ -6,15 +6,14 @@ Description: flow related features
 
 import os
 import subprocess
-import json
-import fnmatch
 from utils import pcom
 from utils import settings
 from utils import env_boot
+from core import lib_map
 
 LOG = pcom.gen_logger(__name__)
 
-class FlowProc(env_boot.EnvBoot):
+class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
     """flow processor for blocks"""
     def __init__(self):
         super().__init__()
@@ -46,20 +45,12 @@ class FlowProc(env_boot.EnvBoot):
         """to process project or block cfg for next step usage"""
         for cfg_k, cfg_v in self.cfg_dic.items():
             if cfg_k == "lib":
-                lib_match_file = f"{self.ced['PROJ_LIB']}{os.sep}.match_lst"
-                if not os.path.isfile(lib_match_file):
-                    LOG.warning(f"no library mapping generated in {self.ced['PROJ_LIB']}")
-                    continue
-                with open(lib_match_file) as lmf:
-                    lib_match_lst = json.load(lmf)
-                for sec_name, map_sec in cfg_v.items():
-                    for opt_k in map_sec:
-                        if not opt_k.startswith("_"):
-                            continue
-                        opt_v_lst = []
-                        for opt_v in pcom.rd_cfg(cfg_v, sec_name, opt_k):
-                            opt_v_lst.extend(fnmatch.filter(lib_match_lst, opt_v))
-                        self.cfg_dic[cfg_k][sec_name][opt_k] = ", ".join(opt_v_lst)
+                if "liblist" not in self.dir_cfg_dic["lib"]:
+                    LOG.error("liblist cfg file liblist.cfg is NA")
+                    raise SystemExit()
+                self.gen_liblist(
+                    self.ced["PROJ_LIB"], self.ced["OUTPUT_SRC"],
+                    self.dir_cfg_dic["lib"]["liblist"], self.cfg_dic["lib"])
         temp_cfg_dic = {}
         for cfg_k, cfg_v in self.cfg_dic.items():
             temp_cfg_dic[cfg_k] = pcom.ch_cfg(cfg_v)
@@ -70,7 +61,7 @@ class FlowProc(env_boot.EnvBoot):
             LOG.error("it's not in a block directory, please cd into one")
             raise SystemExit()
         for cfg_k, cfg_v in self.cfg_dic.items():
-            if cfg_k == "proj":
+            if cfg_k in ("proj", "lib"):
                 continue
             for proj_tmp in pcom.find_iter(
                     f"{self.ced['PROJ_SHARE_TMP']}{os.sep}{cfg_k}", "*"):
@@ -80,18 +71,11 @@ class FlowProc(env_boot.EnvBoot):
                 if dst_sec in cfg_v:
                     LOG.info(f"generating run file {dst_file} ...")
                     cfg_sec = cfg_v[dst_sec]
-                    try:
-                        pcom.ren_tempfile(
-                            proj_tmp, dst_file,
-                            {"global": self.cfg_dic.get("proj", {}),
-                             "system": self.ced, "local": cfg_sec}
-                        )
-                    except Exception as err:
-                        LOG.error(
-                            f"generating from template {proj_tmp} failed, "
-                            f"and the error is {err}"
-                        )
-                        raise SystemExit()
+                    pcom.ren_tempfile(
+                        LOG, proj_tmp, dst_file,
+                        {"global": self.cfg_dic.get("proj", {}),
+                         "system": self.ced, "local": cfg_sec}
+                    )
                     if "_exec_tool" in cfg_sec:
                         with open(f"{dst_file}.oprun", "w") as orf:
                             orf.write(

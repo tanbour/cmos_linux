@@ -21,15 +21,13 @@ class ProjRepo(object):
         """to list all projects registered in op"""
         LOG.info(f"{os.linesep}all available projects")
         pcom.pp_list(self.all_proj_lst)
-    def check_proj(self):
-        """to check initial project name and dir permissions"""
-        if self.repo_dic["init_proj_name"] not in self.all_proj_dic:
-            LOG.error(f"project name must be one of {self.all_proj_lst}")
-            raise SystemExit()
-        pcom.chk_wok(LOG, self.repo_dic["repo_dir"])
     def git_proj(self):
         """to check out project by using git"""
-        self.repo_dic["repo"] = repo = git.Repo.init(self.repo_dic["repo_dir"])
+        try:
+            self.repo_dic["repo"] = repo = git.Repo.init(self.repo_dic["repo_dir"])
+        except PermissionError as err:
+            LOG.error(err)
+            raise SystemExit()
         rmt = repo.remote() if repo.remotes else repo.create_remote(
             "origin", self.repo_dic["repo_url"])
         LOG.info(
@@ -49,9 +47,12 @@ class ProjRepo(object):
     def repo_proj(self, init_proj_name):
         """to operate project from code repo"""
         self.repo_dic["init_proj_name"] = init_proj_name
-        self.repo_dic["repo_url"] = self.all_proj_dic[init_proj_name]
+        try:
+            self.repo_dic["repo_url"] = self.all_proj_dic[init_proj_name]
+        except KeyError:
+            LOG.error(f"project name must be one of {self.all_proj_lst}")
+            raise SystemExit()
         self.repo_dic["repo_dir"] = os.getcwd()
-        self.check_proj()
         if settings.PROJ_REPO == "git":
             self.git_proj()
         elif settings.PROJ_REPO == "svn":

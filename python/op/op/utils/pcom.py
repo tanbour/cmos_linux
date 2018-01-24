@@ -80,6 +80,17 @@ def rd_cfg(cfg, sec, opt, s_flg=False, fbk="", r_flg=False):
     cfg_lst = [cc.strip() for cc in re.split(split_str, value_str) if cc]
     return cfg_lst if not s_flg else (cfg_lst[0] if cfg_lst else "")
 
+def rd_sec(sec, opt, s_flg=False, fbk="", r_flg=False):
+    """to read section to get corresponding option"""
+    value_str = os.path.expandvars(sec.get(opt, fallback=""))
+    if not value_str:
+        value_str = fbk
+    if r_flg:
+        sec.pop(opt)
+    split_str = rf"{os.linesep}" if opt.endswith("_opts") else rf",|{os.linesep}"
+    cfg_lst = [cc.strip() for cc in re.split(split_str, value_str) if cc]
+    return cfg_lst if not s_flg else (cfg_lst[0] if cfg_lst else "")
+
 def ch_cfg(cfg):
     """to change cfg into nested dict and making possible lists"""
     cfg_dic = {}
@@ -88,8 +99,7 @@ def ch_cfg(cfg):
         for opt_k, opt_v in sec_v.items():
             cfg_dic[sec_k][opt_k] = (
                 opt_v if "," not in opt_v and os.linesep not in opt_v
-                else rd_cfg(cfg, sec_k, opt_k)
-            )
+                else rd_cfg(cfg, sec_k, opt_k))
     return cfg_dic
 
 def find_iter(path, pattern, dir_flg=False, cur_flg=False, i_str=""):
@@ -135,18 +145,6 @@ def pp_list(pp_obj, str_flg=False):
         pprint.pprint(pp_obj, width=-1)
     print(appfix_str)
 
-def chk_wok(log, path):
-    """to check write permissions of path"""
-    if not os.path.exists(path):
-        try:
-            os.makedirs(path, exist_ok=True)
-        except PermissionError:
-            log.error(f"dir {path} is NA, and no permission for you to create it")
-            raise SystemExit()
-    elif not os.access(path, os.W_OK):
-        log.error(f"no write permission in dir {path} for you")
-        raise SystemExit()
-
 def pterminate(proc_pid):
     """to terminate specified process according to pid"""
     proc = psutil.Process(proc_pid)
@@ -161,14 +159,37 @@ def pkill(proc_pid):
         sub_proc.kill()
     proc.kill()
 
-def ren_tempfile(temp_in, temp_out, temp_dic):
-    """to render jinja2 template files"""
-    template_loader = jinja2.FileSystemLoader(os.path.dirname(temp_in))
-    template_env = jinja2.Environment(loader=template_loader)
-    template = template_env.get_template(os.path.basename(temp_in))
-    os.makedirs(os.path.dirname(temp_out), exist_ok=True)
-    with open(temp_out, "w") as ttf:
-        ttf.write(template.render(temp_dic))
+def ren_tempfile(log, temp_in, temp_out, temp_dic):
+    """to render jinja2 template file"""
+    try:
+        template_loader = jinja2.FileSystemLoader(os.path.dirname(temp_in))
+        template_env = jinja2.Environment(loader=template_loader)
+        template = template_env.get_template(os.path.basename(temp_in))
+        os.makedirs(os.path.dirname(temp_out), exist_ok=True)
+        with open(temp_out, "w") as ttf:
+            ttf.write(template.render(temp_dic))
+    except jinja2.exceptions.TemplateError as err:
+        log.error(
+            f"generating from template {temp_in} failed, "
+            f"and the error is {str(err)}"
+        )
+        raise SystemExit()
+    except PermissionError as err:
+        log.error(err)
+        raise SystemExit()
+
+def ren_tempstr(log, temp_in, temp_dic):
+    """to render jinja2 template string"""
+    try:
+        temp_out = jinja2.Template(temp_in).render(temp_dic)
+    except jinja2.exceptions.TemplateError as err:
+        log.error(
+            f"generating from template str {temp_in} failed, "
+            f"and the error is {str(err)}"
+        )
+        raise SystemExit()
+    else:
+        return temp_out
 
 class ColoredFormatter(logging.Formatter):
     """op colored logging formatter"""

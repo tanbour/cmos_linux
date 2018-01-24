@@ -71,11 +71,20 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         """a function wrapper for inherited LibProc function"""
         env_boot.EnvBoot.__init__(self)
         self.boot_env()
-        pcom.chk_wok(LOG, self.ced["PROJ_LIB"])
+        try:
+            os.makedirs(self.ced["PROJ_LIB"], exist_ok=True)
+        except PermissionError as err:
+            LOG.error(err)
+            raise SystemExit()
         if "lib" not in self.dir_cfg_dic:
             LOG.error(f"lib directory is NA in {self.ced['PROJ_SHARE_CFG']}")
             raise SystemExit()
-        self.link_lib(self.ced["LIB"], self.ced["PROJ_LIB"], self.dir_cfg_dic["lib"])
+        self.link_lib(
+            self.ced["LIB"], self.ced["PROJ_LIB"],
+            self.dir_cfg_dic["lib"], self.cfg_dic)
+        self.gen_liblist(
+            self.ced["PROJ_LIB"], self.ced["PROJ_LIB"],
+            self.dir_cfg_dic["lib"]["liblist"], self.cfg_dic["lib"])
 
 def run_admin(args):
     """to run admin sub cmd"""

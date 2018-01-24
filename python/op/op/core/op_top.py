@@ -58,7 +58,7 @@ def gen_flow_parser(subparsers):
     """to generate flow parser"""
     flow_parser = subparsers.add_parser(
         "flow",
-        help="sub cmd about run flow")
+        help="sub cmd about running and controlling backend flows")
     me_group = flow_parser.add_mutually_exclusive_group()
     me_group.add_argument(
         "-list_env", dest="flow_list_env", action="store_true",

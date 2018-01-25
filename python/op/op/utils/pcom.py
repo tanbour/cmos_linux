@@ -72,22 +72,27 @@ def gen_cfg(cfg_file_iter, dlts=("=", ":")):
 
 def rd_cfg(cfg, sec, opt, s_flg=False, fbk="", r_flg=False):
     """to read config to get corresponding section and option"""
+    if not cfg:
+        cfg = configparser.ConfigParser()
     value_str = os.path.expandvars(cfg.get(sec, opt, fallback=""))
     if not value_str:
         value_str = fbk
     if r_flg:
-        cfg.remove_option(sec, opt)
+        try:
+            cfg.remove_option(sec, opt)
+        except NoSectionError:
+            pass
     split_str = rf"{os.linesep}" if opt.endswith("_opts") else rf",|{os.linesep}"
     cfg_lst = [cc.strip() for cc in re.split(split_str, value_str) if cc]
     return cfg_lst if not s_flg else (cfg_lst[0] if cfg_lst else "")
 
 def rd_sec(sec, opt, s_flg=False, fbk="", r_flg=False):
     """to read section to get corresponding option"""
-    value_str = os.path.expandvars(sec.get(opt, fallback=""))
+    value_str = os.path.expandvars(sec.get(opt, ""))
     if not value_str:
         value_str = fbk
-    if r_flg:
-        sec.pop(opt)
+    if r_flg and opt in sec:
+        del sec[opt]
     split_str = rf"{os.linesep}" if opt.endswith("_opts") else rf",|{os.linesep}"
     cfg_lst = [cc.strip() for cc in re.split(split_str, value_str) if cc]
     return cfg_lst if not s_flg else (cfg_lst[0] if cfg_lst else "")

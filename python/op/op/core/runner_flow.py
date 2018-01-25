@@ -36,7 +36,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         LOG.info(f"{os.linesep}all current available stages")
         stage_dic = {}
         for cfg_k, cfg_v in self.cfg_dic.items():
-            if cfg_k in pcom.rd_cfg(self.cfg_dic["proj"], "flow", "not_flow_cfg"):
+            if cfg_k in pcom.rd_cfg(self.cfg_dic.get("proj", {}), "flow", "not_flow_cfg"):
                 continue
             cfg_v_lst = list(dict(cfg_v))
             cfg_v_lst.remove("DEFAULT")
@@ -61,7 +61,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             LOG.error("it's not in a block directory, please cd into one")
             raise SystemExit()
         for cfg_k, cfg_v in self.ch_cfg_dic.items():
-            if cfg_k in pcom.rd_cfg(self.cfg_dic["proj"], "flow", "not_flow_cfg"):
+            if cfg_k in pcom.rd_cfg(self.cfg_dic.get("proj", {}), "flow", "not_flow_cfg"):
                 continue
             for proj_tmp in pcom.find_iter(
                     f"{self.ced['PROJ_SHARE_TMP']}{os.sep}{cfg_k}", "*"):

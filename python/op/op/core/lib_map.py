@@ -34,7 +34,7 @@ class LibMap(object):
         for lib_file, lib_file_cfg in lib_dir_cfg_dic.items():
             if lib_file == "liblist":
                 continue
-            can_root = pcom.rd_cfg(cfg_dic.get("proj", {}), "lib_mapping", lib_file, True)
+            can_root = pcom.rd_cfg(cfg_dic.get("proj", {}), "lib_map", lib_file, True)
             if not can_root:
                 LOG.error(
                     f"library mapping search root path of {lib_file} "

@@ -185,7 +185,7 @@ def ren_tempfile(log, temp_in, temp_out, temp_dic):
     except jinja2.exceptions.TemplateError as err:
         log.error(
             f"generating from template {temp_in} failed, "
-            f"and the error is {str(err)}"
+            f"and the error is {err}"
         )
         raise SystemExit()
     except PermissionError as err:
@@ -199,7 +199,7 @@ def ren_tempstr(log, temp_in, temp_dic):
     except jinja2.exceptions.TemplateError as err:
         log.error(
             f"generating from template str {temp_in} failed, "
-            f"and the error is {str(err)}"
+            f"and the error is {err}"
         )
         raise SystemExit()
     else:

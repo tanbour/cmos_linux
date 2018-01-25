@@ -16,7 +16,7 @@ OP_TMP = f"{OP_ROOT}{os.sep}proj_share{os.sep}templates"
 
 # project related settings
 FLG_FILE = ".alchip_proj_root_flg"
-TREE_IGNORE_LST = ["share"]
+BLK_IGNORE_LST = ["share"]
 
 BOOT_CFG = "$PROJ_ROOT/share/config/proj.cfg"
 

@@ -34,7 +34,7 @@ def find_blk_root(path_str, proj_root):
         )
         raise SystemExit()
     blk_name = path_str.replace(proj_root, "").strip(os.sep).split(os.sep)[0]
-    if proj_root == path_str or blk_name in settings.TREE_IGNORE_LST:
+    if proj_root == path_str or blk_name in settings.BLK_IGNORE_LST:
         LOG.info("not in a block directory, block level features off")
         return ""
     return f"{proj_root}{os.sep}{blk_name}"

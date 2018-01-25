@@ -18,14 +18,15 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
     def __init__(self):
         super().__init__()
         self.boot_env()
+        self.ch_cfg_dic = {}
     def list_env(self):
         """to list all current project or block op environment variables"""
         LOG.info(f"{os.linesep}all op internal env variables")
         pcom.pp_list(self.ced)
     def list_blk(self):
         """to list all possible blocks according to project root dir"""
-        tree_ignore_str = "|".join(settings.TREE_IGNORE_LST)
-        run_str = f"tree -L 1 -d -I '(|{tree_ignore_str}|)' {self.ced['PROJ_ROOT']}"
+        blk_ignore_str = "|".join(settings.BLK_IGNORE_LST)
+        run_str = f"tree -L 1 -d -I '(|{blk_ignore_str}|)' {self.ced['PROJ_ROOT']}"
         tree_str = subprocess.run(
             run_str, shell=True, check=True, stdout=subprocess.PIPE).stdout.decode()
         LOG.info(f"{os.linesep}all available blocks")
@@ -35,7 +36,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         LOG.info(f"{os.linesep}all current available stages")
         stage_dic = {}
         for cfg_k, cfg_v in self.cfg_dic.items():
-            if cfg_k == "proj" or cfg_k.startswith("lib"):
+            if cfg_k in pcom.rd_cfg(self.cfg_dic["proj"], "flow", "not_flow_cfg"):
                 continue
             cfg_v_lst = list(dict(cfg_v))
             cfg_v_lst.remove("DEFAULT")
@@ -45,35 +46,34 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         """to process project or block cfg for next step usage"""
         for cfg_k, cfg_v in self.cfg_dic.items():
             if cfg_k == "lib":
-                if "liblist" not in self.dir_cfg_dic["lib"]:
-                    LOG.error("liblist cfg file liblist.cfg is NA")
+                try:
+                    self.gen_liblist(
+                        self.ced["PROJ_LIB"], self.ced["OUTPUT_SRC"],
+                        self.dir_cfg_dic["lib"]["liblist"], self.cfg_dic["lib"])
+                except KeyError as err:
+                    LOG.error(err)
                     raise SystemExit()
-                self.gen_liblist(
-                    self.ced["PROJ_LIB"], self.ced["OUTPUT_SRC"],
-                    self.dir_cfg_dic["lib"]["liblist"], self.cfg_dic["lib"])
-        temp_cfg_dic = {}
         for cfg_k, cfg_v in self.cfg_dic.items():
-            temp_cfg_dic[cfg_k] = pcom.ch_cfg(cfg_v)
-        self.cfg_dic = temp_cfg_dic
+            self.ch_cfg_dic[cfg_k] = pcom.ch_cfg(cfg_v)
     def proc_tmp(self):
         """to process project and block templates to generate output files"""
         if not self.blk_flg:
             LOG.error("it's not in a block directory, please cd into one")
             raise SystemExit()
-        for cfg_k, cfg_v in self.cfg_dic.items():
-            if cfg_k in ("proj", "lib"):
+        for cfg_k, cfg_v in self.ch_cfg_dic.items():
+            if cfg_k in pcom.rd_cfg(self.cfg_dic["proj"], "flow", "not_flow_cfg"):
                 continue
             for proj_tmp in pcom.find_iter(
                     f"{self.ced['PROJ_SHARE_TMP']}{os.sep}{cfg_k}", "*"):
                 dst_file = proj_tmp.replace(
                     self.ced["PROJ_SHARE_TMP"], self.ced["OUTPUT_SRC"])
-                dst_sec = os.path.basename(proj_tmp)
-                if dst_sec in cfg_v:
+                dst_file_name = os.path.basename(proj_tmp)
+                if dst_file_name in cfg_v:
                     LOG.info(f"generating run file {dst_file} ...")
-                    cfg_sec = cfg_v[dst_sec]
+                    cfg_sec = cfg_v[dst_file_name]
                     pcom.ren_tempfile(
                         LOG, proj_tmp, dst_file,
-                        {"global": self.cfg_dic.get("proj", {}),
+                        {"global": self.ch_cfg_dic.get("proj", {}),
                          "system": self.ced, "local": cfg_sec}
                     )
                     if "_exec_tool" in cfg_sec:
@@ -85,8 +85,8 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                     LOG.info("done")
                 else:
                     LOG.warning(
-                        f"template {proj_tmp} has no corresponding config section {dst_sec} "
-                        f"in config {cfg_k}"
+                        f"template {proj_tmp} has no corresponding config section "
+                        f"{dst_file_name} in config {cfg_k}"
                     )
     def proc_run(self, run_lst):
         """to process generated oprun files for running flows"""
@@ -104,7 +104,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             stage_str = os.path.basename(os.path.dirname(oprun_file))
             LOG.info(f"running stage {stage_str}, oprun file {oprun_file} ...")
             subprocess.Popen(
-                f"uxterm -title '{oprun_file}' -hold -e 'source {oprun_file}'", shell=True
+                f"xterm -title '{oprun_file}' -hold -e 'source {oprun_file}'", shell=True
             )
             LOG.info("done")
 

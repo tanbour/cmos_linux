@@ -80,7 +80,7 @@ def rd_cfg(cfg, sec, opt, s_flg=False, fbk="", r_flg=False):
     if r_flg:
         try:
             cfg.remove_option(sec, opt)
-        except NoSectionError:
+        except configparser.NoSectionError:
             pass
     split_str = rf"{os.linesep}" if opt.endswith("_opts") else rf",|{os.linesep}"
     cfg_lst = [cc.strip() for cc in re.split(split_str, value_str) if cc]
@@ -121,12 +121,12 @@ def prod_sec_iter(sec):
             item_dic[k_lst[index]] = opt_v
         yield item_dic
 
-def find_iter(path, pattern, dir_flg=False, cur_flg=False, i_str=""):
+def find_iter(path, pattern, dir_flg=False, cur_flg=False, i_lst=None):
     """to find dirs and files in specified path recursively"""
     if cur_flg:
         find_lst = os.listdir(path)
         for find_name in fnmatch.filter(find_lst, pattern):
-            if i_str and i_str in find_name:
+            if i_lst and any([c_c in find_name for c_c in i_lst]):
                 continue
             root_find_name = os.path.join(path, find_name)
             if os.access(root_find_name, os.R_OK):
@@ -138,7 +138,7 @@ def find_iter(path, pattern, dir_flg=False, cur_flg=False, i_str=""):
         for root_name, dir_name_lst, file_name_lst in os.walk(path, followlinks=False):
             find_lst = dir_name_lst if dir_flg else file_name_lst
             for find_name in fnmatch.filter(find_lst, pattern):
-                if i_str and i_str in find_name:
+                if i_lst and any([c_c in find_name for c_c in i_lst]):
                     continue
                 root_find_name = os.path.join(root_name, find_name)
                 if os.access(root_find_name, os.R_OK):

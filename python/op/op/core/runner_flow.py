@@ -19,6 +19,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         super().__init__()
         self.boot_env()
         self.ch_cfg_dic = {}
+        self.liblist_var_dic = {}
     def list_env(self):
         """to list all current project or block op environment variables"""
         LOG.info(f"{os.linesep}all op internal env variables")
@@ -47,7 +48,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         for cfg_k, cfg_v in self.cfg_dic.items():
             if cfg_k == "lib":
                 try:
-                    self.gen_liblist(
+                    self.liblist_var_dic = self.gen_liblist(
                         self.ced["PROJ_LIB"], self.ced["OUTPUT_SRC"],
                         self.dir_cfg_dic["lib"]["liblist"], self.cfg_dic["lib"])
                 except KeyError as err:
@@ -73,8 +74,8 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                     cfg_sec = cfg_v[dst_file_name]
                     pcom.ren_tempfile(
                         LOG, proj_tmp, dst_file,
-                        {"global": self.ch_cfg_dic.get("proj", {}),
-                         "system": self.ced, "local": cfg_sec}
+                        {"global": self.ch_cfg_dic.get("proj", {}), "env": self.ced,
+                         "local": cfg_sec, "liblist": self.liblist_var_dic}
                     )
                     if "_exec_tool" in cfg_sec:
                         with open(f"{dst_file}.oprun", "w") as orf:

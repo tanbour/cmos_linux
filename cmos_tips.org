@@ -27,7 +27,7 @@ blender, cinelerra-cv, subtitleeditor, audacity, puddletag
 adobe-source-han-sans-cn-fonts
 ibus, ibus-sunpinyin
 ** python
-beautifulsoup4, diff-match-patch, Django, djangorestframework, httpie, django-reversion, ipython, jupyter, Jinja2, matplotlib, networkx, nltk, numpy, openpyxl, cython, pandas, Pillow, pip, psycopg2, mysqlclient, pytz, pyverilog, scikit-learn, scipy, setuptools, sympy, uwsgi, xlrd, xlutils, xlwt, sphinx, jieba, SQLAlchemy, texttable, nested-dict, gitpython, line_profiler, memory_profiler, pycurl, flask, paramiko, psutil, virtualenv, tox, pylint, pylint-django
+beautifulsoup4, diff-match-patch, Django, djangorestframework, httpie, django-reversion, ipython, jupyter, Jinja2, matplotlib, networkx, nltk, numpy, openpyxl, cython, pandas, Pillow, pip, psycopg2, mysqlclient, pytz, pyverilog, scikit-learn, scipy, setuptools, sympy, uwsgi, xlrd, xlutils, xlwt, sphinx, jieba, SQLAlchemy, texttable, nested-dict, gitpython, line_profiler, memory_profiler, pycurl, flask, paramiko, psutil, virtualenv, tox, pylint, pylint-django, nose
 ** npm
 vue, iview, axios, js-cookie, ckeditor
 ** emacs

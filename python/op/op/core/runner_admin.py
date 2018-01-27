@@ -23,9 +23,8 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         """to fill project config and template dir after initialization"""
         proj_flg_file = f"{self.repo_dic['repo_dir']}{os.sep}{settings.FLG_FILE}"
         LOG.info(f"generating op project flag file {settings.FLG_FILE} ...")
-        if not os.path.isfile(proj_flg_file):
-            with open(proj_flg_file, "w") as f_f:
-                f_f.write(self.repo_dic["init_proj_name"])
+        with open(proj_flg_file, "w") as f_f:
+            f_f.write(self.repo_dic["init_proj_name"])
         LOG.info("done")
         LOG.info("generating op project level configs and templates ...")
         env_boot.EnvBoot.__init__(self)
@@ -72,15 +71,16 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         env_boot.EnvBoot.__init__(self)
         self.boot_env()
         pcom.mkdir(LOG, self.ced["PROJ_LIB"])
-        if "lib" not in self.dir_cfg_dic:
-            LOG.error(f"lib directory is NA in {self.ced['PROJ_SHARE_CFG']}")
+        try:
+            self.link_file(
+                self.ced["LIB"], self.ced["PROJ_LIB"],
+                self.dir_cfg_dic["lib"], self.cfg_dic)
+            self.gen_liblist(
+                self.ced["PROJ_LIB"], self.ced["PROJ_LIB"],
+                self.dir_cfg_dic["lib"]["liblist"], self.cfg_dic["lib"])
+        except KeyError as err:
+            LOG.error(err)
             raise SystemExit()
-        self.link_file(
-            self.ced["LIB"], self.ced["PROJ_LIB"],
-            self.dir_cfg_dic["lib"], self.cfg_dic)
-        self.gen_liblist(
-            self.ced["PROJ_LIB"], self.ced["PROJ_LIB"],
-            self.dir_cfg_dic["lib"]["liblist"], self.cfg_dic["lib"])
 
 def run_admin(args):
     """to run admin sub cmd"""

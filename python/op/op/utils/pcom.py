@@ -72,22 +72,27 @@ def gen_cfg(cfg_file_iter, dlts=("=", ":")):
 
 def rd_cfg(cfg, sec, opt, s_flg=False, fbk="", r_flg=False):
     """to read config to get corresponding section and option"""
+    if not cfg:
+        cfg = configparser.ConfigParser()
     value_str = os.path.expandvars(cfg.get(sec, opt, fallback=""))
     if not value_str:
         value_str = fbk
     if r_flg:
-        cfg.remove_option(sec, opt)
+        try:
+            cfg.remove_option(sec, opt)
+        except configparser.NoSectionError:
+            pass
     split_str = rf"{os.linesep}" if opt.endswith("_opts") else rf",|{os.linesep}"
     cfg_lst = [cc.strip() for cc in re.split(split_str, value_str) if cc]
     return cfg_lst if not s_flg else (cfg_lst[0] if cfg_lst else "")
 
 def rd_sec(sec, opt, s_flg=False, fbk="", r_flg=False):
     """to read section to get corresponding option"""
-    value_str = os.path.expandvars(sec.get(opt, fallback=""))
+    value_str = os.path.expandvars(sec.get(opt, ""))
     if not value_str:
         value_str = fbk
-    if r_flg:
-        sec.pop(opt)
+    if r_flg and opt in sec:
+        del sec[opt]
     split_str = rf"{os.linesep}" if opt.endswith("_opts") else rf",|{os.linesep}"
     cfg_lst = [cc.strip() for cc in re.split(split_str, value_str) if cc]
     return cfg_lst if not s_flg else (cfg_lst[0] if cfg_lst else "")
@@ -116,12 +121,12 @@ def prod_sec_iter(sec):
             item_dic[k_lst[index]] = opt_v
         yield item_dic
 
-def find_iter(path, pattern, dir_flg=False, cur_flg=False, i_str=""):
+def find_iter(path, pattern, dir_flg=False, cur_flg=False, i_lst=None):
     """to find dirs and files in specified path recursively"""
     if cur_flg:
         find_lst = os.listdir(path)
         for find_name in fnmatch.filter(find_lst, pattern):
-            if i_str and i_str in find_name:
+            if i_lst and any([c_c in find_name for c_c in i_lst]):
                 continue
             root_find_name = os.path.join(path, find_name)
             if os.access(root_find_name, os.R_OK):
@@ -133,7 +138,7 @@ def find_iter(path, pattern, dir_flg=False, cur_flg=False, i_str=""):
         for root_name, dir_name_lst, file_name_lst in os.walk(path, followlinks=False):
             find_lst = dir_name_lst if dir_flg else file_name_lst
             for find_name in fnmatch.filter(find_lst, pattern):
-                if i_str and i_str in find_name:
+                if i_lst and any([c_c in find_name for c_c in i_lst]):
                     continue
                 root_find_name = os.path.join(root_name, find_name)
                 if os.access(root_find_name, os.R_OK):
@@ -185,7 +190,7 @@ def ren_tempfile(log, temp_in, temp_out, temp_dic):
     except jinja2.exceptions.TemplateError as err:
         log.error(
             f"generating from template {temp_in} failed, "
-            f"and the error is {str(err)}"
+            f"and the error is {err}"
         )
         raise SystemExit()
     except PermissionError as err:
@@ -199,7 +204,7 @@ def ren_tempstr(log, temp_in, temp_dic):
     except jinja2.exceptions.TemplateError as err:
         log.error(
             f"generating from template str {temp_in} failed, "
-            f"and the error is {str(err)}"
+            f"and the error is {err}"
         )
         raise SystemExit()
     else:

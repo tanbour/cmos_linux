@@ -18,7 +18,7 @@ class LibMap(object):
         self.match_lst = []
     def link_src_dst(self, src_file, dst_dir, src_base):
         """to perform source to destination link action"""
-        dst_file = f"{dst_dir}{os.sep}{src_file.replace(src_base, '')}"
+        dst_file = f"{dst_dir}{os.sep}{src_file.replace(src_base, '').strip(os.sep)}"
         if os.path.islink(dst_file):
             os.unlink(dst_file)
         elif os.path.isfile(dst_file):
@@ -34,14 +34,17 @@ class LibMap(object):
         for lib_file, lib_file_cfg in lib_dir_cfg_dic.items():
             if lib_file == "liblist":
                 continue
-            can_root = pcom.rd_cfg(cfg_dic.get("proj", {}), "lib_mapping", lib_file, True)
+            can_root = pcom.rd_cfg(cfg_dic.get("proj", {}), "lib_map", lib_file, True)
+            can_ignore_lst = pcom.rd_cfg(cfg_dic.get("proj", {}), "lib_map", f"{lib_file}_ignore")
             if not can_root:
                 LOG.error(
                     f"library mapping search root path of {lib_file} "
                     f"is not defined in proj.cfg"
                 )
                 raise SystemExit()
-            can_lst = list(pcom.find_iter(can_root, "*"))
+            can_lst = [
+                c_c for c_c in pcom.find_iter(can_root, "*")
+                if not any([ccc in c_c for ccc in can_ignore_lst])]
             cfg_link_lst = []
             for lib_link, lib_sec in cfg_dic.get("lib", {}).items():
                 if not lib_link.startswith(f"link_{lib_file}"):
@@ -70,7 +73,7 @@ class LibMap(object):
                             self.link_src_dst(
                                 match_file, f"{dst_root}", src_root)
         with open(f"{dst_root}{os.sep}.match_lst", "w") as mlf:
-            json.dump(self.match_lst, mlf)
+            json.dump(self.match_lst, mlf, indent=4)
     @classmethod
     def gen_liblist(cls, map_root, liblist_root, liblist_cfg, lib_cfg):
         """to generate project or block liblist files"""
@@ -83,22 +86,38 @@ class LibMap(object):
             LOG.warning(f"library map list file not generated in {map_root}")
         LOG.info("done")
         liblist_dir = f"{liblist_root}{os.sep}liblist"
-        LOG.info(f"generating library liblist files in {liblist_dir} ...")
         pcom.mkdir(LOG, liblist_dir)
         var_dic_lst = list(pcom.prod_sec_iter(lib_cfg["liblist"]))
-        tcl_line_lst = []
+        var_name_line_dic = {}
+        try:
+            custom_dic = {
+                c_k: pcom.rd_cfg(liblist_cfg, "custom", c_k)
+                for c_k in liblist_cfg["custom"]}
+        except KeyError:
+            custom_dic = {}
         if "var" not in liblist_cfg:
             LOG.error("var section is NA in liblist.cfg")
             raise SystemExit()
         for var_name in liblist_cfg["var"]:
-            match_file_lst = []
-            for match_pattern in pcom.rd_cfg(liblist_cfg, "var", var_name):
-                for var_dic in var_dic_lst:
-                    match_file_lst.extend(fnmatch.filter(
-                        lib_match_lst, pcom.ren_tempstr(LOG, match_pattern, var_dic)))
-            value_str = f" \\{os.linesep}{' '*(6+len(var_name))}".join(match_file_lst)
-            tcl_line_lst.append(f'set {var_name} "{value_str}"')
+            if var_name in custom_dic:
+                match_file_lst = custom_dic[var_name]
+            else:
+                match_file_lst = []
+                for match_pattern in pcom.rd_cfg(liblist_cfg, "var", var_name):
+                    for var_dic in var_dic_lst:
+                        match_file_lst.extend(fnmatch.filter(
+                            lib_match_lst, pcom.ren_tempstr(LOG, match_pattern, var_dic)))
+            var_name_line_dic[var_name] = match_file_lst
+        LOG.info(f"generating library liblist files in {liblist_dir} ...")
+        #file generation and liblist dic generation for templates
+        liblist_var_dic = {}
+        tcl_line_lst = []
+        for var_name, match_file_lst in var_name_line_dic.items():
+            liblist_var_dic[var_name] = f" \\{os.linesep} ".join(match_file_lst)
+            tcl_value_str = f" \\{os.linesep}{' '*(6+len(var_name))}".join(match_file_lst)
+            tcl_line_lst.append(f'set {var_name} "{tcl_value_str}"')
             LOG.info(f"variable {var_name} in liblist processed")
         with open(f"{liblist_dir}{os.sep}liblist.tcl", "w") as lltf:
             lltf.write(os.linesep.join(tcl_line_lst))
         LOG.info(f"done")
+        return liblist_var_dic

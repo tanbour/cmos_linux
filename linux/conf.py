@@ -36,15 +36,23 @@ for root_name, _, file_name_lst in os.walk(f"{exec_dir}{os.sep}dotfiles", follow
     for find_name in fnmatch.filter(file_name_lst, "*"):
         repo_file = f"{root_name}{os.sep}{find_name}"
         home_dir = re.sub(r"^.*/dotfiles", os.path.expandvars("$HOME"), root_name)
-        home_file = os.path.expandvars(f"{home_dir}{os.sep}{find_name}")
+        home_file = f"{home_dir}{os.sep}{find_name}"
         if args.check_mode:
+            if not os.path.isfile(home_file):
+                print(f"{'*'*30}{os.linesep}home file {home_file} is NA{os.linesep}{'*'*30}")
+                continue
             with open(repo_file) as rf, open(home_file) as hf:
                 home_lines = hf.readlines()
                 repo_lines = rf.readlines()
             os.sys.stdout.writelines(
                 difflib.unified_diff(home_lines, repo_lines, home_file, repo_file))
         elif args.backup_mode:
+            if not os.path.isfile(home_file):
+                print(f"{'*'*30}{os.linesep}home file {home_file} is NA{os.linesep}{'*'*30}")
+                continue
             shutil.copyfile(home_file, repo_file)
         elif args.apply_mode:
-            os.makedirs(os.path.dirname(home_file), exist_ok=True)
+            if not os.path.isfile(home_file):
+                print(f"{'*'*30}{os.linesep}home file {home_file} is NA{os.linesep}{'*'*30}")
+                os.makedirs(os.path.dirname(home_file), exist_ok=True)
             shutil.copyfile(repo_file, home_file)

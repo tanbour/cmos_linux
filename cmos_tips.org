@@ -17,7 +17,7 @@ linux, linux-headers, base, base-devel, pacman, sudo, ntp, gcc, gcc-fortran, gdb
 ** common gui
 xorg-server, xorg-xinit, xorg-xrandr, xorg-xprop, xautolock, xterm, i3-wm, i3status, i3lock, dmenu, gvim, emacs, tk, openjdk, feh, pulseaudio, pulseaudio-alsa, ponymix, gstreamer, portmidi, flac, x264, x265, ffmpeg, mpv, smplayer, chromium, ttf-dejavu, ttf-font-awesome
 ** linux_server only
-nftables, amdgpu, vsftpd, samba, qvkbd
+nftables, vsftpd, samba, amdgpu
 ** linux_client only
 *** program
 grub, memtest86+, gparted, nvidia, icedtea-web, pepper-flash, filezilla, tcsh, mksh, zsh, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, recordmydesktop, gv, xchm, gnuplot, graphviz, cups-pdf, bchunk, aspell-en, hunspell-en, tigervnc, freerdp, celestia, gnugo, libreoffice, networkmanager, network-manager-applet, android-tools, xf86-input-libinput, acpid, mupdf, dunst, udevil, thunderbird
@@ -253,6 +253,8 @@ yum list installed
 systemctl list-units
 systemctl enable/disable <service>
 systemctl start/stop/restart <service>
+systemctl --failed
+systemctl reset-failed
 
 * grub
 /etc/default/grub: GRUB_GFXMODE=1920x1080
@@ -378,6 +380,7 @@ flac --best <new_file_prefix>*
 
 * X11 resources
 xrdb ~/.Xresources
+xrdb -merge ~/.Xresources
 
 * files leaving
 shopt -s extglob

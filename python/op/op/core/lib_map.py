@@ -22,12 +22,12 @@ class LibMap(object):
         if os.path.islink(dst_file):
             os.unlink(dst_file)
         elif os.path.isfile(dst_file):
-            LOG.warning(f"dst file {dst_file} is not a link")
+            LOG.warning(f" dst file {dst_file} is not a link")
             return
         else:
             pcom.mkdir(LOG, os.path.dirname(dst_file))
         os.symlink(src_file, dst_file)
-        LOG.info(f"linked src file {src_file} as dst file {dst_file}")
+        LOG.info(f" linked src file {src_file} as dst file {dst_file}")
         self.match_lst.append(dst_file)
     def link_file(self, src_root, dst_root, lib_dir_cfg_dic, cfg_dic):
         """to process project or block lib mapping links"""
@@ -78,13 +78,13 @@ class LibMap(object):
     def gen_liblist(cls, map_root, liblist_root, liblist_cfg, lib_cfg):
         """to generate project or block liblist files"""
         match_lst_file = f"{map_root}{os.sep}.match_lst"
-        LOG.info(f"loading library map list file {match_lst_file} ...")
+        LOG.info(f":: loading library map list file {match_lst_file} ...")
         try:
             with open(match_lst_file) as mlf:
                 lib_match_lst = json.load(mlf)
         except FileNotFoundError:
-            LOG.warning(f"library map list file not generated in {map_root}")
-        LOG.info("done")
+            LOG.warning(f" library map list file not generated in {map_root}")
+            lib_match_lst = []
         liblist_dir = f"{liblist_root}{os.sep}liblist"
         pcom.mkdir(LOG, liblist_dir)
         var_dic_lst = list(pcom.prod_sec_iter(lib_cfg["liblist"]))
@@ -108,7 +108,7 @@ class LibMap(object):
                         match_file_lst.extend(fnmatch.filter(
                             lib_match_lst, pcom.ren_tempstr(LOG, match_pattern, var_dic)))
             var_name_line_dic[var_name] = match_file_lst
-        LOG.info(f"generating library liblist files in {liblist_dir} ...")
+        LOG.info(f":: generating library liblist files in {liblist_dir} ...")
         #file generation and liblist dic generation for templates
         liblist_var_dic = {}
         tcl_line_lst = []
@@ -116,8 +116,6 @@ class LibMap(object):
             liblist_var_dic[var_name] = f" \\{os.linesep} ".join(match_file_lst)
             tcl_value_str = f" \\{os.linesep}{' '*(6+len(var_name))}".join(match_file_lst)
             tcl_line_lst.append(f'set {var_name} "{tcl_value_str}"')
-            LOG.info(f"variable {var_name} in liblist processed")
         with open(f"{liblist_dir}{os.sep}liblist.tcl", "w") as lltf:
             lltf.write(os.linesep.join(tcl_line_lst))
-        LOG.info(f"done")
         return liblist_var_dic

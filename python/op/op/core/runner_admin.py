@@ -22,16 +22,15 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
     def fill_proj(self):
         """to fill project config and template dir after initialization"""
         proj_flg_file = f"{self.repo_dic['repo_dir']}{os.sep}{settings.FLG_FILE}"
-        LOG.info(f"generating op project flag file {settings.FLG_FILE} ...")
+        LOG.info(f":: generating op project flag file {settings.FLG_FILE} ...")
         with open(proj_flg_file, "w") as f_f:
             f_f.write(self.repo_dic["init_proj_name"])
-        LOG.info("done")
-        LOG.info("generating op project level configs and templates ...")
+        LOG.info(":: generating op project level configs and templates ...")
         env_boot.EnvBoot.__init__(self)
         dst_cfg_dir = os.path.expandvars(settings.ADMIN_CFG_DIR)
         if os.path.isdir(dst_cfg_dir):
             LOG.info(
-                f"project config dir {dst_cfg_dir} already exists, continue to initialize "
+                f" project config dir {dst_cfg_dir} already exists, continue to initialize "
                 f"the project will overwrite the current project configs"
             )
             pcom.cfm()
@@ -40,15 +39,14 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         dst_tmp_dir = os.path.expandvars(settings.ADMIN_TMP_DIR)
         if os.path.isdir(dst_tmp_dir):
             LOG.info(
-                f"project template dir {dst_tmp_dir} already exists, continue to initialize "
+                f" project template dir {dst_tmp_dir} already exists, continue to initialize "
                 f"the project will overwrite the current project templates"
             )
             pcom.cfm()
             shutil.rmtree(dst_tmp_dir)
         shutil.copytree(settings.OP_TMP, dst_tmp_dir)
-        LOG.info("done")
         LOG.info(
-            "please perform the git commit and git push actions "
+            " please perform the git commit and git push actions "
             "after project and block items are settled down"
         )
     def fill_blocks(self, blk_lst):
@@ -66,6 +64,8 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                 with open(proj_cfg) as pcf, open(blk_cfg, "w") as bcf:
                     for line in pcf:
                         bcf.write(f"# {line}")
+            blk_plg_dir = os.path.expandvars(settings.ADMIN_BLK_CFG_DIR)
+            shutil.copytree(self.ced["PROJ_SHARE_PLG"], blk_plg_dir)
     def fill_lib(self):
         """a function wrapper for inherited LibProc function"""
         env_boot.EnvBoot.__init__(self)
@@ -92,20 +92,18 @@ def run_admin(args):
         admin_proc.fill_proj()
     elif args.admin_block_lst:
         LOG.info(
-            f"generating block level directories and configs of {args.admin_block_lst}, "
+            f":: generating block level directories and configs of {args.admin_block_lst}, "
             f"which will overwrite all the existed block level configs ..."
         )
         pcom.cfm()
         admin_proc.fill_blocks(args.admin_block_lst)
-        LOG.info("done")
     elif args.admin_lib:
         LOG.info(
-            f"generating library mapping links and files, "
+            f":: generating library mapping links and files, "
             f"which will overwrite all the existed library mapping links and files ..."
         )
         pcom.cfm()
         admin_proc.fill_lib()
-        LOG.info("done")
     else:
         LOG.critical("no actions specified in op admin sub cmd")
         raise SystemExit()

@@ -70,8 +70,8 @@ def gen_flow_parser(subparsers):
         "-list_stage", dest="flow_list_stage", action="store_true",
         help="toggle to list all available stages")
     me_group.add_argument(
-        "-gen", dest="flow_gen", action="store_true",
-        help="toggle to generate flow run files")
+        "-gen", dest="flow_gen_lst", default=None, nargs="*",
+        help="toggle and input steps to generate flow run files")
     me_group.add_argument(
         "-run", dest="flow_run_lst", default=None, nargs="*",
         help="toggle and input steps to run flow")
@@ -100,8 +100,7 @@ def main():
         print("OnePiece Platform Version: op 4.0.0")
         return
     if hasattr(args, "func"):
-        LOG.info("op commence ...")
         args.func(args)
-        LOG.info("op complete")
+        LOG.info("op completed")
     else:
         LOG.critical("sub cmd is NA, please use -h to check all sub cmds")

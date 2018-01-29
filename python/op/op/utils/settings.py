@@ -23,6 +23,7 @@ BOOT_CFG = "$PROJ_ROOT/share/config/proj.cfg"
 ADMIN_CFG_DIR = "$PROJ_ROOT/share/config"
 ADMIN_TMP_DIR = "$PROJ_ROOT/share/templates"
 ADMIN_BLK_CFG_DIR = "$BLK_ROOT/config"
+ADMIN_BLK_PLG_DIR = "$BLK_ROOT/plugins"
 
 PROJ_REPO = "git"
 #TODO to obtain projects list from server

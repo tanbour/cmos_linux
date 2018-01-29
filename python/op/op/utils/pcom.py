@@ -21,7 +21,8 @@ def gen_logger(logger_name, file_flg=False):
         "disable_existing_loggers": False,
         "formatters": {
             "color": {
-                "format": "{asctime} {levelname} [{name}] {message}",
+                # "format": "{asctime} {levelname} [{name}] {message}",
+                "format": "{asctime} {levelname} {message}",
                 "datefmt": "%H:%M:%S",
                 "style": "{",
                 "class": "utils.pcom.ColoredFormatter"
@@ -224,7 +225,7 @@ class ColoredFormatter(logging.Formatter):
         log_colors = {
             "DEBUG": "\033[1;35m[DEBUG]\033[1;0m",
             "INFO": "\033[1;34m[INFO]\033[1;0m",
-            "WARNING": "\033[1;33m[WARNING]\033[1;0m",
+            "WARNING": "\033[1;33m[WARN]\033[1;0m",
             "ERROR": "\033[1;31m[ERROR]\033[1;0m",
             "CRITICAL": "\033[1;31m[CRITICAL]\033[1;0m"
         }

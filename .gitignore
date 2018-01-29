@@ -108,7 +108,7 @@ dia/*.dia~
 python/**/*_site/pg_data/
 
 # proj temp
-**/proj/**/output/
+**/proj/**/run/
 
 # test
 **/tests/LIB/

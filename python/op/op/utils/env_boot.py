@@ -81,20 +81,22 @@ class EnvBoot(object):
                 self.ced[env_opt_k] = os.path.expandvars(env_opt_v)
     def boot_cfg(self):
         """to process project and block global cfg dic used only by op"""
-        for proj_cfg in pcom.find_iter(self.ced["PROJ_SHARE_CFG"], "*.cfg", cur_flg=True):
+        base_proj_cfg_dir = os.path.expandvars(settings.PROJ_CFG_DIR)
+        base_blk_cfg_dir = os.path.expandvars(settings.BLK_CFG_DIR)
+        for proj_cfg in pcom.find_iter(base_proj_cfg_dir, "*.cfg", cur_flg=True):
             cfg_kw = os.path.splitext(os.path.basename(proj_cfg))[0]
             if cfg_kw == "proj":
                 continue
             self.proj_cfg_lst.append(proj_cfg)
             if self.blk_flg:
-                blk_cfg = proj_cfg.replace(self.ced["PROJ_SHARE_CFG"], self.ced["BLK_CFG"])
+                blk_cfg = proj_cfg.replace(base_proj_cfg_dir, base_blk_cfg_dir)
                 if not os.path.isfile(blk_cfg):
                     LOG.warning(f" block config file {blk_cfg} is NA")
                 self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg, blk_cfg])
             else:
                 self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg])
         # dir cfgs of project level invisible to blocks
-        for proj_cfg_dir in pcom.find_iter(self.ced["PROJ_SHARE_CFG"], "*", True, True):
+        for proj_cfg_dir in pcom.find_iter(base_proj_cfg_dir, "*", True, True):
             cfg_dir_kw = os.path.basename(proj_cfg_dir)
             self.dir_cfg_dic[cfg_dir_kw] = {}
             for proj_cfg in pcom.find_iter(proj_cfg_dir, "*.cfg", cur_flg=True):

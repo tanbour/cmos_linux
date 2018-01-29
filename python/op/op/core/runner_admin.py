@@ -27,7 +27,7 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
             f_f.write(self.repo_dic["init_proj_name"])
         LOG.info(":: generating op project level configs and templates ...")
         env_boot.EnvBoot.__init__(self)
-        dst_cfg_dir = os.path.expandvars(settings.ADMIN_CFG_DIR)
+        dst_cfg_dir = os.path.expandvars(settings.PROJ_CFG_DIR)
         if os.path.isdir(dst_cfg_dir):
             LOG.info(
                 f" project config dir {dst_cfg_dir} already exists, continue to initialize "
@@ -36,7 +36,7 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
             pcom.cfm()
             shutil.rmtree(dst_cfg_dir, True)
         shutil.copytree(settings.OP_CFG, dst_cfg_dir)
-        dst_tmp_dir = os.path.expandvars(settings.ADMIN_TMP_DIR)
+        dst_tmp_dir = os.path.expandvars(settings.PROJ_TMP_DIR)
         if os.path.isdir(dst_tmp_dir):
             LOG.info(
                 f" project template dir {dst_tmp_dir} already exists, continue to initialize "
@@ -57,15 +57,16 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
             os.environ["BLK_NAME"] = blk_name
             os.environ["BLK_ROOT"] = blk_root_dir = f"{self.ced['PROJ_ROOT']}{os.sep}{blk_name}"
             pcom.mkdir(LOG, blk_root_dir)
-            blk_cfg_dir = os.path.expandvars(settings.ADMIN_BLK_CFG_DIR)
+            blk_cfg_dir = os.path.expandvars(settings.BLK_CFG_DIR)
             for proj_cfg in self.proj_cfg_lst:
-                blk_cfg = proj_cfg.replace(self.ced["PROJ_SHARE_CFG"], blk_cfg_dir)
+                blk_cfg = proj_cfg.replace(
+                    os.path.expandvars(settings.PROJ_CFG_DIR), blk_cfg_dir)
                 pcom.mkdir(LOG, os.path.dirname(blk_cfg))
                 with open(proj_cfg) as pcf, open(blk_cfg, "w") as bcf:
                     for line in pcf:
                         bcf.write(f"# {line}")
-            blk_plg_dir = os.path.expandvars(settings.ADMIN_BLK_CFG_DIR)
-            shutil.copytree(self.ced["PROJ_SHARE_PLG"], blk_plg_dir)
+            blk_plg_dir = os.path.expandvars(settings.BLK_PLG_DIR)
+            shutil.copytree(os.path.expandvars(settings.PROJ_PLG_DIR), blk_plg_dir)
     def fill_lib(self):
         """a function wrapper for inherited LibProc function"""
         env_boot.EnvBoot.__init__(self)

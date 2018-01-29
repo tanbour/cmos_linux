@@ -18,12 +18,13 @@ OP_TMP = f"{OP_ROOT}{os.sep}proj_share{os.sep}templates"
 FLG_FILE = ".alchip_proj_root_flg"
 BLK_IGNORE_LST = ["share"]
 
-BOOT_CFG = "$PROJ_ROOT/share/config/proj.cfg"
+BOOT_CFG = f"$PROJ_ROOT{os.sep}share{os.sep}config{os.sep}proj.cfg"
 
-ADMIN_CFG_DIR = "$PROJ_ROOT/share/config"
-ADMIN_TMP_DIR = "$PROJ_ROOT/share/templates"
-ADMIN_BLK_CFG_DIR = "$BLK_ROOT/config"
-ADMIN_BLK_PLG_DIR = "$BLK_ROOT/plugins"
+PROJ_CFG_DIR = f"$PROJ_ROOT{os.sep}share{os.sep}config"
+PROJ_TMP_DIR = f"$PROJ_ROOT{os.sep}share{os.sep}templates"
+PROJ_PLG_DIR = f"$PROJ_ROOT{os.sep}share{os.sep}plugins"
+BLK_CFG_DIR = f"$BLK_ROOT{os.sep}config"
+BLK_PLG_DIR = f"$BLK_ROOT{os.sep}plugins"
 
 PROJ_REPO = "git"
 #TODO to obtain projects list from server

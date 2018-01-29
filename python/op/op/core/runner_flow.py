@@ -48,9 +48,14 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         """to process project or block cfg for next step usage"""
         for cfg_k, cfg_v in self.cfg_dic.items():
             if cfg_k == "lib":
+                liblist_root_dir = pcom.rd_cfg(
+                    self.cfg_dic.get("proj", {}), "lib_map", "dst_dir", True)
+                if not liblist_root_dir:
+                    LOG.error("cfg option dst_dir is NA in lib_map section of proj.cfg")
+                    raise SystemExit()
                 try:
                     self.liblist_var_dic = self.gen_liblist(
-                        self.ced["PROJ_LIB"], self.ced["RUN_SRC"],
+                        self.ced["PROJ_LIB"], liblist_root_dir,
                         self.dir_cfg_dic["lib"]["liblist"], self.cfg_dic["lib"])
                 except KeyError as err:
                     LOG.error(err)
@@ -65,34 +70,35 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         for cfg_k, cfg_v in self.ch_cfg_dic.items():
             if cfg_k in pcom.rd_cfg(self.cfg_dic.get("proj", {}), "flow", "not_flow_cfg"):
                 continue
-            for proj_tmp in pcom.find_iter(
-                    f"{self.ced['PROJ_SHARE_TMP']}{os.sep}{cfg_k}", "*"):
-                if gen_lst:
-                    if cfg_k not in gen_lst:
-                        continue
-                dst_file = proj_tmp.replace(
-                    self.ced["PROJ_SHARE_TMP"], self.ced["RUN_SRC"])
-                dst_file_name = os.path.basename(proj_tmp)
-                if dst_file_name in cfg_v:
-                    LOG.info(f":: generating run file {dst_file} ...")
-                    cfg_sec = cfg_v[dst_file_name]
-                    pcom.ren_tempfile(
-                        LOG, proj_tmp, dst_file,
-                        {"global": self.ch_cfg_dic.get("proj", {}), "env": self.ced,
-                         "local": cfg_sec, "liblist": self.liblist_var_dic}
-                    )
-                    if "_exec_tool" in cfg_sec:
-                        with open(f"{dst_file}.oprun", "w") as orf:
-                            orf.write(
-                                f"{cfg_sec.get('_exec_tool')} {cfg_sec.get('_exec_opts', '')} "
-                                f"{dst_file}{os.linesep}"
-                            )
-                        self.oprun_file_lst.append(f"{dst_file}.oprun")
-                else:
-                    LOG.warning(
-                        f" template {proj_tmp} has no corresponding config section "
-                        f"{dst_file_name} in config {cfg_k}"
-                    )
+            if gen_lst:
+                if cfg_k not in gen_lst:
+                    continue
+            for sec_k, sec_v in cfg_v.items():
+                if sec_k == "DEFAULT":
+                    continue
+                tmp_file = (
+                    f"{os.path.expandvars(settings.PROJ_TMP_DIR)}"
+                    f"{os.sep}{cfg_k}{os.sep}{sec_k}"
+                )
+                if not os.path.isfile(tmp_file):
+                    LOG.warning(f" template file {tmp_file} is NA used by cfg {cfg_k}")
+                    continue
+                dst_file = tmp_file.replace(
+                    os.path.expandvars(settings.PROJ_TMP_DIR), pcom.rd_cfg(
+                        self.cfg_dic.get("proj", {}), "flow", "run_dir", True))
+                LOG.info(f":: generating run file {dst_file} ...")
+                pcom.ren_tempfile(
+                    LOG, tmp_file, dst_file,
+                    {"global": self.ch_cfg_dic.get("proj", {}), "env": self.ced,
+                     "local": sec_v, "liblist": self.liblist_var_dic}
+                )
+                if "_exec_tool" in sec_v:
+                    with open(f"{dst_file}.oprun", "w") as orf:
+                        orf.write(
+                            f"{sec_v.get('_exec_tool')} {sec_v.get('_exec_opts', '')} "
+                            f"{dst_file}{os.linesep}"
+                        )
+                    self.oprun_file_lst.append(f"{dst_file}.oprun")
     def proc_run(self, run_lst):
         """to process generated oprun files for running flows"""
         if not self.blk_flg:
@@ -104,7 +110,8 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             oprun_lst = []
             for run_kw in run_lst:
                 oprun_lst.extend([c_c for c_c in self.oprun_file_lst if c_c.startswith(
-                    f"{self.ced['RUN_SRC']}{os.sep}{run_kw}")])
+                    f"{pcom.rd_cfg(self.cfg_dic.get('proj', {}), 'flow', 'run_dir', True)}"
+                    f"{os.sep}{run_kw}")])
         for oprun_file in oprun_lst:
             stage_str = os.path.basename(os.path.dirname(oprun_file))
             LOG.info(f":: running stage {stage_str}, oprun file {oprun_file} ...")

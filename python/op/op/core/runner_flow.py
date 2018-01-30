@@ -72,6 +72,8 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             raise SystemExit()
         self.proc_cfg()
         for cfg_k, cfg_v in self.ch_cfg_dic.items():
+            if cfg_k in ("proj", "lib"):
+                continue
             if cfg_k in pcom.rd_cfg(self.cfg_dic.get("proj", {}), "flow", "not_flow_cfg"):
                 continue
             if gen_lst:
@@ -88,7 +90,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                     raise SystemExit()
                 tmp_file = f"{proj_tmp_dir}{os.sep}{cfg_k}{os.sep}{sec_k}"
                 if not os.path.isfile(tmp_file):
-                    LOG.warning(f" template file {tmp_file} is NA used by cfg {cfg_k}")
+                    LOG.warning(f" template file {tmp_file} is NA, used by cfg {cfg_k}")
                     continue
                 dst_file = tmp_file.replace(proj_tmp_dir, flow_output_dir)
                 LOG.info(f":: generating run file {dst_file} ...")
@@ -121,7 +123,8 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             stage_str = os.path.basename(os.path.dirname(oprun_file))
             LOG.info(f":: running stage {stage_str}, oprun file {oprun_file} ...")
             subprocess.run(
-                f"xterm -title '{oprun_file}' -e 'source {oprun_file}'", shell=True
+                f"xterm -title '{oprun_file}' -e 'cd {os.path.dirname(oprun_file)}; "
+                f"source {oprun_file}'", shell=True
             )
 
 def run_flow(args):

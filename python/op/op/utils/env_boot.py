@@ -74,6 +74,8 @@ class EnvBoot(object):
                 os.path.expandvars(settings.BLK_CFG_DIR), "*.cfg", cur_flg=True):
             for sec_k, sec_v in pcom.gen_cfg([cfg_file]).items():
                 for opt_k, opt_v in sec_v.items():
+                    if not opt_v:
+                        continue
                     if opt_k.startswith("VERSION_"):
                         if opt_k in ver_set:
                             LOG.error(

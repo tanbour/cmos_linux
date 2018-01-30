@@ -64,6 +64,8 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                 pcom.mkdir(LOG, os.path.dirname(blk_cfg))
                 with open(proj_cfg) as pcf, open(blk_cfg, "w") as bcf:
                     for line in pcf:
+                        if line.strip().startswith("["):
+                            continue
                         bcf.write(f"# {line}")
             blk_plg_dir = os.path.expandvars(settings.BLK_PLG_DIR)
             shutil.copytree(os.path.expandvars(settings.PROJ_PLG_DIR), blk_plg_dir)

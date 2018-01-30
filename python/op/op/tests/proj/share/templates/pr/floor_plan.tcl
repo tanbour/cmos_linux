@@ -4,3 +4,5 @@
 this is {{i}}
 {%- endfor %}
 {{liblist.o}}
+
+{{env.VERSION_SDC}}

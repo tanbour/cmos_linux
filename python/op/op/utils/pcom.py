@@ -105,8 +105,8 @@ def ch_cfg(cfg):
         cfg_dic[sec_k] = {}
         for opt_k, opt_v in sec_v.items():
             cfg_dic[sec_k][opt_k] = (
-                opt_v if "," not in opt_v and os.linesep not in opt_v
-                else rd_cfg(cfg, sec_k, opt_k))
+                rd_cfg(cfg, sec_k, opt_k, True) if "," not in opt_v
+                and os.linesep not in opt_v else rd_cfg(cfg, sec_k, opt_k))
     return cfg_dic
 
 def prod_sec_iter(sec):
@@ -188,10 +188,11 @@ def ren_tempfile(log, temp_in, temp_out, temp_dic):
         os.makedirs(os.path.dirname(temp_out), exist_ok=True)
         with open(temp_out, "w") as ttf:
             ttf.write(template.render(temp_dic))
-    except jinja2.exceptions.TemplateError as err:
+    except jinja2.exceptions.TemplateSyntaxError as err:
         log.error(
             f"generating from template {temp_in} failed, "
-            f"and the error is {err}"
+            f"and the error is {err}, filename is {err.filename}, "
+            f"line number is {err.lineno}"
         )
         raise SystemExit()
     except PermissionError as err:
@@ -202,10 +203,11 @@ def ren_tempstr(log, temp_in, temp_dic):
     """to render jinja2 template string"""
     try:
         temp_out = jinja2.Template(temp_in).render(temp_dic)
-    except jinja2.exceptions.TemplateError as err:
+    except jinja2.exceptions.TemplateSyntaxError as err:
         log.error(
             f"generating from template str {temp_in} failed, "
-            f"and the error is {err}"
+            f"and the error is {err}, filename is {err.filename}, "
+            f"line number is {err.lineno}"
         )
         raise SystemExit()
     else:

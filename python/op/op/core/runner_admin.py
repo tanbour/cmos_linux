@@ -57,16 +57,31 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
             os.environ["BLK_NAME"] = blk_name
             os.environ["BLK_ROOT"] = blk_root_dir = f"{self.ced['PROJ_ROOT']}{os.sep}{blk_name}"
             pcom.mkdir(LOG, blk_root_dir)
-            blk_cfg_dir = os.path.expandvars(settings.BLK_CFG_DIR)
+            proj_cfg_dir = os.path.expandvars(settings.PROJ_CFG_DIR).rstrip(os.sep)
+            blk_cfg_dir = os.path.expandvars(settings.BLK_CFG_DIR).rstrip(os.sep)
             for proj_cfg in self.proj_cfg_lst:
-                blk_cfg = proj_cfg.replace(
-                    os.path.expandvars(settings.PROJ_CFG_DIR), blk_cfg_dir)
+                blk_cfg = proj_cfg.replace(proj_cfg_dir, blk_cfg_dir)
                 pcom.mkdir(LOG, os.path.dirname(blk_cfg))
                 with open(proj_cfg) as pcf, open(blk_cfg, "w") as bcf:
                     for line in pcf:
                         bcf.write(f"# {line}")
             blk_plg_dir = os.path.expandvars(settings.BLK_PLG_DIR)
             shutil.copytree(os.path.expandvars(settings.PROJ_PLG_DIR), blk_plg_dir)
+    def update_blocks(self, blk_lst):
+        """to obtain blocks input data from release directory"""
+        env_boot.EnvBoot.__init__(self)
+        self.boot_env()
+        for data_file in pcom.find_iter(self.ced["PROJ_RELEASE"], "*"):
+            blk_name = os.path.basename(data_file).split(os.extsep)[0]
+            if not blk_name:
+                continue
+            if blk_lst:
+                if blk_name not in blk_lst:
+                    continue
+            blk_file = data_file.replace(
+                self.ced["PROJ_RELEASE"], f"{self.ced['PROJ_ROOT']}{os.sep}{blk_name}")
+            pcom.mkdir(LOG, os.path.dirname(blk_file))
+            shutil.copyfile(data_file, blk_file)
     def fill_lib(self):
         """a function wrapper for inherited LibProc function"""
         env_boot.EnvBoot.__init__(self)
@@ -98,6 +113,13 @@ def run_admin(args):
         )
         pcom.cfm()
         admin_proc.fill_blocks(args.admin_block_lst)
+    elif args.admin_update_blk != None:
+        LOG.info(
+            f":: updating all block level directories according to RELEASE directory, "
+            f"which will overwrite the existed block files ..."
+        )
+        pcom.cfm()
+        admin_proc.update_blocks(args.admin_update_blk)
     elif args.admin_lib:
         LOG.info(
             f":: generating library mapping links and files, "

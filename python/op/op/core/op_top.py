@@ -28,6 +28,9 @@ def gen_admin_parser(subparsers):
         "-b", dest="admin_block_lst", default=[], nargs="+",
         help="input the block names to be initialized in the specified project")
     me_group.add_argument(
+        "-update_blk", dest="admin_update_blk", default=None, nargs="*",
+        help="input or toggle to update blocks directory according to RELEASE directory")
+    me_group.add_argument(
         "-lib", dest="admin_lib", action="store_true",
         help="toggle to generate library mapping links and related files")
     admin_parser.set_defaults(func=main_admin)
@@ -100,7 +103,11 @@ def main():
         print("OnePiece Platform Version: op 4.0.0")
         return
     if hasattr(args, "func"):
-        args.func(args)
-        LOG.info("op completed")
+        try:
+            args.func(args)
+        except KeyboardInterrupt:
+            LOG.critical("op terminated")
+        else:
+            LOG.info("op completed")
     else:
         LOG.critical("sub cmd is NA, please use -h to check all sub cmds")

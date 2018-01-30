@@ -18,7 +18,7 @@ class LibMap(object):
         self.match_lst = []
     def link_src_dst(self, src_file, dst_dir, src_base):
         """to perform source to destination link action"""
-        dst_file = f"{dst_dir}{os.sep}{src_file.replace(src_base, '').strip(os.sep)}"
+        dst_file = src_file.replace(src_base.rstrip(os.sep), dst_dir.rstrip(os.sep))
         if os.path.islink(dst_file):
             os.unlink(dst_file)
         elif os.path.isfile(dst_file):
@@ -84,7 +84,7 @@ class LibMap(object):
                 lib_match_lst = json.load(mlf)
         except FileNotFoundError:
             LOG.warning(f" library map list file not generated in {map_root}")
-            lib_match_lst = []
+            return {}
         liblist_dir = f"{liblist_root}{os.sep}liblist"
         pcom.mkdir(LOG, liblist_dir)
         var_dic_lst = list(pcom.prod_sec_iter(lib_cfg["liblist"]))

@@ -33,6 +33,9 @@ def gen_admin_parser(subparsers):
     me_group.add_argument(
         "-lib", dest="admin_lib", action="store_true",
         help="toggle to generate library mapping links and related files")
+    me_group.add_argument(
+        "-init_release", dest="admin_init_release", action="store_true",
+        help="toggle to initialize release directories for block input files")
     admin_parser.set_defaults(func=main_admin)
 
 def main_admin(args):

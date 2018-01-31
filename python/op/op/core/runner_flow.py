@@ -23,7 +23,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         self.oprun_file_lst = []
     def list_env(self):
         """to list all current project or block op environment variables"""
-        LOG.info(f":: {os.linesep}all op internal env variables")
+        LOG.info(f":: all op internal env variables")
         pcom.pp_list(self.ced)
     def list_blk(self):
         """to list all possible blocks according to project root dir"""
@@ -31,11 +31,11 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         run_str = f"tree -L 1 -d -I '(|{blk_ignore_str}|)' {self.ced['PROJ_ROOT']}"
         tree_str = subprocess.run(
             run_str, shell=True, check=True, stdout=subprocess.PIPE).stdout.decode()
-        LOG.info(f":: {os.linesep}all available blocks")
+        LOG.info(f":: all available blocks")
         pcom.pp_list(tree_str, True)
     def list_stage(self):
         """to list all current project or block available stages"""
-        LOG.info(f":: {os.linesep}all current available stages")
+        LOG.info(f":: all current available stages")
         stage_dic = {}
         for cfg_k, cfg_v in self.cfg_dic.items():
             if cfg_k in pcom.rd_cfg(self.cfg_dic.get("proj", {}), "flow", "not_flow_cfg"):
@@ -83,16 +83,16 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                 if sec_k == "DEFAULT":
                     continue
                 proj_tmp_dir = os.path.expandvars(settings.PROJ_TMP_DIR).rstrip(os.sep)
-                flow_output_dir = pcom.rd_cfg(
-                    self.cfg_dic.get("proj", {}), "flow", "output_dir", True).rstrip(os.sep)
-                if "{" in flow_output_dir and "}" in flow_output_dir:
-                    LOG.error(f"variables found in {flow_output_dir} not defined")
+                flow_dst_dir = pcom.rd_cfg(
+                    self.cfg_dic.get("proj", {}), "flow", "dst_dir", True).rstrip(os.sep)
+                if "{" in flow_dst_dir and "}" in flow_dst_dir:
+                    LOG.error(f"variables found in {flow_dst_dir} not defined")
                     raise SystemExit()
                 tmp_file = f"{proj_tmp_dir}{os.sep}{cfg_k}{os.sep}{sec_k}"
                 if not os.path.isfile(tmp_file):
                     LOG.warning(f" template file {tmp_file} is NA, used by cfg {cfg_k}")
                     continue
-                dst_file = tmp_file.replace(proj_tmp_dir, flow_output_dir)
+                dst_file = tmp_file.replace(proj_tmp_dir, flow_dst_dir)
                 LOG.info(f":: generating run file {dst_file} ...")
                 pcom.ren_tempfile(
                     LOG, tmp_file, dst_file,
@@ -117,13 +117,13 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             oprun_lst = []
             for run_kw in run_lst:
                 oprun_lst.extend([c_c for c_c in self.oprun_file_lst if c_c.startswith(
-                    f"{pcom.rd_cfg(self.cfg_dic.get('proj', {}), 'flow', 'output_dir', True)}"
+                    f"{pcom.rd_cfg(self.cfg_dic.get('proj', {}), 'flow', 'dst_dir', True)}"
                     f"{os.sep}{run_kw}")])
         for oprun_file in oprun_lst:
             stage_str = os.path.basename(os.path.dirname(oprun_file))
             LOG.info(f":: running stage {stage_str}, oprun file {oprun_file} ...")
             subprocess.run(
-                f"xterm -title '{oprun_file}' -e 'cd {os.path.dirname(oprun_file)}; "
+                f"xterm -title '{oprun_file}' -e '\cd {os.path.dirname(oprun_file)}; "
                 f"source {oprun_file}'", shell=True
             )
 

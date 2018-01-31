@@ -1,0 +1,27 @@
+     BLOCK:                        {{env.BLK_NAME}}
+     mode:                         400
+     MAPPING_FILE:                 {{liblist.STAR_MAPPING_FILE}}
+     EXTRACTION:                   RC
+     NETLIST_FILE:                 ${SPEF}
+     NETLIST_FORMAT:               SPEF
+     COUPLE_TO_GROUND:             NO
+     SHORT_PINS:                   NO
+     DPT:                          {{local.dpt}}
+     NETLIST_LOGICAL_TYPE:         VERILOG
+     NETLIST_INPUT_DRIVERS:        YES
+     CORNERS_FILE:                 {{env.RUN_SCRIPT}}/rc_ext/{{env.BLK_NAME}}.smc
+     SELECTED_CORNERS:             {{local.selected_corners}}
+     SIMULTANEOUS_MULTI_CORNER:    YES
+     *NETLIST_CORNER_NAMES:        {{local.conds}}
+     REDUCTION:                    NO_EXTRA_LOOPS
+     EXTRACT_VIA_CAPS:             {{extract_via_caps}}
+     TEMPERATURE_SENSITIVITY:      NO
+     NUM_CORES:                    {{local.star_cpu_number}} 
+     COUPLING_ABS_THRESHOLD:       {{local.coupling_abs_threshold}}
+     COUPLING_REL_THRESHOLD:       {{local.coupling_rel_threshold}}
+     METAL_FILL_GDS_FILE:          $METAL_FILL_GDS_FILE      
+     METAL_FILL_POLYGON_HANDLING:  {{local.metal_fill_polygon_handling}}
+     GDS_LAYER_MAP_FILE:           {{liblist.STAR_METAL_FILL_MAPPING_FILE}}
+     TOP_DEF_FILE:                 $DEF
+     LEF_FILE:                     ${LEFFILE}
+

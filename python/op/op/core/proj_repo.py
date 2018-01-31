@@ -19,7 +19,7 @@ class ProjRepo(object):
         self.repo_dic = {}
     def list_proj(self):
         """to list all projects registered in op"""
-        LOG.info(f":: {os.linesep}all available projects")
+        LOG.info(f":: all available projects")
         pcom.pp_list(self.all_proj_lst)
     def git_proj(self):
         """to check out project by using git"""
@@ -29,17 +29,14 @@ class ProjRepo(object):
             LOG.error(err)
             raise SystemExit()
         rmt = repo.remote() if repo.remotes else repo.create_remote(
-            "origin", self.repo_dic["repo_url"])
+            "origin", os.path.expandvars(self.repo_dic["repo_url"]))
         LOG.info(
             f":: git pulling project {self.repo_dic['init_proj_name']} "
             f"from repository to {self.repo_dic['repo_dir']} ..."
         )
         pcom.cfm()
         rmt.pull("master")
-        LOG.info(f"please run op cmds under the project dir {self.repo_dic['repo_dir']}")
-        #TODO to process user auth actions
-        # u_n = getpass.getuser()
-        # p_w = getpass.getpass("git password: ")
+        LOG.info(f" please run op cmds under the project dir {self.repo_dic['repo_dir']}")
     def svn_proj(self):
         """to check out project by using svn"""
         pass

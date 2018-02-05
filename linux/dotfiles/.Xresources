@@ -9,22 +9,22 @@ Xft.lcdfilter: lcddefault
 
 ! UXTerm
 ! UXTerm.vt100.geometry: 125x30
-*XTerm.vt100.locale: true
-*XTerm.vt100.metaSendsEscape: true
-*XTerm.vt100.saveLines: 4096
-*XTerm.vt100.scrollBar: true
-*XTerm.vt100.rightScrollBar: true
-*XTerm.vt100.scrollKey: true
-*XTerm.vt100.scrollTtyOutput: false
-*XTerm.vt100.jumpScroll: true
-*XTerm.vt100.multiScroll: true
-*XTerm.vt100.toolBar: false
-*XTerm*faceName: DejaVu Sans Mono
-*XTerm*faceNameDoublesize: Source Han Sans CN
-*XTerm*faceSize: 10
-*XTerm.vt100.cursorBlink: true
-*XTerm.vt100.bellIsUrgent: true
-*XTerm.vt100.eightBitInput: true
+UXTerm.vt100.locale: true
+UXTerm.vt100.metaSendsEscape: true
+UXTerm.vt100.saveLines: 4096
+UXTerm.vt100.scrollBar: true
+UXTerm.vt100.rightScrollBar: true
+UXTerm.vt100.scrollKey: true
+UXTerm.vt100.scrollTtyOutput: false
+UXTerm.vt100.jumpScroll: true
+UXTerm.vt100.multiScroll: true
+UXTerm.vt100.toolBar: false
+UXTerm*faceName: DejaVu Sans Mono
+UXTerm*faceNameDoublesize: Source Han Sans CN
+UXTerm*faceSize: 10
+UXTerm.vt100.cursorBlink: true
+UXTerm.vt100.bellIsUrgent: true
+UXTerm.vt100.eightBitInput: true
 
 !TomorrowNightEighties
 *.foreground:   #cccccc

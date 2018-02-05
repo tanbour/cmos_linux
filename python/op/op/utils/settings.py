@@ -27,11 +27,5 @@ BLK_CFG_DIR = f"$BLK_ROOT{os.sep}config"
 BLK_PLG_DIR = f"$BLK_ROOT{os.sep}plugins"
 
 PROJ_REPO = "git"
-#TODO to obtain projects list from server
-if PROJ_REPO == "git":
-    ALL_PROJ_DIC = {
-        "op_test": "http://${USER}@cnshscmserver.alchip.com/CN/SoC/git/op_test",
-        "fruit": "http://${USER}@cnshscmserver.alchip.com/CN/SoC/git/fruit"
-    }
-elif PROJ_REPO == "svn":
-    ALL_PROJ_DIC = {}
+PROJ_URL = "http://cnshscmserver.alchip.com/CN/SoC/api/rest/repositories.json"
+Q_U = "op_query"

@@ -119,6 +119,8 @@ def run_admin(args):
     admin_proc = AdminProc()
     if args.admin_list_proj:
         admin_proc.list_proj()
+    elif args.admin_list_lab:
+        admin_proc.list_lab()
     elif args.admin_proj_name:
         admin_proc.repo_proj(args.admin_proj_name)
         admin_proc.fill_proj()

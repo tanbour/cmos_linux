@@ -14,6 +14,8 @@ def run_init(args):
     init_repo = proj_repo.ProjRepo()
     if args.init_list_proj:
         init_repo.list_proj()
+    elif args.init_list_lab:
+        init_repo.list_lab()
     elif args.init_proj_name:
         init_repo.repo_proj(args.init_proj_name)
     else:

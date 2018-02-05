@@ -22,6 +22,9 @@ def gen_admin_parser(subparsers):
         "-list", dest="admin_list_proj", action="store_true",
         help="toggle to list all currently available proj names")
     me_group.add_argument(
+        "-list_lab", dest="admin_list_lab", action="store_true",
+        help="toggle to list all currently available lab names")
+    me_group.add_argument(
         "-p", dest="admin_proj_name", default="",
         help="input the proj name which will be kicked off")
     me_group.add_argument(
@@ -51,6 +54,9 @@ def gen_init_parser(subparsers):
     me_group.add_argument(
         "-list", dest="init_list_proj", action="store_true",
         help="toggle to list all currently available proj names")
+    me_group.add_argument(
+        "-list_lab", dest="init_list_lab", action="store_true",
+        help="toggle to list all currently available lab names")
     me_group.add_argument(
         "-p", dest="init_proj_name", default="",
         help="input the proj name which will be check out from repository")

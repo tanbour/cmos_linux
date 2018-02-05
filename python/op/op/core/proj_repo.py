@@ -6,6 +6,7 @@ Description: base class for processing projects from code repo
 
 import os
 import git
+import requests
 from utils import pcom
 from utils import settings
 
@@ -14,13 +15,20 @@ LOG = pcom.gen_logger(__name__)
 class ProjRepo(object):
     """base calss of projects from code repo"""
     def __init__(self):
-        self.all_proj_dic = all_proj_dic = settings.ALL_PROJ_DIC
-        self.all_proj_lst = sorted(list(all_proj_dic))
+        self.all_proj_dic = all_proj_dic = {
+            c_c.get("name", ""): c_c.get("url", "").replace("://", "://${USER}@") for c_c
+            in requests.get(settings.PROJ_URL, auth=(settings.Q_U, settings.Q_U)).json()}
+        self.proj_normal_lst = sorted([c_c for c_c in all_proj_dic if not c_c.startswith("lab_")])
+        self.proj_lab_lst = sorted([c_c for c_c in all_proj_dic if c_c.startswith("lab_")])
         self.repo_dic = {}
     def list_proj(self):
         """to list all projects registered in op"""
         LOG.info(f":: all available projects")
-        pcom.pp_list(self.all_proj_lst)
+        pcom.pp_list(self.proj_normal_lst)
+    def list_lab(self):
+        """to list all projects registered in op"""
+        LOG.info(f":: all available lab projects")
+        pcom.pp_list(self.proj_lab_lst)
     def git_proj(self):
         """to check out project by using git"""
         try:
@@ -46,7 +54,8 @@ class ProjRepo(object):
         try:
             self.repo_dic["repo_url"] = self.all_proj_dic[init_proj_name]
         except KeyError:
-            LOG.error(f"project name must be one of {self.all_proj_lst}")
+            LOG.error(f"project name must be one of {self.proj_normal_lst}")
+            LOG.error(f"lab project name must be one of {self.proj_lab_lst}")
             raise SystemExit()
         self.repo_dic["repo_dir"] = os.getcwd()
         if settings.PROJ_REPO == "git":

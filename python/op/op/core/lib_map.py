@@ -31,6 +31,7 @@ class LibMap(object):
         self.match_lst.append(dst_file)
     def link_file(self, src_root, dst_root, lib_dir_cfg_dic, cfg_dic):
         """to process project or block lib mapping links"""
+        LOG.info(f":: library mapping and files linking ...")
         for lib_file, lib_file_cfg in lib_dir_cfg_dic.items():
             if lib_file == "liblist":
                 continue
@@ -72,7 +73,9 @@ class LibMap(object):
                                 can_lst, f"{can_root}{os.sep}{pattern_search_str}"):
                             self.link_src_dst(
                                 match_file, f"{dst_root}", src_root)
-        with open(f"{dst_root}{os.sep}.match_lst", "w") as mlf:
+        match_lst_file = f"{dst_root}{os.sep}.match_lst"
+        LOG.info(f":: generating library map list file {match_lst_file} ...")
+        with open(match_lst_file, "w") as mlf:
             json.dump(self.match_lst, mlf, indent=4)
     @classmethod
     def gen_liblist(cls, map_root, liblist_root, liblist_cfg, lib_cfg):

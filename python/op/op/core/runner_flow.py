@@ -123,7 +123,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             stage_str = os.path.basename(os.path.dirname(oprun_file))
             LOG.info(f":: running stage {stage_str}, oprun file {oprun_file} ...")
             subprocess.run(
-                f"xterm -title '{oprun_file}' -e '\cd {os.path.dirname(oprun_file)}; "
+                f"xterm -title '{oprun_file}' -e 'cd {os.path.dirname(oprun_file)}; "
                 f"source {oprun_file}'", shell=True
             )
 

@@ -3,7 +3,7 @@
 ##link database to dst database##
 #################################
 
-set src_stage = icc2_place
+set src_stage = icc2_route_opt
 set dst_stage = starrc
 
 echo "delete exsting smc files and starrc command file"
@@ -84,21 +84,21 @@ foreach COND ( $CONDS )
 		set GRD =  "{{liblist.RCBEST_NXTGRD_FILE}}"
 	else if (${COND} == "typical") then
 		set GRD =  "{{liblist.TYPICAL_NXTGRD_FILE}}"
-	else if (${COND} == "cworst_ccworst") then
+	else if (${COND} == "cworst_CCworst") then
 		set GRD =  "{{liblist.CWORST_CCWORST_NXTGRD_FILE}}"
-	else if (${COND} == "cworst_ccworst_T") then
+	else if (${COND} == "cworst_CCworst_T") then
 		set GRD =  "{{liblist.CWORST_CCWORST_T_NXTGRD_FILE}}"
-	else if (${COND} == "cbest_ccbest") then
+	else if (${COND} == "cbest_CCbest") then
 		set GRD =  "{{liblist.CBEST_CCBEST_NXTGRD_FILE}}"
-    else if (${COND} == "cbest_ccbest_T") then
+    else if (${COND} == "cbest_CCbest_T") then
 		set GRD =  "{{liblist.CBEST_CCBEST_T_NXTGRD_FILE}}" 
-    else if (${COND} == "rcworst_ccworst") then
+    else if (${COND} == "rcworst_CCworst") then
 		set GRD =  "{{liblist.RCWORST_CCWORST_NXTGRD_FILE}}"
-	else if (${COND} == "rcworst_ccworst_T") then
+	else if (${COND} == "rcworst_CCworst_T") then
 		set GRD =  "{{liblist.RCWORST_CCWORST_T_NXTGRD_FILE}}" 
-	else if (${COND} == "rcbest_ccbest") then
+	else if (${COND} == "rcbest_CCbest") then
 		set GRD =  "{{liblist.RCBEST_CCBEST_NXTGRD_FILE}}" 
-	else if (${COND} == "rcbest_ccbest_T") then
+	else if (${COND} == "rcbest_CCbest_T") then
 		set GRD =  "{{liblist.RCBEST_CCBEST_T_NXTGRD_FILE}}" 
     else if (${COND} == "cbest_T") then
 		set GRD =  "{{liblist.CBEST_T_NXTGRD_FILE}}" 
@@ -189,7 +189,7 @@ FP
 
 set star_mem_requirement = `expr {{local.star_mem_requirement}} / 10000`
 echo $star_mem_requirement
-absub -r "q:{{local.openlava_batch_queue}} M:$star_mem_requirement star:true n:$star_cpu_number" -c "StarXtract {{env.RUN_SCRIPT}}/rc_ext/${SESSION}.cmd"
+absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:true n:$star_cpu_number" -c "StarXtract {{env.RUN_SCRIPT}}/rc_ext/${SESSION}.cmd"
 
     ############################################
     # change out put spef file naming          #	

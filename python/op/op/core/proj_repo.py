@@ -43,7 +43,14 @@ class ProjRepo(object):
             f"from repository to {self.repo_dic['repo_dir']} ..."
         )
         pcom.cfm()
-        rmt.pull("master")
+        try:
+            rmt.pull("master")
+        except git.exc.GitCommandError as err:
+            if settings.REPO_AUTH_ERR_STR in str(err):
+                LOG.error(str(err))
+                raise SystemExit()
+            elif settings.REPO_BRANCH_ERR_STR in str(err):
+                pass
         LOG.info(f" please run op cmds under the project dir {self.repo_dic['repo_dir']}")
     def svn_proj(self):
         """to check out project by using svn"""

@@ -666,7 +666,7 @@ prosodyctl cert generate platform.sari.com
 * AMD
 ** iommu
 enable iommu in uefi
-set extra linux kernel parameter "iommu=pt" to make iommu work in pass through mode
+set extra linux kernel parameter "amd_iommu=on iommu=pt" to make iommu work in pass through mode
 
 * fstab
 ** check disk

@@ -1,0 +1,56 @@
+! Xft
+! Xft.dpi: 96
+! Xft.antialias: true
+! Xft.hinting: true
+! Xft.autohint = false
+! Xft.hintstyle: hintslight
+Xft.rgba: rgb
+Xft.lcdfilter: lcddefault
+
+! UXTerm
+! UXTerm.vt100.geometry: 125x30
+UXTerm.vt100.locale: true
+UXTerm.vt100.metaSendsEscape: true
+UXTerm.vt100.saveLines: 4096
+UXTerm.vt100.scrollBar: true
+UXTerm.vt100.rightScrollBar: true
+UXTerm.vt100.scrollKey: true
+UXTerm.vt100.scrollTtyOutput: false
+UXTerm.vt100.jumpScroll: true
+UXTerm.vt100.multiScroll: true
+UXTerm.vt100.toolBar: false
+UXTerm*faceName: DejaVu Sans Mono
+UXTerm*faceNameDoublesize: Source Han Sans CN
+UXTerm*faceSize: 10
+UXTerm.vt100.cursorBlink: true
+UXTerm.vt100.bellIsUrgent: true
+UXTerm.vt100.eightBitInput: true
+
+!TomorrowNightEighties
+*.foreground:   #cccccc
+*.background:   #2d2d2d
+*.cursorColor:  #aeafad
+! Black + Grey
+*.color0:       #000000
+*.color8:       #666666
+! Red + Bright Red
+*.color1:       #f2777a
+*.color9:       #FF3334
+! Green + Bright Green
+*.color2:       #99cc99
+*.color10:      #9ec400
+! Yellow (Orange) + Bright Yellow (Yellow)
+*.color3:       #f99157
+*.color11:      #ffcc66
+! Blue + Bright Blue
+*.color4:       #6699cc
+*.color12:      #6699cc
+! Magenta (Purple) + Bright Magenta
+*.color5:       #cc99cc
+*.color13:      #b777e0
+! Cyan (Aqua) + Bright Cyan
+*.color6:       #66cccc
+*.color14:      #54ced6
+! Light Grey (Selection) + White (Current Line)
+*.color7:       #515151
+*.color15:      #393939

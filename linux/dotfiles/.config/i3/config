@@ -172,12 +172,6 @@ bar {
         status_command i3status
 }
 
-# custom variables
-set $d_p LVDS-0
-set $d_e1 VGA-0
-set $d_e2 DP-0
-set $i_msg "workspace 2; exec emacs; workspace 1; exec chromium"
-
 # Manual management of i3 lock
 set $locker i3lock -c 000000 && sleep 1
 set $mode_system System (l) lock, (e) logout, (s) suspend, (r) reboot, (Shift+s) shutdown
@@ -194,6 +188,9 @@ mode "$mode_system" {
 bindsym $mod+z mode "$mode_system"
 
 # Manual management of external displays
+set $d_p LVDS-0
+set $d_e1 VGA-0
+set $d_e2 DP-0
 set $mode_display Ext Screen (c) OFF (1) VGA ON, (2) DP ON, (Shift+1) VGA OFF, (Shift+2) DP OFF
 mode "$mode_display" {
     bindsym c exec --no-startup-id xrandr --output $d_p --primary --auto --output $d_e1 --auto --off --output $d_e2 --auto --off, mode "default"
@@ -220,4 +217,4 @@ for_window [class="Gimp"] floating enable
 exec --no-startup-id xrandr --output $d_p --primary --auto
 exec --no-startup-id nm-applet &
 exec --no-startup-id xautolock -time 15 -locker "$locker" &
-exec --no-startup-id i3-msg $i_msg
+exec --no-startup-id i3-msg "workspace 2; exec emacs; workspace 1; exec chromium"

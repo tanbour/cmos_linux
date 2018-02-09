@@ -666,7 +666,9 @@ prosodyctl cert generate platform.sari.com
 * AMD
 ** iommu
 enable iommu in uefi
-set extra linux kernel parameter "amd_iommu=on iommu=pt" to make iommu work in pass through mode
+set extra linux kernel parameter "iommu=pt" to make iommu work in pass through mode
+** efibootmgr
+efibootmgr --create --disk /dev/sda --part 1 --gpt --label "Arch Linux" --loader /vmlinuz-linux --unicode "root=/dev/sda2 rw initrd=/initramfs-linux.img iommu=pt"
 
 * fstab
 ** check disk

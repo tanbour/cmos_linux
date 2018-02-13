@@ -16,8 +16,7 @@ def find_proj_root(path_str):
     if path_str == "/":
         LOG.error(
             "it's not in a project repository, please cd into one. "
-            "If no project initialized, please use op init cmd to initialize one."
-        )
+            "If no project initialized, please use op init cmd to initialize one.")
         raise SystemExit()
     elif os.path.isfile(f"{path_str}{os.sep}{settings.FLG_FILE}"):
         return path_str
@@ -30,8 +29,7 @@ def find_blk_root(path_str, proj_root):
     if proj_root not in path_str:
         LOG.error(
             "it's not in a project repository, please cd into one. "
-            "If no project initialized, please use op init cmd to initialize one."
-        )
+            "If no project initialized, please use op init cmd to initialize one.")
         raise SystemExit()
     blk_name = path_str.replace(proj_root, "").strip(os.sep).split(os.sep)[0]
     if proj_root == path_str or blk_name in settings.BLK_IGNORE_LST:
@@ -65,40 +63,6 @@ class EnvBoot(object):
             self.ced["BLK_ROOT"] = os.environ["BLK_ROOT"] = blk_root_dir
         else:
             self.blk_flg = False
-        # used to provide the default comment options for blocks
-        self.proj_cfg_lst = []
-    def boot_ver(self):
-        """to find version defination in block level config"""
-        ver_set = set()
-        for cfg_file in pcom.find_iter(
-                os.path.expandvars(settings.BLK_CFG_DIR), "*.cfg", cur_flg=True):
-            for sec_k, sec_v in pcom.gen_cfg([cfg_file]).items():
-                for opt_k, opt_v in sec_v.items():
-                    if not opt_v:
-                        continue
-                    if opt_k.startswith("VERSION_"):
-                        if opt_k in ver_set:
-                            LOG.error(
-                                f"multiple defination of {opt_k} in blk config "
-                                f"{cfg_file} {sec_k}"
-                            )
-                            raise SystemExit()
-                        ver_key = opt_k.replace("VERSION_", "").lower()
-                        key_dir = f"{self.ced['BLK_ROOT']}{os.sep}{ver_key}{os.sep}{opt_v}"
-                        if not os.path.isdir(key_dir):
-                            LOG.error(
-                                f"{ver_key} version dir {key_dir} is NA, "
-                                f"defined in blk config {cfg_file} {sec_k}"
-                            )
-                            raise SystemExit()
-                        if not os.listdir(key_dir):
-                            LOG.error(
-                                f"{ver_key} version dir {key_dir} is empty, "
-                                f"defined in blk config {cfg_file} {sec_k}"
-                            )
-                            raise SystemExit()
-                        ver_set.add(opt_k)
-                        self.ced[opt_k] = os.environ[opt_k] = opt_v
     def boot_ced(self):
         """to process project and block global env dic used only by op"""
         boot_cfg = os.path.expandvars(settings.BOOT_CFG)
@@ -106,8 +70,6 @@ class EnvBoot(object):
             LOG.error(f"boot config file {boot_cfg} is NA")
             raise SystemExit()
         self.cfg_dic = {"proj": pcom.gen_cfg([boot_cfg])}
-        if self.blk_flg:
-            self.boot_ver()
         for proj_sec_k, proj_sec_v in self.cfg_dic["proj"].items():
             if not proj_sec_k.startswith("env_"):
                 continue
@@ -125,7 +87,6 @@ class EnvBoot(object):
             cfg_kw = os.path.splitext(os.path.basename(proj_cfg))[0]
             if cfg_kw == "proj":
                 continue
-            self.proj_cfg_lst.append(proj_cfg)
             if self.blk_flg:
                 blk_cfg = proj_cfg.replace(base_proj_cfg_dir, base_blk_cfg_dir)
                 if not os.path.isfile(blk_cfg):
@@ -133,13 +94,25 @@ class EnvBoot(object):
                 self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg, blk_cfg])
             else:
                 self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg])
-        # dir cfgs of project level invisible to blocks
         for proj_cfg_dir in pcom.find_iter(base_proj_cfg_dir, "*", True, True):
             cfg_dir_kw = os.path.basename(proj_cfg_dir)
-            self.dir_cfg_dic[cfg_dir_kw] = {}
+            self.dir_cfg_dic[cfg_dir_kw] = {"DEFAULT": {}}
             for proj_cfg in pcom.find_iter(proj_cfg_dir, "*.cfg", cur_flg=True):
                 cfg_kw = os.path.splitext(os.path.basename(proj_cfg))[0]
-                self.dir_cfg_dic[cfg_dir_kw][cfg_kw] = pcom.gen_cfg([proj_cfg])
+                self.dir_cfg_dic[cfg_dir_kw]["DEFAULT"][cfg_kw] = pcom.gen_cfg([proj_cfg])
+            if not self.blk_flg:
+                continue
+            blk_cfg_dir = proj_cfg_dir.replace(base_proj_cfg_dir, base_blk_cfg_dir)
+            if not os.path.isdir(blk_cfg_dir):
+                continue
+            for blk_ins in pcom.find_iter(blk_cfg_dir, "*", True, True):
+                blk_ins_kw = os.path.basename(blk_ins)
+                self.dir_cfg_dic[cfg_dir_kw][blk_ins_kw] = {}
+                for blk_cfg in pcom.find_iter(blk_ins, "*.cfg", cur_flg=True):
+                    cfg_kw = os.path.splitext(os.path.basename(blk_cfg))[0]
+                    proj_cfg = f"{proj_cfg_dir}{os.sep}{os.path.basename(blk_cfg)}"
+                    self.dir_cfg_dic[cfg_dir_kw][blk_ins_kw][cfg_kw] = pcom.gen_cfg(
+                        [proj_cfg, blk_cfg])
     def boot_env(self):
         """class top exec function"""
         LOG.info(":: booting env and processing configs ...")

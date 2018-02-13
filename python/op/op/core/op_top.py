@@ -32,7 +32,7 @@ def gen_admin_parser(subparsers):
         help="input the block names to be initialized in the specified project")
     me_group.add_argument(
         "-update_blk", dest="admin_update_blk", default=None, nargs="*",
-        help="input or toggle to update blocks directory according to RELEASE directory")
+        help="toggle or input blocks to update blocks directory according to RELEASE directory")
     me_group.add_argument(
         "-lib", dest="admin_lib", action="store_true",
         help="toggle to generate library mapping links and related files")
@@ -79,14 +79,23 @@ def gen_flow_parser(subparsers):
         "-list_blk", dest="flow_list_blk", action="store_true",
         help="toggle to list all available blocks")
     me_group.add_argument(
-        "-list_stage", dest="flow_list_stage", action="store_true",
-        help="toggle to list all available stages")
+        "-list_flow", dest="flow_list_flow", action="store_true",
+        help="toggle to list all available flows")
+    me_group.add_argument(
+        "-init", dest="flow_init_lst", default=[], nargs="+",
+        help="input flow initial name list to generate flow config files")
+    flow_parser.add_argument(
+        "-parent", dest="flow_parent", default="DEFAULT",
+        help="input flow initial parent name to succeed from")
     me_group.add_argument(
         "-gen", dest="flow_gen_lst", default=None, nargs="*",
-        help="toggle and input steps to generate flow run files")
+        help="toggle and input flows to generate flow run files")
     me_group.add_argument(
         "-run", dest="flow_run_lst", default=None, nargs="*",
-        help="toggle and input steps to run flow")
+        help="toggle and input flows to run flow")
+    me_group.add_argument(
+        "-show_var", dest="flow_show_var_lst", default=None, nargs="*",
+        help="toggle and input flows to list all variables passed to templates")
     flow_parser.set_defaults(func=main_flow)
 
 def main_flow(args):

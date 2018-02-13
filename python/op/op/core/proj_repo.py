@@ -40,12 +40,11 @@ class ProjRepo(object):
             "origin", os.path.expandvars(self.repo_dic["repo_url"]))
         LOG.info(
             f":: git pulling project {self.repo_dic['init_proj_name']} "
-            f"from repository to {self.repo_dic['repo_dir']} ..."
-        )
+            f"from repository to {self.repo_dic['repo_dir']} ...")
         pcom.cfm()
         try:
             rmt.pull("master")
-        except git.exc.GitCommandError as err:
+        except git.GitCommandError as err:
             if settings.REPO_AUTH_ERR_STR in str(err):
                 LOG.error(str(err))
                 raise SystemExit()

@@ -192,8 +192,7 @@ def ren_tempfile(log, temp_in, temp_out, temp_dic):
         log.error(
             f"generating from template {temp_in} failed, "
             f"and the error is {err}, filename is {err.filename}, "
-            f"line number is {err.lineno}"
-        )
+            f"line number is {err.lineno}")
         raise SystemExit()
     except PermissionError as err:
         log.error(err)
@@ -207,8 +206,7 @@ def ren_tempstr(log, temp_in, temp_dic):
         log.error(
             f"generating from template str {temp_in} failed, "
             f"and the error is {err}, filename is {err.filename}, "
-            f"line number is {err.lineno}"
-        )
+            f"line number is {err.lineno}")
         raise SystemExit()
     else:
         return temp_out

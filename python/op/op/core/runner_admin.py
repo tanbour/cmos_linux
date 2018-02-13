@@ -25,7 +25,7 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         LOG.info(f":: generating op project flag file {settings.FLG_FILE} ...")
         with open(proj_flg_file, "w") as f_f:
             f_f.write(self.repo_dic["init_proj_name"])
-        LOG.info(":: generating op project level configs, templates and plugins ...")
+        LOG.info(":: generating op project level configs and templates...")
         env_boot.EnvBoot.__init__(self)
         suite_dict = dict(enumerate(os.listdir(os.path.expandvars(settings.OP_PROJ))))
         pcom.pp_list(suite_dict)
@@ -41,15 +41,13 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         if os.path.isdir(dst_dir):
             LOG.info(
                 f" project share dir {dst_dir} already exists, continue to initialize "
-                f"the project will overwrite the current project configs, templates and plugins"
-            )
+                f"the project will overwrite the current project configs, templates and plugins")
             pcom.cfm()
             shutil.rmtree(dst_dir, True)
         shutil.copytree(f"{settings.OP_PROJ}{os.sep}{suite_name}", dst_dir)
         LOG.info(
             " please perform the git commit and git push actions "
-            "after project and block items are settled down"
-        )
+            "after project and block items are settled down")
     def fill_blocks(self, blk_lst):
         """to fill blocks config dir after initialization"""
         env_boot.EnvBoot.__init__(self)
@@ -60,8 +58,11 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
             pcom.mkdir(LOG, blk_root_dir)
             proj_cfg_dir = os.path.expandvars(settings.PROJ_CFG_DIR).rstrip(os.sep)
             blk_cfg_dir = os.path.expandvars(settings.BLK_CFG_DIR).rstrip(os.sep)
-            for proj_cfg in self.proj_cfg_lst:
-                blk_cfg = proj_cfg.replace(proj_cfg_dir, blk_cfg_dir)
+            for cfg_kw in self.cfg_dic:
+                if cfg_kw == "proj":
+                    continue
+                proj_cfg = f"{proj_cfg_dir}{os.sep}{cfg_kw}.cfg"
+                blk_cfg = f"{blk_cfg_dir}{os.sep}{cfg_kw}.cfg"
                 pcom.mkdir(LOG, os.path.dirname(blk_cfg))
                 with open(proj_cfg) as pcf, open(blk_cfg, "w") as bcf:
                     for line in pcf:
@@ -70,10 +71,28 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                         else:
                             bcf.write(f"# {line}")
                 LOG.info(f" block config {blk_cfg} generated")
-            blk_plg_dir = os.path.expandvars(settings.BLK_PLG_DIR)
-            shutil.rmtree(blk_plg_dir, True)
-            shutil.copytree(os.path.expandvars(settings.PROJ_PLG_DIR), blk_plg_dir)
-            LOG.info(f" block plugins {blk_plg_dir} generated")
+            for dir_cfg_kw in self.dir_cfg_dic:
+                if dir_cfg_kw == "lib":
+                    continue
+                proj_dir_cfg = f"{proj_cfg_dir}{os.sep}{dir_cfg_kw}"
+                blk_dir_cfg = f"{blk_cfg_dir}{os.sep}{dir_cfg_kw}{os.sep}DEFAULT"
+                if os.path.isdir(blk_dir_cfg):
+                    LOG.info(
+                        f" block level config directory {blk_dir_cfg} already exists, "
+                        f"please confirm to overwrite it")
+                    pcom.cfm()
+                shutil.rmtree(blk_dir_cfg, True)
+                shutil.copytree(proj_dir_cfg, blk_dir_cfg)
+                for blk_cfg in pcom.find_iter(blk_dir_cfg, "*.cfg", cur_flg=True):
+                    with open(blk_cfg) as ocf:
+                        blk_lines = ocf.readlines()
+                    with open(blk_cfg, "w") as ncf:
+                        for line in blk_lines:
+                            if line.strip().startswith("["):
+                                ncf.write(line)
+                            else:
+                                ncf.write(f"# {line}")
+                LOG.info(f" block config directory {blk_dir_cfg} generated")
     def update_blocks(self, blk_lst):
         """to obtain blocks input data from release directory"""
         env_boot.EnvBoot.__init__(self)
@@ -97,11 +116,10 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         pcom.mkdir(LOG, self.ced["PROJ_LIB"])
         try:
             self.link_file(
-                self.ced["LIB"], self.ced["PROJ_LIB"],
-                self.dir_cfg_dic["lib"], self.cfg_dic)
+                self.ced["PROJ_LIB"], self.dir_cfg_dic["lib"]["DEFAULT"], self.cfg_dic)
             self.gen_liblist(
                 self.ced["PROJ_LIB"], self.ced["PROJ_LIB"],
-                self.dir_cfg_dic["lib"]["liblist"], self.cfg_dic["lib"])
+                self.dir_cfg_dic["lib"]["DEFAULT"]["liblist"], self.cfg_dic["lib"]["DEFAULT"])
         except KeyError as err:
             LOG.error(err)
             raise SystemExit()
@@ -127,23 +145,20 @@ def run_admin(args):
     elif args.admin_block_lst:
         LOG.info(
             f":: generating block level directories and configs of {args.admin_block_lst}, "
-            f"which will overwrite all the existed block level configs ..."
-        )
+            f"which will overwrite all the existed block level configs ...")
         pcom.cfm()
         admin_proc.fill_blocks(args.admin_block_lst)
         admin_proc.update_blocks(args.admin_block_lst)
     elif args.admin_update_blk != None:
         LOG.info(
             f":: updating all block level directories according to RELEASE directory, "
-            f"which will overwrite the existed block files ..."
-        )
+            f"which will overwrite the existed block files ...")
         pcom.cfm()
         admin_proc.update_blocks(args.admin_update_blk)
     elif args.admin_lib:
         LOG.info(
             f":: generating library mapping links and files, "
-            f"which will overwrite all the existed library mapping links and files ..."
-        )
+            f"which will overwrite all the existed library mapping links and files ...")
         pcom.cfm()
         admin_proc.fill_lib()
     elif args.admin_init_release:

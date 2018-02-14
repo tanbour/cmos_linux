@@ -12,15 +12,16 @@ set dst_stage icc2_clock
 
 set BLK_NAME          "{{env.BLK_NAME}}"
 
-set src_design_library  "{{env.RUN_DATA}}/{{env.BLK_NAME}}.${src_stage}.nlib"
-set dst_design_library "{{env.RUN_DATA}}/{{env.BLK_NAME}}.${dst_stage}.nlib"
+set src_design_library  "{{pre.flow_data_dir}}/{{env.BLK_NAME}}.${src_stage}.nlib"
+set dst_design_library "{{cur.flow_data_dir}}/{{env.BLK_NAME}}.${dst_stage}.nlib"
 
 set clock_cpu_number "{{local.clock_cpu_number}}"
 set clock_active_scenario_list "{{local.clock_active_scenario_list}}"
 
-exec mkdir -p {{env.RUN_DATA}}
-exec mkdir -p {{env.RUN_LOG}}
-exec mkdir -p {{env.RUN_RPT}}
+exec mkdir -p {{cur.flow_data_dir}}
+exec mkdir -p {{cur.flow_log_dir}}
+exec mkdir -p {{cur.flow_rpt_dir}}
+exec mkdir -p {{cur.flow_sum_dir}}
 
 
 ##setup host option

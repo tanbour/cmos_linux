@@ -11,8 +11,8 @@ BACKEND = True
 BE_URL = "http://op.alchip.com.cn:8000"
 
 OP_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-OP_PROJ = f"{OP_ROOT}{os.sep}ext{os.sep}proj_share"
-OP_UTIL = f"{OP_ROOT}{os.sep}ext{os.sep}utils"
+OP_PROJ = f"{OP_ROOT}{os.sep}proj_share{os.sep}suites"
+OP_UTIL = f"{OP_ROOT}{os.sep}proj_share{os.sep}utils"
 
 # project related settings
 FLG_FILE = ".alchip_proj_root_flg"

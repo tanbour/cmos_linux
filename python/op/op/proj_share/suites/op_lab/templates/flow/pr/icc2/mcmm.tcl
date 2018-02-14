@@ -50,7 +50,7 @@ set late_tlu_name_list                 "rcworst_CCworst_T";# *fill late tlu plus
 set temprture_list                     "-40";# *fill temprature talbe, example 125 125
 set process_list                       "1";# *fill process table, example 1 0.9
 set process_label_list                 "";#optional,fill process label table, example fast slow
-set sdc_file_list                      "{{env.BLK_SDC}}/{{env.VERSION_SDC}}/{{env.BLK_NAME}}.func.sdc";# *fill sdc table file according to scenario
+set sdc_file_list                      "{{env.BLK_SDC}}/{{ver.sdc}}/{{env.BLK_NAME}}.func.sdc";# *fill sdc table file according to scenario
 set aocv_file_list                     "{{liblist.AOCV_TT0P8V_WCL_SETUP}}";#optional,fill acov table file accroding to scenario
 set pocv_file_list                     "";#optional,fill pcov file accroding to scenario
 set scenario_status_setup              "true";# *fill setup table with true/false

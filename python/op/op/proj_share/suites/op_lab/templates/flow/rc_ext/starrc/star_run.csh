@@ -7,8 +7,8 @@ set src_stage = icc2_route_opt
 set dst_stage = starrc
 
 echo "delete exsting smc files and starrc command file"
-rm {{env.RUN_SCRIPT}}/rc_ext/*.smc
-rm {{env.RUN_SCRIPT}}/rc_ext/*.cmd
+rm {{cur.flow_scripts_dir}}/rc_ext/*.smc
+rm {{cur.flow_scripts_dir}}/rc_ext/*.cmd
  
 #################################
 ## STAR flow                   ##
@@ -48,15 +48,15 @@ set BLOCK                    =	 $BLK_NAME
 set BLOCK                    =	 $BLK_NAME
 {%- endif %}
 
-set DEF                          = {{env.RUN_DATA}}/{{env.BLK_NAME}}.${src_stage}.def.gz
+set DEF                          = {{pre.flow_data_dir}}/{{env.BLK_NAME}}.${src_stage}.def.gz
 #set LEFFILE                      =	"$LEF_TECH $LEF_STD      $LEF_MEM      $LEF_IP      $LEF_IO"
-set MILKYWAY_DATABASE            =	"{{env.RUN_DATA}}/{{env.BLK_NAME}}.${src_stage}.mw" 
-set NDM_DATABASE                 = "{{env.RUN_DATA}}/{{env.BLK_NAME}}.${src_stage}.nlib"
+set MILKYWAY_DATABASE            =	"{{pre.flow_data_dir}}/{{env.BLK_NAME}}.${src_stage}.mw" 
+set NDM_DATABASE                 = "{{pre.flow_data_dir}}/{{env.BLK_NAME}}.${src_stage}.nlib"
 #set NDM_SEARCH_PATH             = "$NDM_TECH $NDM_STD      $NDM_MEM      $NDM_IP      $NDM_IO"
 set NDM_SEARCH_PATH              = "$NDM_TECH $NDM_STD"
 
-if ( -e `find {{env.RUN_DATA}}/* -name DVIA_${BLK_NAME}.${src_stage}.gds.gz` ) then
-set METAL_FILL_GDS_FILE          = `find {{env.RUN_DATA}}/* -name DVIA_${BLK_NAME}.${src_stage}.gds.gz` 
+if ( -e `find {{pre.flow_data_dir}}/* -name DVIA_${BLK_NAME}.${src_stage}.gds.gz` ) then
+set METAL_FILL_GDS_FILE          = `find {{pre.flow_data_dir}}/* -name DVIA_${BLK_NAME}.${src_stage}.gds.gz` 
 else
 set METAL_FILL_GDS_FILE          = ""
 endif
@@ -134,7 +134,7 @@ foreach tempr ( $tempratures )
  set atempr = 85
  endif
 
-cat <<FP > {{env.RUN_SCRIPT}}/rc_ext/{{env.BLK_NAME}}.${COND}_${tempr}.smc
+cat <<FP > {{cur.flow_scripts_dir}}/rc_ext/{{env.BLK_NAME}}.${COND}_${tempr}.smc
 
 CORNER_NAME: ${COND}_$tempr
 TCAD_GRD_FILE: $GRD
@@ -145,20 +145,20 @@ FP
 end
 end
 
-cat {{env.RUN_SCRIPT}}/rc_ext/{{env.BLK_NAME}}.*.smc > {{env.RUN_SCRIPT}}/rc_ext/{{env.BLK_NAME}}.smc
-rm {{env.RUN_SCRIPT}}/rc_ext/{{env.BLK_NAME}}*_*.smc
+cat {{cur.flow_scripts_dir}}/rc_ext/{{env.BLK_NAME}}.*.smc > {{cur.flow_scripts_dir}}/rc_ext/{{env.BLK_NAME}}.smc
+rm {{cur.flow_scripts_dir}}/rc_ext/{{env.BLK_NAME}}*_*.smc
 
 ############generate cmd file for each condition########
 
 echo "********** Starting {{local.conds}} ..."
 set SESSION	   = {{env.BLK_NAME}}.${dst_stage}
-set SPEF	   = {{env.RUN_DATA}}/${SESSION}.spef
+set SPEF	   = {{cur.flow_data_dir}}/${SESSION}.spef
 
 echo "generating ${SESSION}.cmd file for {{local.conds}}"
 ########################################
 #              flow                    #
 ########################################
-cat << FP >! {{env.RUN_SCRIPT}}/rc_ext/${SESSION}.cmd
+cat << FP >! {{cur.flow_scripts_dir}}/rc_ext/${SESSION}.cmd
 {% if local.star_flow_type == "deflef" %}
 {% include 'starrc/star_deflef.cmd' %}
 {% elif local.star_flow_type == "ndm" %}
@@ -189,7 +189,7 @@ FP
 
 set star_mem_requirement = `expr {{local.star_mem_requirement}} / 10000`
 echo $star_mem_requirement
-absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:true n:$star_cpu_number" -c "StarXtract {{env.RUN_SCRIPT}}/rc_ext/${SESSION}.cmd"
+absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:true n:$star_cpu_number" -c "StarXtract {{cur.flow_scripts_dir}}/rc_ext/${SESSION}.cmd"
 
     ############################################
     # change out put spef file naming          #	
@@ -198,13 +198,13 @@ absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:tru
     foreach selected_corner ($selected_corners)
     set i = 1
     set tmp =  `echo $selected_corner | awk '{print $i}'`
-    if (-e {{env.RUN_DATA}}/${SESSION}.spef) then
-    mv {{env.RUN_DATA}}/${SESSION}.spef {{env.RUN_DATA}}/${SESSION}.spef.$tmp
+    if (-e {{cur.flow_data_dir}}/${SESSION}.spef) then
+    mv {{cur.flow_data_dir}}/${SESSION}.spef {{cur.flow_data_dir}}/${SESSION}.spef.$tmp
     endif
 
-    if ( -e {{env.RUN_DATA}}/${SESSION}.spef.$tmp ) then
-    gzip {{env.RUN_DATA}}/${SESSION}.spef.$tmp
-    mv {{env.RUN_DATA}}/${SESSION}.spef.$tmp.gz {{env.RUN_DATA}}/{{env.BLK_NAME}}.${dst_stage}.$tmp.spef.gz
+    if ( -e {{cur.flow_data_dir}}/${SESSION}.spef.$tmp ) then
+    gzip {{cur.flow_data_dir}}/${SESSION}.spef.$tmp
+    mv {{cur.flow_data_dir}}/${SESSION}.spef.$tmp.gz {{cur.flow_data_dir}}/{{env.BLK_NAME}}.${dst_stage}.$tmp.spef.gz
     endif
     end
 
@@ -212,8 +212,8 @@ absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:tru
 # move report                              #	
 ############################################ 
 
-mkdir -p {{env.RUN_LOG}}/star
-set LOG_DIR = "{{env.RUN_LOG}}/star"
+mkdir -p {{cur.flow_log_dir}}/star
+set LOG_DIR = "{{cur.flow_log_dir}}/star"
 
 if ( $star_flow_type == "deflef" || $star_flow_type == "mw") then
 mv {{env.BLK_NAME}}.star_sum $LOG_DIR/{{env.BLK_NAME}}.${dst_stage}.star_sum

@@ -8,7 +8,7 @@ set src_stage icc2_fp
 set dst_stage icc2_fp
 
 set BLK_NAME          {{env.BLK_NAME}}
-set BLK_NETLIST_LIST  {{ver.netlist}}/{{env.BLK_NAME}}.v
+set BLK_NETLIST_LIST  {{env.BLK_NETLIST}}/{{ver.netlist}}/{{env.BLK_NAME}}.v
 
 set NDM_TECH          {{liblist.NDM_TECH}} 
 set NDM_STD           {{liblist.NDM_STD}}
@@ -73,7 +73,7 @@ redirect -tee {{cur.flow_rpt_dir}}/{{env.BLK_NAME}}.report_timing  {report_timin
 {%- if local.auto_fp == "true" %} 
 initialize_floorplan
 {%- else %}
-read_def {{ver.netlist}}/{{env.BLK_NAME}}.def.gz
+read_def {{env.BLK_FP}}/{{ver.fp}}/{{env.BLK_NAME}}.def.gz
 {%- endif %}
 place_pin -self
 

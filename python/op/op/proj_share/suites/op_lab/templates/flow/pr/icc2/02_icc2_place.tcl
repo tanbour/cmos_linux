@@ -89,7 +89,7 @@ set_app_option -list {place.coarse.continue_on_missing_scandef true}
 ########################################################################
 ## source dont_use/hold_fix/cts cell 
 ########################################################################
-#source -e -v "$FLOW_BRANCH_DIR/user_scripts/set_lib_cell_purpose.tcl"
+#source -e -v "{{cur.config_plugins_dir}}/icc2_scripts/set_lib_cell_purpose.tcl"
 
 ####################################
 ## Enable AOCV 	
@@ -118,7 +118,7 @@ set_app_options -name  time.pocvm_enable_analysis true ; ;# default false
 {%- if local.place_opt_spg_flow == "true" %}
 set_app_options -name place_opt.flow.do_spg -value true
 {%- endif %}
-#place_opt
+place_opt
 {%- endif %}
 {# OPTIMIZATION_FLOW: qor  : runs two pass place_opt #}
 {%- if  local.optimization_flow == "qor"  %}
@@ -178,7 +178,7 @@ split_multibit -slack_threshold 0
 #######################################################################
 
 puts "Alchip-info: Running place_opt -to initial_drc"
-#place_opt -to initial_drc
+place_opt -to initial_drc
 puts "Alchip-info: Running update_timing -full"
 update_timing -full
 
@@ -193,13 +193,13 @@ set_app_options -name place_opt.flow.optimize_icgs_critical_range -value $place_
 {%- endif %}
 
 puts "Alchip-info: Running create_placement -use_seed_locs -timing_driven -effort high"
-#create_placement -use_seed_locs -timing_driven -effort high
+create_placement -use_seed_locs -timing_driven -effort high
 
 puts "Alchip-info: save block for create_placement -use_seed_locs -timing_driven -effort high"
 save_block
 
 puts "Alchip-info: Running place_opt -from initial_drc -to initial_opto"
-#place_opt -from initial_drc -to initial_opto
+place_opt -from initial_drc -to initial_opto
 
 puts "Alchip-info: save block for place_opt -from initial_drc -to initial_opto"
 save_block
@@ -210,7 +210,7 @@ save_block
 {% endif %}
 
 puts "Alchip-info: Running place_opt -from final_place"
-#place_opt -from final_place
+place_opt -from final_place
 
 puts "Alchip-info: save block for place_opt -from final_place"
 save_block
@@ -226,7 +226,7 @@ save_block
 ##OPTIMIZATION_FLOW: arlp  : runs two pass place_opt	
 #######################################################################
 puts "Alchip-info: Running place_opt -to initial_drc"
-#place_opt -to initial_drc
+place_opt -to initial_drc
 puts "Alchip-info: Running update_timing -full"
 update_timing -full
 
@@ -240,13 +240,13 @@ set_app_options -name place_opt.flow.optimize_icgs_critical_range -value $place_
 {%- endif %}
 {%- endif %}
 puts "Alchip-info: Running create_placement -use_seed_locs -timing_driven -congestion"
-#create_placement -use_seed_locs -timing_driven -congestion
+create_placement -use_seed_locs -timing_driven -congestion
 
 puts "Alchip-info: save block for create_placement -use_seed_locs -timing_driven -congestion"
 save_block 
 
 puts "Alchip-info: Running place_opt -from initial_drc -to initial_opto"
-#place_opt -from initial_drc -to initial_opto
+place_opt -from initial_drc -to initial_opto
 
 puts "Alchip-info: save block for place_opt -from initial_drc -to initial_opto"
 save_block
@@ -257,7 +257,7 @@ save_block
 {%- endif %}
 
 puts "Alchip-info: Running place_opt -from final_place"
-#place_opt -from final_place
+place_opt -from final_place
 
 puts "Alchip-info: save block for place_opt -from final_place"
 save_block 
@@ -279,7 +279,7 @@ save_block
 
 {%- if local.place_opt_spg_flow == "false" %} 
 puts "RM-info: Running place_opt -to initial_drc"
-#place_opt -to initial_drc
+place_opt -to initial_drc
 puts "RM-info: Running update_timing -full"
 update_timing -full
 
@@ -291,11 +291,11 @@ puts "RM-info: For designs starting with SPG input, since seed placement comes f
 puts "RM-info: set_app_options -name place_opt.flow.do_spg -value true" 
 set_app_options -name place_opt.flow.do_spg -value true
 puts "RM-info: Running create_placement -congestion_driven_restructuring" 
-#create_placement -congestion_driven_restructuring
+create_placement -congestion_driven_restructuring
 puts "RM-info: set_app_options -name place_opt.flow.do_spg -value false" 
 set_app_options -name place_opt.flow.do_spg -value false
 puts "RM-info: Running place_opt -from initial_drc -to initial_drc"
-#place_opt -from initial_drc -to initial_drc	
+place_opt -from initial_drc -to initial_drc	
 puts "RM-info: Running update_timing -full"
 update_timing -full
 puts "Alchip-info: save block for place_opt -to initial_drc"
@@ -310,9 +310,9 @@ set_app_options -name place_opt.flow.optimize_icgs_critical_range -value $place_
 {%- endif %}        
 {%- endif %}
 puts "Alchip-info: Running create_placement -use_seed_locs -timing_driven -congestion -congestion_effort high -effort high"
-#create_placement -use_seed_locs -timing_driven -congestion -congestion_effort high -effort high
+create_placement -use_seed_locs -timing_driven -congestion -congestion_effort high -effort high
 puts "Alchip-info: Running place_opt -from initial_drc -to initial_opto"
-#place_opt -from initial_drc -to initial_opto
+place_opt -from initial_drc -to initial_opto
 
 {%- if local.place_opt_multibit_banking ==  "true" %} 
 puts "Alchip-info: Running identify_multibit -register -no_dft_opt -apply"
@@ -320,7 +320,7 @@ identify_multibit -register -no_dft_opt -apply
 {%- endif %}
 
 puts "Alchip-info: Running place_opt -from final_place"
-#place_opt -from final_place
+place_opt -from final_place
 
 {%- if local.place_opt_multibit_debanking == "true" %} 
 puts "Alchip-info: Running split_multibit -slack_threshold 0"
@@ -331,7 +331,7 @@ split_multibit -slack_threshold 0
 ## Post-place_opt customizations
 ####################################
 
-#touch -f  {{env.RUN_SCRIPT}}/plugin/post_place.tcl
+#touch -f  {{cur.config_plugins_dir}}/02_place_plug/post_place.tcl
 
 ####################################
 ## refine_opt	
@@ -359,7 +359,7 @@ save_lib
 ####################################			 
 {%- if local.write_place_data == "true" %} 
 
-#write_verilog -include {all} \$DST_DATA_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.pg.v
+#write_verilog -include {all} {{cur.flow_data_dir}}/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.pg.v
 
 ## write_verilog for PrimeTime (no pg, no physical only cells but with diodes and DCAP for leakage power analysis)
 write_verilog  -exclude {scalar_wire_declarations leaf_module_declarations pg_objects end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells flip_chip_pad_cells} -hierarchy all {{cur.flow_data_dir}}/{{env.BLK_NAME}}.${dst_stage}.pt.v 

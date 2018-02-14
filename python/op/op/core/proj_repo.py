@@ -50,7 +50,7 @@ class ProjRepo(object):
                 raise SystemExit()
             elif settings.REPO_BRANCH_ERR_STR in str(err):
                 pass
-        LOG.info(f" please run op cmds under the project dir {self.repo_dic['repo_dir']}")
+        LOG.info(f"please run op cmds under the project dir {self.repo_dic['repo_dir']}")
     def svn_proj(self):
         """to check out project by using svn"""
         pass

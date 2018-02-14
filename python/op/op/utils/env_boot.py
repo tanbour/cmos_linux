@@ -33,7 +33,7 @@ def find_blk_root(path_str, proj_root):
         raise SystemExit()
     blk_name = path_str.replace(proj_root, "").strip(os.sep).split(os.sep)[0]
     if proj_root == path_str or blk_name in settings.BLK_IGNORE_LST:
-        LOG.info(" not in a block directory, block level features off")
+        LOG.info("not in a block directory, block level features off")
         return ""
     return f"{proj_root}{os.sep}{blk_name}"
 
@@ -90,7 +90,7 @@ class EnvBoot(object):
             if self.blk_flg:
                 blk_cfg = proj_cfg.replace(base_proj_cfg_dir, base_blk_cfg_dir)
                 if not os.path.isfile(blk_cfg):
-                    LOG.warning(f" block config file {blk_cfg} is NA")
+                    LOG.warning(f"block config file {blk_cfg} is NA")
                 self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg, blk_cfg])
             else:
                 self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg])

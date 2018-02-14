@@ -40,13 +40,19 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         dst_dir = os.path.expandvars(settings.PROJ_SHARE)
         if os.path.isdir(dst_dir):
             LOG.info(
-                f" project share dir {dst_dir} already exists, continue to initialize "
+                f"project share dir {dst_dir} already exists, continue to initialize "
                 f"the project will overwrite the current project configs, templates and plugins")
             pcom.cfm()
             shutil.rmtree(dst_dir, True)
         shutil.copytree(f"{settings.OP_PROJ}{os.sep}{suite_name}", dst_dir)
+        for prex_dir_k in (
+                self.cfg_dic["proj"]["prex_admin_dir"]
+                if "prex_admin_dir" in self.cfg_dic["proj"] else {}):
+            prex_dir = pcom.rd_cfg(self.cfg_dic["proj"], "prex_admin_dir", prex_dir_k)
+            pcom.mkdir(LOG, prex_dir)
+            LOG.info(f"generated pre-set admin directory {prex_dir}")
         LOG.info(
-            " please perform the git commit and git push actions "
+            "please perform the git commit and git push actions "
             "after project and block items are settled down")
     def fill_blocks(self, blk_lst):
         """to fill blocks config dir after initialization"""
@@ -70,7 +76,7 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                             bcf.write(line)
                         else:
                             bcf.write(f"# {line}")
-                LOG.info(f" block config {blk_cfg} generated")
+                LOG.info(f"block config {blk_cfg} generated")
             for dir_cfg_kw in self.dir_cfg_dic:
                 if dir_cfg_kw == "lib":
                     continue
@@ -78,7 +84,7 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                 blk_dir_cfg = f"{blk_cfg_dir}{os.sep}{dir_cfg_kw}{os.sep}DEFAULT"
                 if os.path.isdir(blk_dir_cfg):
                     LOG.info(
-                        f" block level config directory {blk_dir_cfg} already exists, "
+                        f"block level config directory {blk_dir_cfg} already exists, "
                         f"please confirm to overwrite it")
                     pcom.cfm()
                 shutil.rmtree(blk_dir_cfg, True)
@@ -92,7 +98,7 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                                 ncf.write(line)
                             else:
                                 ncf.write(f"# {line}")
-                LOG.info(f" block config directory {blk_dir_cfg} generated")
+                LOG.info(f"block config directory {blk_dir_cfg} generated")
     def update_blocks(self, blk_lst):
         """to obtain blocks input data from release directory"""
         env_boot.EnvBoot.__init__(self)
@@ -108,29 +114,24 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                 self.ced["PROJ_RELEASE"], f"{self.ced['PROJ_ROOT']}{os.sep}{blk_name}")
             pcom.mkdir(LOG, os.path.dirname(blk_file))
             shutil.copyfile(data_file, blk_file)
-            LOG.info(f" block files {blk_file} copied from {data_file}")
+            LOG.info(f"block files {blk_file} copied from {data_file}")
     def fill_lib(self):
         """a function wrapper for inherited LibProc function"""
         env_boot.EnvBoot.__init__(self)
         self.boot_env()
         pcom.mkdir(LOG, self.ced["PROJ_LIB"])
-        try:
-            self.link_file(
-                self.ced["PROJ_LIB"], self.dir_cfg_dic["lib"]["DEFAULT"], self.cfg_dic)
-            self.gen_liblist(
-                self.ced["PROJ_LIB"], self.ced["PROJ_LIB"],
-                self.dir_cfg_dic["lib"]["DEFAULT"]["liblist"], self.cfg_dic["lib"]["DEFAULT"])
-        except KeyError as err:
-            LOG.error(err)
-            raise SystemExit()
+        self.link_file(
+            self.ced["PROJ_LIB"], self.dir_cfg_dic["lib"]["DEFAULT"], self.cfg_dic)
+        self.gen_liblist(
+            self.ced["PROJ_LIB"], self.ced["PROJ_LIB"],
+            self.dir_cfg_dic["lib"]["DEFAULT"]["liblist"], self.cfg_dic["lib"]["DEFAULT"])
     def init_release(self):
         """to initialize the release input dir"""
         env_boot.EnvBoot.__init__(self)
         self.boot_env()
-        for input_dir in pcom.rd_cfg(
-                self.cfg_dic.get("proj", {}), "release", "input_dir"):
+        for input_dir in pcom.rd_cfg(self.cfg_dic["proj"], "release", "input_dir"):
             pcom.mkdir(LOG, f"{self.ced['PROJ_RELEASE']}{os.sep}{input_dir}")
-            LOG.info(f" release dir {input_dir} generated")
+            LOG.info(f"release dir {input_dir} generated")
 
 def run_admin(args):
     """to run admin sub cmd"""

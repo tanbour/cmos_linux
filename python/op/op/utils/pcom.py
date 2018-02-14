@@ -71,29 +71,22 @@ def gen_cfg(cfg_file_iter, dlts=("=", ":")):
         config.read(cfg_file)
     return config
 
-def rd_cfg(cfg, sec, opt, s_flg=False, fbk="", r_flg=False):
+def rd_cfg(cfg, sec, opt, s_flg=False, fbk=""):
     """to read config to get corresponding section and option"""
     if not cfg:
         cfg = configparser.ConfigParser()
     value_str = os.path.expandvars(cfg.get(sec, opt, fallback=""))
     if not value_str:
         value_str = fbk
-    if r_flg:
-        try:
-            cfg.remove_option(sec, opt)
-        except configparser.NoSectionError:
-            pass
     split_str = rf"{os.linesep}" if opt.endswith("_opts") else rf",|{os.linesep}"
     cfg_lst = [cc.strip() for cc in re.split(split_str, value_str) if cc]
     return cfg_lst if not s_flg else (cfg_lst[0] if cfg_lst else "")
 
-def rd_sec(sec, opt, s_flg=False, fbk="", r_flg=False):
+def rd_sec(sec, opt, s_flg=False, fbk=""):
     """to read section to get corresponding option"""
     value_str = os.path.expandvars(sec.get(opt, ""))
     if not value_str:
         value_str = fbk
-    if r_flg and opt in sec:
-        del sec[opt]
     split_str = rf"{os.linesep}" if opt.endswith("_opts") else rf",|{os.linesep}"
     cfg_lst = [cc.strip() for cc in re.split(split_str, value_str) if cc]
     return cfg_lst if not s_flg else (cfg_lst[0] if cfg_lst else "")
@@ -109,13 +102,13 @@ def ch_cfg(cfg):
                 and os.linesep not in opt_v else rd_cfg(cfg, sec_k, opt_k))
     return cfg_dic
 
-def prod_sec_iter(sec):
-    """to change section to item dictionary list by product loop"""
+def prod_vs_iter(var_lst, sec):
+    """to change section to var item dictionary list by product loop """
     k_lst = []
     v_lst = []
-    for opt_k, opt_v in sec.items():
-        k_lst.append(opt_k)
-        v_lst.append(rd_sec(sec, opt_k))
+    for var in var_lst:
+        k_lst.append(var)
+        v_lst.append(rd_sec(sec, var, fbk=f"{{{{{var}}}}}"))
     for opt_tup in itertools.product(*v_lst):
         item_dic = {}
         for index, opt_v in enumerate(opt_tup):

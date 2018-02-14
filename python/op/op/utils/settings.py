@@ -22,7 +22,6 @@ BOOT_CFG = f"$PROJ_ROOT{os.sep}share{os.sep}config{os.sep}proj.cfg"
 
 PROJ_SHARE = f"$PROJ_ROOT{os.sep}share"
 PROJ_CFG_DIR = f"$PROJ_ROOT{os.sep}share{os.sep}config"
-PROJ_TMP_DIR = f"$PROJ_ROOT{os.sep}share{os.sep}templates"
 BLK_CFG_DIR = f"$BLK_ROOT{os.sep}config"
 
 PROJ_REPO = "git"

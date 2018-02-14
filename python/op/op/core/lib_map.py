@@ -5,6 +5,7 @@ Description: base class for processing library mapping
 """
 
 import os
+import re
 import fnmatch
 import json
 from utils import pcom
@@ -21,13 +22,13 @@ class LibMap(object):
         if os.path.islink(dst_file):
             os.unlink(dst_file)
         elif os.path.isfile(dst_file):
-            LOG.warning(f" dst file {dst_file} is not a link")
+            LOG.warning(f"dst file {dst_file} is not a link")
             self.match_lst.append(dst_file)
             return
         else:
             pcom.mkdir(LOG, os.path.dirname(dst_file))
         os.symlink(src_file, dst_file)
-        LOG.info(f" linked src file {src_file} as dst file {dst_file}")
+        LOG.info(f"linked src file {src_file} as dst file {dst_file}")
         self.match_lst.append(dst_file)
     def link_file(self, dst_root, lib_dir_cfg_dic, cfg_dic):
         """to process project or block lib mapping links"""
@@ -35,18 +36,18 @@ class LibMap(object):
         for lib_file, lib_file_cfg in lib_dir_cfg_dic.items():
             if lib_file == "liblist":
                 continue
-            can_root = pcom.rd_cfg(cfg_dic.get("proj", {}), "lib", lib_file, True)
-            can_tar = pcom.rd_cfg(cfg_dic.get("proj", {}), "lib", f"{lib_file}_dst", True)
+            can_root = pcom.rd_cfg(cfg_dic["proj"], "lib", lib_file, True)
+            can_tar = pcom.rd_cfg(cfg_dic["proj"], "lib", f"{lib_file}_dst", True)
             if not can_root:
                 LOG.error(
                     f"library mapping search root path of {lib_file} "
                     f"is not defined in proj.cfg")
                 raise SystemExit()
             if not can_tar:
-                LOG.error(f" no {lib_file} destination directory specified in {lib_file}.cfg")
+                LOG.error(f"no {lib_file} destination directory specified in {lib_file}.cfg")
                 raise SystemExit()
             pcom.mkdir(LOG, can_tar)
-            can_ignore_lst = pcom.rd_cfg(cfg_dic.get("proj", {}), "lib", f"{lib_file}_ignore")
+            can_ignore_lst = pcom.rd_cfg(cfg_dic["proj"], "lib", f"{lib_file}_ignore")
             can_lst = [
                 c_c for c_c in pcom.find_iter(can_root, "*")
                 if not any([ccc in c_c for ccc in can_ignore_lst])]
@@ -58,8 +59,9 @@ class LibMap(object):
                         f"option _pattern_search not in section {link_sec_k} of file {lib_file}")
                     raise SystemExit()
                 pattern_search = pcom.rd_cfg(
-                    lib_file_cfg, link_sec_k, "_pattern_search", True, r_flg=True)
-                for var_dic in pcom.prod_sec_iter(link_sec_v):
+                    lib_file_cfg, link_sec_k, "_pattern_search", True)
+                var_lst = re.findall(r"{{(.*?)}}", pattern_search)
+                for var_dic in pcom.prod_vs_iter(var_lst, link_sec_v):
                     pattern_search_str = pcom.ren_tempstr(LOG, pattern_search, var_dic)
                     for match_file in fnmatch.filter(
                             can_lst, f"{can_root}{os.sep}{pattern_search_str}"):
@@ -77,11 +79,10 @@ class LibMap(object):
             with open(match_lst_file) as mlf:
                 lib_match_lst = json.load(mlf)
         except FileNotFoundError:
-            LOG.warning(f" library map list file not generated in {map_root}")
+            LOG.warning(f"library map list file not generated in {map_root}")
             return {}
         liblist_dir = f"{liblist_root}{os.sep}liblist"
         pcom.mkdir(LOG, liblist_dir)
-        var_dic_lst = list(pcom.prod_sec_iter(lib_sec))
         var_name_line_dic = {}
         try:
             custom_dic = {
@@ -98,7 +99,8 @@ class LibMap(object):
             else:
                 match_file_lst = []
                 for match_pattern in pcom.rd_cfg(liblist_cfg, "var", var_name):
-                    for var_dic in var_dic_lst:
+                    var_lst = re.findall(r"{{(.*?)}}", match_pattern)
+                    for var_dic in pcom.prod_vs_iter(var_lst, lib_sec):
                         match_file_lst.extend(fnmatch.filter(
                             lib_match_lst, pcom.ren_tempstr(LOG, match_pattern, var_dic)))
             var_name_line_dic[var_name] = match_file_lst

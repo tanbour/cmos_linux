@@ -3,12 +3,29 @@
 ##link database to dst database##
 #################################
 
-set src_stage = icc2_route_opt
-set dst_stage = starrc
+#set pre_stage = icc2_route_opt
+#set cur_stage = starrc
+set pre_stage = "{{pre.sub_stage}}"
+set cur_stage = "{{cur.sub_stage}}"
+
+set pre_stage = `echo $pre_stage | cut -d . -f 1`
+set cur_stage = `echo $cur_stage | cut -d . -f 1`
+
+##mkdir tool output dirctory
+set cur_flow_data_dir = "{{cur.flow_data_dir}}/{{cur.stage}}"
+set pre_flow_data_dir = "{{pre.flow_data_dir}}/{{pre.stage}}"
+set cur_flow_rpt_dir  = "{{cur.flow_rpt_dir}}/{{cur.stage}}"
+set cur_flow_log_dir  = "{{cur.flow_log_dir}}/{{cur.stage}}"
+set cur_flow_sum_dir  = "{{cur.flow_sum_dir}}/{{cur.stage}}"
+
+ mkdir -p $cur_flow_data_dir
+ mkdir -p $cur_flow_rpt_dir
+ mkdir -p $cur_flow_log_dir
+ mkdir -p $cur_flow_sum_dir
 
 echo "delete exsting smc files and starrc command file"
-rm {{cur.flow_scripts_dir}}/rc_ext/*.smc
-rm {{cur.flow_scripts_dir}}/rc_ext/*.cmd
+rm {{cur.flow_scripts_dir}}/{{cur.stage}}/*.smc
+rm {{cur.flow_scripts_dir}}/{{cur.stage}}/*.cmd
  
 #################################
 ## STAR flow                   ##
@@ -37,7 +54,7 @@ set NDM_STD                     = "{{liblist.NDM_STD}}"
 
 {%- if local.star_flow_type == "ndm" %} 
 {%- if local.ndm_block_name ==  "" %}
-set ndm_block_name           =  {{env.BLK_NAME}}/$src_stage 
+set ndm_block_name           =  {{env.BLK_NAME}}/$pre_stage 
 {%- else %}
 set ndm_block_name           = $ndm_block_name
 {%- endif %}
@@ -48,15 +65,15 @@ set BLOCK                    =	 $BLK_NAME
 set BLOCK                    =	 $BLK_NAME
 {%- endif %}
 
-set DEF                          = {{pre.flow_data_dir}}/{{env.BLK_NAME}}.${src_stage}.def.gz
+set DEF                          = "$pre_flow_data_dir/${pre_stage}.{{env.BLK_NAME}}.def.gz"
 #set LEFFILE                      =	"$LEF_TECH $LEF_STD      $LEF_MEM      $LEF_IP      $LEF_IO"
-set MILKYWAY_DATABASE            =	"{{pre.flow_data_dir}}/{{env.BLK_NAME}}.${src_stage}.mw" 
-set NDM_DATABASE                 = "{{pre.flow_data_dir}}/{{env.BLK_NAME}}.${src_stage}.nlib"
+set MILKYWAY_DATABASE            =	"$pre_flow_data_dir/${pre_stage}.{{env.BLK_NAME}}.mw" 
+set NDM_DATABASE                 = "$pre_flow_data_dir/${pre_stage}.{{env.BLK_NAME}}.nlib"
 #set NDM_SEARCH_PATH             = "$NDM_TECH $NDM_STD      $NDM_MEM      $NDM_IP      $NDM_IO"
 set NDM_SEARCH_PATH              = "$NDM_TECH $NDM_STD"
 
-if ( -e `find {{pre.flow_data_dir}}/* -name DVIA_${BLK_NAME}.${src_stage}.gds.gz` ) then
-set METAL_FILL_GDS_FILE          = `find {{pre.flow_data_dir}}/* -name DVIA_${BLK_NAME}.${src_stage}.gds.gz` 
+if ( -e `find $pre_flow_data_dir/* -name DVIA_${pre_stage}.${BLK_NAME}.gds.gz` ) then
+set METAL_FILL_GDS_FILE          = `find {{pre.flow_data_dir}}/* -name DVIA_${pre_stage}.${BLK_NAME}.gds.gz` 
 else
 set METAL_FILL_GDS_FILE          = ""
 endif
@@ -134,7 +151,7 @@ foreach tempr ( $tempratures )
  set atempr = 85
  endif
 
-cat <<FP > {{cur.flow_scripts_dir}}/rc_ext/{{env.BLK_NAME}}.${COND}_${tempr}.smc
+cat <<FP > {{cur.flow_scripts_dir}}/{{cur.stage}}/{{env.BLK_NAME}}.${COND}_${tempr}.smc
 
 CORNER_NAME: ${COND}_$tempr
 TCAD_GRD_FILE: $GRD
@@ -145,20 +162,20 @@ FP
 end
 end
 
-cat {{cur.flow_scripts_dir}}/rc_ext/{{env.BLK_NAME}}.*.smc > {{cur.flow_scripts_dir}}/rc_ext/{{env.BLK_NAME}}.smc
-rm {{cur.flow_scripts_dir}}/rc_ext/{{env.BLK_NAME}}*_*.smc
+cat {{cur.flow_scripts_dir}}/{{cur.stage}}/{{env.BLK_NAME}}.*.smc > {{cur.flow_scripts_dir}}/{{cur.stage}}/{{env.BLK_NAME}}.smc
+rm {{cur.flow_scripts_dir}}/{{cur.stage}}/{{env.BLK_NAME}}*_*.smc
 
 ############generate cmd file for each condition########
 
 echo "********** Starting {{local.conds}} ..."
-set SESSION	   = {{env.BLK_NAME}}.${dst_stage}
-set SPEF	   = {{cur.flow_data_dir}}/${SESSION}.spef
+set SESSION	   = ${cur_stage}{{env.BLK_NAME}}
+set SPEF	   = $cur_flow_data_dir/${SESSION}.spef
 
 echo "generating ${SESSION}.cmd file for {{local.conds}}"
 ########################################
 #              flow                    #
 ########################################
-cat << FP >! {{cur.flow_scripts_dir}}/rc_ext/${SESSION}.cmd
+cat << FP >! {{cur.flow_scripts_dir}}/{{cur.stage}}/${SESSION}.cmd
 {% if local.star_flow_type == "deflef" %}
 {% include 'starrc/star_deflef.cmd' %}
 {% elif local.star_flow_type == "ndm" %}
@@ -189,7 +206,7 @@ FP
 
 set star_mem_requirement = `expr {{local.star_mem_requirement}} / 10000`
 echo $star_mem_requirement
-absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:true n:$star_cpu_number" -c "StarXtract {{cur.flow_scripts_dir}}/rc_ext/${SESSION}.cmd"
+absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:true n:$star_cpu_number" -c "StarXtract {{cur.flow_scripts_dir}}/{{cur.stage}}/${SESSION}.cmd"
 
     ############################################
     # change out put spef file naming          #	
@@ -198,13 +215,13 @@ absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:tru
     foreach selected_corner ($selected_corners)
     set i = 1
     set tmp =  `echo $selected_corner | awk '{print $i}'`
-    if (-e {{cur.flow_data_dir}}/${SESSION}.spef) then
-    mv {{cur.flow_data_dir}}/${SESSION}.spef {{cur.flow_data_dir}}/${SESSION}.spef.$tmp
+    if (-e $cur_flow_data_dir/${SESSION}.spef) then
+    mv $cur_flow_data_dir/${SESSION}.spef $cur_flow_data_dir/${SESSION}.spef.$tmp
     endif
 
-    if ( -e {{cur.flow_data_dir}}/${SESSION}.spef.$tmp ) then
-    gzip {{cur.flow_data_dir}}/${SESSION}.spef.$tmp
-    mv {{cur.flow_data_dir}}/${SESSION}.spef.$tmp.gz {{cur.flow_data_dir}}/{{env.BLK_NAME}}.${dst_stage}.$tmp.spef.gz
+    if ( -e $cur_flow_data_dir/${SESSION}.spef.$tmp ) then
+    gzip $cur_flow_data_dir/${SESSION}.spef.$tmp
+    mv $cur_flow_data_dir/${SESSION}.spef.$tmp.gz $cur_flow_data_dir/${cur_stage}.{{env.BLK_NAME}}.$tmp.spef.gz
     endif
     end
 
@@ -212,11 +229,9 @@ absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:tru
 # move report                              #	
 ############################################ 
 
-mkdir -p {{cur.flow_log_dir}}/star
-set LOG_DIR = "{{cur.flow_log_dir}}/star"
 
 if ( $star_flow_type == "deflef" || $star_flow_type == "mw") then
-mv {{env.BLK_NAME}}.star_sum $LOG_DIR/{{env.BLK_NAME}}.${dst_stage}.star_sum
+mv {{env.BLK_NAME}}.star_sum $cur_flow_log_dir/${cur_stage}.{{env.BLK_NAME}}.star_sum
 endif
 
 if ( $star_flow_type == "ndm") then
@@ -224,17 +239,17 @@ if ( $star_flow_type == "ndm") then
 set block_name = `echo $ndm_block_name | cut -d / -f 1`
 set label_name = `echo $ndm_block_name | cut -d / -f 2`
 
-mv ${block_name}.star_sum $LOG_DIR/{{env.BLK_NAME}}.${dst_stage}.star_sum
+mv ${block_name}.star_sum $cur_flow_log_dir/${cur_stage}.{{env.BLK_NAME}}.star_sum
 endif
 
-mv  ./star/xtract.tech $LOG_DIR/{{env.BLK_NAME}}.${dst_stage}.xtract.tech
-mv ./star/tech_file.asc $LOG_DIR/{{env.BLK_NAME}}.${dst_stage}.tech_file.asc
+mv  ./star/xtract.tech $cur_flow_log_dir/${cur_stage}.{{env.BLK_NAME}}.xtract.tech
+mv ./star/tech_file.asc $cur_flow_log_dir/${cur_stage}.{{env.BLK_NAME}}.tech_file.asc
 
 if (-e ./star/shorts_all.sum) then
-mv ./star/shorts_all.sum $LOG_DIR/{{env.BLK_NAME}}.${dst_stage}.shorts_all.sum
+mv ./star/shorts_all.sum $cur_flow_log_dir/${cur_stage}.{{env.BLK_NAME}}.shorts_all.sum
 endif
 if (-e ./star/opens.sum) then
-mv ./star/opens.sum $LOG_DIR/{{env.BLK_NAME}}.${dst_stage}.opens.sum
+mv ./star/opens.sum $cur_flow_log_dir/${cur_stage}.{{env.BLK_NAME}}.opens.sum
 endif
 
 #./scr/signoff_check/csh/check_starrc_log.csh $RUN_DIR $BLOCK_NAME $OP4_dst_eco

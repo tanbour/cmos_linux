@@ -12,7 +12,7 @@ change_names -rules verilog -hierarchy
 
 #-- read sdc ---------------------------
 remove_sdc
-source -e -v ${SDC_FILE} > {{cur.flow_log_dir}}/02_read_sdc.log
+source -e -v ${SDC_FILE} > $cur_flow_log_dir/02_read_sdc.log
 
 #-- inc sdc ----------------------------
 #remove_clock_uncertainty [all_clocks]
@@ -69,7 +69,9 @@ check_tlu_plus_files
 
 {% endif %}
 #
+{% if local.isolate_buffer_libcell_name != "" %}
 set_isolate_ports -driver {{local.isolate_buffer_libcell_name}} [get_ports *] -force
+{% endif %}
 #===================================================================
 #=================== clock gate setting ============================
 #===================================================================
@@ -78,10 +80,12 @@ set power_cg_physically_aware_cg true
 set pwr_cg_improved_cell_sorting true
 ## chose ULVT cells for clock network, alignd with CTS
 set_clock_gating_style \
-   -max_fanout {{local.clock_gating_max_fanout}} \
-   -minimum_bitwidth {{local.clock_gating_minimun_bitwidth}} \
+   -max_fanout {{local.set_clock_gating_style_max_fanout}} \
+   -minimum_bitwidth {{local.set_clock_gating_style_minimun_bitwidth}} \
    -sequential_cell latch \
-   -positive_edge_logic "integrated:PREICGF2F_D12_N_S8P75TSL_C68L22" \
+{%- if local.set_clock_gating_style_positive_edge_logic_libcell != "" %}
+   -positive_edge_logic "{{ local.set_clock_gating_style_positive_edge_logic_libcell}}" \
+{%- endif %}
    -control_point before \
    -control_signal scan_enable
 #set power_cg_auto_identify true
@@ -93,7 +97,7 @@ set_clock_gating_style \
 #===================================================================
 
 #-- dont use ---------------------------
-{% include  'dc/dc_scripts/dont_use.tcl' %}
+source {{cur.config_plugins_dir}}/dc_scripts/dont_use.tcl
 
 # enable congestion-driven placement, to optimize local congestion and improve correlation
 set placer_enable_enhanced_router true
@@ -125,7 +129,7 @@ set_max_fanout {{local.set_max_fanout_current_design}}        [current_design]
 
 #-- add bounds -------------------------
 #$# --> source {{cur.config_plugins_dir}}/dc_scripts/bounds.tcl
-#$# --> create_bounds -coordinate {{1027.54 1099.2} {1101.43 1254.144}} -name reg_out [get_cells -of_objects  [all_fanin -to  [get_ports -filter "direction == out"] -startpoints_only -flat]]
+#$# --> create_bounds -coordinate { {1027.54 1099.2} {1101.43 1254.144} } -name reg_out [get_cells -of_objects  [all_fanin -to  [get_ports -filter "direction == out"] -startpoints_only -flat]]
 
 #-- setting ----------------------------
 #set_app_var target_library  "\
@@ -134,17 +138,17 @@ set_max_fanout {{local.set_max_fanout_current_design}}        [current_design]
 
 #-- compile ----------------------------
 compile_ultra -no_autoungroup -gate_clock  
-{% include  'dc/dc_scripts/change_name.tcl' %}
-write -hier -format verilog -out {{cur.flow_data_dir}}/01_{{env.BLK_NAME}}.v
-write -f ddc -h -out {{cur.flow_data_dir}}/01_{{env.BLK_NAME}}.ddc
+source -e {{cur.config_plugins_dir}}/dc_scripts/change_name.tcl
+write -hier -format verilog -out $cur_flow_data_dir/01_{{env.BLK_NAME}}.v
+write -f ddc -h -out $cur_flow_data_dir/01_{{env.BLK_NAME}}.ddc
 set_svf -off
 #-- report -----------------------------
-report_timing -nets -input_pins -nosplit -significant_digits 3 -max_paths 100000 -slack_lesser_than 0 -nworst 1 -delay max > ./result/03_SYN_WCZ.rpt
-sh /usr/bin/perl {{cur.config_plugins_dir}}/dc_scripts/check_violation_summary.pl {{cur.flow_rpt_dir}}/03_SYN_{{local.lib_corner}}.rpt > ./result/03_SYN_{{local.lib_corner}}.sum
+report_timing -nets -input_pins -nosplit -significant_digits 3 -max_paths 100000 -slack_lesser_than 0 -nworst 1 -delay max > $cur_flow_rpt_dir/03_SYN_{{local.lib_corner}}.rpt
+sh /usr/bin/perl {{cur.config_plugins_dir}}/dc_scripts/check_violation_summary.pl $cur_flow_rpt_dir/03_SYN_{{local.lib_corner}}.rpt > $cur_flow_rpt_dir/03_SYN_{{local.lib_corner}}.sum
 source {{cur.config_plugins_dir}}/dc_scripts/proc_qor.tcl
-proc_qor > {{cur.flow_rpt_dir}}/03_proc_qor.rpt
-report_qor > {{cur.flow_rpt_dir}}/03_qor.rpt
-report_power > {{cur.flow_rpt_dir}}/03_power.rpt
+proc_qor > $cur_flow_rpt_dir/03_proc_qor.rpt
+report_qor > $cur_flow_rpt_dir/03_qor.rpt
+report_power > $cur_flow_rpt_dir/03_power.rpt
 #return
 #===================================================================
 #=================== compile 2 =====================================
@@ -175,13 +179,17 @@ report_power > {{cur.flow_rpt_dir}}/03_power.rpt
 # identify_register_banks -input_map_file ./scr/map/input_mergerM2.tcl -register_group_file ./scr/map/group_M2.list -output_file ./scr/cmd/4_MB2_3.tcl
 # source ./scr/cmd/4_MB2_3.tcl > M2_merge3.rpt
 
+{%- if local.syn_mode == "dcg" %}
 #-- remove bounds ----------------------
 remove_bounds -all
+{%- endif %}
 #-- set dont touch AC regs -------------
 #$# --> set_dont_touch [get_cells -of_objects  [all_fanin -to  [get_ports -filter "direction == out"] -startpoints_only -flat]] true
-source {{cur.config_plugins_dir}}/dc_scripts/get_all_regs_connect_ports.tcl' %}
+source {{cur.config_plugins_dir}}/dc_scripts/get_all_regs_connect_ports.tcl 
+if {[echo $exclude_merger_regs] != ""} {
 set exclude_merger_regs [get_object_name $exclude_merger_regs]
 set_dont_touch [get_cells $exclude_merger_regs] true
+}
 #-- setting ----------------------------
 identify_clock_gating
 set placer_always_use_congestion_expansion_factors true
@@ -191,8 +199,9 @@ set spg_incr_placement_pass2_congestion_driven true
 #-- merge multi-bit --------------------
 
 # Modified by Cindy Wang on: Fri Jul 29 02:18:43 CST 2016 END
+if {[echo $exclude_merger_regs] != ""} {
 set_dont_touch [get_cells $exclude_merger_regs] false
-
+}
 #-- useful_skew ------------------------
 #source -echo -verbose {{cur.config_plugins_dir}}/dc_scripts/useful_skew.tcl
 source {{cur.config_plugins_dir}}/dc_scripts/proc_auto_weights.tcl
@@ -204,18 +213,18 @@ group_path -name REGOUT -weight 0.1
 #-- compile ----------------------------
 compile_ultra -incremental -no_autoungroup 
 source -e {{cur.config_plugins_dir}}/dc_scripts/change_name.tcl
-write -hier -format verilog -out {{cur.flow_data_dir}}/02_{{env.BLK_NAME}}_MB.v
-write -f ddc -h -out {{cur.flow_data_dir}}/02_{{env.BLK_NAME}}_MB.ddc
+write -hier -format verilog -out $cur_flow_data_dir/02_{{env.BLK_NAME}}_MB.v
+write -f ddc -h -out $cur_flow_data_dir/02_{{env.BLK_NAME}}_MB.ddc
 
 #-- report -----------------------------
-report_timing -nets -input_pins -nosplit -significant_digits 3 -max_paths 100000 -slack_lesser_than 0 -nworst 1 -delay max > {{cur.flow_rpt_dir}}/04_SYN_{{local.lib_corner}}.rpt
-sh /usr/bin/perl {{cur.config_plugins_dir}}/dc_scripts/check_violation_summary.pl {{cur.flow_rpt_dir}}/04_SYN_{{local.lib_corner}}.rpt > {{cur.flow_rpt_dir}}/04_SYN_{{local.lib_corner}}.sum
-proc_qor > {{cur.flow_rpt_dir}}/04_proc_qor.rpt
-report_qor > {{cur.flow_rpt_dir}}/04_qor.rpt
-report_power > {{cur.flow_rpt_dir}}/04_power.rpt
+report_timing -nets -input_pins -nosplit -significant_digits 3 -max_paths 100000 -slack_lesser_than 0 -nworst 1 -delay max > $cur_flow_rpt_dir/04_SYN_{{local.lib_corner}}.rpt
+sh /usr/bin/perl {{cur.config_plugins_dir}}/dc_scripts/check_violation_summary.pl $cur_flow_rpt_dir/04_SYN_{{local.lib_corner}}.rpt > $cur_flow_rpt_dir/04_SYN_{{local.lib_corner}}.sum
+proc_qor > $cur_flow_rpt_dir/04_proc_qor.rpt
+report_qor > $cur_flow_rpt_dir/04_qor.rpt
+report_power > $cur_flow_rpt_dir/04_power.rpt
 
-echo "lvt ratio after 1st compile:" > {{cur.flow_rpt_dir}}/ratio_lvt.rpt
-report_threshold_voltage_group  >> {{cur.flow_rpt_dir}}/ratio_lvt.rpt
-report_clock_gating -nosplit > {{cur.flow_rpt_dir}}/report_clock_gating.rpt
-report_qor > {{cur.flow_rpt_dir}}/{{env.BLK_NAME}}.qor
+echo "lvt ratio after 1st compile:" > $cur_flow_rpt_dir/ratio_lvt.rpt
+report_threshold_voltage_group  >> $cur_flow_rpt_dir/ratio_lvt.rpt
+report_clock_gating -nosplit > $cur_flow_rpt_dir/report_clock_gating.rpt
+report_qor > $cur_flow_rpt_dir/{{env.BLK_NAME}}.qor
 # Modified by Cindy Wang on: Fri Jul 29 02:32:32 CST 2016 END

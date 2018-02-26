@@ -116,18 +116,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             LOG.error(f"netlist version of flow {flow} is NA in flow.cfg")
             raise SystemExit()
         proj_tmp_dir = self.ced["PROJ_SHARE_TMP"].rstrip(os.sep)
-        flow_root_dir = f"{self.ced['BLK_RUN']}{os.sep}v{v_net}{os.sep}{flow}"
-        prex_dir_sec = (
-            self.cfg_dic["proj"]["prex_dir"]
-            if "prex_dir" in self.cfg_dic["proj"] else {})
-        prex_dir_dic = {}
-        for prex_dir_k in prex_dir_sec:
-            prex_dir = pcom.ren_tempstr(
-                LOG, pcom.rd_sec(prex_dir_sec, prex_dir_k, True),
-                {"flow_root_dir": flow_root_dir})
-            pcom.mkdir(LOG, prex_dir)
-            prex_dir_dic[prex_dir_k] = prex_dir
-        flow_liblist_dir = f"{flow_root_dir}{os.sep}liblist"
+        flow_liblist_dir = os.sep.join([self.ced["BLK_RUN"], f"v{v_net}", flow, "liblist"])
         liblist_var_dic = self.gen_liblist(
             self.ced["PROJ_LIB"], flow_liblist_dir,
             self.dir_cfg_dic["lib"]["DEFAULT"]["liblist"],
@@ -144,6 +133,17 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                     f"template file {tmp_file} is NA, "
                     f"used by flow {flow_name} stage {stage_name}")
                 continue
+            flow_root_dir = f"{self.ced['BLK_RUN']}{os.sep}v{v_net}{os.sep}{flow_name}"
+            prex_dir_sec = (
+                self.cfg_dic["proj"]["prex_dir"]
+                if "prex_dir" in self.cfg_dic["proj"] else {})
+            prex_dir_dic = {}
+            for prex_dir_k in prex_dir_sec:
+                prex_dir = pcom.ren_tempstr(
+                    LOG, pcom.rd_sec(prex_dir_sec, prex_dir_k, True),
+                    {"flow_root_dir": flow_root_dir})
+                pcom.mkdir(LOG, prex_dir)
+                prex_dir_dic[prex_dir_k] = prex_dir
             dst_file = os.sep.join([flow_root_dir, "scripts", stage_name, sub_stage_name])
             LOG.info(f":: generating run file {dst_file} ...")
             local_dic = pcom.ch_cfg(
@@ -169,7 +169,9 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                     orf.write(
                         f"{local_dic.get('_exec_tool')} {local_dic.get('_exec_opts', '')} "
                         f"{dst_file}{os.linesep}")
-                self.oprun_lst.append(f"{dst_file}.oprun")
+                self.oprun_lst.append(
+                    {"file": f"{dst_file}.oprun", "flow": flow_name,
+                     "stage": stage_name, "sub_stage": sub_stage_name})
             self.opvar_lst.append(
                 {"local": local_dic, "cur": stage_dic, "pre": pre_stage_dic,
                  "ver": self.ver_dic.get(flow, {})})
@@ -179,12 +181,27 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         if not self.blk_flg:
             LOG.error("it's not in a block directory, please cd into one")
             raise SystemExit()
-        for oprun_file in self.oprun_lst:
-            stage_str = os.path.basename(os.path.dirname(oprun_file))
-            LOG.info(f":: running stage {stage_str}, oprun file {oprun_file} ...")
+        js_cmd = pcom.rd_cfg(self.cfg_dic["proj"], "job_schedule", "cmd", True)
+        js_str = " ".join(
+            [js_cmd,
+             pcom.rd_cfg(self.cfg_dic["proj"], "job_schedule", "mode", True),
+             pcom.rd_cfg(self.cfg_dic["proj"], "job_schedule", "queue", True),
+             pcom.rd_cfg(self.cfg_dic["proj"], "job_schedule", "host", True),
+             pcom.rd_cfg(self.cfg_dic["proj"], "job_schedule", "resource", True),
+             pcom.rd_cfg(self.cfg_dic["proj"], "job_schedule", "extra", True),]) if js_cmd else ""
+        for oprun_dic in self.oprun_lst:
+            job_str = (
+                f"""{js_str} -J '{self.ced["USER"]}:{oprun_dic["flow"]}:{oprun_dic["stage"]}:"""
+                f"""{oprun_dic["sub_stage"]}' """) if js_str else ""
+            LOG.info(
+                f":: running flow {oprun_dic['flow']}, stage {oprun_dic['stage']}, "
+                f"sub_stage {oprun_dic['sub_stage']}, oprun log {oprun_dic['file']}.log ...")
+            o_f = oprun_dic["file"]
+            trash_dir = f"{os.path.dirname(o_f)}{os.sep}.trash"
+            pcom.mkdir(LOG, trash_dir)
             subprocess.run(
-                f"xterm -title '{oprun_file}' -e 'cd {os.path.dirname(oprun_file)}; "
-                f"source {oprun_file} | tee {oprun_file}.log'", shell=True)
+                f"xterm -title '{o_f}' -e 'cd {trash_dir}; "
+                f"{job_str} source {o_f} | tee {o_f}.log'", shell=True)
     def show_var(self):
         """to show all variables used in templates"""
         LOG.info(f":: all templates used env variables")

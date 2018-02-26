@@ -5,12 +5,12 @@ suppress_message {VER-281 VER-936 VER-173 VER-944 VER-176 VER-976 ELAB-311 VER-3
 
 ### add 1121
 set sh_new_variable_message false
-set mw_power_net   VDD
-set mw_ground_net  VSS
-set mw_power_port  VDD
-set mw_ground_port VSS
-set mw_logic1_net  VDD
-set mw_logic0_net  VSS
+set mw_power_net   {{local.mw_power_net}}
+set mw_ground_net  {{local.mw_ground_net}}
+set mw_power_port  {{local.mw_power_port}}
+set mw_ground_port {{local.mw_ground_port}}
+set mw_logic1_net  {{local.mw_logic1_net}}
+set mw_logic0_net  {{local.mw_logic0_net}}
 
 {% if local.syn_mode == "dcg" %}
 

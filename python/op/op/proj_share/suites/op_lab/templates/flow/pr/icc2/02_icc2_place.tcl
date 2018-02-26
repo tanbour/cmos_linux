@@ -5,13 +5,30 @@
 ##########################################################################################
 puts "Alchip-info : Running script [info script]\n"
 
-set src_stage icc2_fp
-set dst_stage icc2_place
+#set pre_stage icc2_fp
+#set cur_stage icc2_place
+set pre_stage "{{pre.sub_stage}}"
+set cur_stage "{{cur.sub_stage}}"
+
+set pre_stage [lindex [split $pre_stage .] 0]
+set cur_stage [lindex [split $cur_stage .] 0]
+
+##mkdir tool output dirctory
+set cur_flow_data_dir "{{cur.flow_data_dir}}/$cur_stage"
+set pre_flow_data_dir "{{pre.flow_data_dir}}/$pre_stage"
+set cur_flow_rpt_dir "{{cur.flow_rpt_dir}}/$cur_stage"
+set cur_flow_log_dir "{{cur.flow_log_dir}}/$cur_stage"
+set cur_flow_sum_dir "{{cur.flow_sum_dir}}/$cur_stage"
+
+exec mkdir -p $cur_flow_data_dir
+exec mkdir -p $cur_flow_rpt_dir
+exec mkdir -p $cur_flow_log_dir
+exec mkdir -p $cur_flow_sum_dir
 
 set BLK_NAME          "{{env.BLK_NAME}}"
 
-set src_design_library  "{{pre.flow_data_dir}}/{{env.BLK_NAME}}.${src_stage}.nlib"
-set dst_design_library "{{cur.flow_data_dir}}/{{env.BLK_NAME}}.${dst_stage}.nlib"
+set pre_design_library  "$pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.nlib"
+set cur_design_library "$cur_flow_data_dir/$cur_stage.{{env.BLK_NAME}}.nlib"
 
 set place_cpu_number "{{local.place_cpu_number}}"
 set place_opt_active_scenario_list "{{local.place_opt_active_scenario_list}}"
@@ -25,32 +42,27 @@ set place_opt_refine_opt "{{local.place_opt_refine_opt}}"
 set pre_cts_setup_uncertainty "{{local.pre_cts_setup_uncertainty}}"
 set write_def_convert_icc2_site_to_lef_site_name_list "{{local.write_def_convert_icc2_site_to_lef_site_name_list}}"
 
-exec mkdir -p {{cur.flow_data_dir}}
-exec mkdir -p {{cur.flow_log_dir}}
-exec mkdir -p {{cur.flow_rpt_dir}}
-exec mkdir -p {{cur.flow_sum_dir}}
-
 ##setup host option
 
 set_host_option -max_core $place_cpu_number
 
 ##back up database
 set bak_date [exec date +%m%d]
-if {[file exist ${dst_design_library}] } {
-if {[file exist ${dst_design_library}_bak_${bak_date}] } {
-exec rm -rf ${dst_design_library}_bak_${bak_date}
+if {[file exist ${cur_design_library}] } {
+if {[file exist ${cur_design_library}_bak_${bak_date}] } {
+exec rm -rf ${cur_design_library}_bak_${bak_date}
 }
-exec mv -f ${dst_design_library} ${dst_design_library}_bak_${bak_date}
+exec mv -f ${cur_design_library} ${cur_design_library}_bak_${bak_date}
 }
 ## copy block and lib from previous stage
-copy_lib -from_lib ${src_design_library} -to_lib ${dst_design_library} -no_design
-open_lib ${src_design_library}
-copy_block -from ${src_design_library}:{{env.BLK_NAME}}/${src_stage} -to ${dst_design_library}:{{env.BLK_NAME}}/${dst_stage}
-close_lib ${src_design_library}
+copy_lib -from_lib ${pre_design_library} -to_lib ${cur_design_library} -no_design
+open_lib ${pre_design_library}
+copy_block -from ${pre_design_library}:{{env.BLK_NAME}}/${pre_stage} -to ${cur_design_library}:{{env.BLK_NAME}}/${cur_stage}
+close_lib ${pre_design_library}
 
-open_lib ${dst_design_library}
+open_lib ${cur_design_library}
 
-current_block {{env.BLK_NAME}}/${dst_stage}
+current_block {{env.BLK_NAME}}/${cur_stage}
 
 link_block
 save_lib
@@ -359,24 +371,14 @@ save_lib
 ####################################			 
 {%- if local.write_place_data == "true" %} 
 
-#write_verilog -include {all} {{cur.flow_data_dir}}/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.pg.v
+write_verilog -exclude {leaf_module_declarations pg_objects} -hierarchy all $cur_flow_data_dir/$cur_stage.{{env.BLK_NAME}}.v
 
-## write_verilog for PrimeTime (no pg, no physical only cells but with diodes and DCAP for leakage power analysis)
-write_verilog  -exclude {scalar_wire_declarations leaf_module_declarations pg_objects end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells flip_chip_pad_cells} -hierarchy all {{cur.flow_data_dir}}/{{env.BLK_NAME}}.${dst_stage}.pt.v 
-
-## write_verilog for LVS (with pg, and with physical only cells)
-write_verilog  -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all {{cur.flow_data_dir}}/{{env.BLK_NAME}}.${dst_stage}.lvs.v
-
-## write_verilog for Formality (with pg, no physical only cells, and no supply statements)
-write_verilog  -exclude {scalar_wire_declarations leaf_module_declarations end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells supply_statements} -hierarchy all {{cur.flow_data_dir}}/{{env.BLK_NAME}}.${dst_stage}.fm.v 
-
-## write_verilog for VC LP (with pg, no physical_only cells, no diodes, and no supply statements)
-write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells diode_cells supply_statements} -hierarchy all {{cur.flow_data_dir}}/{{env.BLK_NAME}}.${dst_stage}.vclp.v
+write_verilog  -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all $cur_flow_data_dir/${cur_stage}.{{env.BLK_NAME}}.pg.v
 
 {% if local.write_def_convert_icc2_site_to_lef_site_name_list != "" %} 
-write_def -include_tech_via_definitions -convert_sites { $write_def_convert_icc2_site_to_lef_site_name_list } -compress gzip {{cur.flow_data_dir}}/{{env.BLK_NAME}}.${dst_stage}.def
+write_def -include_tech_via_definitions -convert_sites { $write_def_convert_icc2_site_to_lef_site_name_list } -compress gzip $cur_flow_data_dir/.${cur_stage}{{env.BLK_NAME}}.def
 {%- else %}
-write_def -include_tech_via_definitions -compress gzip {{cur.flow_data_dir}}/{{env.BLK_NAME}}.${dst_stage}.def
+write_def -include_tech_via_definitions -compress gzip $cur_flow_data_dir/${cur_stage}.{{env.BLK_NAME}}.def
 {%- endif %}
 {%- endif %}
 ####################################

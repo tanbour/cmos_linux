@@ -165,10 +165,17 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                 "cur": stage_dic, "pre": pre_stage_dic, "ver": self.ver_dic.get(flow, {})}
             pcom.ren_tempfile(LOG, tmp_file, dst_file, tmp_dic)
             if "_exec_tool" in local_dic:
+                job_str = (
+                    f"{local_dic.get('_job_cmd')} {local_dic.get('_job_queue')} "
+                    f"{local_dic.get('_job_cpu_number')} {local_dic.get('_job_resource')}"
+                    if "_job_cmd" in local_dic else "")
+                jn_str = (
+                    f"""{job_str} -J '{self.ced["USER"]}:{flow_name}:"""
+                    f"""{stage_name}:{sub_stage_name}' """) if job_str else ""
                 with open(f"{dst_file}.oprun", "w") as orf:
                     orf.write(
-                        f"{local_dic.get('_exec_tool')} {local_dic.get('_exec_opts', '')} "
-                        f"{dst_file}{os.linesep}")
+                        f"{jn_str}{local_dic.get('_exec_tool')} "
+                        f"{local_dic.get('_exec_opts', '')} {dst_file}{os.linesep}")
                 self.oprun_lst.append(
                     {"file": f"{dst_file}.oprun", "flow": flow_name,
                      "stage": stage_name, "sub_stage": sub_stage_name})
@@ -181,18 +188,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         if not self.blk_flg:
             LOG.error("it's not in a block directory, please cd into one")
             raise SystemExit()
-        js_cmd = pcom.rd_cfg(self.cfg_dic["proj"], "job_schedule", "cmd", True)
-        js_str = " ".join(
-            [js_cmd,
-             pcom.rd_cfg(self.cfg_dic["proj"], "job_schedule", "mode", True),
-             pcom.rd_cfg(self.cfg_dic["proj"], "job_schedule", "queue", True),
-             pcom.rd_cfg(self.cfg_dic["proj"], "job_schedule", "host", True),
-             pcom.rd_cfg(self.cfg_dic["proj"], "job_schedule", "resource", True),
-             pcom.rd_cfg(self.cfg_dic["proj"], "job_schedule", "extra", True),]) if js_cmd else ""
         for oprun_dic in self.oprun_lst:
-            job_str = (
-                f"""{js_str} -J '{self.ced["USER"]}:{oprun_dic["flow"]}:{oprun_dic["stage"]}:"""
-                f"""{oprun_dic["sub_stage"]}' """) if js_str else ""
             LOG.info(
                 f":: running flow {oprun_dic['flow']}, stage {oprun_dic['stage']}, "
                 f"sub_stage {oprun_dic['sub_stage']}, oprun log {oprun_dic['file']}.log ...")
@@ -201,7 +197,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             pcom.mkdir(LOG, trash_dir)
             subprocess.run(
                 f"xterm -title '{o_f}' -e 'cd {trash_dir}; "
-                f"{job_str} source {o_f} | tee {o_f}.log'", shell=True)
+                f"source {o_f} | tee {o_f}.log'", shell=True)
     def show_var(self):
         """to show all variables used in templates"""
         LOG.info(f":: all templates used env variables")

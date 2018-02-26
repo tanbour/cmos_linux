@@ -39,13 +39,15 @@ class LibMap(object):
             can_root = pcom.rd_cfg(cfg_dic["proj"], "lib", lib_file, True)
             can_tar = pcom.rd_cfg(cfg_dic["proj"], "lib", f"{lib_file}_dst", True)
             if not can_root:
-                LOG.error(
+                LOG.warning(
                     f"library mapping search root path of {lib_file} "
-                    f"is not defined in proj.cfg")
-                raise SystemExit()
+                    f"is not defined in proj.cfg, skipped")
+                continue
             if not can_tar:
-                LOG.error(f"no {lib_file} destination directory specified in {lib_file}.cfg")
-                raise SystemExit()
+                LOG.warning(
+                    f"no {lib_file} destination directory specified in {lib_file}.cfg, skipped")
+                continue
+            LOG.info(f"library mapping for part {lib_file} ...")
             pcom.mkdir(LOG, can_tar)
             can_ignore_lst = pcom.rd_cfg(cfg_dic["proj"], "lib", f"{lib_file}_ignore")
             can_lst = [

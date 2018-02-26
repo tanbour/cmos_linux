@@ -13,11 +13,11 @@ set pre_stage [lindex [split $pre_stage .] 0]
 set cur_stage [lindex [split $cur_stage .] 0]
 
 ##mkdir tool output dirctory
-set cur_flow_data_dir "{{cur.flow_data_dir}}/$cur_stage"
-set pre_flow_data_dir "{{pre.flow_data_dir}}/$pre_stage"
-set cur_flow_rpt_dir "{{cur.flow_rpt_dir}}/$cur_stage"
-set cur_flow_log_dir "{{cur.flow_log_dir}}/$cur_stage"
-set cur_flow_sum_dir "{{cur.flow_sum_dir}}/$cur_stage"
+set cur_flow_data_dir "{{cur.flow_data_dir}}/{{cur.stage}}"
+set pre_flow_data_dir "{{pre.flow_data_dir}}/{{pre.stage}}"
+set cur_flow_rpt_dir "{{cur.flow_rpt_dir}}/{{cur.stage}}"
+set cur_flow_log_dir "{{cur.flow_log_dir}}/{{cur.stage}}"
+set cur_flow_sum_dir "{{cur.flow_sum_dir}}/{{cur.stage}}"
 
 exec mkdir -p $cur_flow_data_dir
 exec mkdir -p $cur_flow_rpt_dir

@@ -55,15 +55,24 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
     def list_flow(self):
         """to list all current block available flows"""
         LOG.info(":: all current available flows of block")
-        flow_dic = {}
-        for sec_k, sec_v in self.cfg_dic.get("flow", {}).items():
-            flow_dic[sec_k] = pcom.rd_sec(sec_v, "stages")
-        pcom.pp_list(flow_dic)
-    def init(self, init_lst, parent):
+        lf_dic = {}
+        for sec_k in self.cfg_dic.get("flow", {}):
+            lf_lst = []
+            for flow_dic in exp_stages([], self.cfg_dic["flow"], sec_k):
+                flow_name = flow_dic.get("flow", "")
+                stage_name = flow_dic.get("stage", "")
+                sub_stage_name = flow_dic.get("sub_stage", "")
+                lf_lst.append(f"{flow_name}::{stage_name}:{sub_stage_name}")
+            lf_dic[sec_k] = lf_lst
+        pcom.pp_list(lf_dic)
+    def init(self, init_lst):
         """to perform flow initialization"""
         for init_name in init_lst:
-            LOG.info(":: initializing flow directories ...")
-            src_dir = f"{self.ced['BLK_CFG_FLOW']}{os.sep}{parent}"
+            if init_name == "DEFAULT":
+                continue
+            LOG.info(":: initializing flow {init_name} directories ...")
+            parent_flow = pcom.rd_cfg(self.cfg_dic.get("flow", {}), init_name, "pre_flow", True)
+            src_dir = f"{self.ced['BLK_CFG_FLOW']}{os.sep}{parent_flow}"
             dst_dir = f"{self.ced['BLK_CFG_FLOW']}{os.sep}{init_name}"
             if not os.path.isdir(src_dir):
                 LOG.error(f"parent flow directory {src_dir} is NA")
@@ -75,7 +84,6 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                 pcom.cfm()
                 shutil.rmtree(dst_dir, True)
             shutil.copytree(src_dir, dst_dir)
-            LOG.info(f"initializing flow {init_name} done")
     def proc_ver(self):
         """to process class flow version directory"""
         for sec_k, sec_v in self.cfg_dic.get("flow", {}).items():
@@ -213,7 +221,7 @@ def run_flow(args):
     elif args.flow_list_flow:
         f_p.list_flow()
     elif args.flow_init_lst:
-        f_p.init(args.flow_init_lst, args.flow_parent)
+        f_p.init(args.flow_init_lst)
     elif args.flow_gen_lst != None:
         f_p.proc_ver()
         f_p.proc_flow_lst(args.flow_gen_lst)

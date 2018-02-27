@@ -45,10 +45,11 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
             pcom.cfm()
             shutil.rmtree(dst_dir, True)
         shutil.copytree(f"{settings.OP_PROJ}{os.sep}{suite_name}", dst_dir)
+        self.boot_env()
         for prex_dir_k in (
                 self.cfg_dic["proj"]["prex_admin_dir"]
                 if "prex_admin_dir" in self.cfg_dic["proj"] else {}):
-            prex_dir = pcom.rd_cfg(self.cfg_dic["proj"], "prex_admin_dir", prex_dir_k)
+            prex_dir = pcom.rd_cfg(self.cfg_dic["proj"], "prex_admin_dir", prex_dir_k, True)
             pcom.mkdir(LOG, prex_dir)
             LOG.info(f"generated pre-set admin directory {prex_dir}")
         LOG.info(

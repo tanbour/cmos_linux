@@ -84,9 +84,6 @@ def gen_flow_parser(subparsers):
     me_group.add_argument(
         "-init", dest="flow_init_lst", default=[], nargs="+",
         help="input flow initial name list to generate flow config files")
-    flow_parser.add_argument(
-        "-parent", dest="flow_parent", default="DEFAULT",
-        help="input flow initial parent name to succeed from")
     me_group.add_argument(
         "-gen", dest="flow_gen_lst", default=None, nargs="*",
         help="toggle and input flows to generate flow run files")

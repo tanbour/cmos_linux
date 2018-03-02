@@ -28,11 +28,11 @@ class LibMap(object):
         else:
             pcom.mkdir(LOG, os.path.dirname(dst_file))
         os.symlink(src_file, dst_file)
-        LOG.info(f"linked src file {src_file} as dst file {dst_file}")
+        LOG.info(f"linking src file {src_file} as dst file {dst_file}")
         self.match_lst.append(dst_file)
     def link_file(self, dst_root, lib_dir_cfg_dic, cfg_dic):
         """to process project or block lib mapping links"""
-        LOG.info(f":: library mapping and files linking ...")
+        LOG.info(f":: library mapping of files linking ...")
         for lib_file, lib_file_cfg in lib_dir_cfg_dic.items():
             if lib_file == "liblist":
                 continue
@@ -47,7 +47,7 @@ class LibMap(object):
                 LOG.warning(
                     f"no {lib_file} destination directory specified in {lib_file}.cfg, skipped")
                 continue
-            LOG.info(f"library mapping for part {lib_file} ...")
+            LOG.info(f"library mapping for part {lib_file}")
             pcom.mkdir(LOG, can_tar)
             can_ignore_lst = pcom.rd_cfg(cfg_dic["proj"], "lib", f"{lib_file}_ignore")
             can_lst = [
@@ -69,14 +69,15 @@ class LibMap(object):
                             can_lst, f"{can_root}{os.sep}{pattern_search_str}"):
                         self.link_src_dst(match_file, can_tar, can_root)
         match_lst_file = f"{dst_root}{os.sep}.match_lst"
-        LOG.info(f":: generating library map list file {match_lst_file} ...")
+        LOG.info(f"generating library map list file {match_lst_file}")
         with open(match_lst_file, "w") as mlf:
             json.dump(self.match_lst, mlf, indent=4)
     @classmethod
     def gen_liblist(cls, map_root, liblist_root, liblist_cfg, lib_sec):
         """to generate project or block liblist files"""
         match_lst_file = f"{map_root}{os.sep}.match_lst"
-        LOG.info(f":: loading library map list file {match_lst_file} ...")
+        LOG.info(f":: library mapping of liblist generating ...")
+        LOG.info(f"loading library map list file {match_lst_file}")
         try:
             with open(match_lst_file) as mlf:
                 lib_match_lst = json.load(mlf)
@@ -106,7 +107,7 @@ class LibMap(object):
                         match_file_lst.extend(fnmatch.filter(
                             lib_match_lst, pcom.ren_tempstr(LOG, match_pattern, var_dic)))
             var_name_line_dic[var_name] = match_file_lst
-        LOG.info(f":: generating library liblist files in {liblist_dir} ...")
+        LOG.info(f"generating library liblist files in {liblist_dir}")
         #file generation and liblist dic generation for templates
         liblist_var_dic = {}
         tcl_line_lst = []

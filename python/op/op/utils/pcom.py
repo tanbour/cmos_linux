@@ -78,7 +78,9 @@ def rd_cfg(cfg, sec, opt, s_flg=False, fbk=""):
     value_str = os.path.expandvars(cfg.get(sec, opt, fallback=""))
     if not value_str:
         value_str = fbk
-    split_str = rf"{os.linesep}" if opt.endswith("_opts") else rf",|{os.linesep}"
+    split_str = (
+        rf"{os.linesep}" if opt.endswith("_opts") or opt.startswith("_exp_")
+        else rf",|{os.linesep}")
     cfg_lst = [cc.strip() for cc in re.split(split_str, value_str) if cc]
     return cfg_lst if not s_flg else (cfg_lst[0] if cfg_lst else "")
 
@@ -87,7 +89,9 @@ def rd_sec(sec, opt, s_flg=False, fbk=""):
     value_str = os.path.expandvars(sec.get(opt, ""))
     if not value_str:
         value_str = fbk
-    split_str = rf"{os.linesep}" if opt.endswith("_opts") else rf",|{os.linesep}"
+    split_str = (
+        rf"{os.linesep}" if opt.endswith("_opts") or opt.startswith("_exp_")
+        else rf",|{os.linesep}")
     cfg_lst = [cc.strip() for cc in re.split(split_str, value_str) if cc]
     return cfg_lst if not s_flg else (cfg_lst[0] if cfg_lst else "")
 
@@ -97,9 +101,14 @@ def ch_cfg(cfg):
     for sec_k, sec_v in cfg.items():
         cfg_dic[sec_k] = {}
         for opt_k, opt_v in sec_v.items():
-            cfg_dic[sec_k][opt_k] = (
-                rd_cfg(cfg, sec_k, opt_k, True) if "," not in opt_v
-                and os.linesep not in opt_v else rd_cfg(cfg, sec_k, opt_k))
+            if opt_k.endswith("_opts") or opt_k.startswith("_exp_"):
+                cfg_dic[sec_k][opt_k] = (
+                    rd_cfg(cfg, sec_k, opt_k, True) if os.linesep not in opt_v
+                    else rd_cfg(cfg, sec_k, opt_k))
+            else:
+                cfg_dic[sec_k][opt_k] = (
+                    rd_cfg(cfg, sec_k, opt_k, True) if "," not in opt_v
+                    and os.linesep not in opt_v else rd_cfg(cfg, sec_k, opt_k))
     return cfg_dic
 
 def prod_vs_iter(var_lst, sec):
@@ -179,8 +188,16 @@ def ren_tempfile(log, temp_in, temp_out, temp_dic):
         template_env = jinja2.Environment(loader=template_loader)
         template = template_env.get_template(os.path.basename(temp_in))
         os.makedirs(os.path.dirname(temp_out), exist_ok=True)
-        with open(temp_out, "w") as ttf:
-            ttf.write(template.render(temp_dic))
+        temp_con = template.render(temp_dic)
+        if not os.path.isfile(temp_out):
+            with open(temp_out, "w") as ttf:
+                ttf.write(temp_con)
+        else:
+            with open(temp_out) as tof:
+                temp_pre_con = tof.read()
+            if temp_pre_con != temp_con:
+                with open(temp_out, "w") as ttf:
+                    ttf.write(temp_con)
     except jinja2.exceptions.TemplateSyntaxError as err:
         log.error(
             f"generating from template {temp_in} failed, "

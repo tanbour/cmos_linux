@@ -12,6 +12,7 @@ LOG = pcom.gen_logger(__name__)
 def run_init(args):
     """to run init sub cmd"""
     init_repo = proj_repo.ProjRepo()
+    init_repo.gen_all_proj()
     if args.init_list_proj:
         init_repo.list_proj()
     elif args.init_list_lab:

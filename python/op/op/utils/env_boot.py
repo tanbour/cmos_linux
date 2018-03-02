@@ -115,6 +115,6 @@ class EnvBoot(object):
                         [proj_cfg, blk_cfg])
     def boot_env(self):
         """class top exec function"""
-        LOG.info(":: booting env and processing configs ...")
+        LOG.info(":: booting env ...")
         self.boot_ced()
         self.boot_cfg()

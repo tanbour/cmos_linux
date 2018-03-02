@@ -15,12 +15,17 @@ LOG = pcom.gen_logger(__name__)
 class ProjRepo(object):
     """base calss of projects from code repo"""
     def __init__(self):
+        self.all_proj_dic = {}
+        self.proj_normal_lst = []
+        self.proj_lab_lst = []
+        self.repo_dic = {}
+    def gen_all_proj(self):
+        """to get all projects from repo server"""
         self.all_proj_dic = all_proj_dic = {
             c_c.get("name", ""): c_c.get("url", "").replace("://", "://${USER}@") for c_c
             in requests.get(settings.PROJ_URL, auth=(settings.Q_U, settings.Q_U)).json()}
         self.proj_normal_lst = sorted([c_c for c_c in all_proj_dic if not c_c.startswith("lab_")])
         self.proj_lab_lst = sorted([c_c for c_c in all_proj_dic if c_c.startswith("lab_")])
-        self.repo_dic = {}
     def list_proj(self):
         """to list all projects registered in op"""
         LOG.info(f":: all available projects")
@@ -39,17 +44,20 @@ class ProjRepo(object):
         rmt = repo.remote() if repo.remotes else repo.create_remote(
             "origin", os.path.expandvars(self.repo_dic["repo_url"]))
         LOG.info(
-            f":: git pulling project {self.repo_dic['init_proj_name']} "
-            f"from repository to {self.repo_dic['repo_dir']} ...")
+            f"git pulling project {self.repo_dic['init_proj_name']} "
+            f"from repository to {self.repo_dic['repo_dir']}")
         pcom.cfm()
         try:
             rmt.pull("master")
         except git.GitCommandError as err:
-            if settings.REPO_AUTH_ERR_STR in str(err):
-                LOG.error(str(err))
+            if any([c_c in str(err) for c_c in settings.REPO_AUTH_ERR_STR_LST]):
+                LOG.error("password incorrect, please use AD pwd instead of EoD pwd")
                 raise SystemExit()
             elif settings.REPO_BRANCH_ERR_STR in str(err):
                 pass
+            else:
+                LOG.error(err)
+                raise SystemExit()
         LOG.info(f"please run op cmds under the project dir {self.repo_dic['repo_dir']}")
     def svn_proj(self):
         """to check out project by using svn"""
@@ -57,6 +65,7 @@ class ProjRepo(object):
     def repo_proj(self, init_proj_name):
         """to operate project from code repo"""
         self.repo_dic["init_proj_name"] = init_proj_name
+        LOG.info(f":: initializing project {init_proj_name} ...")
         try:
             self.repo_dic["repo_url"] = self.all_proj_dic[init_proj_name]
         except KeyError:

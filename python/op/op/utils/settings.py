@@ -27,5 +27,7 @@ BLK_CFG_DIR = f"$BLK_ROOT{os.sep}config"
 PROJ_REPO = "git"
 PROJ_URL = "http://cnshscmserver.alchip.com/CN/SoC/api/rest/repositories.json"
 Q_U = "op_query"
-REPO_AUTH_ERR_STR = "Authentication failed"
+REPO_AUTH_ERR_STR_LST = ["Authentication failed", "401 while accessing"]
 REPO_BRANCH_ERR_STR = "Couldn't find remote ref master"
+
+DEFAULT_EXP_ERR = r"(.*\*E\b.*|.*\b(?:Error|ERROR|Err|ERR|err)\b.*)"

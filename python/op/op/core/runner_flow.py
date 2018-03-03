@@ -162,8 +162,6 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
                     f"used by flow {flow_name} stage {stage_name}")
                 continue
             flow_root_dir = f"{self.ced['BLK_RUN']}{os.sep}v{v_net}{os.sep}{flow_name}"
-            dst_file = os.path.join(flow_root_dir, "scripts", stage_name, sub_stage_name)
-            LOG.info(f":: generating run file {dst_file} ...")
             local_dic = pcom.ch_cfg(
                 self.dir_cfg_dic.get("flow", {}).get(flow_name, {}).get(stage_name, {})).get(
                     sub_stage_name, {})
@@ -178,35 +176,48 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
                 "global": pcom.ch_cfg(self.cfg_dic["proj"]), "env": self.ced,
                 "local": local_dic, "liblist": liblist_var_dic,
                 "cur": stage_dic, "pre": pre_stage_dic, "ver": self.ver_dic.get(flow, {})}
-            pcom.ren_tempfile(LOG, tmp_file, dst_file, tmp_dic)
-            if "_exec_tool" in local_dic:
-                job_str = (
-                    f"{local_dic.get('_job_cmd', '')} {local_dic.get('_job_queue', '')} "
-                    f"{local_dic.get('_job_cpu_number', '')} {local_dic.get('_job_resource', '')}"
-                    if "_job_cmd" in local_dic else "")
-                jn_str = (
-                    f"""{job_str} -J '{self.ced["USER"]}:{flow_name}:"""
-                    f"""{stage_name}:{sub_stage_name}' """) if job_str else ""
-                with open(f"{dst_file}.oprun", "w") as orf:
-                    orf.write(
-                        f"{jn_str}{local_dic.get('_exec_tool', '')} "
-                        f"{local_dic.get('_exec_opts', '')} {dst_file}{os.linesep}")
-                exp_err = local_dic.get("_exp_err", settings.DEFAULT_EXP_ERR)
-                if isinstance(exp_err, list) and exp_err:
-                    exp_err = exp_err[0]
-                exp_dic = {"exp_err": exp_err}
-                if self.run_flg:
-                    file_mt = os.path.getmtime(dst_file)
-                    f_flg = False if file_mt > pre_file_mt else True
-                    if f_flg:
-                        # updated timestamp to fit auto-skip feature
-                        os.utime(dst_file)
-                        # following stages have to be forced run
+            multi_inst_lst = pcom.rd_cfg(
+                self.dir_cfg_dic.get("flow", {}).get(flow_name, {}).get(stage_name, {}),
+                sub_stage_name, "_multi_inst")
+            if not multi_inst_lst:
+                multi_inst_lst = [""]
+            for multi_inst in multi_inst_lst:
+                ssn_base, ssn_ext = os.path.splitext(sub_stage_name)
+                msub_stage_name = (
+                    f"{ssn_base}{os.extsep}{multi_inst}{ssn_ext}"
+                    if multi_inst else sub_stage_name)
+                dst_file = os.path.join(flow_root_dir, "scripts", stage_name, msub_stage_name)
+                LOG.info(f":: generating run file {dst_file} ...")
+                pcom.ren_tempfile(LOG, tmp_file, dst_file, tmp_dic)
+                if "_exec_tool" in local_dic:
+                    job_str = (
+                        f"{local_dic.get('_job_cmd', '')} {local_dic.get('_job_queue', '')} "
+                        f"{local_dic.get('_job_cpu_number', '')} "
+                        f"{local_dic.get('_job_resource', '')}"
+                        if "_job_cmd" in local_dic else "")
+                    jn_str = (
+                        f"""{job_str} -J '{self.ced["USER"]}:{flow_name}:"""
+                        f"""{stage_name}:{msub_stage_name}' """) if job_str else ""
+                    with open(f"{dst_file}.oprun", "w") as orf:
+                        orf.write(
+                            f"{jn_str}{local_dic.get('_exec_tool', '')} "
+                            f"{local_dic.get('_exec_opts', '')} {dst_file}{os.linesep}")
+                    exp_err = local_dic.get("_exp_err", settings.DEFAULT_EXP_ERR)
+                    if isinstance(exp_err, list) and exp_err:
+                        exp_err = exp_err[0]
+                    exp_dic = {"exp_err": exp_err}
+                    if self.run_flg:
                         file_mt = os.path.getmtime(dst_file)
-                    self.proc_run(
-                        {"file": f"{dst_file}.oprun", "flow": flow_name,
-                         "stage": stage_name, "sub_stage": sub_stage_name,
-                         "exp_dic": exp_dic}, f_flg)
+                        f_flg = False if file_mt > pre_file_mt else True
+                        if f_flg:
+                            # updated timestamp to fit auto-skip feature
+                            os.utime(dst_file)
+                            # following stages have to be forced run
+                            file_mt = os.path.getmtime(dst_file)
+                        self.proc_run(
+                            {"file": f"{dst_file}.oprun", "flow": flow_name,
+                             "stage": stage_name, "sub_stage": msub_stage_name,
+                             "exp_dic": exp_dic}, f_flg)
             self.opvar_lst.append(
                 {"local": local_dic, "cur": stage_dic, "pre": pre_stage_dic,
                  "ver": self.ver_dic.get(flow, {})})

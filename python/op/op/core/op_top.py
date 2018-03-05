@@ -87,6 +87,9 @@ def gen_flow_parser(subparsers):
     me_group.add_argument(
         "-run", dest="flow_run_lst", default=None, nargs="*",
         help="toggle and input flows to run flow")
+    flow_parser.add_argument(
+        "-force", dest="flow_force", action="store_true",
+        help="toggle flows to run flow force to ignore the previous status")
     me_group.add_argument(
         "-show_var", dest="flow_show_var_lst", default=None, nargs="*",
         help="toggle and input flows to list all variables passed to templates")
@@ -100,7 +103,7 @@ def gen_args_top():
     """to generate top args help for op"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-v", dest="version", default=False, action="store_true",
+        "-v", dest="version", action="store_true",
         help="show op version info and exit")
     subparsers = parser.add_subparsers()
     gen_admin_parser(subparsers)

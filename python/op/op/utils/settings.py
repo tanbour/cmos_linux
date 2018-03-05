@@ -29,5 +29,3 @@ PROJ_URL = "http://cnshscmserver.alchip.com/CN/SoC/api/rest/repositories.json"
 Q_U = "op_query"
 REPO_AUTH_ERR_STR_LST = ["Authentication failed", "401 while accessing"]
 REPO_BRANCH_ERR_STR = "Couldn't find remote ref master"
-
-DEFAULT_EXP_ERR = r"(.*\*E\b.*|.*\b(?:Error|ERROR|Err|ERR|err)\b.*)"

@@ -1,0 +1,64 @@
+[PROJECT_INFO]
+PROJ_NAME		=	Pelican
+PROJ_DIR		=	/proj/Pelican
+SCRIPTS_DIR		=	/proj/Pelican/TEMPLATES/PTSI/scripts
+LIBRARY_SETUP_FILE	=	/proj/Pelican/TEMPLATES/PTSI/tcl/mv_library_setup.tcl
+PT_TEMPLATE_FILE	=	/proj/Pelican/TEMPLATES/PTSI/tcl/PTSI_signoff_template.tcl
+PT_SETTING_FILE		=	/proj/Pelican/TEMPLATES/PTSI/setting/ALCHIP-PT-SignOff-CommonSetting.TSMC.N7.tcl
+SIGNOFF_CRITERIA_FILE	=	/proj/Pelican/TEMPLATES/PTSI/criteria/ALCHIP-PT-SignOff-Criteria.TSMC.N7.tcl
+BLOCK_RELEASE_DIR	=	/proj/Pelican/WORK/ericl/STA/release
+STA_TOOL		=	/apps/synopsys/pt_vM-2016.12-SP3/bin/pt_shell
+ANNOTATED_FILE_FORMAT	=	SPEF
+ALL_SCENARIO_LIST       =       func.tt0p4v.tt85.cworst_ccworst_t_85c.setup
+				func.tt0p4v.tt85.rcworst_ccworst_t_85c.setup
+                                func.tt0p4v.wcz.cworst_ccworst_0c.hold
+                                func.tt0p4v.wcz.rcworst_ccworst_0c.hold
+                                func.tt0p4v.wc.cworst_ccworst_125c.hold
+                                func.tt0p4v.wc.rcworst_ccworst_125c.hold
+                                func.tt0p4v.ltz.cworst_ccworst_0c.hold
+                                func.tt0p4v.ltz.rcworst_ccworst_0c.hold
+                                func.tt0p4v.ml.cworst_ccworst_125c.hold
+                                func.tt0p4v.ml.rcworst_ccworst_125c.hold
+                                func.tt0p4v.ltz.cbest_ccbest_0c.hold
+                                func.tt0p4v.ltz.rcbest_ccbest_0c.hold
+                                func.tt0p4v.ml.cbest_ccbest_125c.hold
+                                func.tt0p4v.ml.rcbest_ccbest_125c.hold
+
+
+[DESIGN_INFO]
+TOP				=	hash_top
+VOLTAGE				=	tt0p4v tt0p75v
+SDC_LIST(func,tt0p4v)           =      /proj/Pelican/WORK/ericl/STA/release/hash_top/sdc/hash_top.600M.sdc
+SDC_LIST(func,tt0p75v)          =      /proj/Pelican/WORK/ericl/STA/release/hash_top/sdc/hash_top.1P6G.sdc
+SPEF(cworst_ccworst_0c)      =      /proj/Pelican/WORK/wadec/STARRC/130fbnew_route_opt/cworst_CCworst/hash_top.cworst_ccworst_0c.spef.gz
+SPEF(cworst_ccworst_125c)      =      /proj/Pelican/WORK/wadec/STARRC/130fbnew_route_opt/cworst_CCworst/hash_top.cworst_ccworst_125c.spef.gz
+SPEF(rcworst_ccworst_0c)      =      /proj/Pelican/WORK/wadec/STARRC/130fbnew_route_opt/rcworst_CCworst/hash_top.rcworst_ccworst_0c.spef.gz
+SPEF(rcworst_ccworst_125c)      =      /proj/Pelican/WORK/wadec/STARRC/130fbnew_route_opt/rcworst_CCworst/hash_top.rcworst_ccworst_125c.spef.gz
+SPEF(rcbest_ccbest_0c)      =      /proj/Pelican/WORK/wadec/STARRC/130fbnew_route_opt/rcbest_CCbest/hash_top.rcbest_ccbest_0c.spef.gz
+SPEF(rcbest_ccbest_125c)      =      /proj/Pelican/WORK/wadec/STARRC/130fbnew_route_opt/rcbest_CCbest/hash_top.rcbest_ccbest_125c.spef.gz
+SPEF(cworst_ccworst_t_85c)      =      /proj/Pelican/WORK/wadec/STARRC/130fbnew_route_opt/cworst_CCworst_T/hash_top.cworst_ccworst_t_85c.spef.gz
+SPEF(cbest_ccbest_0c)      =      /proj/Pelican/WORK/wadec/STARRC/130fbnew_route_opt/cbest_CCbest/hash_top.cbest_ccbest_0c.spef.gz
+SPEF(cbest_ccbest_125c)      =      /proj/Pelican/WORK/wadec/STARRC/130fbnew_route_opt/cbest_CCbest/hash_top.cbest_ccbest_125c.spef.gz
+VNET                            =      /proj/Pelican/WORK/wadec/ICC2/130fb/Outputs/route_opt/hash_top.pt.v.gz
+SUB_BLOCKS			=	""
+SUB_BLOCKS_FILE			=	""
+MV_INSTANCES			=	""
+MV_INSTANCES_FILE		=	""
+SUB_BLOCKS_LOCATIONS_FILE       =       /proj/Pelican/WORK/shawnc/PTSI/hinst_flip_rotate/asic_top.list
+
+[FLOW_CONTROL]
+CLK_MODE			=	propagated
+XTK				=	xtk
+PBA_MODE			=	path
+PATH_TYPE			=	full
+NWORST_NUM			=	1
+PBA_PATH_NUM			=	25000
+MAX_PATH_NUM			=	9999999
+SAVE_SESSION_SCENARIO_LIST	=	all
+GEN_SDF				=	false
+GEN_ETM				=	true 
+GEN_ILM				=	false
+GEN_HSC				=	false
+ENABLE_OCV			=	true 
+ENABLE_AOCV			=	false 
+ENABLE_POCV			=	false

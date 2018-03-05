@@ -23,6 +23,9 @@ set cur_flow_sum_dir  = "{{cur.flow_sum_dir}}/{{cur.stage}}"
  mkdir -p $cur_flow_log_dir
  mkdir -p $cur_flow_sum_dir
 
+##link previous stage data
+ln -sf $pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.v $cur_flow_data_dir/$cur_stage.{{env.BLK_NAME}}.v.gz
+
 echo "delete exsting smc files and starrc command file"
 rm {{cur.flow_scripts_dir}}/{{cur.stage}}/*.smc
 rm {{cur.flow_scripts_dir}}/{{cur.stage}}/*.cmd
@@ -221,7 +224,7 @@ absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:tru
 
     if ( -e $cur_flow_data_dir/${SESSION}.spef.$tmp ) then
     gzip $cur_flow_data_dir/${SESSION}.spef.$tmp
-    mv $cur_flow_data_dir/${SESSION}.spef.$tmp.gz $cur_flow_data_dir/${cur_stage}.{{env.BLK_NAME}}.$tmp.spef.gz
+    mv $cur_flow_data_dir/${SESSION}.spef.$tmp.gz $cur_flow_data_dir/{{env.BLK_NAME}}.$tmp.spef.gz
     endif
     end
 

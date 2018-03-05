@@ -371,9 +371,9 @@ save_lib
 ####################################			 
 {%- if local.write_place_data == "true" %} 
 
-write_verilog -exclude {leaf_module_declarations pg_objects} -hierarchy all $cur_flow_data_dir/$cur_stage.{{env.BLK_NAME}}.v
+write_verilog -compress gzip -exclude {leaf_module_declarations pg_objects} -hierarchy all $cur_flow_data_dir/$cur_stage.{{env.BLK_NAME}}.v
 
-write_verilog  -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all $cur_flow_data_dir/${cur_stage}.{{env.BLK_NAME}}.pg.v
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all $cur_flow_data_dir/${cur_stage}.{{env.BLK_NAME}}.pg.v
 
 {% if local.write_def_convert_icc2_site_to_lef_site_name_list != "" %} 
 write_def -include_tech_via_definitions -convert_sites { $write_def_convert_icc2_site_to_lef_site_name_list } -compress gzip $cur_flow_data_dir/.${cur_stage}{{env.BLK_NAME}}.def

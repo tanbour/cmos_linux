@@ -79,7 +79,7 @@ def rd_cfg(cfg, sec, opt, s_flg=False, fbk=""):
     if not value_str:
         value_str = fbk
     split_str = (
-        rf"{os.linesep}" if opt.endswith("_opts") or opt.startswith("_exp_")
+        rf"{os.linesep}" if opt.endswith("_opts") or opt.startswith("exp_")
         else rf",|{os.linesep}")
     cfg_lst = [cc.strip() for cc in re.split(split_str, value_str) if cc]
     return cfg_lst if not s_flg else (cfg_lst[0] if cfg_lst else "")
@@ -90,7 +90,7 @@ def rd_sec(sec, opt, s_flg=False, fbk=""):
     if not value_str:
         value_str = fbk
     split_str = (
-        rf"{os.linesep}" if opt.endswith("_opts") or opt.startswith("_exp_")
+        rf"{os.linesep}" if opt.endswith("_opts") or opt.startswith("exp_")
         else rf",|{os.linesep}")
     cfg_lst = [cc.strip() for cc in re.split(split_str, value_str) if cc]
     return cfg_lst if not s_flg else (cfg_lst[0] if cfg_lst else "")
@@ -101,7 +101,7 @@ def ch_cfg(cfg):
     for sec_k, sec_v in cfg.items():
         cfg_dic[sec_k] = {}
         for opt_k, opt_v in sec_v.items():
-            if opt_k.endswith("_opts") or opt_k.startswith("_exp_"):
+            if opt_k.endswith("_opts") or opt_k.startswith("exp_"):
                 cfg_dic[sec_k][opt_k] = (
                     rd_cfg(cfg, sec_k, opt_k, True) if os.linesep not in opt_v
                     else rd_cfg(cfg, sec_k, opt_k))

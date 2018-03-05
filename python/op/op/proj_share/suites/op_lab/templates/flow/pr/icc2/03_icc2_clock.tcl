@@ -69,6 +69,10 @@ start_gui
 sh sleep 5
 stop_gui
 
+write_verilog -compress gzip -exclude {leaf_module_declarations pg_objects} -hierarchy all $cur_flow_data_dir/$cur_stage.{{env.BLK_NAME}}.v
+
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all $cur_flow_data_dir/${cur_stage}.{{env.BLK_NAME}}.pg.v
+
 save_block -as {{env.BLK_NAME}}
 save_lib
 

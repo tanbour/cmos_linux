@@ -25,19 +25,22 @@ exec mkdir -p $cur_flow_rpt_dir
 exec mkdir -p $cur_flow_log_dir
 exec mkdir -p $cur_flow_sum_dir
 
-set BLK_NAME          {{env.BLK_NAME}}
+set BLK_NAME          "{{env.BLK_NAME}}"
 
 {%- if local.use_dc_output_netlist == "true" %}
 set BLK_NETLIST_LIST  "$pre_flow_data_dir/{{env.BLK_NAME}}.v"
 {%- else %} 
 set BLK_NETLIST_LIST  "{{env.BLK_NETLIST}}/{{ver.netlist}}/{{env.BLK_NAME}}.v"
 {%- endif %} 
-set NDM_TECH          {{liblist.NDM_TECH}} 
-set NDM_STD           {{liblist.NDM_STD}}
+set BLK_SDC_DIR       "{{env.BLK_SDC}}/{{ver.sdc}}"
+set OCV_MODE          "{{local.ocv_mode}}" 
+set NDM_TECH          "{{liblist.NDM_TECH}}" 
+set NDM_STD           "{{liblist.NDM_STD}}"
 
 set reference_library "{{liblist.NDM_STD}} {{liblist.NDM_TECH}}"
 set cur_design_library "$cur_flow_data_dir/$cur_stage.{{env.BLK_NAME}}.nlib"
 
+source {{cur.flow_liblist_dir}}/liblist/liblist.tcl 
 
 ##back up database
 set bak_date [exec date +%m%d]
@@ -66,7 +69,7 @@ save_lib
 
 #set_voltage  0.72 -object VDD
 #set_voltage  0 -object VSS
-{% include 'icc2/mcmm.tcl' %}
+source  -e -v "{{cur.config_plugins_dir}}/icc2_scripts/mcmm/mcmm.tcl"
 {% if local.fix_io_hold == "true" %}
 foreach scenario [get_object_name [get_scenarios -filter "active == true"]] {
 puts "Alchip-info : set IO hold false path to scenario $scenario "

@@ -6,3 +6,5 @@ this is {{i}}
 {{liblist.o}}
 
 This is fp
+
+{{local._multi_inst}}

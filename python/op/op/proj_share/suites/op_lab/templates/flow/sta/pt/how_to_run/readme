@@ -1,0 +1,43 @@
+# Usage: 
+Step 1:
+  UNIX> cp /proj/<project>/TEMPLATE/PTSI/how_to_run/* <run_dir>
+  UNIX> cp <run_dir>
+  UNIX> vi pt.config.<voltage>			;# edit your pt.config*
+
+Step 2: genetate scripts and do STA.
+  UNIX> ./ptsi run				;# do STA based on pt.cofng. default.
+  or
+  UNIX> ./ptsi run pt.config.tt0p4v		;# do STA based on pt.cofng.tt0p4v
+  or
+  UNIX> ./ptsi run pt.config.tt0p75v		;# do STA based on pt.cofng.tt0p75v
+
+# End.
+
+
+
+
+Others: generate scripts only
+  UNIX> ./ptsi script				;# generate scripts only based on pt.config, default.
+  or 
+  UNIX> ./ptsi scripts pt.config.tt0p4v		;# generate scripts only based on pt.config.tt0p4v.
+  or
+  UNIX> ./ptsi scripts pt.config.tt0p75v	;# generate scripts only based on pt.config.tt0p75v.
+
+
+
+Hierarchy STA
+1. Release directory:
+<release_dir>/<block>/vnet/<block>.v.gz
+<release_dir>/<block>/spef/<block>.<rc_corner>.spef.gz
+<release_dir>/<block>/lib/<block>.<pt_session>.db
+
+2. STA with .lib
+
+Example for asic_top,
+
+  a. hash_top use .lib, hash_top_group use verilog
+      SUB_BLOCKS                      =       lib:hash_top
+					  verilog:hash_top_group
+  b. flatten STA
+      SUB_BLOCKS                      =       verilog:hash_top hash_top_group
+

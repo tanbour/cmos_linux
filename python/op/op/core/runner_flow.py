@@ -72,8 +72,10 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
         for init_name in init_lst:
             if init_name == "DEFAULT":
                 continue
-            LOG.info(":: initializing flow {init_name} directories ...")
+            LOG.info(f":: initializing flow {init_name} directories ...")
             parent_flow = pcom.rd_cfg(self.cfg_dic.get("flow", {}), init_name, "pre_flow", True)
+            if not parent_flow:
+                parent_flow = "DEFAULT"
             src_dir = f"{self.ced['BLK_CFG_FLOW']}{os.sep}{parent_flow}"
             dst_dir = f"{self.ced['BLK_CFG_FLOW']}{os.sep}{init_name}"
             if not os.path.isdir(src_dir):
@@ -182,14 +184,16 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
             if not multi_inst_lst:
                 multi_inst_lst = [""]
             for multi_inst in multi_inst_lst:
-                ssn_base, ssn_ext = os.path.splitext(sub_stage_name)
-                msub_stage_name = (
-                    f"{ssn_base}{os.extsep}{multi_inst}{ssn_ext}"
-                    if multi_inst else sub_stage_name)
-                dst_file = os.path.join(flow_root_dir, "scripts", stage_name, msub_stage_name)
+                multi_inst = multi_inst.strip()
+                dst_file = os.path.join(
+                    flow_root_dir, "scripts", stage_name, f"{sub_stage_name}__{multi_inst}",
+                    sub_stage_name) if multi_inst else os.path.join(
+                        flow_root_dir, "scripts", stage_name, sub_stage_name)
+                local_dic["_multi_inst"] = multi_inst
                 LOG.info(f":: generating run file {dst_file} ...")
                 pcom.ren_tempfile(LOG, tmp_file, dst_file, tmp_dic)
-                if "_exec_tool" in local_dic:
+                if "_exec_cmd" in local_dic:
+                    tool_str = local_dic.get("_exec_tool", "")
                     job_str = (
                         f"{local_dic.get('_job_cmd', '')} {local_dic.get('_job_queue', '')} "
                         f"{local_dic.get('_job_cpu_number', '')} "
@@ -197,15 +201,16 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
                         if "_job_cmd" in local_dic else "")
                     jn_str = (
                         f"""{job_str} -J '{self.ced["USER"]}:{flow_name}:"""
-                        f"""{stage_name}:{msub_stage_name}' """) if job_str else ""
+                        f"""{stage_name}:{sub_stage_name}:{multi_inst}'""") if job_str else ""
+                    cmd_str = local_dic.get("_exec_cmd", "")
                     with open(f"{dst_file}.oprun", "w") as orf:
                         orf.write(
-                            f"{jn_str}{local_dic.get('_exec_tool', '')} "
-                            f"{local_dic.get('_exec_opts', '')} {dst_file}{os.linesep}")
-                    exp_err = local_dic.get("_exp_err", settings.DEFAULT_EXP_ERR)
-                    if isinstance(exp_err, list) and exp_err:
-                        exp_err = exp_err[0]
-                    exp_dic = {"exp_err": exp_err}
+                            f"{tool_str} {jn_str} {cmd_str} {dst_file}{os.linesep}")
+                    err_kw_lst = pcom.rd_cfg(
+                        self.cfg_dic.get("filter", {}), stage_name, "exp_error_keywords")
+                    wav_kw_lst = pcom.rd_cfg(
+                        self.cfg_dic.get("filter", {}), stage_name, "exp_waiver_keywords")
+                    filter_dic = {"err_kw_lst": err_kw_lst, "wav_kw_lst": wav_kw_lst}
                     if self.run_flg:
                         file_mt = os.path.getmtime(dst_file)
                         f_flg = False if file_mt > pre_file_mt else True
@@ -216,8 +221,8 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
                             file_mt = os.path.getmtime(dst_file)
                         self.proc_run(
                             {"file": f"{dst_file}.oprun", "flow": flow_name,
-                             "stage": stage_name, "sub_stage": msub_stage_name,
-                             "exp_dic": exp_dic}, f_flg)
+                             "stage": stage_name, "sub_stage": sub_stage_name,
+                             "multi_inst": multi_inst, "filter_dic": filter_dic}, f_flg)
             self.opvar_lst.append(
                 {"local": local_dic, "cur": stage_dic, "pre": pre_stage_dic,
                  "ver": self.ver_dic.get(flow, {})})
@@ -229,7 +234,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
         if not os.path.isfile(run_file):
             LOG.error(f"run file {run_file} is NA")
             raise SystemExit()
-        run_exp_dic = run_dic.get("exp_dic", {})
+        run_filter_dic = run_dic.get("filter_dic", {})
         run_file_dir = os.path.dirname(run_file)
         run_file_base = os.path.basename(run_file)
         run_json = f"{run_file_dir}{os.sep}.{run_file_base}.json"
@@ -237,8 +242,8 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
         run_src_file = os.path.splitext(run_file)[0]
         file_mt = os.path.getmtime(run_src_file)
         LOG.info(
-            f":: running flow {run_dic['flow']}::{run_dic['stage']}:{run_dic['sub_stage']}, "
-            f"oprun log {run_file}.log ...")
+            f":: running flow {run_dic['flow']}::{run_dic['stage']}:{run_dic['sub_stage']}:"
+            f"{run_dic['multi_inst']}, oprun log {run_file}.log ...")
         if not f_flg and os.path.isfile(run_pass) and os.path.getmtime(run_pass) > file_mt:
             LOG.info(f"passed and re-run skipped")
             if os.path.isfile(run_json) and os.path.getmtime(run_json) > file_mt:
@@ -251,15 +256,16 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
             f"xterm -title '{run_file}' -e 'cd {trash_dir}; "
             f"source {run_file} | tee {run_file}.log'", shell=True)
         LOG.info(f"parsing log file {run_file}.log")
-        log_dic = self.parse_run_log(f"{run_file}.log", run_exp_dic)
+        log_dic = self.parse_run_log(f"{run_file}.log", run_filter_dic)
         with open(run_json, "w") as rjf:
             json.dump(log_dic, rjf)
         if log_dic.get("status", "") == "passed":
             open(run_pass, "w").close()
             LOG.info(f"passed")
-        elif os.path.isfile(run_pass):
-            os.remove(run_pass)
-            LOG.error(f"failed")
+        else:
+            if os.path.isfile(run_pass):
+                os.remove(run_pass)
+            LOG.error(f"failed lines: {os.linesep}{os.linesep.join(log_dic['err_lst'])}")
             raise SystemExit()
         # query_url = f"{pcom.BE_URL}/pj_app/regr/db_query/query_insert_case/"
         # if pcom.BACKEND:

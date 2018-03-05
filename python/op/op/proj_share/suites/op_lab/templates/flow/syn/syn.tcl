@@ -6,5 +6,5 @@
 {% include 'dc/01_read_verilog.tcl' %}
 {% include 'dc/02_compile.tcl' %}
 {% include 'dc/03_opt_net.tcl' %}
-check_design > {{cur.flow_rpt_dir}}/02_check_design.log
+check_design > {{cur.flow_rpt_dir}}/{{cur.stage}}/02_check_design.log
 exit

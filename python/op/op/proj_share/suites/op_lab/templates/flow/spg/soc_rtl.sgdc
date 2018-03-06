@@ -1,0 +1,4 @@
+current_design {{env.BLK_NAME}}
+sdc_data -file {{cur.flow_scripts_dir}}/spg/soc_rtl.sgdc
+
+

@@ -43,6 +43,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
         self.opvar_lst = []
         self.run_flg = False
         self.force_flg = False
+        self.lib_flg = True
     def list_env(self):
         """to list all current project or block op environment variables"""
         LOG.info(":: all op internal env variables")
@@ -151,7 +152,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
             self.ced["PROJ_LIB"], flow_liblist_dir,
             self.dir_cfg_dic["lib"]["DEFAULT"]["liblist"],
             self.cfg_dic["lib"][flow] if flow in self.cfg_dic["lib"]
-            else self.cfg_dic["lib"]["DEFAULT"])
+            else self.cfg_dic["lib"]["DEFAULT"], self.lib_flg)
         pre_stage_dic = {}
         pre_file_mt = 0.0
         for flow_dic in exp_stages([], self.cfg_dic["flow"], flow):
@@ -189,6 +190,12 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
                     flow_root_dir, "scripts", stage_name, multi_inst,
                     sub_stage_name) if multi_inst else os.path.join(
                         flow_root_dir, "scripts", stage_name, sub_stage_name)
+                dst_run_file = os.path.join(
+                    flow_root_dir, "sum", stage_name, multi_inst,
+                    f"{sub_stage_name}.oprun") if multi_inst else os.path.join(
+                        flow_root_dir, "sum", stage_name, f"{sub_stage_name}.oprun")
+                pcom.mkdir(LOG, os.path.dirname(dst_file))
+                pcom.mkdir(LOG, os.path.dirname(dst_run_file))
                 local_dic["_multi_inst"] = multi_inst
                 LOG.info(f":: generating run file {dst_file} ...")
                 pcom.ren_tempfile(LOG, tmp_file, dst_file, tmp_dic)
@@ -203,14 +210,16 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
                         f"""{job_str} -J '{self.ced["USER"]}:{flow_name}:"""
                         f"""{stage_name}:{sub_stage_name}:{multi_inst}'""") if job_str else ""
                     cmd_str = local_dic.get("_exec_cmd", "")
-                    with open(f"{dst_file}.oprun", "w") as orf:
+                    with open(dst_run_file, "w") as orf:
                         orf.write(
-                            f"{tool_str} {jn_str} {cmd_str} {dst_file}{os.linesep}")
+                            f"{tool_str}{os.linesep}{jn_str} {cmd_str} {dst_file}{os.linesep}")
                     err_kw_lst = pcom.rd_cfg(
                         self.cfg_dic.get("filter", {}), stage_name, "exp_error_keywords")
                     wav_kw_lst = pcom.rd_cfg(
                         self.cfg_dic.get("filter", {}), stage_name, "exp_waiver_keywords")
-                    filter_dic = {"err_kw_lst": err_kw_lst, "wav_kw_lst": wav_kw_lst}
+                    fin_str = self.ced.get("FIN_STR", "")
+                    filter_dic = {
+                        "err_kw_lst": err_kw_lst, "wav_kw_lst": wav_kw_lst, "fin_str": fin_str}
                     if self.run_flg:
                         file_mt = os.path.getmtime(dst_file)
                         f_flg = False if file_mt > pre_file_mt else True
@@ -222,11 +231,13 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
                             # following stages have to be forced run
                             file_mt = os.path.getmtime(dst_file)
                         self.proc_run(
-                            {"file": f"{dst_file}.oprun", "flow": flow_name,
+                            {"src": dst_file, "file": dst_run_file, "flow": flow_name,
                              "stage": stage_name, "sub_stage": sub_stage_name,
                              "multi_inst": multi_inst, "filter_dic": filter_dic}, f_flg)
                     else:
                         file_mt = 0.0
+                else:
+                    file_mt = 0.0
             self.opvar_lst.append(
                 {"local": local_dic, "cur": stage_dic, "pre": pre_stage_dic,
                  "ver": self.ver_dic.get(flow, {})})
@@ -234,16 +245,18 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
             pre_file_mt = file_mt
     def proc_run(self, run_dic, f_flg=True):
         """to process generated oprun files for running flows"""
+        run_src_file = run_dic.get("src", "")
+        if not os.path.isfile(run_src_file):
+            LOG.error(f"run src file {run_src_file} is NA")
+            raise SystemExit()
         run_file = run_dic.get("file", "")
         if not os.path.isfile(run_file):
             LOG.error(f"run file {run_file} is NA")
             raise SystemExit()
         run_filter_dic = run_dic.get("filter_dic", {})
-        run_file_dir = os.path.dirname(run_file)
-        run_file_base = os.path.basename(run_file)
-        run_json = f"{run_file_dir}{os.sep}.{run_file_base}.json"
-        run_pass = f"{run_file_dir}{os.sep}.{run_file_base}.pass"
-        run_src_file = os.path.splitext(run_file)[0]
+        run_json = f"{run_file}.json"
+        run_pass = f"{run_file}.pass"
+        run_fin = f"{run_file}.fin"
         file_mt = os.path.getmtime(run_src_file)
         LOG.info(
             f":: running flow {run_dic['flow']}::{run_dic['stage']}:{run_dic['sub_stage']}:"
@@ -256,14 +269,19 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
             return
         trash_dir = f"{os.path.dirname(run_file)}{os.sep}.trash"
         pcom.mkdir(LOG, trash_dir)
-        tail_str = " &" if run_dic['multi_inst'] else ""
-        subprocess.run(
-            f"xterm -title '{run_file}' -e 'cd {trash_dir}; "
-            f"source {run_file} | tee {run_file}.log'{tail_str}", shell=True)
+        if f_flg or not os.path.isfile(run_fin):
+            subprocess.run(
+                f"xterm -title '{run_file}' -e 'cd {trash_dir}; "
+                f"source {run_file} | tee {run_file}.log'", shell=True)
         LOG.info(f"parsing log file {run_file}.log")
         log_dic = self.parse_run_log(f"{run_file}.log", run_filter_dic)
         with open(run_json, "w") as rjf:
             json.dump(log_dic, rjf)
+        if log_dic.get("fin", False):
+            open(run_fin, "w").close()
+        else:
+            if os.path.isfile(run_fin):
+                os.remove(run_fin)
         if log_dic.get("status", "") == "passed":
             open(run_pass, "w").close()
             LOG.info(f"passed")
@@ -295,15 +313,20 @@ def run_flow(args):
     elif args.flow_init_lst:
         f_p.init(args.flow_init_lst)
     elif args.flow_gen_lst != None:
+        if args.flow_no_lib:
+            f_p.lib_flg = False
         f_p.proc_ver()
         f_p.proc_flow_lst(args.flow_gen_lst)
     elif args.flow_run_lst != None:
         f_p.run_flg = True
         if args.flow_force:
             f_p.force_flg = True
+        if args.flow_no_lib:
+            f_p.lib_flg = False
         f_p.proc_ver()
         f_p.proc_flow_lst(args.flow_run_lst)
     elif args.flow_show_var_lst != None:
+        f_p.lib_flg = False
         f_p.proc_ver()
         f_p.proc_flow_lst(args.flow_show_var_lst)
         f_p.show_var()

@@ -73,8 +73,18 @@ class LibMap(object):
         with open(match_lst_file, "w") as mlf:
             json.dump(self.match_lst, mlf, indent=4)
     @classmethod
-    def gen_liblist(cls, map_root, liblist_root, liblist_cfg, lib_sec):
+    def gen_liblist(cls, map_root, liblist_root, liblist_cfg, lib_sec, lib_flg=True):
         """to generate project or block liblist files"""
+        if not lib_flg:
+            try:
+                with open(f"{liblist_root}{os.sep}liblist{os.sep}liblist.json") as lljf:
+                    liblist_var_dic = json.load(lljf)
+            except FileNotFoundError:
+                LOG.error(
+                    f"library mapping generated file is NA, "
+                    f"no_lib option should be toggled next time")
+                raise SystemExit()
+            return liblist_var_dic
         match_lst_file = f"{map_root}{os.sep}.match_lst"
         LOG.info(f":: library mapping of liblist generating ...")
         LOG.info(f"loading library map list file {match_lst_file}")
@@ -117,4 +127,6 @@ class LibMap(object):
             tcl_line_lst.append(f'set {var_name} "{tcl_value_str}"')
         with open(f"{liblist_dir}{os.sep}liblist.tcl", "w") as lltf:
             lltf.write(os.linesep.join(tcl_line_lst))
+        with open(f"{liblist_dir}{os.sep}liblist.json", "w") as lljf:
+            json.dump(liblist_var_dic, lljf, indent=4)
         return liblist_var_dic

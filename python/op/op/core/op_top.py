@@ -90,6 +90,9 @@ def gen_flow_parser(subparsers):
     flow_parser.add_argument(
         "-force", dest="flow_force", action="store_true",
         help="toggle flows to run flow force to ignore the previous status")
+    flow_parser.add_argument(
+        "-no_lib", dest="flow_no_lib", action="store_true",
+        help="toggle flows to run flow without liblist generation")
     me_group.add_argument(
         "-show_var", dest="flow_show_var_lst", default=None, nargs="*",
         help="toggle and input flows to list all variables passed to templates")

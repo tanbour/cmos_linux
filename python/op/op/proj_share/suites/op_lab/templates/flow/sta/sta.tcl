@@ -9,8 +9,7 @@ set cur_stage [lindex [split $cur_stage .] 0]
 
 set ANNOTATED_FILE_FORMAT	    	"{{local.ANNOTATED_FILE_FORMAT}}"
 
-set ALL_SCENARIO_LIST               "{{local.ALL_SCENARIO_LIST}}"
-set SESSION                         "$ALL_SCENARIO_LIST" 
+set SESSION                         "{{local._multi_inst}}" 
 set MODE                            [lindex [split $SESSION .] 0]
 set VOLT                            [lindex [split $SESSION .] 1]
 set LIB_CORNER                      [lindex [split $SESSION .] 2]

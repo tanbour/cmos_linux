@@ -180,7 +180,7 @@ puts "INFO: Reading tlupus for lib_corner $lib_corner"
   set_parasitic_parameters -corners $lib_corner -late_spec $late_tlu_name -early_spec $early_tlu_name -library $tech_ndm
   
   ##read sdc/aocv/pocv
-  set sdc_file_name  "${BLK_SDC_DIR}/{{env.BLK_NAME}}.$mode.sdc"
+  set sdc_file_name  "${BLK_SDC_DIR}/$BLK_NAME.$mode.sdc"
 
   if {$OCV_MODE == "aocv"} {set aocv_file_name [set [join "AOCV [string toupper $lib_tt_volt]  [string toupper $lib_corner] [string toupper $analysis_type]" "_"]]} else {set aocv_file_name ""}
   if {$OCV_MODE == "pocv"} {set pocv_file_name [set [join "POCV [string toupper $lib_tt_volt]  [string toupper $lib_corner] [string toupper $analysis_type]" "_"]]} else {set pocv_file_name ""}

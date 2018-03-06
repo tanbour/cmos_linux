@@ -65,7 +65,7 @@ link_block
 save_lib
 
 ##setup constraint
-#read_sdc {{env.BLK_SDC}}/{{env.BLK_NAME}}.func.sdc
+#read_sdc {{env.BLK_SDC}}/{{ver.sdc}}{{env.BLK_NAME}}.func.sdc
 
 #set_voltage  0.72 -object VDD
 #set_voltage  0 -object VSS

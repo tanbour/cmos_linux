@@ -75,9 +75,10 @@ def rd_cfg(cfg, sec, opt, s_flg=False, fbk=""):
     """to read config to get corresponding section and option"""
     if not cfg:
         cfg = configparser.ConfigParser()
-    value_str = os.path.expandvars(cfg.get(sec, opt, fallback=""))
+    value_str = cfg.get(sec, opt, fallback="")
     if not value_str:
         value_str = fbk
+    value_str = os.path.expandvars(value_str)
     split_str = (
         rf"{os.linesep}" if opt.endswith("_opts") or opt.startswith("exp_")
         else rf",|{os.linesep}")

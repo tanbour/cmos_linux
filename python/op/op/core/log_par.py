@@ -18,6 +18,7 @@ class LogParser(object):
         if not os.path.isfile(run_log):
             LOG.warning(f"log {run_log} to be parsed is NA")
             return {}
+        fin_str = run_filter_dic.get("fin_str", "")
         err_kw_lst = run_filter_dic.get("err_kw_lst", [])
         wav_kw_lst = run_filter_dic.get("wav_kw_lst", [])
         log_dic = {}
@@ -26,11 +27,12 @@ class LogParser(object):
         if not rl_con:
             LOG.error(f"log file is empty")
             raise SystemExit()
+        log_dic["fin"] = True if fin_str and fin_str in rl_con else False
         if not err_kw_lst:
             err_lst = []
         else:
             err_exp = "|".join([f".*{c_c}.*" for c_c in err_kw_lst if c_c]).strip("|")
-            wav_exp = rf"^$|{'|'.join(wav_kw_lst)}".strip("|")
+            wav_exp = rf"^$|{'|'.join([re.escape(c_c) for c_c in wav_kw_lst if c_c])}".strip("|")
             err_lst = [c_c for c_c in re.findall(err_exp, rl_con) if not re.search(wav_exp, c_c)]
         if err_lst:
             log_dic["status"] = "failed"

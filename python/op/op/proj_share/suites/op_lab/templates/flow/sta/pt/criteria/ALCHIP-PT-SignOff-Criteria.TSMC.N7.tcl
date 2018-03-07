@@ -94,14 +94,14 @@ foreach voltage $VOLTAGE {
     puts "INFO: apply OCV setting for $voltage domain Done."
 }
 puts "INFO: apply OCV setting. Done."
-report_timing_derate > $cur_flow_rpt_dir/timing_derate.rpt
+report_timing_derate > {{cur.cur_flow_rpt_dir}}/timing_derate.rpt
 
 }
 #===================================== Part 2: AOCV or POCV =================================================
 # && [lindex $VOLTAGE 0] == "tt0p75v"
 # ENABLE POCV
 if {[info exists ENABLE_POCV] && $ENABLE_POCV == "true" } {
-    if {[file exists report_pocv_not_annotated.rpt]} {file delete $cur_flow_rpt_dir/report_pocv_not_annotated.rpt}
+    if {[file exists report_pocv_not_annotated.rpt]} {file delete {{cur.cur_flow_rpt_dir}}/report_pocv_not_annotated.rpt}
     puts "INFO: POCV is enable."
     puts "INFO: apply POCV setting, start ..."
     
@@ -113,22 +113,22 @@ if {[info exists ENABLE_POCV] && $ENABLE_POCV == "true" } {
     set timing_enable_constraint_variation false
     set timing_enable_cumulative_incremental_derate true
     
-    echo "Read pocvm $pocvWireFile" 	>> $cur_flow_rpt_dir/report_pocv_not_annotated.rpt
+    echo "Read pocvm $pocvWireFile" 	>> {{cur.cur_flow_rpt_dir}}/report_pocv_not_annotated.rpt
     echo "Read pocvm $pocvWireFile"
-    read_aocvm $pocvWireFile 		>> $cur_flow_rpt_dir/report_pocv_not_annotated.rpt
+    read_aocvm $pocvWireFile 		>> {{cur.cur_flow_rpt_dir}}/report_pocv_not_annotated.rpt
     foreach voltage [array names MV_LIBRARY_INST_MAP] {
         if { [info exist pocvLibrary($voltage)] && $pocvLibrary($voltage) != "" } {
             foreach file $pocvLibrary($voltage) {
-                echo "Read pocvm $file" >> $cur_flow_rpt_dir/report_pocv_not_annotated.rpt
+                echo "Read pocvm $file" >> {{cur.cur_flow_rpt_dir}}/report_pocv_not_annotated.rpt
                 echo "Read pocvm $file"
-                read_ocvm $file >> $cur_flow_rpt_dir/report_pocv_not_annotated.rpt
+                read_ocvm $file >> {{cur.cur_flow_rpt_dir}}/report_pocv_not_annotated.rpt
             }
         
         }
     }
-    report_ocvm -type pocvm >> $cur_flow_rpt_dir/report_pocv_not_annotated.rpt
-    #report_ocvm -type pocvm -coefficient -list_not_annotated -nosplit >> $cur_flow_rpt_dir/report_pocv_not_annotated.rpt
-    report_ocvm -type pocvm -list_not_annotated -nosplit              >> $cur_flow_rpt_dir/report_pocv_not_annotated.rpt
+    report_ocvm -type pocvm >> {{cur.cur_flow_rpt_dir}}/report_pocv_not_annotated.rpt
+    #report_ocvm -type pocvm -coefficient -list_not_annotated -nosplit >> {{cur.cur_flow_rpt_dir}}/report_pocv_not_annotated.rpt
+    report_ocvm -type pocvm -list_not_annotated -nosplit              >> {{cur.cur_flow_rpt_dir}}/report_pocv_not_annotated.rpt
     puts "INFO: apply POCV setting. Done."
 
 } elseif {[info exists ENABLE_AOCV] && $ENABLE_AOCV == "true"} {
@@ -141,14 +141,14 @@ if {[info exists ENABLE_POCV] && $ENABLE_POCV == "true" } {
     foreach voltage $VOLTAGE {
         if { [info exist aocvLibrary($voltage)] && $aocvLibrary($voltage) != "" } {
             foreach file $aocvLibrary($voltage) {
-                echo "Read aocvm $file"    >> $cur_flow_log_dir/check_aocvm.log
-                read_aocvm $file >> $cur_flow_log_dir/check_aocvm.log
+                echo "Read aocvm $file"    >> {{cur.cur_flow_log_dir}}/check_aocvm.log
+                read_aocvm $file >> {{cur.cur_flow_log_dir}}/check_aocvm.log
             }
         }
-    echo "Read aocvm $aocvWireFile" >> $cur_flow_log_dir/check_aocvm.log
-    read_aocvm $aocvWireFile >> $cur_flow_log_dir/check_aocvm.log
-    report_aocvm >> $cur_flow_log_dir/check_aocvm.log
-    report_aocvm -list_not_annotated -nosplit > $cur_flow_rpt_dir/report_aocv_not_annotated.rpt
+    echo "Read aocvm $aocvWireFile" >> {{cur.cur_flow_log_dir}}/check_aocvm.log
+    read_aocvm $aocvWireFile >> {{cur.cur_flow_log_dir}}/check_aocvm.log
+    report_aocvm >> {{cur.cur_flow_log_dir}}/check_aocvm.log
+    report_aocvm -list_not_annotated -nosplit > {{cur.cur_flow_rpt_dir}}/report_aocv_not_annotated.rpt
 
 }
 puts "INFO: apply AOCV setting. Done."
@@ -195,7 +195,7 @@ foreach voltage $VOLTAGE {
     }
 }
 
-report_timing_derate -increment > $cur_flow_rpt_dir/timing_derate_incr.rpt
+report_timing_derate -increment > {{cur.cur_flow_rpt_dir}}/timing_derate_incr.rpt
 
 #==================================== Part 4: MaxTrans ==============================================
 if {[file exists maxTransConstraint.rpt]} {file delete maxTransConstraint.rpt}
@@ -341,7 +341,7 @@ foreach voltage [array names pinList] {
         set max_tran [lindex [lindex $clist $i] 1]
         #remove_max_trans $pin_name
         #set_max_transition -force $max_tran $pin_name
-        #echo "set_max_transition -force $max_tran $pin_name" >> $cur_flow_rpt_dir/maxTransConstraint.rpt
+        #echo "set_max_transition -force $max_tran $pin_name" >> {{cur.cur_flow_rpt_dir}}/maxTransConstraint.rpt
     }
     
     
@@ -350,7 +350,7 @@ foreach voltage [array names pinList] {
         set max_tran [lindex [lindex $dlist $i] 1]
         #remove_max_trans $pin_name
         #set_max_transition -force $max_tran $pin_name
-        #echo "set_max_transition -force $max_tran $pin_name" >> $cur_flow_rpt_dir/maxTransConstraint.rpt
+        #echo "set_max_transition -force $max_tran $pin_name" >> {{cur.cur_flow_rpt_dir}}/maxTransConstraint.rpt
     }
 }
 unset pins

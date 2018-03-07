@@ -17,6 +17,7 @@ OP_UTIL = f"{OP_ROOT}{os.sep}proj_share{os.sep}utils"
 # project related settings
 FLG_FILE = ".alchip_proj_root_flg"
 BLK_IGNORE_LST = ["share"]
+GITIGNORE = f"run/{os.linesep}"
 
 BOOT_CFG = f"$PROJ_ROOT{os.sep}share{os.sep}config{os.sep}proj.cfg"
 
@@ -29,3 +30,5 @@ PROJ_URL = "http://cnshscmserver.alchip.com/CN/SoC/api/rest/repositories.json"
 Q_U = "op_query"
 REPO_AUTH_ERR_STR_LST = ["Authentication failed", "401 while accessing"]
 REPO_BRANCH_ERR_STR = "Couldn't find remote ref master"
+
+MP_POOL = 8

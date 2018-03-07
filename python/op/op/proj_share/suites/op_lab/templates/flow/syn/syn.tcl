@@ -7,4 +7,7 @@
 {% include 'dc/02_compile.tcl' %}
 {% include 'dc/03_opt_net.tcl' %}
 check_design > {{cur.flow_rpt_dir}}/{{cur.stage}}/02_check_design.log
+
+puts "Alchip_info: op stage finished."
+
 exit

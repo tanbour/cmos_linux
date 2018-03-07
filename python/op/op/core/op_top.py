@@ -25,13 +25,13 @@ def gen_admin_parser(subparsers):
         "-list_lab", dest="admin_list_lab", action="store_true",
         help="toggle to list all currently available lab names")
     me_group.add_argument(
-        "-p", dest="admin_proj_name", default="",
+        "-p", dest="admin_proj_name",
         help="input the proj name which will be kicked off")
     me_group.add_argument(
-        "-b", dest="admin_block_lst", default=[], nargs="+",
+        "-b", dest="admin_block_lst", nargs="+",
         help="input the block names to be initialized in the specified project")
     me_group.add_argument(
-        "-update_blk", dest="admin_update_blk", default=None, nargs="*",
+        "-update_blk", dest="admin_update_blk", nargs="*",
         help="toggle or input blocks to update blocks directory according to RELEASE directory")
     me_group.add_argument(
         "-lib", dest="admin_lib", action="store_true",
@@ -55,7 +55,7 @@ def gen_init_parser(subparsers):
         "-list_lab", dest="init_list_lab", action="store_true",
         help="toggle to list all currently available lab names")
     me_group.add_argument(
-        "-p", dest="init_proj_name", default="",
+        "-p", dest="init_proj_name",
         help="input the proj name which will be check out from repository")
     init_parser.set_defaults(func=main_init)
 
@@ -79,22 +79,22 @@ def gen_flow_parser(subparsers):
         "-list_flow", dest="flow_list_flow", action="store_true",
         help="toggle to list all available flows")
     me_group.add_argument(
-        "-init", dest="flow_init_lst", default=[], nargs="+",
+        "-init", dest="flow_init_lst", nargs="+",
         help="input flow initial name list to generate flow config files")
     me_group.add_argument(
-        "-gen", dest="flow_gen_lst", default=None, nargs="*",
+        "-gen", dest="flow_gen_lst", nargs="*",
         help="toggle and input flows to generate flow run files")
     me_group.add_argument(
-        "-run", dest="flow_run_lst", default=None, nargs="*",
+        "-run", dest="flow_run_lst", nargs="*",
         help="toggle and input flows to run flow")
     flow_parser.add_argument(
-        "-force", dest="flow_force", action="store_true",
-        help="toggle flows to run flow force to ignore the previous status")
+        "-force", dest="flow_force", default=False, nargs="?",
+        help="toggle and input begin sub-stage to run force to ignore last status")
     flow_parser.add_argument(
         "-no_lib", dest="flow_no_lib", action="store_true",
         help="toggle flows to run flow without liblist generation")
     me_group.add_argument(
-        "-show_var", dest="flow_show_var_lst", default=None, nargs="*",
+        "-show_var", dest="flow_show_var_lst", nargs="*",
         help="toggle and input flows to list all variables passed to templates")
     flow_parser.set_defaults(func=main_flow)
 

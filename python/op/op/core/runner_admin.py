@@ -22,6 +22,9 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
     def fill_proj(self):
         """to fill project config and template dir after initialization"""
         LOG.info(":: filling project {self.repo_dic['init_proj_name']} repo ...")
+        proj_gi_file = f"{self.repo_dic['repo_dir']}{os.sep}.gitignore"
+        with open(proj_gi_file, "w") as g_f:
+            g_f.write(settings.GITIGNORE)
         proj_flg_file = f"{self.repo_dic['repo_dir']}{os.sep}{settings.FLG_FILE}"
         LOG.info(f"generating op project flag file {settings.FLG_FILE}")
         with open(proj_flg_file, "w") as f_f:
@@ -151,7 +154,7 @@ def run_admin(args):
         pcom.cfm()
         admin_proc.fill_blocks(args.admin_block_lst)
         admin_proc.update_blocks(args.admin_block_lst)
-    elif args.admin_update_blk != None:
+    elif args.admin_update_blk is not None:
         LOG.info(
             f"updating all block level directories according to RELEASE directory, "
             f"which will overwrite the existed block files ...")

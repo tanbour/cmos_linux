@@ -1,4 +1,5 @@
 current_design {{env.BLK_NAME}}
-sdc_data -file {{cur.flow_scripts_dir}}/spg/soc_rtl.sgdc
+sdc_data -file {{env.BLK_SDC}}/{{ver.sdc}}/{{env.BLK_NAME}}.rtl.sdc
 
 
+puts "Alchip_info: op stage finished."

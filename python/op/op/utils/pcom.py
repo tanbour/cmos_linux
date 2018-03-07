@@ -11,6 +11,7 @@ import fnmatch
 import configparser
 import itertools
 import pprint
+import signal
 import psutil
 import jinja2
 
@@ -229,6 +230,15 @@ def mkdir(log, path):
     except PermissionError as err:
         log.error(err)
         raise SystemExit()
+
+def sig_init():
+    """to initialize multiprocessing pool"""
+    # signal.signal(signal.SIGINT, signal.SIG_IGN)
+    signal.signal(signal.SIGINT, sig_hand)
+
+def sig_hand(*_):
+    """to handle signal SIGINT, *_ repr (signal, frame)"""
+    raise SystemExit()
 
 class ColoredFormatter(logging.Formatter):
     """op colored logging formatter"""

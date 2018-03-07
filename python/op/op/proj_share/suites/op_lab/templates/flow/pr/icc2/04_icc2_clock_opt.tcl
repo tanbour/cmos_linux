@@ -14,21 +14,12 @@ set pre_stage [lindex [split $pre_stage .] 0]
 set cur_stage [lindex [split $cur_stage .] 0]
 
 ##mkdir tool output dirctory
-set cur_flow_data_dir "{{cur.flow_data_dir}}/{{cur.stage}}"
 set pre_flow_data_dir "{{pre.flow_data_dir}}/{{pre.stage}}"
-set cur_flow_rpt_dir "{{cur.flow_rpt_dir}}/{{cur.stage}}"
-set cur_flow_log_dir "{{cur.flow_log_dir}}/{{cur.stage}}"
-set cur_flow_sum_dir "{{cur.flow_sum_dir}}/{{cur.stage}}"
-
-exec mkdir -p $cur_flow_data_dir
-exec mkdir -p $cur_flow_rpt_dir
-exec mkdir -p $cur_flow_log_dir
-exec mkdir -p $cur_flow_sum_dir
 
 set BLK_NAME          "{{env.BLK_NAME}}"
 
 set pre_design_library  "$pre_flow_data_dir/${pre_stage}.{{env.BLK_NAME}}.nlib"
-set cur_design_library "$cur_flow_data_dir/${cur_stage}.{{env.BLK_NAME}}.nlib"
+set cur_design_library "{{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.nlib"
 
 set clock_opt_cpu_number "{{local.clock_opt_cpu_number}}"
 set clock_opt_active_scenario_list "{{local.clock_opt_active_scenario_list}}"
@@ -68,11 +59,10 @@ start_gui
 sh sleep 5
 stop_gui
 
-write_verilog -compress gzip -exclude {leaf_module_declarations pg_objects} -hierarchy all $cur_flow_data_dir/$cur_stage.{{env.BLK_NAME}}.v
+write_verilog -compress gzip -exclude {leaf_module_declarations pg_objects} -hierarchy all {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.v
 
-write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all $cur_flow_data_dir/${cur_stage}.{{env.BLK_NAME}}.pg.v
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.pg.v
 
 save_block -as {{env.BLK_NAME}}
 save_lib
 
-exit

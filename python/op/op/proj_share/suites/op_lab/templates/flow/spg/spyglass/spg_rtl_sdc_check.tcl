@@ -15,7 +15,8 @@ set SDC  {{env.BLK_SDC}}/{{ver.sdc}}/{{env.BLK_NAME}}.rtl.sdc
 set RST  {{local.RST}}
 set SGDC {{cur.flow_scripts_dir}}/spg/soc_rtl.sgdc
 set RTL [glob {{env.BLK_RTL}}/{{ver.rtl}}/*]
-#
+set REPORT_DIR {{cur.flow_rpt_dir}}/spg
+
 # ignore modules in read design
 set IGNORE_MODUELS { empty}
 set IGNORE_MODUELS1 { \

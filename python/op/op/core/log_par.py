@@ -16,7 +16,7 @@ class LogParser(object):
     def parse_run_log(cls, run_log, run_filter_dic):
         """to parse sub stage run log"""
         if not os.path.isfile(run_log):
-            LOG.warning(f"log {run_log} to be parsed is NA")
+            LOG.error(f"log {run_log} to be parsed is NA")
             return {}
         fin_str = run_filter_dic.get("fin_str", "")
         err_kw_lst = run_filter_dic.get("err_kw_lst", [])
@@ -26,7 +26,7 @@ class LogParser(object):
             rl_con = rlf.read()
         if not rl_con:
             LOG.error(f"log file is empty")
-            raise SystemExit()
+            return {}
         log_dic["fin"] = True if fin_str and fin_str in rl_con else False
         if not err_kw_lst:
             err_lst = []

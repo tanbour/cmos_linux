@@ -23,16 +23,7 @@ set cur_stage "{{cur.sub_stage}}"
 set pre_stage [lindex [split $pre_stage .] 0]
 set cur_stage [lindex [split $cur_stage .] 0]
 
-set cur_flow_data_dir "{{cur.flow_data_dir}}/{{cur.stage}}"
 set pre_flow_data_dir "{{pre.flow_data_dir}}/{{pre.stage}}"
-set cur_flow_rpt_dir "{{cur.flow_rpt_dir}}/{{cur.stage}}"
-set cur_flow_log_dir "{{cur.flow_log_dir}}/{{cur.stage}}"
-set cur_flow_sum_dir "{{cur.flow_sum_dir}}/{{cur.stage}}"
-
-exec mkdir -p $cur_flow_data_dir
-exec mkdir -p $cur_flow_rpt_dir
-exec mkdir -p $cur_flow_log_dir
-exec mkdir -p $cur_flow_sum_dir
 
 {% if local.rc_corner == "cworst" %}
 set TLUP_{{local.rc_corner}}  "{{liblist.CWORST_TLUPLUS_FILE}}"

@@ -55,7 +55,7 @@ source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
 ###===================================================================###
 ###  run PT flow                                                      ###
 ###===================================================================###
-{% include 'pt/tcl/PTSI_signoff_template.tcl' %}
+{% include 'pt/PTSI_signoff_template.tcl' %}
 
-
+puts "Alchip_info: op stage finished."
 exit

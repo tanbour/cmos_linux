@@ -12,19 +12,10 @@ set pre_stage = `echo $pre_stage | cut -d . -f 1`
 set cur_stage = `echo $cur_stage | cut -d . -f 1`
 
 ##mkdir tool output dirctory
-set cur_flow_data_dir = "{{cur.flow_data_dir}}/{{cur.stage}}"
 set pre_flow_data_dir = "{{pre.flow_data_dir}}/{{pre.stage}}"
-set cur_flow_rpt_dir  = "{{cur.flow_rpt_dir}}/{{cur.stage}}"
-set cur_flow_log_dir  = "{{cur.flow_log_dir}}/{{cur.stage}}"
-set cur_flow_sum_dir  = "{{cur.flow_sum_dir}}/{{cur.stage}}"
-
- mkdir -p $cur_flow_data_dir
- mkdir -p $cur_flow_rpt_dir
- mkdir -p $cur_flow_log_dir
- mkdir -p $cur_flow_sum_dir
 
 ##link previous stage data
-ln -sf $pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.v $cur_flow_data_dir/$cur_stage.{{env.BLK_NAME}}.v.gz
+ln -sf $pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.v.gz {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.v.gz
 
 echo "delete exsting smc files and starrc command file"
 rm {{cur.flow_scripts_dir}}/{{cur.stage}}/*.smc
@@ -180,7 +171,7 @@ rm {{cur.flow_scripts_dir}}/{{cur.stage}}/{{env.BLK_NAME}}*_*.smc
 
 echo "********** Starting {{local.conds}} ..."
 set SESSION	   = ${cur_stage}{{env.BLK_NAME}}
-set SPEF	   = $cur_flow_data_dir/${SESSION}.spef
+set SPEF	   = {{cur.cur_flow_data_dir}}/${SESSION}.spef
 
 echo "generating ${SESSION}.cmd file for {{local.conds}}"
 ########################################
@@ -201,11 +192,11 @@ FP
 	echo "Design Name                : {{env.BLK_NAME}}"
     echo STAR_MAPPING_FILE           : {{liblist.STAR_MAPPING_FILE}}
     echo star_cpu_number             : {{local.star_cpu_number}}
-    echo conds                       : {{local.conds}}
+    echo conds                       : ${CONDS}
     echo dpt                         : {{local.dpt}}
     echo extract_via_caps            : {{local.extract_via_caps}}
     echo simultaneous_multi_corner   : {{local.simultaneous_multi_corner}}
-    echo selected_corners            : {{local.selected_corners}}
+    echo selected_corners            : ${selected_corners}
     echo metal_fill_polygon_handling : {{local.metal_fill_polygon_handling}}
     echo GDS_LAYER_MAP_FILE          : {{liblist.STAR_METAL_FILL_MAPPING_FILE}}
     echo COUPLING_ABS_THRESHOLD      : {{local.coupling_abs_threshold}}
@@ -226,13 +217,13 @@ absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:tru
     foreach selected_corner ($selected_corners)
     set i = 1
     set tmp =  `echo $selected_corner | awk '{print $i}'`
-    if (-e $cur_flow_data_dir/${SESSION}.spef) then
-    mv $cur_flow_data_dir/${SESSION}.spef $cur_flow_data_dir/${SESSION}.spef.$tmp
+    if (-e {{cur.cur_flow_data_dir}}/${SESSION}.spef) then
+    mv {{cur.cur_flow_data_dir}}/${SESSION}.spef {{cur.cur_flow_data_dir}}/${SESSION}.spef.$tmp
     endif
 
-    if ( -e $cur_flow_data_dir/${SESSION}.spef.$tmp ) then
-    gzip $cur_flow_data_dir/${SESSION}.spef.$tmp
-    mv $cur_flow_data_dir/${SESSION}.spef.$tmp.gz $cur_flow_data_dir/{{env.BLK_NAME}}.$tmp.spef.gz
+    if ( -e {{cur.cur_flow_data_dir}}/${SESSION}.spef.$tmp ) then
+    gzip {{cur.cur_flow_data_dir}}/${SESSION}.spef.$tmp
+    mv {{cur.cur_flow_data_dir}}/${SESSION}.spef.$tmp.gz {{cur.cur_flow_data_dir}}/{{env.BLK_NAME}}.$tmp.spef.gz
     endif
     end
 
@@ -242,7 +233,7 @@ absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:tru
 
 
 if ( $star_flow_type == "deflef" || $star_flow_type == "mw") then
-mv {{env.BLK_NAME}}.star_sum $cur_flow_log_dir/${cur_stage}.{{env.BLK_NAME}}.star_sum
+mv {{env.BLK_NAME}}.star_sum {{cur.cur_flow_log_dir}}/${cur_stage}.{{env.BLK_NAME}}.star_sum
 endif
 
 if ( $star_flow_type == "ndm") then
@@ -250,17 +241,17 @@ if ( $star_flow_type == "ndm") then
 set block_name = `echo $ndm_block_name | cut -d / -f 1`
 set label_name = `echo $ndm_block_name | cut -d / -f 2`
 
-mv ${block_name}.star_sum $cur_flow_log_dir/${cur_stage}.{{env.BLK_NAME}}.star_sum
+mv ${block_name}.star_sum {{cur.cur_flow_log_dir}}/${cur_stage}.{{env.BLK_NAME}}.star_sum
 endif
 
-mv  ./star/xtract.tech $cur_flow_log_dir/${cur_stage}.{{env.BLK_NAME}}.xtract.tech
-mv ./star/tech_file.asc $cur_flow_log_dir/${cur_stage}.{{env.BLK_NAME}}.tech_file.asc
+mv  ./star/xtract.tech {{cur.cur_flow_log_dir}}/${cur_stage}.{{env.BLK_NAME}}.xtract.tech
+mv ./star/tech_file.asc {{cur.cur_flow_log_dir}}/${cur_stage}.{{env.BLK_NAME}}.tech_file.asc
 
 if (-e ./star/shorts_all.sum) then
-mv ./star/shorts_all.sum $cur_flow_log_dir/${cur_stage}.{{env.BLK_NAME}}.shorts_all.sum
+mv ./star/shorts_all.sum {{cur.cur_flow_log_dir}}/${cur_stage}.{{env.BLK_NAME}}.shorts_all.sum
 endif
 if (-e ./star/opens.sum) then
-mv ./star/opens.sum $cur_flow_log_dir/${cur_stage}.{{env.BLK_NAME}}.opens.sum
+mv ./star/opens.sum {{cur.cur_flow_log_dir}}/${cur_stage}.{{env.BLK_NAME}}.opens.sum
 endif
 
 #./scr/signoff_check/csh/check_starrc_log.csh $RUN_DIR $BLOCK_NAME $OP4_dst_eco

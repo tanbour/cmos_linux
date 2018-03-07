@@ -14,16 +14,7 @@ set pre_stage [lindex [split $pre_stage .] 0]
 set cur_stage [lindex [split $cur_stage .] 0]
 
 ##mkdir tool output dirctory
-set cur_flow_data_dir "{{cur.flow_data_dir}}/{{cur.stage}}"
 set pre_flow_data_dir "{{pre.flow_data_dir}}/{{pre.stage}}"
-set cur_flow_rpt_dir "{{cur.flow_rpt_dir}}/{{cur.stage}}"
-set cur_flow_log_dir "{{cur.flow_log_dir}}/{{cur.stage}}"
-set cur_flow_sum_dir "{{cur.flow_sum_dir}}/{{cur.stage}}"
-
-exec mkdir -p $cur_flow_data_dir
-exec mkdir -p $cur_flow_rpt_dir
-exec mkdir -p $cur_flow_log_dir
-exec mkdir -p $cur_flow_sum_dir
 
 set BLK_NAME          "{{env.BLK_NAME}}"
 
@@ -38,7 +29,7 @@ set NDM_TECH          "{{liblist.NDM_TECH}}"
 set NDM_STD           "{{liblist.NDM_STD}}"
 
 set reference_library "{{liblist.NDM_STD}} {{liblist.NDM_TECH}}"
-set cur_design_library "$cur_flow_data_dir/$cur_stage.{{env.BLK_NAME}}.nlib"
+set cur_design_library "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
 
 source {{cur.flow_liblist_dir}}/liblist/liblist.tcl 
 
@@ -87,13 +78,13 @@ set_app_options -name time.enable_io_path_groups -value true
 
 ###report
 {%- if local.enable_report == "true" %}
-redirect -tee $cur_flow_rpt_dir/{{env.BLK_NAME}}.report_timing  {report_timing}
+redirect -tee {{cur.cur_flow_rpt_dir}}/{{env.BLK_NAME}}.report_timing  {report_timing}
 {%- endif %}
 
 ###auto floorplan
 {%- if local.auto_fp == "true" %} 
 initialize_floorplan
-write_def  -compress gzip $cur_flow_data_dir/$cur_stage.{{env.BLK_NAME}}.def
+write_def  -compress gzip {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.def
 {%- else %}
 read_def {{env.BLK_FP}}/{{ver.fp}}/{{env.BLK_NAME}}.def.gz
 {%- endif %}
@@ -111,5 +102,4 @@ save_block -as {{env.BLK_NAME}}
 save_block -as {{env.BLK_NAME}}/${cur_stage}
 save_lib
 
-exit
 

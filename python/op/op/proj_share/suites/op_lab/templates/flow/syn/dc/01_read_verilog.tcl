@@ -21,8 +21,8 @@ analyze -format verilog $rtl_file
 #$# --> elaborate $TOP
 elaborate {{env.BLK_NAME}}
 current_design {{env.BLK_NAME}}
-link > $cur_flow_log_dir/00_link_design.log
+link > {{cur.cur_flow_log_dir}}/00_link_design.log
 #
 #set uniquify_naming_style ${TOP}_%s_%d
 uniquify
-#check_design > $cur_flow_log_dir/01_check_design.log
+#check_design > {{cur.cur_flow_log_dir}}/01_check_design.log

@@ -12,7 +12,7 @@ change_names -rules verilog -hierarchy
 
 #-- read sdc ---------------------------
 remove_sdc
-source -e -v ${SDC_FILE} > $cur_flow_log_dir/02_read_sdc.log
+source -e -v ${SDC_FILE} > {{cur.cur_flow_log_dir}}/02_read_sdc.log
 
 #-- inc sdc ----------------------------
 #remove_clock_uncertainty [all_clocks]
@@ -139,16 +139,16 @@ set_max_fanout {{local.set_max_fanout_current_design}}        [current_design]
 #-- compile ----------------------------
 compile_ultra -no_autoungroup -gate_clock  
 source -e {{cur.config_plugins_dir}}/dc_scripts/change_name.tcl
-write -hier -format verilog -out $cur_flow_data_dir/01_{{env.BLK_NAME}}.v
-write -f ddc -h -out $cur_flow_data_dir/01_{{env.BLK_NAME}}.ddc
+write -hier -format verilog -out {{cur.cur_flow_data_dir}}/01_{{env.BLK_NAME}}.v
+write -f ddc -h -out {{cur.cur_flow_data_dir}}/01_{{env.BLK_NAME}}.ddc
 set_svf -off
 #-- report -----------------------------
-report_timing -nets -input_pins -nosplit -significant_digits 3 -max_paths 100000 -slack_lesser_than 0 -nworst 1 -delay max > $cur_flow_rpt_dir/03_SYN_{{local.lib_corner}}.rpt
-sh /usr/bin/perl {{cur.config_plugins_dir}}/dc_scripts/check_violation_summary.pl $cur_flow_rpt_dir/03_SYN_{{local.lib_corner}}.rpt > $cur_flow_rpt_dir/03_SYN_{{local.lib_corner}}.sum
+report_timing -nets -input_pins -nosplit -significant_digits 3 -max_paths 100000 -slack_lesser_than 0 -nworst 1 -delay max > {{cur.cur_flow_rpt_dir}}/03_SYN_{{local.lib_corner}}.rpt
+sh /usr/bin/perl {{cur.config_plugins_dir}}/dc_scripts/check_violation_summary.pl {{cur.cur_flow_rpt_dir}}/03_SYN_{{local.lib_corner}}.rpt > {{cur.cur_flow_rpt_dir}}/03_SYN_{{local.lib_corner}}.sum
 source {{cur.config_plugins_dir}}/dc_scripts/proc_qor.tcl
-proc_qor > $cur_flow_rpt_dir/03_proc_qor.rpt
-report_qor > $cur_flow_rpt_dir/03_qor.rpt
-report_power > $cur_flow_rpt_dir/03_power.rpt
+proc_qor > {{cur.cur_flow_rpt_dir}}/03_proc_qor.rpt
+report_qor > {{cur.cur_flow_rpt_dir}}/03_qor.rpt
+report_power > {{cur.cur_flow_rpt_dir}}/03_power.rpt
 #return
 #===================================================================
 #=================== compile 2 =====================================
@@ -213,18 +213,18 @@ group_path -name REGOUT -weight 0.1
 #-- compile ----------------------------
 compile_ultra -incremental -no_autoungroup 
 source -e {{cur.config_plugins_dir}}/dc_scripts/change_name.tcl
-write -hier -format verilog -out $cur_flow_data_dir/02_{{env.BLK_NAME}}_MB.v
-write -f ddc -h -out $cur_flow_data_dir/02_{{env.BLK_NAME}}_MB.ddc
+write -hier -format verilog -out {{cur.cur_flow_data_dir}}/02_{{env.BLK_NAME}}_MB.v
+write -f ddc -h -out {{cur.cur_flow_data_dir}}/02_{{env.BLK_NAME}}_MB.ddc
 
 #-- report -----------------------------
-report_timing -nets -input_pins -nosplit -significant_digits 3 -max_paths 100000 -slack_lesser_than 0 -nworst 1 -delay max > $cur_flow_rpt_dir/04_SYN_{{local.lib_corner}}.rpt
-sh /usr/bin/perl {{cur.config_plugins_dir}}/dc_scripts/check_violation_summary.pl $cur_flow_rpt_dir/04_SYN_{{local.lib_corner}}.rpt > $cur_flow_rpt_dir/04_SYN_{{local.lib_corner}}.sum
-proc_qor > $cur_flow_rpt_dir/04_proc_qor.rpt
-report_qor > $cur_flow_rpt_dir/04_qor.rpt
-report_power > $cur_flow_rpt_dir/04_power.rpt
+report_timing -nets -input_pins -nosplit -significant_digits 3 -max_paths 100000 -slack_lesser_than 0 -nworst 1 -delay max > {{cur.cur_flow_rpt_dir}}/04_SYN_{{local.lib_corner}}.rpt
+sh /usr/bin/perl {{cur.config_plugins_dir}}/dc_scripts/check_violation_summary.pl {{cur.cur_flow_rpt_dir}}/04_SYN_{{local.lib_corner}}.rpt > {{cur.cur_flow_rpt_dir}}/04_SYN_{{local.lib_corner}}.sum
+proc_qor > {{cur.cur_flow_rpt_dir}}/04_proc_qor.rpt
+report_qor > {{cur.cur_flow_rpt_dir}}/04_qor.rpt
+report_power > {{cur.cur_flow_rpt_dir}}/04_power.rpt
 
-echo "lvt ratio after 1st compile:" > $cur_flow_rpt_dir/ratio_lvt.rpt
-report_threshold_voltage_group  >> $cur_flow_rpt_dir/ratio_lvt.rpt
-report_clock_gating -nosplit > $cur_flow_rpt_dir/report_clock_gating.rpt
-report_qor > $cur_flow_rpt_dir/{{env.BLK_NAME}}.qor
+echo "lvt ratio after 1st compile:" > {{cur.cur_flow_rpt_dir}}/ratio_lvt.rpt
+report_threshold_voltage_group  >> {{cur.cur_flow_rpt_dir}}/ratio_lvt.rpt
+report_clock_gating -nosplit > {{cur.cur_flow_rpt_dir}}/report_clock_gating.rpt
+report_qor > {{cur.cur_flow_rpt_dir}}/{{env.BLK_NAME}}.qor
 # Modified by Cindy Wang on: Fri Jul 29 02:32:32 CST 2016 END

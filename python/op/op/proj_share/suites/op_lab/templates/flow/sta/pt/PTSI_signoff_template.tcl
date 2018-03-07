@@ -7,13 +7,6 @@ set  pt_tmp_dir {{cur.flow_scripts_dir}}/.trach/TMP
 
 exec touch {{cur.flow_scripts_dir}}/.trach/.start
 if {[info exists VOLT] && [llength $VOLT] > 1} {set VOLT [join $VOLT {_}]}
-#set SESSION  "$ALL_SCENARIO_LIST" 
-#
-#set MODE           [lindex [split $SESSION .] 0]
-#set VOLT           [lindex [split $SESSION .] 1]
-#set LIB_CORNER     [lindex [split $SESSION .] 2]
-#set RC_CORNER      [lindex [split $SESSION .] 3]
-#set CHECK_TYPE     [lindex [split $SESSION .] 4]
 
 ##mkdir tool output dirctory
 set pre_flow_data_dir "{{pre.flow_data_dir}}/{{pre.stage}}"
@@ -26,13 +19,13 @@ if {[file isfile $flow_root_dir/${SESSION}.ready]} {file delete $flow_root_dir/$
 ########################################################################
 # LIBRARY
 ########################################################################
-source {{cur.config_plugins_dir}}/pt_scripts/utility/mv_library_setup.tcl
+{% include 'pt/tcl/mv_library_setup.tcl' %}
 
 ########################################################################
 # PT SETUP
 ########################################################################
+{% include 'pt/setting/ALCHIP-PT-SignOff-CommonSetting.TSMC.N7.tcl' %} 
 
-source {{cur.config_plugins_dir}}/pt_scripts/settings/ALCHIP-PT-SignOff-CommonSetting.TSMC.N7.tcl 
 ########################################################################
 # READ DESIGN
 ########################################################################
@@ -94,7 +87,7 @@ redirect -append {{cur.cur_flow_rpt_dir}}/output_port_loading.rpt   {report_port
     remove_clock_uncertainty -setup [get_clocks *]
     remove_clock_uncertainty -hold [get_clocks *]
 {%- else %}
-source {{cur.config_plugins_dir}}/pt_scripts/criteria/ALCHIP-PT-SignOff-Criteria.TSMC.N7.tcl  
+{%- include 'pt/criteria/ALCHIP-PT-SignOff-Criteria.TSMC.N7.tcl' %}  
 {%- endif %}
 
 ########################################################################

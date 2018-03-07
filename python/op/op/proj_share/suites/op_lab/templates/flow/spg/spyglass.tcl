@@ -9,6 +9,8 @@
 # generate report
 {% include 'spyglass/4_spg_report.tcl' %}
 
+puts "Alchip_info: op stage finished."
+
 save_project
 exit -force
 

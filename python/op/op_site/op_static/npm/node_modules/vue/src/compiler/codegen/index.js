@@ -86,15 +86,13 @@ export function genElement (el: ASTElement, state: CodegenState): string {
 }
 
 // hoist static sub-trees out
-function genStatic (el: ASTElement, state: CodegenState, once: ?boolean): string {
+function genStatic (el: ASTElement, state: CodegenState): string {
   el.staticProcessed = true
   state.staticRenderFns.push(`with(this){return ${genElement(el, state)}}`)
   return `_m(${
     state.staticRenderFns.length - 1
-  },${
-    el.staticInFor ? 'true' : 'false'
-  },${
-    once ? 'true' : 'false'
+  }${
+    el.staticInFor ? ',true' : ''
   })`
 }
 
@@ -121,7 +119,7 @@ function genOnce (el: ASTElement, state: CodegenState): string {
     }
     return `_o(${genElement(el, state)},${state.onceId++},${key})`
   } else {
-    return genStatic(el, state, true)
+    return genStatic(el, state)
   }
 }
 
@@ -355,7 +353,7 @@ function genScopedSlot (
         ? `${el.if}?${genChildren(el, state) || 'undefined'}:undefined`
         : genChildren(el, state) || 'undefined'
       : genElement(el, state)
-  }}`
+    }}`
   return `{key:${key},fn:${fn}}`
 }
 
@@ -485,13 +483,26 @@ function genComponent (
   })`
 }
 
-function genProps (props: Array<{ name: string, value: string }>): string {
+function genProps (props: Array<{ name: string, value: any }>): string {
   let res = ''
   for (let i = 0; i < props.length; i++) {
     const prop = props[i]
-    res += `"${prop.name}":${transformSpecialNewlines(prop.value)},`
+    /* istanbul ignore if */
+    if (__WEEX__) {
+      res += `"${prop.name}":${generateValue(prop.value)},`
+    } else {
+      res += `"${prop.name}":${transformSpecialNewlines(prop.value)},`
+    }
   }
   return res.slice(0, -1)
+}
+
+/* istanbul ignore next */
+function generateValue (value) {
+  if (typeof value === 'string') {
+    return transformSpecialNewlines(value)
+  }
+  return JSON.stringify(value)
 }
 
 // #3895, #4268

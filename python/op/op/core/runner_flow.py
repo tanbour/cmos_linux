@@ -245,14 +245,15 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
             flow_root_dir, "scripts", stage_name, multi_inst,
             sub_stage_name) if multi_inst else os.path.join(
                 flow_root_dir, "scripts", stage_name, sub_stage_name)
-        dst_run_file = os.path.join(
+        dst_op_file = os.path.join(
             flow_root_dir, "sum", stage_name, multi_inst,
-            f"{sub_stage_name}.oprun") if multi_inst else os.path.join(
-                flow_root_dir, "sum", stage_name, f"{sub_stage_name}.oprun")
+            f"{sub_stage_name}.op") if multi_inst else os.path.join(
+                flow_root_dir, "sum", stage_name, f"{sub_stage_name}.op")
+        dst_run_file = f"{dst_op_file}.run"
         pcom.mkdir(LOG, os.path.dirname(dst_file))
-        pcom.mkdir(LOG, os.path.dirname(dst_run_file))
+        pcom.mkdir(LOG, os.path.dirname(dst_op_file))
         local_dic["_multi_inst"] = multi_inst
-        LOG.info(f":: generating run file {dst_file} ...")
+        LOG.info(f":: generating file {dst_file} ...")
         pcom.ren_tempfile(LOG, tmp_file, dst_file, tmp_dic)
         if "_exec_cmd" in local_dic:
             tool_str = local_dic.get("_exec_tool", "")
@@ -262,12 +263,18 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
                 f"{local_dic.get('_job_resource', '')}"
                 if "_job_cmd" in local_dic else "")
             jn_str = (
-                f"""{job_str} -J '{self.ced["USER"]}:{flow_name}:"""
+                f"""{job_str} -J '{self.ced["USER"]}::{flow_name}::"""
                 f"""{stage_name}:{sub_stage_name}:{multi_inst}'""") if job_str else ""
             cmd_str = local_dic.get("_exec_cmd", "")
-            with open(dst_run_file, "w") as orf:
-                orf.write(
-                    f"{tool_str}{os.linesep}{jn_str} {cmd_str} {dst_file}{os.linesep}")
+            with open(dst_op_file, "w") as drf:
+                drf.write(
+                    f"{tool_str}{os.linesep}{cmd_str} {dst_file}{os.linesep}")
+            trash_dir = f"{os.path.dirname(dst_op_file)}{os.sep}.trash"
+            pcom.mkdir(LOG, trash_dir)
+            with open(dst_run_file, "w") as dbf:
+                dbf.write(
+                    f"{jn_str} xterm -title '{dst_file}' -e 'cd {trash_dir}; "
+                    f"source {dst_op_file} | tee {dst_run_file}.log'{os.linesep}")
             err_kw_lst = pcom.rd_cfg(
                 self.cfg_dic.get("filter", {}), stage_name, "exp_error_keywords")
             wav_kw_lst = pcom.rd_cfg(
@@ -313,19 +320,16 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
         file_mt = os.path.getmtime(run_src_file)
         LOG.info(
             f":: running flow {run_dic['flow']}::{run_dic['stage']}:{run_dic['sub_stage']}:"
-            f"{run_dic['multi_inst']}, oprun log {run_file}.log ...")
+            f"{run_dic['multi_inst']}, op log {run_file}.log ...")
         if not f_flg and os.path.isfile(run_pass) and os.path.getmtime(run_pass) > file_mt:
             LOG.info(f"passed and re-run skipped")
             if os.path.isfile(run_json) and os.path.getmtime(run_json) > file_mt:
                 with open(run_json) as rjf:
                     log_dic = json.load(rjf)
             return False
-        trash_dir = f"{os.path.dirname(run_file)}{os.sep}.trash"
-        pcom.mkdir(LOG, trash_dir)
         if f_flg or not os.path.isfile(run_fin) or os.path.getmtime(run_fin) <= file_mt:
-            subprocess.run(
-                f"xterm -title '{run_file}' -e 'cd {trash_dir}; "
-                f"source {run_file} | tee {run_file}.log'", shell=True)
+            with open(f"{run_file}.blog", "w") as rfb:
+                subprocess.run(f"source {run_file}", shell=True, stdout=rfb)
         LOG.info(f"parsing log file {run_file}.log")
         log_dic = self.parse_run_log(f"{run_file}.log", run_filter_dic)
         if not log_dic:

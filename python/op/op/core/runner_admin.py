@@ -41,15 +41,26 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
             else:
                 LOG.warning("please input a correct index")
         suite_name = suite_dict[int(index_rsp)]
-        dst_dir = os.path.expandvars(settings.PROJ_SHARE)
-        if os.path.isdir(dst_dir):
+        suite_dst_dir = os.path.expandvars(settings.PROJ_SHARE)
+        if os.path.isdir(suite_dst_dir):
             LOG.info(
-                f"project share dir {dst_dir} already exists, continue to initialize "
+                f"project share dir {suite_dst_dir} already exists, continue to initialize "
                 f"the project will overwrite the current project configs, templates and plugins")
             pcom.cfm()
-            shutil.rmtree(dst_dir, True)
-        shutil.copytree(f"{settings.OP_PROJ}{os.sep}{suite_name}", dst_dir)
+            shutil.rmtree(suite_dst_dir, True)
+        shutil.copytree(f"{settings.OP_PROJ}{os.sep}{suite_name}", suite_dst_dir)
         self.boot_env()
+        utils_dst_dir = self.ced.get("PROJ_UTILS", "")
+        if not utils_dst_dir:
+            LOG.error("project level proj.cfg env PROJ_UTILS is not defined")
+            raise SystemExit()
+        if os.path.isdir(utils_dst_dir):
+            LOG.info(
+                f"project utils dir {utils_dst_dir} already exists, continue to initialize "
+                f"the project will overwrite the current project utils")
+            pcom.cfm()
+            shutil.rmtree(utils_dst_dir, True)
+        shutil.copytree(settings.OP_UTILS, utils_dst_dir)
         for prex_dir_k in (
                 self.cfg_dic["proj"]["prex_admin_dir"]
                 if "prex_admin_dir" in self.cfg_dic["proj"] else {}):
@@ -79,7 +90,7 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                 pcom.mkdir(LOG, os.path.dirname(blk_cfg))
                 with open(proj_cfg) as pcf, open(blk_cfg, "w") as bcf:
                     for line in pcf:
-                        if line.strip().startswith("["):
+                        if line.startswith("["):
                             bcf.write(line)
                         else:
                             bcf.write(f"# {line}")

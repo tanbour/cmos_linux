@@ -77,7 +77,7 @@ class LibMap(object):
         """to generate project or block liblist files"""
         if not lib_flg:
             try:
-                with open(f"{liblist_root}{os.sep}liblist{os.sep}liblist.json") as lljf:
+                with open(f"{map_root}{os.sep}liblist{os.sep}liblist.json") as lljf:
                     liblist_var_dic = json.load(lljf)
             except FileNotFoundError:
                 LOG.error(

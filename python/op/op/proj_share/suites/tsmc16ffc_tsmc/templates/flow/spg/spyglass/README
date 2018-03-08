@@ -1,0 +1,71 @@
+*  *******************************************************************
+*  *   Alchip Spyglass RTL/SDC check scripts --- Alchip Confidential *
+*  *******************************************************************
+*  Update history
+*  Date		Version		Description
+*  2018/2/12	V1.0		Initial release
+*
+****************************************************************************************************
+*  Release Note:                                                                                   *
+*                                                                                                  *
+* 1. Scripts description                                                                           *
+*       - README : this file                                                                       *
+*       - 0_spg_rtl_sdc_check.tcl : main script, user needs to define the varialbes                  *
+*       - 1_soc_rtl_load_design.tcl :read design, no need to touch                                 *
+*       - 2_soc_rtl_waive.tcl : set waive rules, user could to add or remove some rules            *
+*       - ./waive_rules/waive_*.tcl   : waive rules                                                *
+*       - 3_soc_rtl_run_goal_lint.tcl : RTL LINK check                                             *
+*       - 3_soc_rtl_run_goal_cdc.tcl  : CDC check                                                  *
+*       - 3_soc_rtl_run_goal_sdc.tcl  : SDC check                                                  *
+*       - 3_soc_rtl_run_goal_dft.tcl  : DFT check                                                  *
+*       - 4_spg_report.tcl : make report, no need to touch                                         *
+*       - soc_rtl.sgdc : sdc definitions, user needs to define the location of sdc                 *
+*                                                                                                  *
+* 2. Checks covered:                                                                               *
+*       - Spg rtl lint check                                                                       *
+*       - Spg CDC check                                                                            *
+*       - Spg SDC check                                                                            *
+*       - Spg DFT check                                                                            *
+*                                                                                                  *
+* 3. Special notes                                                                                 *
+*	1) The design RTL and SDC are project dependent, user needs to make judgement based on     *
+*          detail design.                                                                          *
+*	2) Suggest to disable the submodules and remove the stop/ignore options one by one to save *
+*          compiling/check iteration period for SoC.                                               *
+*	3) The wave rules are also design dependent, customer still need to check the wave list to *
+*          add/remove the wave tree.                                                               *
+****************************************************************************************************
+****************************************************************************************************
+*  Detail files:                                                                                   *
+*	.                                                                
+*	|-- README
+*	|-- 0_spg_rtl_sdc_check.tcl
+*	|-- 1_soc_rtl_load_design.tcl                                    
+*	|-- 2_soc_rtl_waive.tcl                                          
+*	|-- 3_soc_rtl_run_goal.tcl                                       
+*	|-- 3_soc_rtl_run_goal_cdc.tcl
+*	|-- 3_soc_rtl_run_goal_dft.tcl
+*	|-- 3_soc_rtl_run_goal_lint.tcl
+*	|-- 3_soc_rtl_run_goal_sdc.tcl
+*	|-- 4_spg_report.tcl
+*	|-- soc_rtl.sgdc
+*	`-- waive_rules
+*	    |-- waive_cdc_cdc_abstract.tcl
+*	    |-- waive_cdc_cdc_setup_check.tcl
+*	    |-- waive_cdc_cdc_verify.tcl
+*	    |-- waive_cdc_cdc_verify_jitter.tcl
+*	    |-- waive_cdc_cdc_verify_struct.tcl
+*	    |-- waive_cdc_clock_reset_integrity.tcl
+*	    |-- waive_constraints_sdc_abstract.tcl
+*	    |-- waive_constraints_sdc_audit.tcl
+*	    |-- waive_constraints_sdc_check.tcl
+*	    |-- waive_constraints_sdc_exception_struct.tcl
+*	    |-- waive_constraints_sdc_redundancy.tcl
+*	    |-- waive_dft_dft_abstract.tcl
+*	    |-- waive_dft_dft_best_practice.tcl
+*	    |-- waive_dft_dft_bist_ready.tcl
+*	    |-- waive_dft_dft_dsm_best_practice.tcl
+*	    |-- waive_dft_dft_dsm_random_resistance.tcl
+*	    |-- waive_dft_dft_scan_ready.tcl
+*	    `-- waive_lint_lint_rtl.tcl
+*	

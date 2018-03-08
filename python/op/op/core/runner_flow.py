@@ -328,8 +328,8 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
                     log_dic = json.load(rjf)
             return False
         if f_flg or not os.path.isfile(run_fin) or os.path.getmtime(run_fin) <= file_mt:
-            with open(f"{run_file}.blog", "w") as rfb:
-                subprocess.run(f"source {run_file}", shell=True, stdout=rfb)
+            with open(f"{run_file}.blog", "w") as rfl, open(f"{run_file}.beer", "w") as rfe:
+                subprocess.run(f"source {run_file}", shell=True, stdout=rfl, stderr=rfe)
         LOG.info(f"parsing log file {run_file}.log")
         log_dic = self.parse_run_log(f"{run_file}.log", run_filter_dic)
         if not log_dic:
@@ -386,7 +386,8 @@ def run_flow(args):
         f_p.proc_ver()
         f_p.proc_flow_lst(args.flow_run_lst)
     elif args.flow_show_var_lst is not None:
-        f_p.lib_flg = False
+        if args.flow_no_lib:
+            f_p.lib_flg = False
         f_p.proc_ver()
         f_p.proc_flow_lst(args.flow_show_var_lst)
         f_p.show_var()

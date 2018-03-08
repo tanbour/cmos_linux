@@ -143,6 +143,7 @@
 (global-set-key (kbd "M-7") 'shell)
 (global-set-key (kbd "C-M-7") 'ansi-term)
 (global-set-key (kbd "M-8") 'flyspell-mode)
+(global-set-key (kbd "M-9") 'send-invisible)
 
 ;; emacs_server
 (server-start)

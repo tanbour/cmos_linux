@@ -43,15 +43,9 @@
             Table scrolling <i-switch v-model="fixedHeader" style="margin-right:5px"></i-switch>
             <br>
             <br>
-            Table size
-            <Radio-group v-model="tableSize" type="button">
-              <Radio label="large">large</Radio>
-              <Radio label="default">medium</Radio>
-              <Radio label="small">small(default)</Radio>
-            </Radio-group>
-            <i-input placeholder="Search" style="width:200px; float:right"></i-input>
+            <i-input v-model="searchQuery" placeholder="Search" clearable style="width:200px"></i-input>
           </div>
-          <i-table :border="showBorder" :stripe="showStripe" :show-header="showHeader" :height="fixedHeader?300:''" :columns="table_col" :data="table_data" :size="tableSize" ref="table"></i-table>
+          <i-table :border="showBorder" :stripe="showStripe" :show-header="showHeader" :height="fixedHeader?300:''" :columns="table_col" :data="s_table_data" size="small" ref="table"></i-table>
           <div style="margin:10px; overflow:hidden">
             <div style="float:right">
               <Page :total="dataCount" :page-size="pageSize" show-total @on-change="changePage"></Page>
@@ -82,13 +76,13 @@
        col_ary: [],
        data_ary: [],
        filter_ary_obj: {},
+       searchQuery: "",
        showBorder: false,
        showStripe: false,
        showHeader: true,
        showIndex: false,
        showCheckbox: true,
        fixedHeader: false,
-       tableSize: "small",
        dataCount: 0,
        pageSize: 10,
        rsp_data: {},
@@ -182,6 +176,20 @@
          }
        })
        return columns
+     },
+     s_table_data: function () {
+       var searchQuery = this.searchQuery && this.searchQuery.toLowerCase()
+       if (searchQuery) {
+         data = this.table_data.filter(function (row) {
+           return Object.keys(row).some(function (key) {
+             return String(row[key]).toLowerCase().indexOf(searchQuery) > -1
+           })
+         })
+       }
+       else {
+         data = this.table_data
+       }
+       return data
      }
    },
    methods: {

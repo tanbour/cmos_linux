@@ -25,7 +25,7 @@ class LogParser(object):
         with open(run_log, errors="replace") as rlf:
             rl_con = rlf.read()
         if not rl_con:
-            LOG.error(f"log file is empty")
+            LOG.error("log file is empty")
             return {}
         log_dic["fin"] = True if fin_str and fin_str in rl_con else False
         if not err_kw_lst:

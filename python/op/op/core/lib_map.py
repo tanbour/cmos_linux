@@ -32,7 +32,7 @@ class LibMap(object):
         self.match_lst.append(dst_file)
     def link_file(self, dst_root, lib_dir_cfg_dic, cfg_dic):
         """to process project or block lib mapping links"""
-        LOG.info(f":: library mapping of files linking ...")
+        LOG.info(":: library mapping of files linking ...")
         for lib_file, lib_file_cfg in lib_dir_cfg_dic.items():
             if lib_file == "liblist":
                 continue
@@ -81,12 +81,12 @@ class LibMap(object):
                     liblist_var_dic = json.load(lljf)
             except FileNotFoundError:
                 LOG.error(
-                    f"library mapping generated file is NA, "
-                    f"no_lib option should be toggled next time")
+                    "library mapping generated file is NA, "
+                    "no_lib option should be toggled next time")
                 raise SystemExit()
             return liblist_var_dic
         match_lst_file = f"{map_root}{os.sep}.match_lst"
-        LOG.info(f":: library mapping of liblist generating ...")
+        LOG.info(":: library mapping of liblist generating ...")
         LOG.info(f"loading library map list file {match_lst_file}")
         try:
             with open(match_lst_file) as mlf:

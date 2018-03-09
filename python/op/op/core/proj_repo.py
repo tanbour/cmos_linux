@@ -28,11 +28,11 @@ class ProjRepo(object):
         self.proj_lab_lst = sorted([c_c for c_c in all_proj_dic if c_c.startswith("lab_")])
     def list_proj(self):
         """to list all projects registered in op"""
-        LOG.info(f":: all available projects")
+        LOG.info(":: all available projects")
         pcom.pp_list(self.proj_normal_lst)
     def list_lab(self):
         """to list all projects registered in op"""
-        LOG.info(f":: all available lab projects")
+        LOG.info(":: all available lab projects")
         pcom.pp_list(self.proj_lab_lst)
     def git_proj(self):
         """to check out project by using git"""
@@ -51,7 +51,7 @@ class ProjRepo(object):
             rmt.pull("master")
         except git.GitCommandError as err:
             if any([c_c in str(err) for c_c in settings.REPO_AUTH_ERR_STR_LST]):
-                LOG.error("password incorrect, please use AD pwd instead of EoD pwd")
+                LOG.error("password (AD pwd) incorrect")
                 raise SystemExit()
             elif settings.REPO_BRANCH_ERR_STR in str(err):
                 pass

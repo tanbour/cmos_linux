@@ -322,7 +322,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
             f":: running flow {run_dic['flow']}::{run_dic['stage']}:{run_dic['sub_stage']}:"
             f"{run_dic['multi_inst']}, op log {run_file}.log ...")
         if not f_flg and os.path.isfile(run_pass) and os.path.getmtime(run_pass) > file_mt:
-            LOG.info(f"passed and re-run skipped")
+            LOG.info("passed and re-run skipped")
             if os.path.isfile(run_json) and os.path.getmtime(run_json) > file_mt:
                 with open(run_json) as rjf:
                     log_dic = json.load(rjf)
@@ -343,7 +343,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
                 os.remove(run_fin)
         if log_dic.get("status", "") == "passed":
             open(run_pass, "w").close()
-            LOG.info(f"passed")
+            LOG.info("passed")
         else:
             if os.path.isfile(run_pass):
                 os.remove(run_pass)
@@ -358,7 +358,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
         if not self.blk_flg:
             LOG.error("it's not in a block directory, please cd into one")
             raise SystemExit()
-        LOG.info(f":: all templates used variables")
+        LOG.info(":: all templates used variables")
         pcom.pp_list(self.opvar_lst)
 
 def run_flow(args):

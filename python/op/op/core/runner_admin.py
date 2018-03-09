@@ -21,7 +21,7 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         lib_map.LibMap.__init__(self)
     def fill_proj(self):
         """to fill project config and template dir after initialization"""
-        LOG.info(":: filling project {self.repo_dic['init_proj_name']} repo ...")
+        LOG.info(f":: filling project {self.repo_dic['init_proj_name']} repo ...")
         proj_gi_file = f"{self.repo_dic['repo_dir']}{os.sep}.gitignore"
         with open(proj_gi_file, "w") as g_f:
             g_f.write(settings.GITIGNORE)
@@ -167,14 +167,14 @@ def run_admin(args):
         admin_proc.update_blocks(args.admin_block_lst)
     elif args.admin_update_blk is not None:
         LOG.info(
-            f"updating all block level directories according to RELEASE directory, "
-            f"which will overwrite the existed block files ...")
+            "updating all block level directories according to RELEASE directory, "
+            "which will overwrite the existed block files ...")
         pcom.cfm()
         admin_proc.update_blocks(args.admin_update_blk)
     elif args.admin_lib:
         LOG.info(
-            f"generating library mapping links and files, "
-            f"which will overwrite all the existed library mapping links and files ...")
+            "generating library mapping links and files, "
+            "which will overwrite all the existed library mapping links and files ...")
         pcom.cfm()
         admin_proc.fill_lib()
     else:

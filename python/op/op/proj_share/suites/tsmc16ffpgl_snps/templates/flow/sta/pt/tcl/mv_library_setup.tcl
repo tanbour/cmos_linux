@@ -118,8 +118,10 @@ set cLimit [string toupper $CHECK_TYPE]
 foreach volt $VOLTAGE {
     set aocvLibrary($volt) [list]
     set vLimit [string toupper $volt]
-    if { [llength [info globals AOCV_*_${vLimit}_${lLimit}_${cLimit}]] >= 1 } {
-        foreach vr [info globals AOCV_*_${vLimit}_${lLimit}_${cLimit}] {
+#    if { [llength [info globals AOCV_*_${vLimit}_${lLimit}_${cLimit}]] >= 1 } {
+    if { [llength [info globals AOCV_*_${vLimit}_${lLimit}]] >= 1 } {
+#        foreach vr [info globals AOCV_*_${vLimit}_${lLimit}_${cLimit}] {
+        foreach vr [info globals AOCV_*_${vLimit}_${lLimit}] {
              set cmd " \
              set aocvLibrary($volt) \[concat $aocvLibrary($volt) \$$vr\] \
              "; eval $cmd

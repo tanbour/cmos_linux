@@ -46,7 +46,7 @@ remove_corners -all
 
 ## scenario settings
 set tech_ndm                           "tech_only";# *fill tech_ndm name, example tech_only,remember it's not tech ndm library path! only tech ndm name is OK.
-set scenario_list                      "func.tt0p8v.wcl.cworst_CCworst_T_m40c.setup";# *fill scenario table 
+set scenario_list                      "func.tt0p8v.wcl.cworst_CCworst_T_n40c.setup";# *fill scenario table 
 set process_list                       "1";# *fill process table, example 1 0.9
 set process_label_list                 "";#optional,fill process label table, example fast slow
 set scenario_status_leakage_power      "false";#optional,fill setup table with true/false
@@ -182,8 +182,8 @@ puts "INFO: Reading tlupus for lib_corner $lib_corner"
   ##read sdc/aocv/pocv
   set sdc_file_name  "${BLK_SDC_DIR}/$BLK_NAME.$mode.sdc"
 
-  if {$OCV_MODE == "aocv"} {set aocv_file_name [set [join "AOCV [string toupper $lib_tt_volt]  [string toupper $lib_corner] [string toupper $analysis_type]" "_"]]} else {set aocv_file_name ""}
-  if {$OCV_MODE == "pocv"} {set pocv_file_name [set [join "POCV [string toupper $lib_tt_volt]  [string toupper $lib_corner] [string toupper $analysis_type]" "_"]]} else {set pocv_file_name ""}
+  if {$OCV_MODE == "aocv"} {set aocv_file_name [set [join "AOCV [string toupper $lib_tt_volt]  [string toupper $lib_corner]" "_"]]} else {set aocv_file_name ""}
+  if {$OCV_MODE == "pocv"} {set pocv_file_name [set [join "POCV [string toupper $lib_tt_volt]  [string toupper $lib_corner]" "_"]]} else {set pocv_file_name ""}
 
   if { [file exist $sdc_file_name] } {
   echo "INFO: source sdc file $sdc_file_name for scenario $scenario"

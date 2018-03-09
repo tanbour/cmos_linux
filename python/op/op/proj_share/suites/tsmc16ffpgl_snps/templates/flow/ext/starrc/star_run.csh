@@ -135,13 +135,13 @@ echo "generating smc file for $COND"
 if ( ${COND} == "typical" ) then
    set tempratures = " 25c 85c"
 else
-   set tempratures = "125c m40c 0c"
+   set tempratures = "125c n40c 0c"
 
 endif
 
 foreach tempr ( $tempratures )
  
- if ( $tempr == m40c ) then
+ if ( $tempr == n40c ) then
  set atempr = "-40"
  else if ( $tempr == 125c ) then
  set atempr = 125

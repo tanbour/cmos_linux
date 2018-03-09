@@ -138,14 +138,14 @@ set_max_fanout {{local.set_max_fanout_current_design}}        [current_design]
 
 #-- compile ----------------------------
 compile_ultra -no_autoungroup -gate_clock  
-source -e {{cur.config_plugins_dir}}/dc_scripts/change_name.tcl
+source -e {{env.PROJ_UTILS}}/dc_utils/change_name.tcl
 write -hier -format verilog -out {{cur.cur_flow_data_dir}}/01_{{env.BLK_NAME}}.v
 write -f ddc -h -out {{cur.cur_flow_data_dir}}/01_{{env.BLK_NAME}}.ddc
 set_svf -off
 #-- report -----------------------------
 report_timing -nets -input_pins -nosplit -significant_digits 3 -max_paths 100000 -slack_lesser_than 0 -nworst 1 -delay max > {{cur.cur_flow_rpt_dir}}/03_SYN_{{local.lib_corner}}.rpt
-sh /usr/bin/perl {{cur.config_plugins_dir}}/dc_scripts/check_violation_summary.pl {{cur.cur_flow_rpt_dir}}/03_SYN_{{local.lib_corner}}.rpt > {{cur.cur_flow_rpt_dir}}/03_SYN_{{local.lib_corner}}.sum
-source {{cur.config_plugins_dir}}/dc_scripts/proc_qor.tcl
+sh /usr/bin/perl {{env.PROJ_UTILS}}/dc_utils/check_violation_summary.pl {{cur.cur_flow_rpt_dir}}/03_SYN_{{local.lib_corner}}.rpt > {{cur.cur_flow_rpt_dir}}/03_SYN_{{local.lib_corner}}.sum
+source {{env.PROJ_UTILS}}/dc_utils/proc_qor.tcl
 proc_qor > {{cur.cur_flow_rpt_dir}}/03_proc_qor.rpt
 report_qor > {{cur.cur_flow_rpt_dir}}/03_qor.rpt
 report_power > {{cur.cur_flow_rpt_dir}}/03_power.rpt
@@ -204,7 +204,7 @@ set_dont_touch [get_cells $exclude_merger_regs] false
 }
 #-- useful_skew ------------------------
 #source -echo -verbose {{cur.config_plugins_dir}}/dc_scripts/useful_skew.tcl
-source {{cur.config_plugins_dir}}/dc_scripts/proc_auto_weights.tcl
+source {{env.PROJ_UTILS}}/dc_utils/proc_auto_weights.tcl
 proc_auto_weights -wns
 group_path -name REGIN -weight 0.1
 group_path -name REGOUT -weight 0.1
@@ -212,13 +212,13 @@ group_path -name REGOUT -weight 0.1
 
 #-- compile ----------------------------
 compile_ultra -incremental -no_autoungroup 
-source -e {{cur.config_plugins_dir}}/dc_scripts/change_name.tcl
+source -e {{env.PROJ_UTILS}}/dc_utils/change_name.tcl
 write -hier -format verilog -out {{cur.cur_flow_data_dir}}/02_{{env.BLK_NAME}}_MB.v
 write -f ddc -h -out {{cur.cur_flow_data_dir}}/02_{{env.BLK_NAME}}_MB.ddc
 
 #-- report -----------------------------
 report_timing -nets -input_pins -nosplit -significant_digits 3 -max_paths 100000 -slack_lesser_than 0 -nworst 1 -delay max > {{cur.cur_flow_rpt_dir}}/04_SYN_{{local.lib_corner}}.rpt
-sh /usr/bin/perl {{cur.config_plugins_dir}}/dc_scripts/check_violation_summary.pl {{cur.cur_flow_rpt_dir}}/04_SYN_{{local.lib_corner}}.rpt > {{cur.cur_flow_rpt_dir}}/04_SYN_{{local.lib_corner}}.sum
+sh /usr/bin/perl {{env.PROJ_UTILS}}/dc_utils/check_violation_summary.pl {{cur.cur_flow_rpt_dir}}/04_SYN_{{local.lib_corner}}.rpt > {{cur.cur_flow_rpt_dir}}/04_SYN_{{local.lib_corner}}.sum
 proc_qor > {{cur.cur_flow_rpt_dir}}/04_proc_qor.rpt
 report_qor > {{cur.cur_flow_rpt_dir}}/04_qor.rpt
 report_power > {{cur.cur_flow_rpt_dir}}/04_power.rpt

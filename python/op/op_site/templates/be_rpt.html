@@ -34,6 +34,8 @@
           </div>
         </div>
         <div v-else>
+          <i-input v-model="searchQuery" placeholder="Search" clearable style="width:200px"></i-input>
+          <br>
           <div style="margin:10px">
             Display border <i-switch v-model="showBorder" style="margin-right:5px"></i-switch>
             Display stripe <i-switch v-model="showStripe" style="margin-right:5px"></i-switch>
@@ -42,8 +44,6 @@
             Display header <i-switch v-model="showHeader" style="margin-right:5px"></i-switch>
             Table scrolling <i-switch v-model="fixedHeader" style="margin-right:5px"></i-switch>
             <br>
-            <br>
-            <i-input v-model="searchQuery" placeholder="Search" clearable style="width:200px"></i-input>
           </div>
           <i-table :border="showBorder" :stripe="showStripe" :show-header="showHeader" :height="fixedHeader?300:''" :columns="table_col" :data="s_table_data" size="small" ref="table"></i-table>
           <div style="margin:10px; overflow:hidden">

@@ -1,17 +1,16 @@
 {% load i18n %}
 {% load staticfiles %}
 
-<template id="be_rpt">
+<template id="flow_rpt">
   <div>
     {% verbatim %}
     <div class="layout-breadcrumb">
       <breadcrumb>
         <breadcrumb-item><a @click="init({method: 'get', url: level_url.index}, 'proj')" title="go to project list">{{cb_data.l0.text}}</a></breadcrumb-item>
-        <breadcrumb-item v-if="level === 'block' || level === 'version' || level === 'flow' || level === 'stage' || level === 'detail'"><a @click="init({method: 'get', url: level_url.proj.replace('djst_var', cb_data.l1.url_id)}, 'block')" title="go to block list">{{cb_data.l1.text}}</a></breadcrumb-item>
-        <breadcrumb-item v-if="level === 'version' || level === 'flow' || level === 'stage' || level === 'detail'"><a @click="init({method: 'get', url: level_url.block.replace('djst_var', cb_data.l2.url_id)}, 'version')" title="go to version list">{{cb_data.l2.text}}</a></breadcrumb-item>
-        <breadcrumb-item v-if="level === 'flow' || level === 'stage' || level === 'detail'"><a @click="init({method: 'get', url: level_url.version.replace('djst_var', cb_data.l3.url_id)}, 'flow')" title="go to flow list">{{cb_data.l3.text}}</a></breadcrumb-item>
-        <breadcrumb-item v-if="level === 'stage' || level === 'detail'"><a @click="init({method: 'get', url: level_url.flow.replace('djst_var', cb_data.l4.url_id)}, 'stage')" title="go to stage list">{{cb_data.l4.text}}</a></breadcrumb-item>
-        <breadcrumb-item v-if="level === 'detail'"><a @click="init({method: 'get', url: level_url.stage.replace('djst_var', cb_data.l5.url_id)}, 'detail')" title="refresh detail page">{{cb_data.l5.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="level === 'block' || level === 'flow' || level === 'stage' || level === 'detail'"><a @click="init({method: 'get', url: level_url.proj.replace('djst_var', cb_data.l1.url_id)}, 'block')" title="go to block list">{{cb_data.l1.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="level === 'flow' || level === 'stage' || level === 'detail'"><a @click="init({method: 'get', url: level_url.block.replace('djst_var', cb_data.l2.url_id)}, 'flow')" title="go to flow list">{{cb_data.l2.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="level === 'stage' || level === 'detail'"><a @click="init({method: 'get', url: level_url.flow.replace('djst_var', cb_data.l3.url_id)}, 'stage')" title="go to stage list">{{cb_data.l3.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="level === 'detail'"><a @click="init({method: 'get', url: level_url.stage.replace('djst_var', cb_data.l4.url_id)}, 'detail')" title="refresh detail page">{{cb_data.l4.text}}</a></breadcrumb-item>
       </breadcrumb>
     </div>
     {% endverbatim %}
@@ -68,8 +67,8 @@
 </template>
 
 <script>
- Vue.component("be_rpt", {
-   template: "#be_rpt",
+ Vue.component("flow_rpt", {
+   template: "#flow_rpt",
    data: function () {
      return {
        table_data: [],
@@ -89,20 +88,18 @@
        rsp_title: {},
        level: "",
        level_url: {
-         index: "{% url 'be_rpt:proj_list' %}",
-         title: "{% url 'be_rpt:title_detail' '1' %}",
-         proj: "{% url 'be_rpt:proj_detail' 'djst_var' %}",
-         block: "{% url 'be_rpt:block_detail' 'djst_var' %}",
-         version: "{% url 'be_rpt:version_detail' 'djst_var' %}",
-         flow: "{% url 'be_rpt:flow_detail' 'djst_var' %}",
-         stage: "{% url 'be_rpt:stage_detail' 'djst_var' %}",
+         index: "{% url 'flow_rpt:proj_list' %}",
+         title: "{% url 'flow_rpt:title_detail' '1' %}",
+         proj: "{% url 'flow_rpt:proj_detail' 'djst_var' %}",
+         block: "{% url 'flow_rpt:block_detail' 'djst_var' %}",
+         flow: "{% url 'flow_rpt:flow_detail' 'djst_var' %}",
+         stage: "{% url 'flow_rpt:stage_detail' 'djst_var' %}",
          detail: ""
        },
        level_next: {
          index: "proj",
          proj: "block",
-         block: "version",
-         version: "flow",
+         block: "flow",
          flow: "stage",
          stage: "detail",
          detail: ""
@@ -221,46 +218,33 @@
          this.cb_data.l0.text = this.rsp_data.name
          this.cb_data.l1.url_id = this.rsp_data.id
          this.cb_data.l1.text = "blocks"
-       } else if (this.level === "version") {
-         this.cur_data = this.rsp_data.version_block
+       } else if (this.level === "flow") {
+         this.cur_data = this.rsp_data.flow_block
          this.cb_data.l0.text = this.rsp_data.proj.name
          this.cb_data.l1.url_id = this.rsp_data.proj.id
          this.cb_data.l1.text = this.rsp_data.name
          this.cb_data.l2.url_id = this.rsp_data.id
-         this.cb_data.l2.text = "versions"
-       } else if (this.level === "flow") {
-         this.cur_data = this.rsp_data.flow_version
+         this.cb_data.l2.text = "flows"
+       } else if (this.level === "stage") {
+         this.cur_data = this.rsp_data.stage_flow
          this.cb_data.l0.text = this.rsp_data.block.proj.name
          this.cb_data.l1.url_id = this.rsp_data.block.proj.id
          this.cb_data.l1.text = this.rsp_data.block.name
          this.cb_data.l2.url_id = this.rsp_data.block.id
          this.cb_data.l2.text = this.rsp_data.name
          this.cb_data.l3.url_id = this.rsp_data.id
-         this.cb_data.l3.text = "flows"
-       } else if (this.level === "stage") {
-         this.cur_data = this.rsp_data.stage_flow
-         this.cb_data.l0.text = this.rsp_data.version.block.proj.name
-         this.cb_data.l1.url_id = this.rsp_data.version.block.proj.id
-         this.cb_data.l1.text = this.rsp_data.version.block.name
-         this.cb_data.l2.url_id = this.rsp_data.version.block.id
-         this.cb_data.l2.text = this.rsp_data.version.name
-         this.cb_data.l3.url_id = this.rsp_data.version.id
-         this.cb_data.l3.text = this.rsp_data.name
-         this.cb_data.l4.url_id = this.rsp_data.id
-         this.cb_data.l4.text = "stages"
+         this.cb_data.l3.text = "stages"
        } else if (this.level == "detail") {
          this.cur_data = this.rsp_data
-         this.cb_data.l0.text = this.rsp_data.flow.version.block.proj.name
-         this.cb_data.l1.url_id = this.rsp_data.flow.version.block.proj.id
-         this.cb_data.l1.text = this.rsp_data.flow.version.block.name
-         this.cb_data.l2.url_id = this.rsp_data.flow.version.block.id
-         this.cb_data.l2.text = this.rsp_data.flow.version.name
-         this.cb_data.l3.url_id = this.rsp_data.flow.version.id
-         this.cb_data.l3.text = this.rsp_data.flow.name
-         this.cb_data.l4.url_id = this.rsp_data.flow.id
-         this.cb_data.l4.text = this.rsp_data.name
-         this.cb_data.l5.url_id = this.rsp_data.id
-         this.cb_data.l5.text = "details"
+         this.cb_data.l0.text = this.rsp_data.flow.block.proj.name
+         this.cb_data.l1.url_id = this.rsp_data.flow.block.proj.id
+         this.cb_data.l1.text = this.rsp_data.flow.block.name
+         this.cb_data.l2.url_id = this.rsp_data.flow.block.id
+         this.cb_data.l2.text = this.rsp_data.flow.name
+         this.cb_data.l3.url_id = this.rsp_data.flow.id
+         this.cb_data.l3.text = this.rsp_data.name
+         this.cb_data.l4.url_id = this.rsp_data.id
+         this.cb_data.l4.text = "details"
        }
        if (this.level !== "detail") {
          this.cur_title = this.rsp_title[this.level]
@@ -272,7 +256,7 @@
            title: this.level + " name",
            key: "obj_name",
            /* "fixed": "left",*/
-           width: 200,
+           width: 150,
            sortable: true,
            sortType: "asc",
            render: (h, params) => {
@@ -307,13 +291,39 @@
            }
          }
        ]
-       if (this.level === "version"  || this.level === "flow" || this.level === "stage")
+       if (this.level === "flow" || this.level === "stage") {
          this.col_ary.push({
            title: "Date",
            key: "created_time",
            width: 200,
            sortable: true
          })
+         this.col_ary.push({
+           title: "Status",
+           key: "status",
+           width: 150,
+           sortable: true,
+           render: (h, params) => {
+             const row = params.row
+             const color = row.status === "running" ? "yellow" : row.status === "passed" ? "green" : (row.status === undefined || row.status === "") ? "blue" : "red"
+             const text = row.status
+             return h("Tag", {
+               props: {
+                 type: "dot",
+                 color: color
+               }
+             }, text)
+           }
+         })
+       }
+       if (this.level === "stage") {
+         this.col_ary.push({
+           title: "Version",
+           key: "version",
+           width: 150,
+           sortable: true
+         })
+       }
        if (this.level === "block")
          this.col_ary.push({
            title: "Milestone",
@@ -333,31 +343,12 @@
          })
        for (var i = 0; i < this.cur_title.length; i++) {
          var head = this.cur_title[i]
-         if (head === "status")
-           this.col_ary.push({
-             title: head,
-             key: head,
-             width: 150,
-             sortable: true,
-             render: (h, params) => {
-               const row = params.row
-               const color = row.status === "running" ? "yellow" : row.status === "passed" ? "green" : (row.status === undefined || row.status === "") ? "blue" : "red"
-               const text = row.status
-               return h("Tag", {
-                 props: {
-                   type: "dot",
-                   color: color
-                 }
-               }, text)
-             }
-           })
-         else
-           this.col_ary.push({
-             title: head,
-             key: head,
-             width: 150,
-             sortable: true,
-           })
+         this.col_ary.push({
+           title: head,
+           key: head,
+           width: 150,
+           sortable: true,
+         })
        }
      },
      procDataAry: function () {
@@ -375,8 +366,12 @@
          } else {
            data_dic.owner = qs_obj.owner.name
          }
-         if (this.level === "version" || this.level === "flow" || this.level === "stage") {
+         if (this.level === "flow" || this.level === "stage") {
            data_dic.created_time = qs_obj.created_time.slice(0, 19).replace("T", " ")
+           data_dic.status = qs_obj.status
+         }
+         if (this.level === "stage") {
+           data_dic.version = qs_obj.version
          }
          if (this.level === "block") {
            data_dic.milestone = qs_obj.milestone

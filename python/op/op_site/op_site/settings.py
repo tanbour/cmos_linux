@@ -31,7 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'be_rpt.apps.BeRptConfig',
+    'flow_rpt.apps.FlowRptConfig',
     'proj_checker.apps.ProjCheckerConfig',
     'rest_framework',
     'django.contrib.admin',

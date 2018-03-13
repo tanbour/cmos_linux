@@ -17,19 +17,19 @@
       <div class="layout" :class="{'layout-hide-text': spanLeft < 2}">
         <row type="flex">
           <i-col :span="spanLeft" class="layout-menu-left">
-            <i-menu active-name="be_rpt" theme="dark" width="auto" @on-select="changeContent">
+            <i-menu theme="dark" width="auto" @on-select="changeContent">
               <div class="layout-logo-left"></div>
-              <menu-item name="be_rpt">
-                <Icon type="ios-albums-outline" :size="iconSize"></Icon>
-                <span class="layout-text">BE Reports</span>
+              <menu-item name="flow_status">
+                <Icon type="stats-bars" :size="iconSize"></Icon>
+                <span class="layout-text">Flow Status</span>
               </menu-item>
-              <!-- <menu-item name="fe_rpt">
-                   <Icon type="ios-albums-outline" :size="iconSize"></Icon>
-                   <span class="layout-text">FE Reports</span>
-                   </menu-item> -->
+              <menu-item name="flow_rpt">
+                <Icon type="document-text" :size="iconSize"></Icon>
+                <span class="layout-text">Flow Reports</span>
+              </menu-item>
               <menu-item name="proj_checker">
-                <Icon type="ios-analytics" :size="iconSize"></Icon>
-                <span class="layout-text">Projects Checker</span>
+                <Icon type="android-checkmark-circle" :size="iconSize"></Icon>
+                <span class="layout-text">Proj Checker</span>
               </menu-item>
             </i-menu>
           </i-col>

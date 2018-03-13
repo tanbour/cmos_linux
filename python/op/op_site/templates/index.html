@@ -8,12 +8,14 @@ op platform --- alchip
 
 {% block content %}
 <home v-if="content_id === 'home'"></home>
-<be_rpt v-if="content_id === 'be_rpt'"></be_rpt>
+<flow_status v-if="content_id === 'flow_status'"></flow_status>
+<flow_rpt v-if="content_id === 'flow_rpt'"></flow_rpt>
 <proj_checker v-if="content_id === 'proj_checker'"></proj_checker>
 {% endblock %}
 
 {% block component %}
 {% include "home.html" %}
-{% include "be_rpt.html" %}
+{% include "flow_status.html" %}
+{% include "flow_rpt.html" %}
 {% include "proj_checker.html" %}
 {% endblock %}

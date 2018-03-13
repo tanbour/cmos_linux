@@ -13,7 +13,6 @@ class Title(models.Model):
     """title models for table"""
     proj = JSONField(default=list, blank=True)
     block = JSONField(default=list, blank=True)
-    version = JSONField(default=list, blank=True)
     flow = JSONField(default=list, blank=True)
     stage = JSONField(default=list, blank=True)
 
@@ -37,36 +36,25 @@ class Block(models.Model):
     class Meta:
         unique_together = ("name", "proj")
 
-class Version(models.Model):
-    """version models"""
-    name = models.CharField(max_length=50)
-    block = models.ForeignKey(Block, on_delete=models.CASCADE, related_name="version_block")
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="version_owner")
-    created_time = models.DateTimeField(auto_now_add=True)
-    data = JSONField(default=dict, blank=True)
-    def __str__(self):
-        return f"{self.name}__{self.block}"
-    class Meta:
-        unique_together = ("name", "block", "owner")
-
 class Flow(models.Model):
     """flow models"""
     name = models.CharField(max_length=50)
-    version = models.ForeignKey(Version, on_delete=models.CASCADE, related_name="flow_version")
+    block = models.ForeignKey(Block, on_delete=models.CASCADE, related_name="flow_block")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="flow_owner")
-    created_time = models.DateTimeField(auto_now_add=True)
+    created_time = models.DateTimeField()
+    status = models.CharField(max_length=20)
     data = JSONField(default=dict, blank=True)
     def __str__(self):
-        return f"{self.name}__{self.version}"
-    class Meta:
-        unique_together = ("name", "version", "owner")
+        return f"{self.name}__{self.block}"
 
 class Stage(models.Model):
     """stage models"""
     name = models.CharField(max_length=50)
     flow = models.ForeignKey(Flow, on_delete=models.CASCADE, related_name="stage_flow")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="stage_owner")
-    created_time = models.DateTimeField(auto_now_add=True)
+    created_time = models.DateTimeField()
+    status = models.CharField(max_length=20)
+    version = models.CharField(max_length=20)
     data = JSONField(default=dict, blank=True)
     def __str__(self):
         return f"{self.name}__{self.flow}"

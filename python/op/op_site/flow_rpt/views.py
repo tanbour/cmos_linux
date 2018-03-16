@@ -6,8 +6,11 @@ from rest_framework import permissions
 from .models import User, Title, Proj, Block, Flow, Stage
 from .serializers import UserSerializer, TitleSerializer, ProjSerializer, BlockSerializer, FlowSerializer, StageSerializer
 from .serializers import UserRelatedSerializer, ProjRelatedSerializer, BlockRelatedSerializer, FlowRelatedSerializer, StageDetailSerializer
-from .serializers import StageFullSerializer
+from .serializers import FlowStatusSerializer, FlowStatusRelatedSerializer
 from django.utils import timezone as tz
+from django.conf import settings
+import dateutil.parser
+import pytz
 
 class TitleList(generics.ListAPIView):
     """flow report title list"""
@@ -68,6 +71,16 @@ class FlowDetail(generics.RetrieveAPIView):
     queryset = Flow.objects.all()
     serializer_class = FlowRelatedSerializer
 
+class FlowStatusList(generics.ListAPIView):
+    """flow report flow status list"""
+    queryset = Flow.objects.all()
+    serializer_class = FlowStatusSerializer
+
+class FlowStatusDetail(generics.RetrieveAPIView):
+    """flow report flow status detail"""
+    queryset = Flow.objects.all()
+    serializer_class = FlowStatusRelatedSerializer
+
 class StageList(generics.ListAPIView):
     """flow report stage list"""
     queryset = Stage.objects.all()
@@ -89,11 +102,6 @@ class StageDetail(generics.RetrieveAPIView):
     """flow report stage detail"""
     queryset = Stage.objects.all()
     serializer_class = StageDetailSerializer
-
-class StageFullList(generics.ListAPIView):
-    """flow report stage list"""
-    queryset = Stage.objects.all()
-    serializer_class = StageFullSerializer
 
 class UserList(generics.ListCreateAPIView):
     """flow report user list"""
@@ -150,7 +158,9 @@ class RunnerFlow(views.APIView):
         block_name = request.data.get("block")
         proj_name = request.data.get("proj")
         owner_name = request.data.get("owner")
-        created_time = request.data.get("created_time", tz.datetime.now())
+        created_time = request.data.get("created_time", "")
+        created_time = pytz.timezone(settings.TIME_ZONE).localize(dateutil.parser.parse(
+            created_time) if created_time else tz.datetime.now())
         status = request.data.get("status", "NA")
         if not flow_name:
             return Response({"message": "flow name is NA"}, status=status.HTTP_400_BAD_REQUEST)
@@ -179,9 +189,15 @@ class RunnerStage(views.APIView):
         block_name = request.data.get("block")
         proj_name = request.data.get("proj")
         owner_name = request.data.get("owner")
-        created_time = request.data.get("created_time", tz.datetime.now())
+        created_time = request.data.get("created_time", "")
+        created_time = pytz.timezone(settings.TIME_ZONE).localize(dateutil.parser.parse(
+            created_time) if created_time else tz.datetime.now())
         status = request.data.get("status", "NA")
         version = request.data.get("version", "NA")
+        f_created_time = request.data.get("f_created_time", "")
+        f_created_time = pytz.timezone(settings.TIME_ZONE).localize(dateutil.parser.parse(
+            f_created_time) if f_created_time else tz.datetime.now())
+        f_status = request.data.get("f_status", "NA")
         if not stage_name:
             return Response({"message": "stage name is NA"}, status=status.HTTP_400_BAD_REQUEST)
         if not flow_name:
@@ -197,11 +213,13 @@ class RunnerStage(views.APIView):
         block_obj, _ = Block.objects.get_or_create(
             {"name": block_name, "proj": proj_obj}, name=block_name, proj=proj_obj)
         flow_obj, _ = Flow.objects.get_or_create(
-            {"name": flow_name, "block": block_obj, "owner": owner_obj},
-            name=flow_name, block=block_obj, owner=owner_obj)
+            {"name": flow_name, "block": block_obj, "owner": owner_obj,
+             "created_time": f_created_time, "status": f_status},
+            name=flow_name, block=block_obj, owner=owner_obj, created_time=f_created_time)
         stage_obj, created_flg = Stage.objects.update_or_create(
-            {"name": stage_name, "flow": flow_obj, "owner": owner_obj,
+            {"name": stage_name, "owner": owner_obj,
              "created_time": created_time, "status": status, "version": version,
              "data": request.data.get("data", {})},
-            name=stage_name, flow=flow_obj, owner=owner_obj, created_time=created_time)
+            name=stage_name, owner=owner_obj, created_time=created_time)
+        stage_obj.flow.add(flow_obj)
         return Response({"stage_name": stage_obj.name, "created_flg": created_flg})

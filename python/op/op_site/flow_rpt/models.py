@@ -46,11 +46,13 @@ class Flow(models.Model):
     data = JSONField(default=dict, blank=True)
     def __str__(self):
         return f"{self.name}__{self.block}"
+    class Meta:
+        unique_together = ("name", "block", "owner", "created_time")
 
 class Stage(models.Model):
     """stage models"""
     name = models.CharField(max_length=50)
-    flow = models.ForeignKey(Flow, on_delete=models.CASCADE, related_name="stage_flow")
+    flow = models.ManyToManyField(Flow, related_name="stage_flow")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="stage_owner")
     created_time = models.DateTimeField()
     status = models.CharField(max_length=20)

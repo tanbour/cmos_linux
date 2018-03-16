@@ -6,7 +6,8 @@
     {% verbatim %}
     <div class="layout-breadcrumb">
       <breadcrumb>
-        <breadcrumb-item><a @click="init({method: 'get', url: url})" title="to fresh the whole table">stages</a></breadcrumb-item>
+        <breadcrumb-item><a @click="init({method: 'get', url: level_url.index}, 'flow')" title="go to flow list">{{cb_data.l0.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="level === 'stage'"><a @click="init({method: 'get', url: level_url.flow.replace('djst_var', cb_data.l1.url_id)}, 'stage')" title="refresh stage page">{{cb_data.l1.text}}</a></breadcrumb-item>
       </breadcrumb>
     </div>
     {% endverbatim %}
@@ -41,7 +42,16 @@
        dataCount: 0,
        pageSize: 50,
        rsp_data: {},
-       url: "{% url 'flow_rpt:stage_full_list' %}"
+       level: "",
+       level_url: {
+         index: "{% url 'flow_rpt:flow_status_list' %}",
+         flow: "{% url 'flow_rpt:flow_status_detail' 'djst_var' %}"
+       },
+       cur_data: [],
+       cb_data: {
+         l0: {},
+         l1: {}
+       }
      }
    },
    computed: {
@@ -104,9 +114,11 @@
      }
    },
    methods: {
-     init: function(ajax_cfg = {method: "get", url: this.url}) {
+     init: function(ajax_cfg = {method: "get", url: this.level_url.index}, level = "flow") {
        axios(ajax_cfg).then((response) => {
          this.rsp_data = response.data
+         this.level = level
+         this.procLevel()
          this.procDataAry()
          this.procColAry()
          this.pageTableData()
@@ -114,10 +126,49 @@
          console.log(error)
        })
      },
+     procLevel: function () {
+       if (this.level === "flow") {
+         this.cur_data = this.rsp_data
+         this.cb_data.l0.text = "flows"
+       } else if (this.level === "stage") {
+         this.cur_data = this.rsp_data.stage_flow
+         this.cb_data.l0.text = this.rsp_data.block.name + ":" + this.rsp_data.block.proj.name + ":" + this.rsp_data.name
+         this.cb_data.l1.url_id = this.rsp_data.id
+         this.cb_data.l1.text = "stages"
+       }
+     },
      procColAry: function () {
-       this.col_ary = [
-         {
-           title: "stage name",
+       this.col_ary = []
+       if (this.level === "flow") {
+         this.col_ary.push({
+           title: this.level + " name",
+           key: "obj_name",
+           /* "fixed": "left",*/
+           width: 150,
+           sortable: true,
+           render: (h, params) => {
+             const row = params.row
+             const pk = row.obj_pk
+             const text = row.obj_name
+             return h("a", {
+               on: {
+                 click: () => {
+                   this.init({
+                     method: "get",
+                     url: this.level_url[this.level].replace("djst_var", pk)}, "stage")
+                 }
+               }
+             }, text)
+           },
+           filters: this.filter_ary_obj.obj_name,
+           filterMultiple: true,
+           filterMethod: function (value, row) {
+             return row.obj_name === value
+           }
+         })
+       } else if (this.level === "stage") {
+         this.col_ary.push({
+           title: this.level + " name",
            key: "obj_name",
            /* "fixed": "left",*/
            width: 150,
@@ -127,70 +178,50 @@
            filterMethod: function (value, row) {
              return row.obj_name === value
            }
+         })
+       }
+       this.col_ary.push({
+         title: "Owner",
+         key: "owner",
+         width: 150,
+         sortable: true,
+         filters: this.filter_ary_obj.owner,
+         filterMultiple: true,
+         filterMethod: function (value, row) {
+           return row.owner === value
+         }
+       })
+       this.col_ary.push({
+         title: "Date",
+         key: "created_time",
+         width: 200,
+         sortable: true,
+         sortType: "desc"
+       })
+       this.col_ary.push({
+         title: "Status",
+         key: "status",
+         width: 150,
+         sortable: true,
+         filters: this.filter_ary_obj.status,
+         filterMultiple: true,
+         filterMethod: function (value, row) {
+           return row.status === value
          },
-         {
-           title: "Owner",
-           key: "owner",
-           width: 150,
-           sortable: true,
-           filters: this.filter_ary_obj.owner,
-           filterMultiple: true,
-           filterMethod: function (value, row) {
-             return row.owner === value
-           }
-         },
-         {
-           title: "Date",
-           key: "created_time",
-           width: 200,
-           sortable: true,
-           sortType: "desc"
-         },
-         {
-           title: "Status",
-           key: "status",
-           width: 150,
-           sortable: true,
-           filters: this.filter_ary_obj.status,
-           filterMultiple: true,
-           filterMethod: function (value, row) {
-             return row.status === value
-           },
-           render: (h, params) => {
-             const row = params.row
-             const color = row.status === "running" ? "yellow" : row.status === "passed" ? "green" : (row.status === undefined || row.status === "") ? "blue" : "red"
-             const text = row.status
-             return h("Tag", {
-               props: {
-                 type: "dot",
-                 color: color
-               }
-             }, text)
-           }
-         },
-         {
-           title: "Version",
-           key: "version",
-           width: 150,
-           sortable: true,
-           filters: this.filter_ary_obj.version,
-           filterMultiple: true,
-           filterMethod: function (value, row) {
-             return row.version === value
-           }
-         },
-         {
-           title: "Flow",
-           key: "flow",
-           width: 150,
-           sortable: true,
-           filters: this.filter_ary_obj.flow,
-           filterMultiple: true,
-           filterMethod: function (value, row) {
-             return row.flow === value
-           }
-         },
-         {
+         render: (h, params) => {
+           const row = params.row
+           const color = row.status === "running" ? "yellow" : row.status === "passed" ? "green" : (row.status === undefined || row.status === "") ? "blue" : "red"
+           const text = row.status
+           return h("Tag", {
+             props: {
+               type: "dot",
+               color: color
+             }
+           }, text)
+         }
+       })
+       if (this.level === "flow") {
+         this.col_ary.push({
            title: "Block",
            key: "block",
            width: 150,
@@ -200,8 +231,8 @@
            filterMethod: function (value, row) {
              return row.block === value
            }
-         },
-         {
+         })
+         this.col_ary.push({
            title: "Project",
            key: "proj",
            width: 150,
@@ -211,24 +242,47 @@
            filterMethod: function (value, row) {
              return row.proj === value
            }
-         }
-       ]
+         })
+       } else if (this.level === "stage") {
+         this.col_ary.push({
+           title: "Version",
+           key: "version",
+           width: 150,
+           sortable: true,
+           filters: this.filter_ary_obj.version,
+           filterMultiple: true,
+           filterMethod: function (value, row) {
+             return row.version === value
+           }
+         })
+       }
      },
      procDataAry: function () {
        this.data_ary = []
-       this.filter_ary_obj = {obj_name: [], owner: [], status: [], version: [], flow: [], block: [], proj: []}
-       var unique_ary_obj = {obj_name: [], owner: [], status: [], version: [], flow: [], block: [], proj: []}
-       for (var i = 0; i < this.rsp_data.length; i++) {
-         var qs_obj = this.rsp_data[i]
+       this.filter_ary_obj = {obj_name: [], owner: [], status: []}
+       var unique_ary_obj = {obj_name: [], owner: [], status: []}
+       if (this.level === "flow") {
+         this.filter_ary_obj.block = []
+         this.filter_ary_obj.proj = []
+         unique_ary_obj.block = []
+         unique_ary_obj.proj = []
+       } else if (this.level === "stage") {
+         this.filter_ary_obj.version = []
+         unique_ary_obj.version = []
+       }
+       for (var i = 0; i < this.cur_data.length; i++) {
+         var qs_obj = this.cur_data[i]
          data_dic = {
            obj_pk: qs_obj.id,
            obj_name: qs_obj.name,
            created_time: qs_obj.created_time.slice(0, 19).replace("T", " "),
            status: qs_obj.status,
-           version: qs_obj.version,
-           flow: qs_obj.flow.name,
-           block: qs_obj.flow.block.name,
-           proj: qs_obj.flow.block.proj.name
+         }
+         if (this.level === "flow") {
+           data_dic.block = qs_obj.block.name,
+           data_dic.proj = qs_obj.block.proj.name
+         } else if (this.level === "stage") {
+           data_dic.version = qs_obj.version
          }
          if (qs_obj.owner === null) {
            data_dic.owner = "NA"

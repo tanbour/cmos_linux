@@ -34,7 +34,8 @@ class FlowAdmin(admin.ModelAdmin):
 
 class StageAdmin(admin.ModelAdmin):
     """stage admin"""
-    list_display = ("id", "name", "flow", "owner", "created_time", "status", "version")
+    list_display = ("id", "name", "owner", "created_time", "status", "version")
+    filter_horizontal = ("flow",)
     list_filter = ["created_time"]
     search_field = ["name", "flow", "owner", "created_time", "status", "version", "data"]
 

@@ -13,7 +13,6 @@ urlpatterns = [
     path("flows/<pk>", views.FlowDetail.as_view(), name="flow_detail"),
     path("stages/", views.StageList.as_view(), name="stage_list"),
     path("stages/<pk>", views.StageDetail.as_view(), name="stage_detail"),
-    path("stages_full/", views.StageFullList.as_view(), name="stage_full_list"),
     path("users/", views.UserList.as_view(), name="user_list"),
     path("users/<pk>", views.UserDetail.as_view(), name="user_detail"),
     path("titles/", views.TitleList.as_view(), name="title_list"),
@@ -22,6 +21,8 @@ urlpatterns = [
     path("runner/blocks/", views.RunnerBlock.as_view(), name="runner_block"),
     path("runner/flows/", views.RunnerFlow.as_view(), name="runner_flow"),
     path("runner/stages/", views.RunnerStage.as_view(), name="runner_stage"),
+    path("flows_status/", views.FlowStatusList.as_view(), name="flow_status_list"),
+    path("flows_status/<pk>", views.FlowStatusDetail.as_view(), name="flow_status_detail"),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

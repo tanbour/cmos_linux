@@ -20,7 +20,7 @@ xorg-server, xorg-xinit, xorg-xrandr, xorg-xprop, xautolock, xterm, i3-wm, i3sta
 nftables, vsftpd, samba, amdgpu
 ** linux_client only
 *** program
-grub, memtest86+, gparted, nvidia, icedtea-web, pepper-flash, filezilla, tcsh, mksh, zsh, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, recordmydesktop, gv, xchm, gnuplot, graphviz, cups-pdf, bchunk, aspell-en, hunspell-en, tigervnc, freerdp, celestia, gnugo, libreoffice, networkmanager, network-manager-applet, android-tools, xf86-input-libinput, acpid, mupdf, udevil, thunderbird
+gparted, nvidia, icedtea-web, pepper-flash, filezilla, tcsh, mksh, zsh, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, recordmydesktop, gv, xchm, gnuplot, graphviz, cups-pdf, bchunk, aspell-en, hunspell-en, tigervnc, freerdp, celestia, gnugo, libreoffice, networkmanager, network-manager-applet, android-tools, xf86-input-libinput, acpid, mupdf, udevil, thunderbird
 *** multimedia
 blender, cinelerra-cv, subtitleeditor, audacity, puddletag
 ** chinese and ibus
@@ -669,6 +669,10 @@ enable iommu in uefi
 set extra linux kernel parameter "iommu=pt" to make iommu work in pass through mode
 ** efibootmgr
 efibootmgr --create --disk /dev/sda --part 1 --gpt --label "Arch Linux" --loader /vmlinuz-linux --unicode "root=/dev/sda2 rw initrd=/initramfs-linux.img iommu=pt"
+efibootmgr --verbose
+# rm /sys/firmware/efi/efivars/dump-*
+# efibootmgr --bootorder XXXX,XXXX
+intel: efibootmgr --create --disk /dev/sda --part 1 --gpt --label "Arch Linux" --loader /vmlinuz-linux --unicode "root=/dev/sda2 rw initrd=/intel-ucode.img initrd=/initramfs-linux.img iommu=pt"
 
 * fstab
 ** check disk
@@ -706,6 +710,7 @@ UUID=6b835efe-6110-46c2-aea3-99d0c169e238	none      	swap      	defaults,discard
 //192.168.50.2/public	/mnt/samba/public	cifs	credentials=/mnt/samba/smbcredentials,uid=cmos,gid=users,x-systemd.automount	0 0
 
 * dhcpcd
+vim /etc/dhcpcd.conf
 interface enp2s0f0
 static ip_address=xxx.xxx.xx.2/24
 static routers=xxx.xxx.xx.1
@@ -719,3 +724,64 @@ network.protocol-handler.warn-external.ftp = true
 network.protocol-handler.warn-external.http = true
 network.protocol-handler.warn-external.https = true
 mail.biff.use_system_alert = true
+
+* usb install media
+# dd bs=4M if=/path/to/archlinux.iso of=/dev/sdx status=progress oflag=sync
+
+* ssd
+https://www.jianshu.com/p/nQpqsN
+
+* arch install
+# ls /sys/firmware/efi/efivars
+# ping archlinux.org
+# timedatectl set-ntp true
+
+# fdisk -l
+# parted /dev/sdx
+(parted) mklabel gpt
+(parted) mkpart ESP fat32 1MiB 1GiB
+(parted) set 1 boot on
+(parted) mkpart primary ext4 1GiB 230GiB
+(parted) mkpart primary linux-swap 230GiB 100%
+(parted) q
+# fdisk -l
+# mkfs.fat -F32 /dev/sda1
+# mkfs.ext4 /dev/sda2
+# mkswap /dev/sda3
+# swapon /dev/sda3
+
+# mount /dev/sda2 /mnt
+# mkdir /mnt/boot
+# mount /dev/sda1 /mnt/boot
+vi /etc/pacman.d/mirrorlist
+# pacstrap /mnt base
+# genfstab -U /mnt >> /mnt/etc/fstab
+> fstab
+
+# arch-chroot /mnt
+# ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+# hwclock --systohc
+vi /etc/locale.gen
+# locale-gen
+vi /etc/locale.conf
+LANG=en_US.UTF-8
+vi /etc/hostname
+my_host_name
+vi /etc/hosts
+127.0.0.1	localhost
+::1		localhost
+127.0.1.1	my_host_name.localdomain	my_host_name
+
+server: dhcpcd
+laptop: iw, wpa_supplicant, NetworkManager(nmcli)
+
+# mkinitcpio -p linux
+# passwd
+> efibootmgr
+
+intel: intel-ucode
+> efibootmgr:intel
+
+# exit
+# umount -R /mnt
+# reboot

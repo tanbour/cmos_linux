@@ -1,0 +1,177 @@
+#!/usr/bin/perl
+##################################################################################
+# PROGRAM:     check_GDS_layer_usage.pl
+# CREATOR:     Zachary Shi <zacharys@alchip.com>
+# DESCRIPTION: check all the GDS layer information from PIPO logs
+# USAGE:       check_GDS_layer_usage.pl <pipo log directory>
+# INFORMATION: Initial version from Alchip Design Platform Group
+# DATE:        Sun Oct 22 16:53:46 CST 2017
+###################################################################################
+
+#### setting ####
+# please input the directory name of each block and top, eg: @block = qw( SC MEM IP IO), $top = "chip".
+my @block = qw( SC MEM IP IO ) ;
+my $top = "chip" ;
+
+@default_dir = (@block, $top);
+
+# "0" is for normal mode, "1" is for debug mode.
+my $is_debug = 0 ;
+
+#### sub function ####
+sub dprintf {
+  if ( $is_debug == 1 ) {
+    printf "$_[0]"
+  }
+}
+
+#### main ####
+$root_dir = shift ;
+$root_dir = $ENV{PWD} if( $root_dir eq "" ) ;
+
+undef %layers ;
+foreach $type ( @default_dir ) {
+  dprintf "Info: ####### $type\n" ;
+  ## create dir hash ##
+  my $hash_size = keys %{$type} ;
+  dprintf "Info: hash size of $type: $hash_size\n" ;
+  if ( $hash_size eq 0 ) {
+    undef %{$type} ;
+  }
+
+  ## get files in each dir ##
+  @files = sort( split( '\s+', `find $root_dir/$type -name "*\.*"` ) );
+  $file_num = @files ;
+  if( $file_num eq 0 ) {
+    printf "Warning: can not find the logs in the directory \"$type\", please check it\n";
+    next
+  }
+
+  ## check each file ##
+  foreach $file ( @files ) {
+    ( $file_name ) = $file =~ /\/([^\/]+)$/;
+    dprintf "Info: checking the file: $file\n";
+
+    my $is_layer = 0;
+    open( FILE, "< $file" ) ;
+    while (<FILE>) {
+      if ( /^\s+Statistics\s+of\s+Layers/ ) {
+        $is_layer = 1 ;
+        dprintf "Info: find the statistics of layers in the file: $file\n" ;
+      }
+
+      if ( $is_layer ) {
+        if ( /^\S+\s+\S+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+/ ) {
+          ( $layer_name , $layer_num , $layer_data_type ) = /^(\S+)\s+\S+\s+(\d+)\s+(\d+)\s+/ ;
+          dprintf "Info: layer and it related info: $layer_name => $layer_num:$layer_data_type\n" ;
+
+          ## for block and top hash
+          if ( exists( ${$type}{$layer_name} ) ) {
+            my $layer_value = ${$type}{$layer_name} ;
+            my @layer_value = split( ' ', $layer_value ) ;
+            if ( grep {$_ eq "$layer_num:$layer_data_type"} @layer_value ) {
+              dprintf "Info: got the same value in exists hash: @layer_value => $layer_num:$layer_data_type\n" ;
+            } else {
+              push( @layer_value , "$layer_num:$layer_data_type" ) ;
+              $layer_value = join( ' ', @layer_value ) ;
+              ${$type}{$layer_name} = $layer_value ;
+              dprintf "Info: add new value to exists hash: $type\{$layer_name\} => ${$type}{$layer_name}\n" ;
+            }
+
+          } else {
+            ${$type}{$layer_name} = "$layer_num:$layer_data_type" ;
+            dprintf "Info: new hash value: $type\{$layer_name\} => ${$type}{$layer_name} \n";
+          }
+
+          ## for hash %layers
+          if ( exists($layers{$layer_name}) ) {
+            my $layer_data = $layers{$layer_name} ;
+            my @layer_data = split(' ', $layer_data) ;
+            if ( grep {$_ eq "$layer_num:$layer_data_type"} @layer_data ) {
+              dprintf "Info: hash \%layers already have the same value: @layer_data => $layer_num:$layer_data_type\n" ;
+            } else {
+              push( @layer_data, "$layer_num:$layer_data_type" ) ;
+              $layer_data = join(' ', @layer_data) ;
+              $layers{$layer_name} = $layer_data ;
+              dprintf "Info: hash \%layers add new value: \$layers\{$layer_name\} => $layers{$layer_name}\n" ;
+            }
+          } else {
+            $layers{$layer_name} = "$layer_num:$layer_data_type" ;
+            dprintf "Info: hash \%layers have new value: $layer_num:$layer_data_type\n" ;
+          }
+        }
+
+      }
+    }
+  }
+
+  dprintf "\n#########################################\n";
+  dprintf "Info: summary of layer, layer number, and layer data type of \"$type\":\n" ;
+  foreach ( keys %{$type} ) {
+    dprintf "key: $_,\tvalue: ${$type}{$_}\n" ;
+  }
+  dprintf "#########################################\n";
+}
+
+dprintf "Info: summary of layer, layer number and layer date type of all layers\n";
+foreach ( keys %layers ) {
+  dprintf "key: $_,\tvalue: $layers{$_}\n";
+}
+
+#### checking and printing the result ####
+printf "####################################################################\n";
+printf "Info: Below is the GDS layer check summary:\n";
+printf " Layer(Number:Type)     ";
+foreach $type ( @default_dir ) {
+  printf ("%-6s", $type);
+}
+printf "  Result\n";
+printf "--------------------   ----  -----  ---  ----  ------  --------\n";
+
+foreach $layer ( keys %layers ) {
+  $layer_data = $layers{$layer} ;
+  @layer_data = split(' ', $layer_data) ;
+
+  foreach $layer_data ( @layer_data ) {
+    printf (" %-20s ", "$layer ($layer_data)");
+
+    ## for block
+    my $flag = 0;
+    foreach $type ( @block ) {
+      $type_value = ${$type}{$layer} ;
+      @type_value = split(' ', $type_value);
+      $type_value_num = @type_value ;
+      if ($type_value_num eq 0) {
+        printf "  NO  ";
+      } else {
+        if ( grep { $_ eq $layer_data } @type_value ) {
+          printf "  YES ";
+          $flag = 1;
+        } else {
+          printf "  NO  ";
+        }
+      }
+    }
+
+    ## for top
+    $type_value = ${$top}{$layer};
+    @type_value = split(' ', $type_value);
+    $type_value_num = @type_value ;
+    if ($type_value_num eq 0) {
+      printf "  NO      Fail\n";
+    } else {
+      if ( grep { $_ eq $layer_data } @type_value ) {
+        printf "  YES ";
+        if ($flag eq 0 ) {
+          printf "    Warning\n";
+        } else {
+          printf "    OK\n";
+        }
+      } else {
+        printf "  NO      Fail\n";
+      }
+    }
+
+  }
+}
+

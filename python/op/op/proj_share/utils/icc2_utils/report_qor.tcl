@@ -1,0 +1,213 @@
+puts "Alchip-info: Running script [info script]\n"
+
+set cur_stage          "$cur_stage"
+
+####################################
+## Timing Constraints 
+####################################
+puts "Alchip-info: reporting timing constraints ...\n"
+if {$common_report_scenario == "true"} { 
+redirect -file $blk_rpt_dir/$cur_stage.scenarios.rpt {report_scenarios}
+}
+if {$common_report_pvt == "true" } {
+redirect -file $blk_rpt_dir/$cur_stage.pvt.rpt {report_pvt}
+}
+####################################
+## Timing and QoR 
+####################################
+puts "Alchip-info: reporting timing and QoR ...\n"
+## QoR
+if {$common_report_qor == "true" } {
+redirect -file $blk_rpt_dir/$cur_stage.qor.rpt {report_qor -scenarios [all_scenarios]}
+redirect -tee -append -file $blk_rpt_dir/$cur_stage.qor.rpt {report_qor -summary}
+}
+## Timing (-variation enabled for POCV)
+if {$common_report_timing == "true" } {
+if {[get_app_option_value -name time.pocvm_enable_analysis]} {
+	redirect -file $blk_rpt_dir/$cur_stage.timing.max.rpt {report_timing -delay max -scenarios [all_scenarios] \
+	-input_pins -nets -transition_time -capacitance -attributes -physical -derate -report_by group -variation}
+} else {
+	redirect -file $blk_rpt_dir/$cur_stage.timing.max.rpt {report_timing -delay max -scenarios [all_scenarios] \
+	-input_pins -nets -transition_time -capacitance -attributes -physical -derate -report_by group}
+}
+
+# Min timing report is generated in postcts (-variation enabled for POCV)
+if {$cur_stage == "03_clock"| $cur_stage == "04_clock_opt" | $cur_stage == "05_route" | $cur_stage == "06_route_opt" | $cur_stage == "08_finish"} {
+	if {[get_app_option_value -name time.pocvm_enable_analysis]} {
+		redirect -file $blk_rpt_dir/$cur_stage.timing.min.rpt {report_timing -delay min -scenarios [all_scenarios] \
+		-input_pins -nets -transition_time -capacitance -attributes -physical -derate -report_by group -variation}
+	} else {
+		redirect -file $blk_rpt_dir/$cur_stage.timing.min.rpt {report_timing -delay min -scenarios [all_scenarios] \
+		-input_pins -nets -transition_time -capacitance -attributes -physical -derate -report_by group}
+	}
+}
+}
+if {$common_report_constraint == "true" } {
+## Constraint violations
+redirect -file $blk_rpt_dir/$cur_stage.constraint.rpt {report_constraint -all_violators -max_transition -max_capacitance -scenarios [all_scenarios]}
+}
+if {$common_report_congestion_map == "true" } {
+#congestion map
+if {$cur_stage == "02_place" | $cur_stage == "03_clock"| $cur_stage == "04_clock_opt" | $cur_stage == "05_route" | $cur_stage == "06_route_opt"} {
+	redirect -tee -file $blk_rpt_dir/$cur_stage.route_global.congestion_map_only.rpt {route_global -congestion_map_only true}
+}
+}
+
+####################################
+## UPF and power 
+####################################
+# redirect -file $blk_rpt_dir/$cur_stage.check_mv_design {check_mv_design} ;# included in the check_design commands
+if {$common_report_threshold_voltage_group == "true" } {
+	redirect -file $blk_rpt_dir/$cur_stage.threshold_voltage_group.rpt {report_threshold_voltage_group}
+}
+if {$common_report_power == "true" } {
+redirect -file $blk_rpt_dir/$cur_stage.power.rpt {report_power -verbose -scenarios [all_scenarios]}
+}
+if {$common_report_mv_path == "true" } {
+redirect -file $blk_rpt_dir/$cur_stage.mv_path.rpt {report_mv_path -all_not_associated}
+}
+####################################
+## Clock trees 
+####################################
+if {$cts_report_clock_tree_info == "true"} {
+if {$cur_stage == "03_clock" | $cur_stage == "04_clock_opt" } {
+	puts "Alchip-info: reporting clock tree information and QoR ...\n"
+# report clock timing for each scenario from Alicez
+foreach SCENARIO_NAME [get_object_name [all_scenarios]] {
+current_scenario $SCENARIO_NAME 
+set output_dir $blk_rpt_dir/${cur_stage}_report/${SCENARIO_NAME}
+sh mkdir -p  $blk_rpt_dir/${cur_stage}_report
+sh mkdir -p $output_dir
+        foreach_in_collection clock [ get_clocks * ] {
+             set clock_name [ get_attribute $clock full_name ]
+             foreach_in_collection source [ get_attribute $clock sources ] {
+             	set source_name [ get_attribute $source full_name ]
+             	echo [ format "# report_clock_timing -nosplit -significant_digits 3 -type latency -nworst 9999999 -clock %s -from %s" $clock_name $source_name ] \
+             	>> $output_dir/report_clock_timing.latency.rpt
+             	report_clock_timing -nosplit -significant_digits 3 -type latency -nworst 9999999 -clock $clock_name -from $source_name \
+             	>> $output_dir/report_clock_timing.latency.rpt
+
+             	echo [ format "# report_clock_timing -nosplit -significant_digits 3 -type latency -nworst 9999999 -clock %s -from %s" $clock_name $source_name ] \
+             	> $output_dir/${clock_name}.report_clock_timing.latency.rpt
+             	report_clock_timing -nosplit -significant_digits 3 -type latency -nworst 9999999 -clock $clock_name -from $source_name \
+             	>> $output_dir/${clock_name}.report_clock_timing.latency.rpt
+		
+       		 sh ${blk_utils_dir}/icc2_utils/check_report_clock_timing_latency.pl \
+       		      $output_dir/${clock_name}.report_clock_timing.latency.rpt \
+       		    > $output_dir/${clock_name}.report_clock_timing.latency.summary.rpt
+		
+             }
+        }
+        report_clock_qor  -type summary -significant_digits 3  -scenarios $SCENARIO_NAME    > $blk_rpt_dir/$cur_stage.report_clock_qor_clock_summary.rpt
+        report_clock_qor  -type structure  -significant_digits 3  -scenarios $SCENARIO_NAME > $output_dir/report_clock_qor_clock_structure.rpt
+        report_clock_qor  -histogram_type latency -histogram_bins 15 -significant_digits 3 -nosplit  -scenarios $SCENARIO_NAME > $output_dir/report_clock_qor_clock_latency.rpt
+
+        sh /usr/bin/perl ${blk_utils_dir}/icc2_utils/check_report_clock_timing_latency.pl \
+             $output_dir/report_clock_timing.latency.rpt \
+           >  $output_dir/$cur_stage.report_clock_timing.latency.summary.rpt
+}
+}
+}
+####################################
+## Routing  
+####################################
+## check_routes is performed for postroute
+if {$route_check_route == "true" } {
+if {$cur_stage == "03_clock"| $cur_stage == "04_clock_opt" | $cur_stage == "05_route" | $cur_stage == "06_route_opt"} {
+	puts "Alchip-info: Verifying and checking routing ...\n"
+	redirect -file $blk_rpt_dir/$cur_stage.check_routes.log {check_routes}
+}
+}
+
+####################################
+## report_design  
+####################################
+
+if {$common_report_utilization == "true" } {
+redirect -tee -file $blk_rpt_dir/$cur_stage.utilization.rpt {report_utilization}
+}
+  
+####################################
+## MISC  
+####################################
+if {$common_report_units == "true" } {
+puts "Alchip-info: reporting units ...\n"
+	redirect -file $blk_rpt_dir/$cur_stage.units.rpt {report_units}
+}
+
+########################################################################
+## Additional Zero interconnect delay reporting at init_design stage  
+########################################################################
+if {$fp_report_zero_interconnect_delay_timing == "true" } { 
+if {$cur_stage == "01_fp"} {
+	puts "Alchip-info: time.delay_calculation_style is set to zero_interconnect ...\n"
+	set_app_options -name time.delay_calculation_style -value zero_interconnect
+	
+	puts "Alchip-info: reporting timing and QoR in zero_interconnect mode ...\n"
+	## QoR
+	redirect -file $blk_rpt_dir/$cur_stage.zero_interconnect.qor.rpt {report_qor -scenarios [all_scenarios]}
+	redirect -tee -append -file $blk_rpt_dir/$cur_stage.zero_interconnect.qor.rpt {report_qor -summary}
+
+	puts "Alchip-info: time.delay_calculation_style is reset...\n"
+	reset_app_options time.delay_calculation_style
+}
+}
+########################################################################
+## Additional non-SI reporting at route_auto and route_opt stage  
+########################################################################
+if {$route_no_si_timing_report == "true" } {
+if {$cur_stage == "05_route" | $cur_stage == "06_route_opt"} {
+	if {[get_app_option_value -name time.si_enable_analysis]} {
+		set RM_current_value_enable_si true
+	}
+	puts "Alchip-info: time.si_enable_analysis is set to false ...\n"
+	set_app_options -name time.si_enable_analysis -value false
+	
+	puts "Alchip-info: reporting timing and QoR in non-SI mode ...\n"
+	## QoR
+	redirect -file $blk_rpt_dir/$cur_stage.no_si.qor.rpt {report_qor -scenarios [all_scenarios]}
+	redirect -tee -append -file $blk_rpt_dir/$cur_stage.no_si.qor.rpt {report_qor -summary}
+	
+	## Timing (-variation enabled for POCV)
+	if {[get_app_option_value -name time.pocvm_enable_analysis]} {
+		redirect -file $blk_rpt_dir/$cur_stage.no_si.timing.max.rpt {report_timing -delay max -scenarios [all_scenarios] \
+		-input_pins -nets -transition_time -capacitance -attributes -physical -derate -report_by group -variation}
+	} else {
+		redirect -file $blk_rpt_dir/$cur_stage.no_si.timing.max.rpt {report_timing -delay max -scenarios [all_scenarios] \
+		-input_pins -nets -transition_time -capacitance -attributes -physical -derate -report_by group}
+	}
+
+	## Restore user default of time.enable_si
+	if {[info exists RM_current_value_enable_si] && ${RM_current_value_enable_si}} {
+		set_app_options -name time.si_enable_analysis -value true
+	}
+}
+}
+########################################################################
+##  detail timing report
+########################################################################
+
+if {$common_report_detail_timing == "true" } {
+foreach_in sc [get_scenario *] {
+  set sc_name [get_object_name $sc ]
+  echo "INFO: $sc_name"
+  current_scenario $sc_name
+
+  report_timing -slack_lesser_than 0 -max_paths 99999 -nosplit -sort_by slack -nets -input_pins -significant_digits 3 -scenarios $sc_name > $blk_rpt_dir/$cur_stage.${sc_name}_timing.rpt
+  exec ${blk_utils_dir}/icc2_utils/check_violation_summary.pl $blk_rpt_dir/$cur_stage.${sc_name}_timing.rpt > $blk_rpt_dir/$cur_stage.${sc_name}_timing.rpt.sum
+  exec ${blk_utils_dir}/icc2_utils/sort_sta_violation_summary.pl  $blk_rpt_dir/$cur_stage.${sc_name}_timing.rpt.sum > $blk_rpt_dir/$cur_stage.${sc_name}_timing.rpt.sum.sort
+  exec gzip -f $blk_rpt_dir/$cur_stage.${sc_name}_timing.rpt
+exec rm $blk_rpt_dir/$cur_stage.${sc_name}_timing.rpt.sum
+# internal
+  set_false_path -from [ all_inputs ]
+  set_false_path -to [ all_outputs ]
+  report_timing -slack_lesser_than 0 -max_paths 99999 -nosplit -sort_by slack -nets -input_pins -significant_digits 3 -scenarios $sc_name > $blk_rpt_dir/$cur_stage.${sc_name}_timing_internal.rpt
+  exec ${blk_utils_dir}/icc2_utils/check_violation_summary.pl $blk_rpt_dir/$cur_stage.${sc_name}_timing_internal.rpt > $blk_rpt_dir/$cur_stage.${sc_name}_timing_internal.rpt.sum
+  exec ${blk_utils_dir}/icc2_utils/sort_sta_violation_summary.pl  $blk_rpt_dir/$cur_stage.${sc_name}_timing_internal.rpt.sum > $blk_rpt_dir/$cur_stage.${sc_name}_timing_internal.rpt.sum.sort
+  exec gzip -f $blk_rpt_dir/$cur_stage.${sc_name}_timing_internal.rpt
+exec rm $blk_rpt_dir/$cur_stage.${sc_name}_timing_internal.rpt.sum
+}
+}
+
+puts "Alchip-info: Completed script [info script]\n"
+

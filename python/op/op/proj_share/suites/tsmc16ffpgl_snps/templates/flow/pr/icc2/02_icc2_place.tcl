@@ -1,43 +1,40 @@
 
 ##########################################################################################
 # Tool: IC Compiler II
-# Alchip Onepiece
 ##########################################################################################
 puts "Alchip-info : Running script [info script]\n"
 
-#set pre_stage icc2_fp
-#set cur_stage icc2_place
+##===================================================================##
+## SETUP                                                             ##
+##===================================================================##
+
+source {{cur.flow_scripts_dir}}/pr/00_setup.tcl
+source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+
 set pre_stage "{{pre.sub_stage}}"
 set cur_stage "{{cur.sub_stage}}"
 
 set pre_stage [lindex [split $pre_stage .] 0]
 set cur_stage [lindex [split $cur_stage .] 0]
 
-##mkdir tool output dirctory
+set blk_rpt_dir       "{{cur.cur_flow_rpt_dir}}"
 set pre_flow_data_dir "{{pre.flow_data_dir}}/{{pre.stage}}"
-
-set BLK_NAME          "{{env.BLK_NAME}}"
+set cur_design_library "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
+set icc2_cpu_number   "[lindex "{{local._job_cpu_number}}" end]"
+set_host_option -max_cores $icc2_cpu_number
 
 set pre_design_library  "$pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.nlib"
 set cur_design_library "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
 
-set place_cpu_number "{{local.place_cpu_number}}"
-set place_opt_active_scenario_list "{{local.place_opt_active_scenario_list}}"
 set optimization_flow "{{local.optimization_flow}}"
-set place_opt_spg_flow "{{local.place_opt_spg_flow}}"
-set place_opt_optimize_icgs "{{local.place_opt_optimize_icgs}}"
-set place_opt_optimize_icgs_critical_range "{{local.place_opt_optimize_icgs_critical_range}}"
-set place_opt_multibit_banking "{{local.place_opt_multibit_banking}}"
-set place_opt_multibit_debanking  "{{local.place_opt_multibit_debanking}}"
-set place_opt_refine_opt "{{local.place_opt_refine_opt}}"
-set pre_cts_setup_uncertainty "{{local.pre_cts_setup_uncertainty}}"
-set write_def_convert_icc2_site_to_lef_site_name_list "{{local.write_def_convert_icc2_site_to_lef_site_name_list}}"
-
-##setup host option
-
-set_host_option -max_core $place_cpu_number
-
-##back up database
+set place_opt_active_scenario_list "{{local.place_opt_active_scenario_list}}"
+set switch_activity_file "{{local.switch_activity_file}}" 
+set switch_activity_file_power_scenario "{{local.switch_activity_file_power_scenario}}" 
+set enable_place_reporting "{{local.enable_place_reporting}}"
+##===================================================================##
+## back up database
+## copy block and lib from previous stage
+##===================================================================##
 set bak_date [exec date +%m%d]
 if {[file exist ${cur_design_library}] } {
 if {[file exist ${cur_design_library}_bak_${bak_date}] } {
@@ -50,9 +47,7 @@ copy_lib -from_lib ${pre_design_library} -to_lib ${cur_design_library} -no_desig
 open_lib ${pre_design_library}
 copy_block -from ${pre_design_library}:{{env.BLK_NAME}}/${pre_stage} -to ${cur_design_library}:{{env.BLK_NAME}}/${cur_stage}
 close_lib ${pre_design_library}
-
 open_lib ${cur_design_library}
-
 current_block {{env.BLK_NAME}}/${cur_stage}
 
 link_block
@@ -72,53 +67,76 @@ set_scenario_status -active true [all_scenarios]
 ########################################################################
 ## Additional timer related setups :prects uncertainty 	
 ########################################################################
-{% if local.pre_cts_setup_uncertainty != "" %} 
-foreach scenario $place_opt_active_scenario_list {
-current_scenario $scenario
-remove_clock_uncertainty -setup -hold [all_clocks ]
-set_clock_uncertainty -setup $pre_cts_setup_uncertainty [all_clocks ]
-}
-{% endif %}
 
 ########################################################################
 ## place_opt settings	
 ########################################################################
 ## Reset all app options in current block
 reset_app_options -block [current_block] *
-{% include 'icc2/tsmc_settings/tsmc16ffc_common.tcl' %}
-{% include 'icc2/tsmc_settings/tsmc16ffc_place.tcl' %}
 
-set_app_option -list {place.coarse.continue_on_missing_scandef true}
-########################################################################
-## source dont_use/hold_fix/cts cell 
-########################################################################
-#source -e -v "{{cur.config_plugins_dir}}/icc2_scripts/set_lib_cell_purpose.tcl"
+puts "Alchip-info: settings icc2_settings/icc2_common.tcl"
+{% include  'icc2/icc2_settings/icc2_common.tcl' %} 
+
+puts "Alchip-info: settings icc2_settings/icc2_place.tcl "
+{% include  'icc2/icc2_settings/icc2_place.tcl' %} 
+
+puts "Alchip-info: Sourcing  tsmc16ffpgl settings"
+{% include 'icc2/tsmc16ffpgl_settings/tsmc16ffpgl_settings.tcl'%} 
+
+puts "Alchip-info: Sourcing  set_lib_cell_purpose.tcl"
+source -e -v "{{cur.config_plugins_dir}}/icc2_scripts/common_scripts/set_lib_cell_purpose.tcl"
 
 ####################################
 ## Enable AOCV 	
 ####################################
-{% if local.ocv_mode == "aocv" %} 
+{%- if local.ocv_mode == "aocv" %} 
 ## Enable the AOCV analysis
 set_app_options -name time.aocvm_enable_analysis -value true ;# default false
-{% elif local.ocv_mode == "pocv" %} 
-set_app_options -name  time.pocvm_enable_analysis true ; ;# default false
+{%- elif local.ocv_mode == "pocv" %} 
+set_app_options -name  time.pocvm_enable_analysis -value true ; ;# default false
+{%- else %}
+set_app_options -name time.aocvm_enable_analysis -value false ;# default false
+set_app_options -name  time.pocvm_enable_analysis -value false ; ;# default false
 {% endif %}
 
 ####################################
 ## read_saif 
 ####################################
-## read_saif is recommended for features such as PREROUTE_LOW_POWER_PLACEMENT, and PREROUTE_TOTAL_POWER_OPTIMIZATION
+{%- if local.switch_activity_file %}
+	if {$switch_activity_file_power_scenario != ""} {
+		set read_saif_cmd "read_saif $switch_activity_file -scenarios $switch_activity_file_power_scenario"
+	} else {
+		set read_saif_cmd "read_saif $switch_activity_file"
+	}
+   	if {$switch_activity_file_source_instance != ""} {lappend read_saif_cmd -strip_path $switch_activity_file_source_instance}
+	if {$switch_activity_file_target_instance != ""} {lappend read_saif_cmd -path $switch_activity_file_target_instance}
+	puts "Alchip-info : $read_saif_cmd"
+	eval $read_saif_cmd
+{%- endif %}
 
 ####################################
 ## Pre-place_opt customizations
 ####################################
+source {{cur.config_plugins_dir}}/icc2_scripts/02_place/00_usr_pre_place.tcl
+####################################
+## report place_opt start non default app options
+####################################
+redirect -tee -file $blk_rpt_dir/$cur_stage.app_options.start.rpt {report_app_options -non_default}
 
-{# OPTIMIZATION_FLOW: ttr  : runs two pass place_opt #}
+####################################
+## place_opt run command 
+####################################
+{#- source usr place_opt command file from plugins #}
+{%- if local.use_usr_place_opt_cmd_tcl == "true" %}
+source {{cur.config_plugins_dir}}/icc2_scripts/02_place/01_usr_place_opt_cmd.tcl
+save_block
+{%- else %}
+{#- OPTIMIZATION_FLOW: ttr  : runs two pass place_opt #}
 {%- if  local.optimization_flow == "ttr"  %}
 #######################################################################
 #OPTIMIZATION_FLOW: ttr: runs single place_opt	
 #######################################################################
-{%- if local.place_opt_spg_flow == "true" %}
+{%- if local.use_spg_flow == "true" %}
 set_app_options -name place_opt.flow.do_spg -value true
 {%- endif %}
 place_opt
@@ -330,38 +348,76 @@ puts "Alchip-info: Running split_multibit -slack_threshold 0"
 split_multibit -slack_threshold 0
 {%- endif %}
 {%- endif %}
+{%- endif %}
+
 ####################################
 ## Post-place_opt customizations
 ####################################
-
-#touch -f  {{cur.config_plugins_dir}}/02_place_plug/post_place.tcl
+source {{cur.config_plugins_dir}}/icc2_scripts/02_place/00_usr_post_place.tcl
 
 ####################################
 ## refine_opt	
 ####################################
+source {{cur.config_plugins_dir}}/icc2_scripts/02_place/02_usr_pre_refine_opt.tcl
+{#- source usr refine_opt command file from plugins #}
+{%- if local.use_usr_refine_opt_cmd_tcl == "true" %}
+source {{cur.config_plugins_dir}}/icc2_scripts/02_place/03_usr_refine_opt_cmd.tcl
+{%- else %}
 {%- if local.place_opt_refine_opt == "true" %} 
 puts "Alchip-info: Running refine_opt command"
 refine_opt
 puts "Alchip-info: save block for refine_opt"
 save_block 
 {%- endif %}
+{%- if local.refine_opt_enable_exclusive_power_opt == "true" %}
+set_app_options -name refine_opt.flow.exclusive -value power
+refine_opt
+puts "Alchip-info: save block for refine_opt power optimization"
+save_block 
+{%- endif %}
+{%- if local.refine_opt_enable_exclusive_area_opt == "true" %}
+set_app_options -name refine_opt.flow.exclusive -value area
+refine_opt
+puts "Alchip-info: save block for refine_opt area optimization"
+save_block 
+{%- endif %}
+{%- endif %}
+source {{cur.config_plugins_dir}}/icc2_scripts/02_place/02_usr_post_refine_opt.tcl
 
 ####################################
-## output netlist/def
+## Connect pg net	
 ####################################
+{# commnets by DM: 
+Info: recommand PL modify "connect_pg_net directly on this line base on block name instead of using script."
+For example : 
+if {$blk_name == orange } {
+connect_pg_net -net VDD [get_port VDD] 
+} 
+-#}
+
+set connect_pg_net_body [open {{cur.config_plugins_dir}}/icc2_scripts/common_scripts/connect_pg_net.tcl  r]
+if {[gets $connect_pg_net_body line1] >= 0} {
+        puts "Alchip-info : Sourcing [which $TCL_USER_CONNECT_PG_NET_SCRIPT]"
+        source -e -v $TCL_USER_CONNECT_PG_NET_SCRIPT
+} else {
+puts "Alchip-info: Running connect_pg_net command"
+	connect_pg_net
+	# For non-MV designs with more than one PG, you should use connect_pg_net in manual mode.
+}
+close $connect_pg_net_body
 
 ####################################
 ## save design
 ####################################
 save_block
 save_block -as {{env.BLK_NAME}}
-save_lib
-
 ####################################
 ## Report and output
 ####################################			 
-{%- if local.write_place_data == "true" %} 
-
+{%- if local.place_use_usr_write_data_tcl == "true" %}
+source {{cur.config_plugins_dir}}/icc2_scripts/02_place/08_usr_write_data.tcl
+{%- else %}
+{%- if local.place_write_data == "true" %} 
 write_verilog -compress gzip -exclude {leaf_module_declarations pg_objects} -hierarchy all {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.v
 
 write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.pg.v
@@ -372,6 +428,41 @@ write_def -include_tech_via_definitions -convert_sites { $write_def_convert_icc2
 write_def -include_tech_via_definitions -compress gzip {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.def
 {%- endif %}
 {%- endif %}
+{%- endif %}
+
+####################################
+## report place_opt end non default app options
+####################################
+redirect -tee -file $blk_rpt_dir/$cur_stage.app_options.end.rpt {report_app_options -non_default}
+
+####################################
+## generate early touch file
+####################################	
+exec touch {{cur.cur_flow_sum_dir}}/${cur_stage}.{{env.BLK_NAME}}.early_complete
+####################################
+## create abstract
+####################################	
+{%- if local.place_create_abstract == "true" %}
+open_block  {{env.BLK_NAME}} 
+create_abstract
+create_frame
+save_lib
+{%- endif %}
+
+####################################
+## Report and output
+####################################			 
+{%- if local.place_use_usr_report_tcl == "true" %}
+source -v {{cur.config_plugins_dir}}/icc2_scripts/02_place/09_usr_place_report.tcl
+{%- else %}
+set REPORT_QOR_SCRIPT {{env.PROJ_UTILS}}/icc2_utils/report_qor.tcl
+{%- if local.enable_place_reporting == "true" %} 
+puts "Alchip-info: Sourcing [which $REPORT_QOR_SCRIPT]"
+source -v -e $REPORT_QOR_SCRIPT
+{%- endif %}
+{%- endif %}
+source -v -e {{env.PROJ_UTILS}}/icc2_utils/snapshot.tcl
 ####################################
 ## exit icc2
-####################################	
+####################################
+puts "Alchip-info : Completed script [info script]\n"

@@ -3,9 +3,11 @@
 # Alchip Onepiece
 ##########################################################################################
 puts "Alchip-info : Running script [info script]\n"
-
-#set pre_stage icc2_fp
-#set cur_stage icc2_fp
+##===================================================================##
+## SETUP                                                             ##
+##===================================================================##
+source {{cur.flow_scripts_dir}}/pr/00_setup.tcl
+source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
 
 set pre_stage "{{pre.sub_stage}}"
 set cur_stage "{{cur.sub_stage}}"
@@ -13,35 +15,28 @@ set cur_stage "{{cur.sub_stage}}"
 set pre_stage [lindex [split $pre_stage .] 0]
 set cur_stage [lindex [split $cur_stage .] 0]
 
-##mkdir tool output dirctory
-set pre_flow_data_dir "{{pre.flow_data_dir}}/{{pre.stage}}"
-
-set BLK_NAME          "{{env.BLK_NAME}}"
-
-{%- if local.use_dc_output_netlist == "true" %}
-set BLK_NETLIST_LIST  "$pre_flow_data_dir/{{env.BLK_NAME}}.v"
-{%- else %} 
-set BLK_NETLIST_LIST  "{{env.BLK_NETLIST}}/{{ver.netlist}}/{{env.BLK_NAME}}.v"
-{%- endif %} 
-set BLK_SDC_DIR       "{{env.BLK_SDC}}/{{ver.sdc}}"
-set OCV_MODE          "{{local.ocv_mode}}" 
-set NDM_TECH          "{{liblist.NDM_TECH}}" 
-set NDM_STD           "{{liblist.NDM_STD}}"
-
-set reference_library "{{liblist.NDM_STD}} {{liblist.NDM_TECH}}"
+set blk_rpt_dir       "{{cur.cur_flow_rpt_dir}}"
 set cur_design_library "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
+set icc2_cpu_number   "[lindex "{{local._job_cpu_number}}" end]"
+set_host_option -max_cores $icc2_cpu_number
+set enable_fp_reporting "{{local.enable_fp_reporting}}"
+##===================================================================##
+##  Design creation                                                  ##
+##===================================================================##
 
-source {{cur.flow_liblist_dir}}/liblist/liblist.tcl 
-
-##back up database
+## backup previous database
 set bak_date [exec date +%m%d]
 if {[file exist ${cur_design_library}] } {
 if {[file exist  ${cur_design_library}_bak_${bak_date}] } {
 exec rm -rf ${cur_design_library}_bak_${bak_date}
 }
+puts "Alchip-info: The specified ICC2 ndm database is already existing. It will be renamed first."
 exec mv -f ${cur_design_library} ${cur_design_library}_bak_${bak_date}
 }
+
 ## create lib
+source {{cur.config_plugins_dir}}/icc2_scripts/01_fp/00_usr_pre_create_lib.tcl
+
 create_lib \
     -use_technology_lib {{liblist.NDM_TECH}} \
     -ref_libs $reference_library \
@@ -49,57 +44,191 @@ create_lib \
 
 open_lib $cur_design_library
 
-##read verilog
-read_verilog -top {{env.BLK_NAME}}  $BLK_NETLIST_LIST
+source {{cur.config_plugins_dir}}/icc2_scripts/01_fp/00_usr_post_create_lib.tcl
+
+{%- if local.use_spg_flow == "false" %}
+puts "Alchip-info: reading verilog ...... "
+read_verilog -top {{env.BLK_NAME}}  $blk_netlist_list
 current_block {{env.BLK_NAME}}
 link_block
 save_lib
+{%- elif  local.use_spg_flow == "true" %}
+puts "Alchip-info: reading $dc_output_icc2_script for spg_flow ...... "
+source  "$dc_output_icc2_script"
+{%- endif %}
 
-##setup constraint
-#read_sdc {{env.BLK_SDC}}/{{ver.sdc}}{{env.BLK_NAME}}.func.sdc
+##load and commit UPF file
+{%- if local.use_upf == "true" %}
+puts "Alchip-info: use_upf is true, block upf will been load"
+		load_upf $low_power_file
+		commit_upf
+		associate_mv_cells -all
+{%- else %}
+puts "Alchip-info: use_upf is false, block upf will not been load"
+{%- endif %}
 
-#set_voltage  0.72 -object VDD
-#set_voltage  0 -object VSS
-source  -e -v "{{cur.config_plugins_dir}}/icc2_scripts/mcmm/mcmm.tcl"
+## source mcmm file setup timing constrains
+
+{% include  'icc2/mcmm.tcl' %}
+
+## set io false path
 {% if local.fix_io_hold == "true" %}
 foreach scenario [get_object_name [get_scenarios -filter "active == true"]] {
 puts "Alchip-info : set IO hold false path to scenario $scenario "
 
+current_scenario $scenario
 set_false_path -hold -from [all_inputs] -to [all_outputs]
-#}
 {% else %}
 puts "Alchip-info : IO hold is not set be false path to scenario  "
 {% endif %}
 
-########################################################################
 ## Additional timer related setups : create path groups 	
-########################################################################
 set_app_options -name time.enable_io_path_groups -value true  
+}
+## Connect pg net	
+{# commnets by DM: 
+Info: recommand PL modify "connect_pg_net directly on this line base on block name instead of using script."
+For example : 
+if {$blk_name == orange } {
+connect_pg_net -net VDD [get_port VDD] 
+} 
+-#}
 
-###report
-{%- if local.enable_report == "true" %}
-redirect -tee {{cur.cur_flow_rpt_dir}}/{{env.BLK_NAME}}.report_timing  {report_timing}
-{%- endif %}
+set connect_pg_net_body [open {{cur.config_plugins_dir}}/icc2_scripts/common_scripts/connect_pg_net.tcl  r]
+if {[gets $connect_pg_net_body line1] >= 0} {
+        puts "Alchip-info : Sourcing [which $TCL_USER_CONNECT_PG_NET_SCRIPT]"
+        source -e -v $TCL_USER_CONNECT_PG_NET_SCRIPT
+} else {
+puts "Alchip-info: Running connect_pg_net command"
+	connect_pg_net
+	# For non-MV designs with more than one PG, you should use connect_pg_net in manual mode.
+}
+close $connect_pg_net_body
 
-###auto floorplan
-{%- if local.auto_fp == "true" %} 
-initialize_floorplan
-write_def  -compress gzip {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.def
+## save design and lib before floorplan 
+save_block 
+save_block -as {{env.BLK_NAME}}/${cur_stage}
+save_lib 
+########################################################################
+## floorplan stage
+########################################################################
+## Reset all app options in current block
+reset_app_options -block [current_block] *
+
+puts "Alchip-info: settings icc2_settings/icc2_common.tcl"
+{% include  'icc2/icc2_settings/icc2_common.tcl' %} 
+
+puts "Alchip-info: settings icc2_settings/icc2_place.tcl "
+{% include  'icc2/icc2_settings/icc2_place.tcl' %} 
+
+puts "Alchip-info: Sourcing  tsmc16ffpgl settings"
+{% include 'icc2/tsmc16ffpgl_settings/tsmc16ffpgl_settings.tcl'%} 
+
+puts "Alchip-info: Sourcing  set_lib_cell_purpose.tcl"
+source -e -v "{{cur.config_plugins_dir}}/icc2_scripts/common_scripts/set_lib_cell_purpose.tcl"
+
+####################################
+## Pre-Floorplan customizations
+####################################
+source -e -v  "{{cur.config_plugins_dir}}/icc2_scripts/01_fp/01_usr_pre_fp.tcl"
+####################################
+## source floorplan or manul floorplan
+####################################
+{%- if local.enable_manual_floorplan == "false" %} 
+{%- if local.def_convert_site_list %} 
+puts "Alchip-info:read_def read_def -add_def_only_objects all {{env.BLK_FP}}/{{ver.fp}}/{{env.BLK_NAME}}.def.gz -convert_sites { local.def_convert_site_list }"
+read_def -add_def_only_objects all {{env.BLK_FP}}/{{ver.fp}}/{{env.BLK_NAME}}.def.gz -convert_sites { local.def_convert_site_list }
 {%- else %}
-read_def {{env.BLK_FP}}/{{ver.fp}}/{{env.BLK_NAME}}.def.gz
+puts "Alchip-info:read_def read_def -add_def_only_objects all {{env.BLK_FP}}/{{ver.fp}}/{{env.BLK_NAME}}.def.gz "
+read_def -add_def_only_objects all {{env.BLK_FP}}/{{ver.fp}}/{{env.BLK_NAME}}.def.gz
 {%- endif %}
-place_pin -self
+{%- elif local.enable_manual_floorplan == "true" %}
+puts  "Alchip-info: manual floorplan is enabled, please start manual work and save block before exit icc2!"
+return
+{%- endif %}
+####################################
+## SCANDEF 
+####################################
+if {[file exists [which $scandef_file]]} {
+		read_def $scandef_file	
+} 
+####################################
+## MV setup :
+## provide a customized MV script	
+####################################
+## A Tcl script placeholder for your MV setup commands,such as create_voltage_area, placement bound, 
+#  power switch creation and level shifter insertion, etc
+if {[file exists [which $tcl_mv_setup_file]]} {
+	puts "Alchip-info : Sourcing [which $tcl_mv_setup_file]"
+	source -v -echo $tcl_mv_setup_file
+} 
+####################################
+## Post-Floorplan customizations
+####################################
+source -v -e  "{{cur.config_plugins_dir}}/icc2_scripts/01_fp/01_usr_post_fp.tcl"
+####################################
+## Connect pg net	
+####################################
+{# commnets by DM: 
+Info: recommand PL modify "connect_pg_net directly on this line base on block name instead of using script."
+For example : 
+if {$blk_name == orange } {
+connect_pg_net -net VDD [get_port VDD] 
+} 
+-#}
 
-###create placement
-set_app_option -list {place.coarse.continue_on_missing_scandef true}
-create_placement 
+set connect_pg_net_body [open {{cur.config_plugins_dir}}/icc2_scripts/common_scripts/connect_pg_net.tcl  r]
+if {[gets $connect_pg_net_body line1] >= 0} {
+        puts "Alchip-info : Sourcing [which $TCL_USER_CONNECT_PG_NET_SCRIPT]"
+        source -e -v $TCL_USER_CONNECT_PG_NET_SCRIPT
+} else {
+puts "Alchip-info: Running connect_pg_net command"
+	connect_pg_net
+	# For non-MV designs with more than one PG, you should use connect_pg_net in manual mode.
+}
+close $connect_pg_net_body
+####################################
+## output netlist/def
+####################################
+{%- if local.use_usr_fp_write_data == "true" %}
+source {{cur.config_plugins_dir}}/icc2_scripts/01_fp/08_usr_write_data.tcl 
+{%- else %}
+{%- if local.fp_write_data == "true" %}
+write_verilog -compress gzip -exclude {leaf_module_declarations pg_objects} -hierarchy all {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.v
 
-start_gui
-sh sleep 10
-stop_gui
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.pg.v
+
+write_def -include_tech_via_definitions -compress gzip {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.def
+{% if local.write_def_convert_icc2_site_to_lef_site_name_list != "" %} 
+write_def -include_tech_via_definitions -convert_sites { $write_def_convert_icc2_site_to_lef_site_name_list } -compress gzip {{cur.cur_flow_data_dir}}/.${cur_stage}{{env.BLK_NAME}}.def
+{%- else %}
+write_def -include_tech_via_definitions -compress gzip {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.def
+{%- endif %}
+{%- endif %}
+{%- endif %}
 ####save_database
 save_block -as {{env.BLK_NAME}}
 save_block -as {{env.BLK_NAME}}/${cur_stage}
 save_lib
+####################################
+## generate early touch file
+####################################	
+exec touch {{cur.cur_flow_sum_dir}}/${cur_stage}.{{env.BLK_NAME}}.early_complete
 
-
+####################################
+## Sanity checks and QoR Report	
+####################################
+{%- if local.fp_use_usr_report_tcl == "true" %}
+source -v {{cur.config_plugins_dir}}/icc2_scripts/01_fp/09_usr_fp_report.tcl
+{%- else %}
+{%- if local.enable_fp_reporting == "true" %}
+set REPORT_QOR_SCRIPT {{env.PROJ_UTILS}}/icc2_utils/report_qor.tcl
+puts "Alchip-info: Sourcing [which $REPORT_QOR_SCRIPT]"
+source -v -e $REPORT_QOR_SCRIPT ;# reports with zero interconnect delay
+{%- endif %}
+{%- endif %}
+source -v -e {{env.PROJ_UTILS}}/icc2_utils/snapshot.tcl
+####################################
+## exit icc2
+####################################
+puts "Alchip-info : Completed script [info script]\n"

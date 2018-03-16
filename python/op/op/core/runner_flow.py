@@ -7,13 +7,13 @@ Description: flow related features
 import os
 import shutil
 import subprocess
-import json
 from multiprocessing import Pool
 from utils import pcom
 from utils import settings
 from utils import env_boot
+from utils import db_if
 from core import lib_map
-from core import log_par
+from core import file_proc
 
 LOG = pcom.gen_logger(__name__)
 
@@ -35,7 +35,7 @@ def exp_stages(s_lst, cfg, sec, p_s=None):
     stage_lst.extend(s_lst)
     return exp_stages(stage_lst, cfg, pre_flow, pre_stage)
 
-class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
+class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
     """flow processor for blocks"""
     def __init__(self):
         super().__init__()
@@ -73,6 +73,9 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
         pcom.pp_list(lf_dic)
     def init(self, init_lst):
         """to perform flow initialization"""
+        if not self.blk_flg:
+            LOG.error("it's not in a block directory, please cd into one")
+            raise SystemExit()
         for init_name in init_lst:
             if init_name == "DEFAULT":
                 continue
@@ -97,22 +100,23 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
         for sec_k, sec_v in self.cfg_dic.get("flow", {}).items():
             self.ver_dic[sec_k] = {}
             for opt_k, opt_v in sec_v.items():
-                if not opt_v:
-                    continue
                 if opt_k.startswith("VERSION_"):
                     ver_key = opt_k.replace("VERSION_", "").lower()
-                    key_dir = f"{self.ced['BLK_ROOT']}{os.sep}{ver_key}{os.sep}{opt_v}"
-                    if not os.path.isdir(key_dir):
-                        LOG.error(
-                            f"{ver_key} version dir {key_dir} is NA, "
-                            f"defined in flow config section {sec_k}")
-                        raise SystemExit()
-                    if not os.listdir(key_dir):
-                        LOG.error(
-                            f"{ver_key} version dir {key_dir} is empty, "
-                            f"defined in flow config section {sec_k}")
-                        raise SystemExit()
-                    self.ver_dic[sec_k][ver_key] = opt_v
+                    if not opt_v:
+                        self.ver_dic[sec_k][ver_key] = ""
+                    else:
+                        key_dir = f"{self.ced['BLK_ROOT']}{os.sep}{ver_key}{os.sep}{opt_v}"
+                        if not os.path.isdir(key_dir):
+                            LOG.error(
+                                f"{ver_key} version dir {key_dir} is NA, "
+                                f"defined in flow config section {sec_k}")
+                            raise SystemExit()
+                        if not os.listdir(key_dir):
+                            LOG.error(
+                                f"{ver_key} version dir {key_dir} is empty, "
+                                f"defined in flow config section {sec_k}")
+                            raise SystemExit()
+                        self.ver_dic[sec_k][ver_key] = opt_v
     def proc_force(self):
         """to process force dic info"""
         if self.force_stage is None:
@@ -166,7 +170,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
             LOG.error(f"netlist version of flow {flow} is NA in flow.cfg")
             raise SystemExit()
         proj_tmp_dir = self.ced["PROJ_SHARE_TMP"].rstrip(os.sep)
-        flow_liblist_dir = os.path.join(self.ced["BLK_RUN"], f"v{v_net}", flow, "liblist")
+        flow_liblist_dir = os.path.join(self.ced["BLK_RUN"], "liblist")
         liblist_var_dic = self.gen_liblist(
             self.ced["PROJ_LIB"], flow_liblist_dir,
             self.dir_cfg_dic["lib"]["DEFAULT"]["liblist"],
@@ -230,6 +234,11 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
             if any([c_c is True for c_c in file_mt_lst if c_c]):
                 raise SystemExit()
             pre_file_mt = max(file_mt_lst)
+        if self.run_flg:
+            db_if.w_flow(
+                {"name": flow_name, "block": self.ced["BLK_NAME"], "proj": self.ced["PROJ_NAME"],
+                 "owner": self.ced["USER"], "created_time": self.ced["DATETIME"].isoformat(),
+                 "status": "passed"})
     def proc_inst(self, multi_inst, inst_dic):
         """to process particular inst"""
         flow_root_dir = inst_dic["stage_dic"]["flow_root_dir"]
@@ -274,11 +283,12 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
             with open(dst_run_file, "w") as dbf:
                 dbf.write(
                     f"{jn_str} xterm -title '{dst_file}' -e 'cd {trash_dir}; "
-                    f"source {dst_op_file} | tee {dst_run_file}.log'{os.linesep}")
+                    f"source {dst_op_file} | tee {dst_run_file}.log; "
+                    f"touch {dst_run_file}.stat'{os.linesep}")
             err_kw_lst = pcom.rd_cfg(
-                self.cfg_dic.get("filter", {}), stage_name, "exp_error_keywords")
+                self.cfg_dic.get("filter", {}), stage_name, "error_keywords_exp")
             wav_kw_lst = pcom.rd_cfg(
-                self.cfg_dic.get("filter", {}), stage_name, "exp_waiver_keywords")
+                self.cfg_dic.get("filter", {}), stage_name, "waiver_keywords_exp")
             fin_str = self.ced.get("FIN_STR", "")
             filter_dic = {
                 "err_kw_lst": err_kw_lst, "wav_kw_lst": wav_kw_lst, "fin_str": fin_str}
@@ -292,10 +302,13 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
                     os.utime(dst_file)
                     # following stages have to be forced run
                     file_mt = os.path.getmtime(dst_file)
-                p_run = self.proc_run(
+                file_p = file_proc.FileProc(
                     {"src": dst_file, "file": dst_run_file, "flow": flow_name,
                      "stage": stage_name, "sub_stage": sub_stage_name,
-                     "multi_inst": multi_inst, "filter_dic": filter_dic}, f_flg)
+                     "multi_inst": multi_inst, "filter_dic": filter_dic,
+                     "flow_root_dir": flow_root_dir, "ced": self.ced,
+                     "ver_dic": self.ver_dic}, f_flg)
+                p_run = file_p.proc_run_file()
                 if p_run is True:
                     return p_run
             else:
@@ -303,56 +316,6 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap, log_par.LogParser):
         else:
             file_mt = 0.0
         return file_mt
-    def proc_run(self, run_dic, f_flg=True):
-        """to process generated oprun files for running flows"""
-        run_src_file = run_dic.get("src", "")
-        if not os.path.isfile(run_src_file):
-            LOG.error(f"run src file {run_src_file} is NA")
-            return True
-        run_file = run_dic.get("file", "")
-        if not os.path.isfile(run_file):
-            LOG.error(f"run file {run_file} is NA")
-            return True
-        run_filter_dic = run_dic.get("filter_dic", {})
-        run_json = f"{run_file}.json"
-        run_pass = f"{run_file}.pass"
-        run_fin = f"{run_file}.fin"
-        file_mt = os.path.getmtime(run_src_file)
-        LOG.info(
-            f":: running flow {run_dic['flow']}::{run_dic['stage']}:{run_dic['sub_stage']}:"
-            f"{run_dic['multi_inst']}, op log {run_file}.log ...")
-        if not f_flg and os.path.isfile(run_pass) and os.path.getmtime(run_pass) > file_mt:
-            LOG.info("passed and re-run skipped")
-            if os.path.isfile(run_json) and os.path.getmtime(run_json) > file_mt:
-                with open(run_json) as rjf:
-                    log_dic = json.load(rjf)
-            return False
-        if f_flg or not os.path.isfile(run_fin) or os.path.getmtime(run_fin) <= file_mt:
-            with open(f"{run_file}.blog", "w") as rfl, open(f"{run_file}.beer", "w") as rfe:
-                subprocess.run(f"source {run_file}", shell=True, stdout=rfl, stderr=rfe)
-        LOG.info(f"parsing log file {run_file}.log")
-        log_dic = self.parse_run_log(f"{run_file}.log", run_filter_dic)
-        if not log_dic:
-            return True
-        with open(run_json, "w") as rjf:
-            json.dump(log_dic, rjf)
-        if log_dic.get("fin", False):
-            open(run_fin, "w").close()
-        else:
-            if os.path.isfile(run_fin):
-                os.remove(run_fin)
-        if log_dic.get("status", "") == "passed":
-            open(run_pass, "w").close()
-            LOG.info("passed")
-        else:
-            if os.path.isfile(run_pass):
-                os.remove(run_pass)
-            LOG.error(f"failed lines: {os.linesep}{os.linesep.join(log_dic['err_lst'])}")
-            return True
-        return False
-        # query_url = f"{pcom.BE_URL}/pj_app/regr/db_query/query_insert_case/"
-        # if pcom.BACKEND:
-        #     requests.post(query_url, json=log_dic)
     def show_var(self):
         """to show all variables used in templates"""
         if not self.blk_flg:

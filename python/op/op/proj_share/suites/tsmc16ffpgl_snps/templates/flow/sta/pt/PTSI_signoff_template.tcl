@@ -171,9 +171,22 @@ redirect -append {{cur.cur_flow_rpt_dir}}/${SESSION}/output_port_loading.rpt   {
 # UPDATE TIMING & SAVE SESSION
 #
 redirect -tee {{cur.cur_flow_log_dir}}/${SESSION}/update_timing.log { update_timing }
-{% if  local.SAVE_SESSION == "true" %} 
+{%- if local.SAVE_SESSION_LIST is string %}
+{%- if local.SAVE_SESSION_LIST == "all" %}
 save_session ${TOP}_${SESSION}.session	;# -only_used_libraries
-{%- endif %} 
+{%- elif local.SAVE_SESSION_LIST  == local._multi_inst %} 
+save_session ${TOP}_${SESSION}.session	;# -only_used_libraries
+{%- endif %}
+{%- endif %}
+{%- if local.SAVE_SESSION_LIST is sequence %}
+{%- for save_session in local.SAVE_SESSION_LIST %}
+{%- if save_session == "all" %}
+save_session ${TOP}_${SESSION}.session
+{% elif  save_session  == local._multi_inst %} 
+save_session ${TOP}_${SESSION}.session	;# -only_used_libraries
+{%- endif %}
+{%- endfor %}
+{%- endif %}
 
 ########################################################################
 # REPORT (WITH IO)

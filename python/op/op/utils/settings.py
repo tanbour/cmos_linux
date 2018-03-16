@@ -17,7 +17,7 @@ OP_UTILS = f"{OP_ROOT}{os.sep}proj_share{os.sep}utils"
 # project related settings
 FLG_FILE = ".alchip_proj_root_flg"
 BLK_IGNORE_LST = ["share"]
-GITIGNORE = f"run/{os.linesep}"
+GITIGNORE = f"run/{os.linesep}*.sw[op]{os.linesep}"
 
 BOOT_CFG = f"$PROJ_ROOT{os.sep}share{os.sep}config{os.sep}proj.cfg"
 

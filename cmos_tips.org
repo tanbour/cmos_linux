@@ -277,14 +277,6 @@ export LD_LIBRARY_PATH
 export LD_RUN_PATH
 ./configure LDFLAGS="-L<path>" CPPFLAGS="-I<include_path>" --prefix=<local_path>
 
-* smb
-smb://<ip_addr>
-# usermod --shell /usr/bin/nologin --lock username
-# smbpasswd -a samba_user
-/etc/samba/smb.conf:
-    [global]
-    server min protocol = SMB2
-
 * locale
 en_US.UTF-8
 (rpm) /etc/sysconfig/i18n
@@ -529,8 +521,13 @@ tomcat8 home dir: /usr/share/tomcat8
     <user password="tomcat" roles="tomcat, manager-script, manager-gui,admin" username="tomcat"/>
 
 * sshd
-/etc/ssh/sshd_config
-(rpm) service sshd start/stop/restart
+vim /etc/ssh/sshd_config
+AllowUsers    user1 user2
+Port 39901
+# systemctl edit sshd.socket
+[Socket]
+ListenStream=192.168.50.2:3511
+FreeBind=true
 
 * vncserver
 (rpm) /etc/sysconfig/vncservers
@@ -539,6 +536,23 @@ vncpasswd
 chkconfig vncserver on
 (rpm) /etc/sysconfig/iptables
 (rpm) service iptables restart
+
+* smb
+smb://<ip_addr>
+# useradd -g users -s /bin/bash username
+# usermod --shell /usr/bin/nologin --lock username
+# smbpasswd -a samba_user
+# pdbedit -L -v
+/etc/samba/smb.conf:
+    [global]
+    server min protocol = SMB2
+
+* dhcpcd
+vim /etc/dhcpcd.conf
+interface enp2s0f0
+static ip_address=xxx.xxx.xx.2/24
+static routers=xxx.xxx.xx.1
+static domain_name_servers=xxx.xxx.xx.1 114.114.114.114 8.8.8.8
 
 * django
 ** settings
@@ -679,24 +693,28 @@ intel: efibootmgr --create --disk /dev/sda --part 1 --gpt --label "Arch Linux" -
 lsblk -f
 mklabel gpt
 mkfs.ext4 /dev/sdb1
-** hdd
+** server
 /etc/fstab
 # <file system> <dir> <type> <options> <dump> <pass>
 # /dev/sda2
-UUID=c712efa0-104a-4e98-87a3-a04ca8160164	/         	ext4      	rw,relatime,data=ordered	0 1
+UUID=e4735dc5-0801-462b-9d64-58b82a435d50       /               ext4            rw,relatime,discard,data=ordered
+    0 1
 # /dev/sda1
-UUID=EB81-715A      	/boot     	vfat      	rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro	0 2
+UUID=6035-3B7E          /boot           vfat            rw,relatime,discard,fmask=0022,dmask=0022,codepage=437,iocha
+rset=iso8859-1,shortname=mixed,utf8,errors=remount-ro       0 2
 # /dev/sda3
-UUID=06582195-b25d-4196-98d4-c775b3cf65bf	none      	swap      	defaults  	0 0
+UUID=1c592281-59d4-41ea-8873-d6934434f4f3       none            swap            defaults,discard,pri=-2 0 0
 # /dev/sdb1
-UUID=c83c5c95-caab-4669-a319-dbbc851a70e1	/nas/delft     	ext4      	rw,relatime,data=ordered	0 2
+UUID=c83c5c95-caab-4669-a319-dbbc851a70e1       /nas/delft      ext4            rw,relatime,data=ordered        0 2
 # /dev/sdc1
-UUID=19a448bc-d923-459e-ac00-bab5a220c3e6	/nas/shanghai  	ext4      	rw,relatime,data=ordered	0 2
+UUID=19a448bc-d923-459e-ac00-bab5a220c3e6       /nas/shanghai   ext4            rw,relatime,data=ordered        0 2
 # /dev/sdd1
-UUID=434311c3-7a36-4249-bb91-51cbf518793a	/nas/venus  	ext4      	rw,relatime,data=ordered,nofail,x-systemd.device-timeout=1	0 2
+UUID=434311c3-7a36-4249-bb91-51cbf518793a       /nas/venus      ext4            rw,relatime,data=ordered,nofail,x-sy
+stemd.device-timeout=1      0 2
 # /dev/sde1
-UUID=8dffe51b-2326-43fd-8549-1d3a319c71e5	/nas/jupiter  	ext4      	rw,relatime,data=ordered,nofail,x-systemd.device-timeout=1	0 2
-** ssd
+UUID=8dffe51b-2326-43fd-8549-1d3a319c71e5       /nas/jupiter    ext4            rw,relatime,data=ordered,nofail,x-sy
+stemd.device-timeout=1      0 2
+** laptop
 # <file system> <dir> <type> <options> <dump> <pass>
 # /dev/sda2
 UUID=b78d31d2-727f-4034-8016-5c9af69d7d52	/         	ext4      	rw,relatime,discard,data=ordered	0 1
@@ -708,13 +726,6 @@ UUID=6b835efe-6110-46c2-aea3-99d0c169e238	none      	swap      	defaults,discard
 //192.168.50.2/nas	/mnt/samba/nas		cifs	credentials=/mnt/samba/smbcredentials,x-systemd.automount	0 0
 
 //192.168.50.2/public	/mnt/samba/public	cifs	credentials=/mnt/samba/smbcredentials,uid=cmos,gid=users,x-systemd.automount	0 0
-
-* dhcpcd
-vim /etc/dhcpcd.conf
-interface enp2s0f0
-static ip_address=xxx.xxx.xx.2/24
-static routers=xxx.xxx.xx.1
-static domain_name_servers=xxx.xxx.xx.1 114.114.114.114 8.8.8.8
 
 * xmodmap
 xmodmap -pke
@@ -729,7 +740,15 @@ mail.biff.use_system_alert = true
 # dd bs=4M if=/path/to/archlinux.iso of=/dev/sdx status=progress oflag=sync
 
 * ssd
-https://www.jianshu.com/p/nQpqsN
+vi /etc/fstab
+relatime,discard
+cat /proc/sys/vm/swappiness
+vi /etc/sysctl.d/99-sysctl.conf
+vm.swappiness=1
+vi /etc/udev/rules.d/60-ioschedulers.rules
+cat /sys/block/sda/queue/scheduler
+# set noop scheduler for non-rotating disks
+ACTION=="add|change", KERNEL=="sda", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="noop"
 
 * arch install
 # ls /sys/firmware/efi/efivars
@@ -785,3 +804,10 @@ intel: intel-ucode
 # exit
 # umount -R /mnt
 # reboot
+
+* services
+dhcpcd.service
+sshd.socket
+nftables.service
+smb.service
+cronie.service

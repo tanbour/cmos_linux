@@ -75,7 +75,7 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         env_boot.EnvBoot.__init__(self)
         self.boot_env()
         for blk_name in blk_lst:
-            LOG.info(":: filling block {blk_name} ...")
+            LOG.info(f":: filling block {blk_name} ...")
             os.environ["BLK_NAME"] = blk_name
             os.environ["BLK_ROOT"] = blk_root_dir = f"{self.ced['PROJ_ROOT']}{os.sep}{blk_name}"
             pcom.mkdir(LOG, blk_root_dir)

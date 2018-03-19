@@ -179,6 +179,10 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         pre_stage_dic = {}
         pre_file_mt = 0.0
         force_flg = False
+        flow_if_dic = {
+            "name": flow, "block": self.ced["BLK_NAME"], "proj": self.ced["PROJ_NAME"],
+            "owner": self.ced["USER"], "created_time": self.ced["DATETIME"].isoformat(),
+            "status": "failed"}
         for flow_dic in exp_stages([], self.cfg_dic["flow"], flow):
             flow_name = flow_dic.get("flow", "")
             stage_name = flow_dic.get("stage", "")
@@ -224,21 +228,23 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                 "tmp_file": tmp_file, "pre_file_mt": pre_file_mt,
                 "force_flg": force_flg}
             if self.run_flg:
-                with Pool(settings.MP_POOL, initializer=pcom.sig_init) as mip:
-                    file_mt_lst = mip.starmap(
-                        self.proc_inst, zip(multi_inst_lst, [inst_dic]*len(multi_inst_lst)))
+                try:
+                    with Pool(settings.MP_POOL, initializer=pcom.sig_init) as mip:
+                        file_mt_lst = mip.starmap(
+                            self.proc_inst, zip(multi_inst_lst, [inst_dic]*len(multi_inst_lst)))
+                except KeyboardInterrupt:
+                    db_if.w_flow(flow_if_dic)
+                    raise KeyboardInterrupt
+                if any([c_c is True for c_c in file_mt_lst if c_c]):
+                    db_if.w_flow(flow_if_dic)
+                    raise SystemExit()
+                pre_file_mt = max(file_mt_lst)
             else:
-                file_mt_lst = []
                 for multi_inst in multi_inst_lst:
-                    file_mt_lst.append(self.proc_inst(multi_inst, inst_dic))
-            if any([c_c is True for c_c in file_mt_lst if c_c]):
-                raise SystemExit()
-            pre_file_mt = max(file_mt_lst)
+                    self.proc_inst(multi_inst, inst_dic)
         if self.run_flg:
-            db_if.w_flow(
-                {"name": flow_name, "block": self.ced["BLK_NAME"], "proj": self.ced["PROJ_NAME"],
-                 "owner": self.ced["USER"], "created_time": self.ced["DATETIME"].isoformat(),
-                 "status": "passed"})
+            flow_if_dic["status"] = "passed"
+            db_if.w_flow(flow_if_dic)
     def proc_inst(self, multi_inst, inst_dic):
         """to process particular inst"""
         flow_root_dir = inst_dic["stage_dic"]["flow_root_dir"]
@@ -250,6 +256,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         tmp_file = inst_dic["tmp_file"]
         pre_file_mt = inst_dic["pre_file_mt"]
         force_flg = inst_dic["force_flg"]
+        file_mt = 0.0
         dst_file = os.path.join(
             flow_root_dir, "scripts", stage_name, multi_inst,
             sub_stage_name) if multi_inst else os.path.join(
@@ -300,7 +307,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                 if f_flg:
                     # updated timestamp to fit auto-skip feature
                     os.utime(dst_file)
-                    # following stages have to be forced run
+                    # stages followed up have to be forced run
                     file_mt = os.path.getmtime(dst_file)
                 file_p = file_proc.FileProc(
                     {"src": dst_file, "file": dst_run_file, "flow": flow_name,
@@ -311,10 +318,6 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                 p_run = file_p.proc_run_file()
                 if p_run is True:
                     return p_run
-            else:
-                file_mt = 0.0
-        else:
-            file_mt = 0.0
         return file_mt
     def show_var(self):
         """to show all variables used in templates"""

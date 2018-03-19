@@ -70,10 +70,12 @@ class FileProc(object):
         for p_k, p_v in pcd.items():
             if not p_k.endswith("key"):
                 continue
-            # key_path = os.path.join(flow_root_dir, "rpt", f"{sub_stage_name}_{p_k}.rpt")
-            key_path = f"{self.run_dic['file']}.log"
+            sub_stage = os.path.splitext(sub_stage_name)[0]
+            key_path = os.path.join(
+                flow_root_dir, "rpt", stage_name, inst_name, f"{sub_stage}.{p_v}.rpt")
+            # key_path = f"{self.run_dic['file']}.log"
             if not os.path.isfile(key_path):
-                LOG.error("log file {key_path} to be parsed is NA")
+                LOG.error(f"log file {key_path} to be parsed is NA")
                 return True
             log_par.add_parser(
                 key_path, pcd.get(f"{p_k}_type", ""),
@@ -120,6 +122,8 @@ class FileProc(object):
         if not os.path.isfile(self.file_dic["stat"]) or os.path.getmtime(
                 self.file_dic["stat"]) <= file_mt:
             LOG.error(f"sub process {self.run_file} is terminated")
+            db_stage_dic["status"] = "failed"
+            db_if.w_stage(db_stage_dic)
             return True
         if self.proc_run_log() is True or self.proc_logs() is True:
             return True

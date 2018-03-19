@@ -56,7 +56,7 @@ class LogParser(object):
             multi_line = ""
             prev = None
             for line in p_f:
-                ### match for single
+                # match for single
                 for parser in parser_single_lst:
                     for recomp in parser.recomp_lst:
                         l_m = recomp.search(line)
@@ -66,7 +66,7 @@ class LogParser(object):
                             if parser.template:
                                 data = self._run_template(parser.template, raw_dic)
                                 self._update_ext_dic(ext_dic, data)
-                ### match for multi-lines
+                # match for multi-lines
                 if not parser_multi_lst:
                     continue
                 if prev is None:
@@ -113,8 +113,10 @@ PARSER_CFG_DIC = {
             "icc2_ems_key": "icc2_check_design",
             "icc2_ems_key_type": "single",
             "icc2_ems_key_exp_lst": [
-                r'\s+Total\s+(?P<ems_total>\d+)\s+EMS messages : (?P<ems_error>\d+) errors, (?P<ems_warn>\d+) warnings, (?P<ems_info>\d+) info.',
-                r'\s+Total\s+(?P<non_ems_total>\d+)\s+non-EMS messages : (?P<non_ems_error>\d+) errors, (?P<non_ems_warn>\d+) warnings, (?P<non_ems_info>\d+) info.'
+                r'\s+Total\s+(?P<ems_total>\d+)\s+EMS messages : (?P<ems_error>\d+) errors, '
+                r'(?P<ems_warn>\d+) warnings, (?P<ems_info>\d+) info.',
+                r'\s+Total\s+(?P<non_ems_total>\d+)\s+non-EMS messages : (?P<non_ems_error>\d+) '
+                r'errors, (?P<non_ems_warn>\d+) warnings, (?P<non_ems_info>\d+) info.'
             ],
             "icc2_ems_key_tpl": """{
                 "ems_total": "{{ems_total}}",
@@ -126,130 +128,22 @@ PARSER_CFG_DIC = {
                 "non_ems_warn" : "{{non_ems_warn}}",
                 "non_ems_info" : "{{non_ems_info}}"
             }"""
-        }
+        },
+        # "01_fp.tcl": {
+        #     "qor_key": "qor",
+        #     "qor_key_type": "multi",
+        #     "qor_key_exp_lst": [
+        #         r'^(?P<icc2_scenario>([a-zA-Z]\S+(\.|_)\S+|Design))\s+'
+        #         r'\((?P<icc2_timingtype>(Setup|Hold))\)\s+(?P<WNS>([-+]?\d+\.\d*|--))'
+        #         r'\s+(?P<TNS>[-+]?\d+\.\d*)\s+(?P<NVE>\d+)'
+        #     ],
+        #     "qor_key_tpl": '''{
+        #     "scenario" : "{{icc2_scenario}}",
+        #     "type" : "{{icc2_timingtype.lower()}}",
+        #     "WNS" : {% if WNS == "--" %}0.0{% else %}{{WNS}}{% endif%},
+        #     "TNS" : {{TNS}},
+        #     "NVE" : {{NVE}},
+        #     }'''
+        # },
     }
 }
-
-# if __name__ == '__main__':
-
-#     # tentative config example for [log_parser]
-#     icc2_ems_log = '/proj/OP4/SOFTWARE/WORK/minato/beta-2/Anarion/WORK/minato/huc_core_sys/V0720_S0720_F0720/rpt/icc2.0724/huc_core_sys.icc2_place.default.0724.check_design.pre_clock_tree_stage.log'
-#     icc2_ems_key = 'icc2_check_design'
-#     icc2_ems_reg = 'single', r'\s+Total\s+(?P<ems_total>\d+)\s+EMS messages : (?P<ems_error>\d+) errors, (?P<ems_warn>\d+) warnings, (?P<ems_info>\d+) info.'
-#     icc2_ems_tpl = '''{
-#       "ems_total" : {{ems_total}},
-#       "ems_error" : {{ems_error}},
-#       "ems_warn" : {{ems_warn}},
-#       "ems_info" : {{ems_info}}
-#     }'''
-
-#     icc2_non_ems_log = '/proj/OP4/SOFTWARE/WORK/minato/beta-2/Anarion/WORK/minato/huc_core_sys/V0720_S0720_F0720/rpt/icc2.0724/huc_core_sys.icc2_place.default.0724.check_design.pre_clock_tree_stage.log'
-#     icc2_non_ems_key = 'icc2_check_design'
-#     icc2_non_ems_reg = 'single', r'\s+Total\s+(?P<non_ems_total>\d+)\s+non-EMS messages : (?P<non_ems_error>\d+) errors, (?P<non_ems_warn>\d+) warnings, (?P<non_ems_info>\d+) info.'
-#     icc2_non_ems_tpl = '''{
-#       "non_ems_total" : {{non_ems_total}},
-#       "non_ems_error" : {{non_ems_error}},
-#       "non_ems_warn" : {{non_ems_warn}},
-#       "non_ems_info" : {{non_ems_info}}
-#     }'''
-
-
-#     icc2_constraint_scinario_log = '/proj/OP4/SOFTWARE/WORK/minato/dev/sample/rpt/icc2.120460/engine_tile.icc2_route_opt.default.120460.constraint.rep'
-#     icc2_constraint_scinario_key = 'icc2_constraint'
-#     icc2_constraint_scinario_reg = 'single', r'\s+Scenario:\s+(?P<icc2_scenario>\S+)'
-
-#     icc2_max_transition_log = icc2_constraint_scinario_log
-#     icc2_max_transition_key = icc2_constraint_scinario_key
-#     icc2_max_transition_reg = 'single', r'\s+Number of max_transition violation\(s\):\s+(?P<max_transition>\d+)'
-#     icc2_max_transition_tpl = '''{
-#       "scenario" : "{{icc2_scenario}}",
-#       "max_transition" : {{max_transition}}
-#     }'''
-
-#     icc2_max_capacitance_log = icc2_constraint_scinario_log
-#     icc2_max_capacitance_key = icc2_constraint_scinario_key
-#     icc2_max_capacitance_reg = 'single', r'\s+Number of max_capacitance violation\(s\):\s+(?P<max_capacitance>\d+)'
-#     icc2_max_capacitance_tpl = '''{
-#       "scenario" : "{{icc2_scenario}}",
-#       "max_capacitance" : {{max_capacitance}}
-#     }'''
-
-
-#     icc2_qor_log = '/proj/OP4/SOFTWARE/WORK/minato/dev/sample/rpt/icc2.120460/engine_tile.icc2_route_opt.default.120460.qor.rep'
-#     icc2_qor_key = 'icc2_timing'
-#     icc2_qor_reg = 'multi', r'^(?P<icc2_scenario>([a-zA-Z]\S+(\.|_)\S+|Design))\s+\((?P<icc2_timingtype>(Setup|Hold))\)\s+(?P<WNS>([-+]?\d+\.\d*|--))\s+(?P<TNS>[-+]?\d+\.\d*)\s+(?P<NVE>\d+)'
-#     icc2_qor_tpl = '''{
-#       "scenario" : "{{icc2_scenario}}",
-#       "type" : "{{icc2_timingtype.lower()}}",
-#       "WNS" : {% if WNS == "--" %}0.0{% else %}{{WNS}}{% endif%},
-#       "TNS" : {{TNS}},
-#       "NVE" : {{NVE}},
-#     }'''
-
-
-#     icc2_cell_density_log = '/proj/OP4/SOFTWARE/WORK/minato/dev/sample/rpt/icc2.120460/engine_tile.icc2_route_opt.default.120460.cell_density.png'
-#     icc2_cell_density_key = 'icc2_cell_density'
-
-
-#     icc2_congestion_log = '/proj/OP4/SOFTWARE/WORK/minato/dev/sample/rpt/icc2.120460/engine_tile.icc2_route_opt.default.120460.congestion.png'
-#     icc2_congestion_key = 'icc2_congestion'
-
-
-#     icc2_cell_area_log = '/proj/OP4/SOFTWARE/WORK/minato/dev/sample/rpt/icc2.120460/engine_tile.icc2_route_opt.default.120460.threshold_voltage_group.rep'
-#     icc2_cell_area_key = 'icc2_cell_area'
-#     icc2_cell_area_reg = 'multi', r'^(?P<vt>\S+)\s+(?P<area>\d+\.\d*)\s+\((?P<ratio>\d+\.\d*)%\)\s+(\d+\.\d*)\s+\((\d+\.\d*)%\)\s+(\d+\.\d*)\s+\((\d+\.\d*)%\)'
-#     icc2_cell_area_tpl = '''{
-#       "vt" : "{{vt}}",
-#       "area" : {{area}},
-#       "ratio" : {{ratio}}
-#     }'''
-
-
-#     icc2_utilization_log = '/proj/OP4/SOFTWARE/WORK/minato/dev/sample/rpt/icc2.120460/engine_tile.icc2_route_opt.default.120460.utilization.rpt'
-#     icc2_utilization_key = 'icc2_utilization'
-#     icc2_utilization_reg = 'single', r'^Utilization Ratio:\s+(?P<utilization>\d+\.\d*)'
-#     icc2_utilization_tpl = '''{
-#       "utilization" : {{utilization}}
-#     }'''
-
-
-#     icc2_routing_violation_log = '/proj/OP4/SOFTWARE/WORK/minato/dev/sample/rpt/icc2.120460/engine_tile.icc2_route_opt.default.120460.check_routes.log'
-#     icc2_routing_violation_key = 'icc2_routing_violation'
-#     icc2_routing_violation_reg = 'single', r'^Total number of DRCs = (?P<drc>\d+)'
-#     icc2_routing_violation_tpl = '''{
-#       "Total" : {{drc}}
-#     }'''
-
-
-#     icc2_misc_server_log = '/proj/OP4/SOFTWARE/WORK/minato/dev/sample/log/icc2.120460/icc2_route_opt.default.120460.log'
-#     icc2_misc_server_key = 'icc2_misc'
-#     icc2_misc_server_reg = 'single', r'^<<Starting on (?P<server>\S+)>>'
-
-#     icc2_misc_mem_log = icc2_misc_server_log
-#     icc2_misc_mem_key = icc2_misc_server_key
-#     icc2_misc_mem_reg = 'single', r'^Maximum memory usage for this session: (?P<max_memory>\d+\.\d*) MB'
-
-#     icc2_misc_elapsed_log = icc2_misc_server_log
-#     icc2_misc_elapsed_key = icc2_misc_server_key
-#     icc2_misc_elapsed_reg = 'single', r'^Elapsed time for this session:\s+(?P<elapsed>\d+) seconds \(\s*(\d+\.\d*)\s*hours\)'
-#     icc2_misc_elapsed_tpl = '''{
-#       "server" : "{{server}}",
-#       "max_memory" : {{max_memory}},
-#       "elapsed" : float("%.1f"%({{elapsed}} / 60.0)),
-#     }'''
-
-
-
-#     # Sample log parsing procedure
-#     p = LogParser()
-
-#     # Just example
-#     l_dic = locals().copy()
-#     for var in l_dic.keys():
-#         m = re.match(r'^(icc2_\w+)_log$', var)
-#         if m:
-#             key = m.groups(1)
-#             p.add_parser(l_dic[var], l_dic['%s_key'%key], l_dic.get('%s_reg'%key, None), l_dic.get('%s_tpl'%key, None))
-
-#     ext_dic = p.run_parser()
-#     print(json.dumps(ext_dic, indent=4))

@@ -9,8 +9,7 @@ from utils import pcom
 from utils import settings
 
 LOG = pcom.gen_logger(__name__)
-# BASE_URL = settings.BE_URL
-BASE_URL = "http://localhost:8000"
+BASE_URL = settings.BE_URL
 
 def w_stage(data_dic):
     """to write stage table record"""

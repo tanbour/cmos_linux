@@ -233,12 +233,7 @@ def mkdir(log, path):
 
 def sig_init():
     """to initialize multiprocessing pool"""
-    # signal.signal(signal.SIGINT, signal.SIG_IGN)
-    signal.signal(signal.SIGINT, sig_hand)
-
-def sig_hand(*_):
-    """to handle signal SIGINT, *_ repr (signal, frame)"""
-    raise SystemExit()
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 class ColoredFormatter(logging.Formatter):
     """op colored logging formatter"""

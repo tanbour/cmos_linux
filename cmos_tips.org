@@ -77,6 +77,12 @@ M-x rectangle-number-lines
 C-u M-x rectangle-number-lines
 ** ansi term
 prefix your standard keyboard shortcuts with C-x, M-x should be replaced with C-x M-x
+** buffer coding system
+revert-buffer-with-coding-system
+
+* vim
+** buffer coding system
+set fileencodings=utf-8,gb18030
 
 * python
 ** pre compilation
@@ -95,7 +101,6 @@ subprocess.run(<sys_cmd>, shell=True, stderr=subprocess.DEVNULL, stdout=subproce
 with psycopg2.connect(None, '<database>', '<user>', '<passwd>', '<host>', '<port>') as conn:
     with conn.cursor() as c:
         c.execute(<SQL>)
-
 conn = psycopg2.connect(None, '<database>', '<user>', '<passwd>', '<host>', '<port>')
 c = conn.cursor()
 c.execute(<SQL>)
@@ -193,8 +198,50 @@ run: ${TARGET}
 clean:
         rm ${TARGET} ${TARGET_LIB} ${OBJECTS}
 
-* sed
-sed -i -E "s/<regex>/<string>/g" <files>
+* django
+** settings
+uwsgi_params
+<proj>_nginx.conf
+ln -s <proj_nginx_conf_path>/<proj>_nginx.conf /etc/nginx/conf.d/
+<proj>_uwsgi.ini
+<proj>/settings.py
+manage.py createsuperuser
+manage.py makemigrations
+manage.py migrate
+manage.py collectstatic
+manage.py dumpdata <app> > data.json
+manage.py loaddata data.json
+** django-bootstrap3
+'javascript_in_head': True,
+
+* latex
+** texlive package files update
+mktexlsr
+** latex cjk
+*** encapsulated
+\usepackage[encapsulated]{CJK}
+\usepackage{ucs}
+\usepackage[utf8x]{inputenc}
+% use one of bsmi(trad Chinese), gbsn(simp Chinese), min(Japanese), mj(Korean); see:
+% /usr/share/texmf-dist/tex/latex/cjk/texinput/UTF8/*.fd
+\newcommand{\cntext}[1]{\begin{CJK}{UTF8}{gbsn}#1\end{CJK}}
+\cntext{你好，\LaTeX}
+*** directed
+\documentclass[12pt, cjk]{beamer}
+\usepackage[encapsulated]{CJK}
+\usepackage{ucs}
+\usepackage[utf8x]{inputenc}
+\begin{document}
+\begin{CJK}{UTF8}{gbsn}
+你好，\LaTeX
+\end{CJK}
+\end{document}
+** xecjk
+\usepackage{xeCJK}
+\setCJKmainfont{SourceHanSansCN-Regular}
+\begin{document}
+你好，\XeTeX
+\end{document}
 
 * git
 git pull origin
@@ -220,16 +267,195 @@ cleartool ci \!:1 \!:2 `cleartool lsco -cview -me -short -r`
 cleartool find . -type f -branch "brtype(<branch>)" -print
 cleartool find \!:1 -version 'version(<version>) &&! lbtype(\!:2)' -print
 
-* firefox
-~/.mozilla/firefox/defaults/profile/user.js:
-    user_pref("capability.policy.policynames", "localfilelinks");
-    user_pref("capability.policy.localfilelinks.sites", "<site1_url> <site2_url>");
-    user_pref("capability.policy.localfilelinks.checkloaduri.enabled", "allAccess");
-    user_pref("browser.backspace_action", 0);
-    user_pref("browser.startup.homepage", "<home_url>")
+* arch install
+# dd bs=4M if=/path/to/archlinux.iso of=/dev/sdx status=progress oflag=sync
 
-* rsync
-rsync -avh --delete </src_dir/> </tar_dir/>
+# ls /sys/firmware/efi/efivars
+# ping archlinux.org
+# timedatectl set-ntp true
+
+# fdisk -l
+# parted /dev/sdx
+(parted) mklabel gpt
+(parted) mkpart ESP fat32 1MiB 1GiB
+(parted) set 1 boot on
+(parted) mkpart primary ext4 1GiB 230GiB
+(parted) mkpart primary linux-swap 230GiB 100%
+(parted) q
+# fdisk -l
+# mkfs.fat -F32 /dev/sda1
+# mkfs.ext4 /dev/sda2
+# mkswap /dev/sda3
+# swapon /dev/sda3
+
+# mount /dev/sda2 /mnt
+# mkdir /mnt/boot
+# mount /dev/sda1 /mnt/boot
+vi /etc/pacman.d/mirrorlist
+# pacstrap /mnt base
+# genfstab -U /mnt >> /mnt/etc/fstab
+> fstab
+
+# arch-chroot /mnt
+# ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+# hwclock --systohc
+vi /etc/locale.gen
+# locale-gen
+vi /etc/locale.conf
+LANG=en_US.UTF-8
+vi /etc/hostname
+my_host_name
+vi /etc/hosts
+127.0.0.1	localhost
+::1		localhost
+127.0.1.1	my_host_name.localdomain	my_host_name
+
+server: dhcpcd
+laptop: iw, wpa_supplicant, NetworkManager(nmcli)
+
+# mkinitcpio -p linux
+# passwd
+
+amd: > amd vi
+intel: intel-ucode
+efibootmgr --create --disk /dev/sda --part 1 --gpt --label "Arch Linux" --loader /vmlinuz-linux --unicode "root=/dev/sda2 rw initrd=/intel-ucode.img initrd=/initramfs-linux.img"
+
+# exit
+# umount -R /mnt
+# reboot
+
+* amd vi
+** iommu
+enable iommu in uefi
+set extra linux kernel parameter "iommu=pt" to make iommu work in pass through mode
+** efibootmgr
+efibootmgr --create --disk /dev/sda --part 1 --gpt --label "Arch Linux" --loader /vmlinuz-linux --unicode "root=/dev/sda2 rw initrd=/initramfs-linux.img iommu=pt"
+efibootmgr --verbose
+# rm /sys/firmware/efi/efivars/dump-*
+# efibootmgr --bootorder XXXX,XXXX
+
+* fstab
+** check disk
+lsblk -f
+** server
+/etc/fstab
+# <file system> <dir> <type> <options> <dump> <pass>
+# /dev/sda2
+UUID=e4735dc5-0801-462b-9d64-58b82a435d50       /               ext4            rw,relatime,discard,data=ordered
+    0 1
+# /dev/sda1
+UUID=6035-3B7E          /boot           vfat            rw,relatime,discard,fmask=0022,dmask=0022,codepage=437,iocha
+rset=iso8859-1,shortname=mixed,utf8,errors=remount-ro       0 2
+# /dev/sda3
+UUID=1c592281-59d4-41ea-8873-d6934434f4f3       none            swap            defaults,discard,pri=-2 0 0
+# /dev/sdb1
+UUID=c83c5c95-caab-4669-a319-dbbc851a70e1       /nas/delft      ext4            rw,relatime,data=ordered        0 2
+# /dev/sdc1
+UUID=19a448bc-d923-459e-ac00-bab5a220c3e6       /nas/shanghai   ext4            rw,relatime,data=ordered        0 2
+# /dev/sdd1
+UUID=434311c3-7a36-4249-bb91-51cbf518793a       /nas/venus      ext4            rw,relatime,data=ordered,nofail,x-sy
+stemd.device-timeout=1      0 2
+# /dev/sde1
+UUID=8dffe51b-2326-43fd-8549-1d3a319c71e5       /nas/jupiter    ext4            rw,relatime,data=ordered,nofail,x-sy
+stemd.device-timeout=1      0 2
+** laptop
+# <file system> <dir> <type> <options> <dump> <pass>
+# /dev/sda2
+UUID=b78d31d2-727f-4034-8016-5c9af69d7d52	/         	ext4      	rw,relatime,discard,data=ordered	0 1
+# /dev/sda1
+UUID=fb432bf1-8dd9-4d6b-9a1c-4601e1996209	/boot     	ext4      	rw,relatime,discard,data=ordered	0 2
+# /dev/sda3
+UUID=6b835efe-6110-46c2-aea3-99d0c169e238	none      	swap      	defaults,discard  	0 0
+
+//192.168.50.2/nas	/mnt/samba/nas		cifs	credentials=/mnt/samba/smbcredentials,x-systemd.automount	0 0
+
+//192.168.50.2/public	/mnt/samba/public	cifs	credentials=/mnt/samba/smbcredentials,uid=cmos,gid=users,x-systemd.automount	0 0
+
+* ssd
+vi /etc/fstab
+relatime,discard
+cat /proc/sys/vm/swappiness
+vi /etc/sysctl.d/99-sysctl.conf
+vm.swappiness=1
+vi /etc/udev/rules.d/60-ioschedulers.rules
+cat /sys/block/sda/queue/scheduler
+# set noop scheduler for non-rotating disks
+ACTION=="add|change", KERNEL=="sda", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="noop"
+
+* services
+** list
+dhcpcd.service
+sshd.socket
+nftables.service
+smb.service
+cronie.service
+** dhcpcd
+vim /etc/dhcpcd.conf
+interface enp2s0f0
+static ip_address=xxx.xxx.xx.2/24
+static routers=xxx.xxx.xx.1
+static domain_name_servers=xxx.xxx.xx.1 114.114.114.114 8.8.8.8
+** sshd
+vim /etc/ssh/sshd_config
+AllowUsers    user1 user2
+Port 39901
+# systemctl edit sshd.socket
+[Socket]
+ListenStream=192.168.50.2:3511
+FreeBind=true
+** smb
+smb://<ip_addr>
+# useradd -g users -s /bin/bash username
+# usermod --shell /usr/bin/nologin --lock username
+# smbpasswd -a samba_user
+# pdbedit -L -v
+/etc/samba/smb.conf:
+    [global]
+    server min protocol = SMB2
+** crontab
+crontab -l
+crontab -e
+# using absolute path both in crontab -e and scripts
+*/3 * * * * /usr/local/bin/python3.5 /home/firefly/ff_server/svn_monitor.py
+@daily rsync -a /nas/delft/cmos/ /nas/venus/cmos/nas_temp/
+@daily rsync -a /nas/delft/irabbi/ /nas/venus/irabbi/nas_temp/
+@weekly rsync -a --delete /nas/venus/cmos/ /nas/jupiter/cmos/
+@weekly rsync -a --delete /nas/venus/irabbi/ /nas/jupiter/irabbi/
+** svn
+svnadmin create /svn/<proj_dir>
+/svn/<proj_dir>/conf/svnserve.conf
+/svn/<proj_dir>/conf/passwd
+/svn/<proj_dir>/conf/authz
+svnserve -d -r /svn/<proj_dir>
+port:3690
+svn co svn://<ip>
+svn pe svn:ignore <path>
+svn resolve --accept working -R <path>
+svn pg -R svn:ignore <path>
+svn pg -R svn:global-ignores <path>
+** prosody
+admins = { "yigy@platform.sari.com" }
+VirtualHost "platform.sari.com"
+Component "conference.sari.com" "muc"
+    restrict_room_creation = "admin"
+prosodyctl cert generate platform.sari.com
+
+* standard help
+/usr/lib /lib link problems
+man <prog>
+<prog> -h/--help
+
+* local installation
+.a: ./configure --prefix=<local_dir>
+.so: ./configure --enable-shared --prefix=<local_dir> --with-gcc=/usr/bin/gcc44
+make
+make test
+make install
+
+* other lib version local installation
+export LD_LIBRARY_PATH
+export LD_RUN_PATH
+./configure LDFLAGS="-L<path>" CPPFLAGS="-I<include_path>" --prefix=<local_path>
 
 * pacman
 pacman -Syu
@@ -249,45 +475,9 @@ package-cleanup --quiet --leaves
 yum remove <pkg>
 yum list installed
 
-* systemctl
-systemctl list-units
-systemctl enable/disable <service>
-systemctl start/stop/restart <service>
-systemctl --failed
-systemctl reset-failed
-
 * grub
 /etc/default/grub: GRUB_GFXMODE=1920x1080
 grub-mkconfig -o /boot/grub/grub.cfg
-
-* standard help
-/usr/lib /lib link problems
-man <prog>
-<prog> -h/--help
-
-* local installation
-.a: ./configure --prefix=<local_dir>
-.so: ./configure --enable-shared --prefix=<local_dir> --with-gcc=/usr/bin/gcc44
-make
-make test
-make install
-
-* other lib version local installation
-export LD_LIBRARY_PATH
-export LD_RUN_PATH
-./configure LDFLAGS="-L<path>" CPPFLAGS="-I<include_path>" --prefix=<local_path>
-
-* locale
-en_US.UTF-8
-(rpm) /etc/sysconfig/i18n
-(rpm) /etc/environment
-
-* login shell
-chsh -s <shell> <user>
-
-* integrity check
-pwck
-grpck
 
 * nvidia
 ** correct DPI
@@ -306,81 +496,12 @@ Section "Device"
     Driver "amdgpu"
 EndSection
 
-* latex cjk
-** encapsulated
-\usepackage[encapsulated]{CJK}
-\usepackage{ucs}
-\usepackage[utf8x]{inputenc}
-% use one of bsmi(trad Chinese), gbsn(simp Chinese), min(Japanese), mj(Korean); see:
-% /usr/share/texmf-dist/tex/latex/cjk/texinput/UTF8/*.fd
-\newcommand{\cntext}[1]{\begin{CJK}{UTF8}{gbsn}#1\end{CJK}}
-\cntext{你好，\LaTeX}
-** directed
-\documentclass[12pt, cjk]{beamer}
-\usepackage[encapsulated]{CJK}
-\usepackage{ucs}
-\usepackage[utf8x]{inputenc}
-\begin{document}
-\begin{CJK}{UTF8}{gbsn}
-你好，\LaTeX
-\end{CJK}
-\end{document}
-
-* xetex
-** xecjk
-\usepackage{xeCJK}
-\setCJKmainfont{SourceHanSansCN-Regular}
-\begin{document}
-你好，\XeTeX
-\end{document}
-
-* texlive package files update
-mktexlsr
-
-* editor coding system
-** for emacs
-revert-buffer-with-coding-system
-** for vim
-set fileencodings=utf-8,gb18030
-
-* xfreerdp
-xfreerdp -g 1920x960 --ignore-certificate -u <user> -p <passwd> --plugin rdpsnd <host>
-
-* cinelerra
-/etc/sysctl.conf: kernel.shmmax = 0x7fffffff
-sysctl -p
-
-* media format conversion
-** lame
-lame is used to convert mp3 vbr to cbr (Audacity for advanced conversion)
-** wma2mp3
-for i in *.wma;
-do mplayer -vo null -vc dummy -af resample=44100 -ao pcm:waveheader "$i" && lame -m j -h --vbr-new -b 192 audiodump.wav -o "`basename "$i" .wma`.mp3";
-done;
-rm -f audiodump.wav
-** mp32wma
-pacpl -t mp3 --bitrate 320 -o wma -r <src_dir>
-** 2mp4
-ffmpeg -i <wmv_file> -r 60 -b:a 192k -b:v 2000k <mp4_file>
-ffmpeg -i <mov_file> -r 60 -ar 44100 -b:a 192k -b:v 2000k <mp4_file>
-** ape&cue2flac
-ffmpeg -i <ape_file> <wav_file>
-bchunk -w <wav_file> <cue_file> <new_file_prefix>
-flac --best <new_file_prefix>*
-** standard sample rates
-192 224 256 320
-
-* X11 resources
-xrdb ~/.Xresources
-xrdb -merge ~/.Xresources
-
-* files leaving
-shopt -s extglob
-rm !(<file1>|<dir1>|<file2>)
-
-* gmail
-imap.googlemail.com:993
-smtp.googlemail.com:465/587
+* systemctl
+systemctl list-units
+systemctl enable/disable <service>
+systemctl start/stop/restart <service>
+systemctl --failed
+systemctl reset-failed
 
 * firewall
 ** iptables
@@ -486,19 +607,6 @@ flush privileges;
 show grants for <user>@localhost;
 mysqladmin -u root -p password <new_passwd>
 
-* svn
-svnadmin create /svn/<proj_dir>
-/svn/<proj_dir>/conf/svnserve.conf
-/svn/<proj_dir>/conf/passwd
-/svn/<proj_dir>/conf/authz
-svnserve -d -r /svn/<proj_dir>
-port:3690
-svn co svn://<ip>
-svn pe svn:ignore <path>
-svn resolve --accept working -R <path>
-svn pg -R svn:ignore <path>
-svn pg -R svn:global-ignores <path>
-
 * uwsgi
 uwsgi --ini sprd_site_uwsgi.ini --pidfile=uwsgi.pid &
 uwsgi --stop uwsgi.pid
@@ -519,56 +627,6 @@ tomcat8 home dir: /usr/share/tomcat8
     <role rolename="manager-script"/>
     <role rolename="manager-gui"/>
     <user password="tomcat" roles="tomcat, manager-script, manager-gui,admin" username="tomcat"/>
-
-* sshd
-vim /etc/ssh/sshd_config
-AllowUsers    user1 user2
-Port 39901
-# systemctl edit sshd.socket
-[Socket]
-ListenStream=192.168.50.2:3511
-FreeBind=true
-
-* vncserver
-(rpm) /etc/sysconfig/vncservers
-vncpasswd
-(rpm) service vncserver start/stop/restart
-chkconfig vncserver on
-(rpm) /etc/sysconfig/iptables
-(rpm) service iptables restart
-
-* smb
-smb://<ip_addr>
-# useradd -g users -s /bin/bash username
-# usermod --shell /usr/bin/nologin --lock username
-# smbpasswd -a samba_user
-# pdbedit -L -v
-/etc/samba/smb.conf:
-    [global]
-    server min protocol = SMB2
-
-* dhcpcd
-vim /etc/dhcpcd.conf
-interface enp2s0f0
-static ip_address=xxx.xxx.xx.2/24
-static routers=xxx.xxx.xx.1
-static domain_name_servers=xxx.xxx.xx.1 114.114.114.114 8.8.8.8
-
-* django
-** settings
-uwsgi_params
-<proj>_nginx.conf
-ln -s <proj_nginx_conf_path>/<proj>_nginx.conf /etc/nginx/conf.d/
-<proj>_uwsgi.ini
-<proj>/settings.py
-manage.py createsuperuser
-manage.py makemigrations
-manage.py migrate
-manage.py collectstatic
-manage.py dumpdata <app> > data.json
-manage.py loaddata data.json
-** django-bootstrap3
-'javascript_in_head': True,
 
 * irun
 ** pcom
@@ -656,79 +714,65 @@ verdi -autoalias -sv +v2k -ssv -ssy -undockWin -nologo
 ** nWave options
 nWave -ssf <fsdb> -sswr <novas_rc>
 
-* crontab
-crontab -l
-crontab -e
-# using absolute path both in crontab -e and scripts
-*/3 * * * * /usr/local/bin/python3.5 /home/firefly/ff_server/svn_monitor.py
-@daily rsync -a /nas/delft/cmos/ /nas/venus/cmos/nas_temp/
-@daily rsync -a /nas/delft/irabbi/ /nas/venus/irabbi/nas_temp/
-@weekly rsync -a --delete /nas/venus/cmos/ /nas/jupiter/cmos/
-@weekly rsync -a --delete /nas/venus/irabbi/ /nas/jupiter/irabbi/
-
-* android
-** nexus
-sed -i 's/ro.setupwizard.network_required=true/ro.setupwizard.network_required=false/g' /system/build.prop
-
-* prosody
-admins = { "yigy@platform.sari.com" }
-VirtualHost "platform.sari.com"
-Component "conference.sari.com" "muc"
-    restrict_room_creation = "admin"
-prosodyctl cert generate platform.sari.com
-
-* AMD
-** iommu
-enable iommu in uefi
-set extra linux kernel parameter "iommu=pt" to make iommu work in pass through mode
-** efibootmgr
-efibootmgr --create --disk /dev/sda --part 1 --gpt --label "Arch Linux" --loader /vmlinuz-linux --unicode "root=/dev/sda2 rw initrd=/initramfs-linux.img iommu=pt"
-efibootmgr --verbose
-# rm /sys/firmware/efi/efivars/dump-*
-# efibootmgr --bootorder XXXX,XXXX
-intel: efibootmgr --create --disk /dev/sda --part 1 --gpt --label "Arch Linux" --loader /vmlinuz-linux --unicode "root=/dev/sda2 rw initrd=/intel-ucode.img initrd=/initramfs-linux.img iommu=pt"
-
-* fstab
-** check disk
-lsblk -f
-mklabel gpt
-mkfs.ext4 /dev/sdb1
-** server
-/etc/fstab
-# <file system> <dir> <type> <options> <dump> <pass>
-# /dev/sda2
-UUID=e4735dc5-0801-462b-9d64-58b82a435d50       /               ext4            rw,relatime,discard,data=ordered
-    0 1
-# /dev/sda1
-UUID=6035-3B7E          /boot           vfat            rw,relatime,discard,fmask=0022,dmask=0022,codepage=437,iocha
-rset=iso8859-1,shortname=mixed,utf8,errors=remount-ro       0 2
-# /dev/sda3
-UUID=1c592281-59d4-41ea-8873-d6934434f4f3       none            swap            defaults,discard,pri=-2 0 0
-# /dev/sdb1
-UUID=c83c5c95-caab-4669-a319-dbbc851a70e1       /nas/delft      ext4            rw,relatime,data=ordered        0 2
-# /dev/sdc1
-UUID=19a448bc-d923-459e-ac00-bab5a220c3e6       /nas/shanghai   ext4            rw,relatime,data=ordered        0 2
-# /dev/sdd1
-UUID=434311c3-7a36-4249-bb91-51cbf518793a       /nas/venus      ext4            rw,relatime,data=ordered,nofail,x-sy
-stemd.device-timeout=1      0 2
-# /dev/sde1
-UUID=8dffe51b-2326-43fd-8549-1d3a319c71e5       /nas/jupiter    ext4            rw,relatime,data=ordered,nofail,x-sy
-stemd.device-timeout=1      0 2
-** laptop
-# <file system> <dir> <type> <options> <dump> <pass>
-# /dev/sda2
-UUID=b78d31d2-727f-4034-8016-5c9af69d7d52	/         	ext4      	rw,relatime,discard,data=ordered	0 1
-# /dev/sda1
-UUID=fb432bf1-8dd9-4d6b-9a1c-4601e1996209	/boot     	ext4      	rw,relatime,discard,data=ordered	0 2
-# /dev/sda3
-UUID=6b835efe-6110-46c2-aea3-99d0c169e238	none      	swap      	defaults,discard  	0 0
-
-//192.168.50.2/nas	/mnt/samba/nas		cifs	credentials=/mnt/samba/smbcredentials,x-systemd.automount	0 0
-
-//192.168.50.2/public	/mnt/samba/public	cifs	credentials=/mnt/samba/smbcredentials,uid=cmos,gid=users,x-systemd.automount	0 0
-
-* xmodmap
+* xorg
+** Xresources
+xrdb ~/.Xresources
+xrdb -merge ~/.Xresources
+** xmodmap
 xmodmap -pke
+
+* bash
+** files leaving
+shopt -s extglob
+rm !(<file1>|<dir1>|<file2>)
+** login shell modification
+chsh -s <shell> <user>
+
+* integrity check
+pwck
+grpck
+
+* sed
+sed -i -E "s/<regex>/<string>/g" <files>
+
+* rsync
+rsync -avh --delete </src_dir/> </tar_dir/>
+
+* xfreerdp
+xfreerdp -g 1920x960 --ignore-certificate -u <user> -p <passwd> --plugin rdpsnd <host>
+
+* cinelerra
+/etc/sysctl.conf: kernel.shmmax = 0x7fffffff
+sysctl -p
+
+* media format conversion
+** lame
+lame is used to convert mp3 vbr to cbr (Audacity for advanced conversion)
+** wma2mp3
+for i in *.wma;
+do mplayer -vo null -vc dummy -af resample=44100 -ao pcm:waveheader "$i" && lame -m j -h --vbr-new -b 192 audiodump.wav -o "`basename "$i" .wma`.mp3";
+done;
+rm -f audiodump.wav
+** mp32wma
+pacpl -t mp3 --bitrate 320 -o wma -r <src_dir>
+** 2mp4
+ffmpeg -i <wmv_file> -r 60 -b:a 192k -b:v 2000k <mp4_file>
+ffmpeg -i <mov_file> -r 60 -ar 44100 -b:a 192k -b:v 2000k <mp4_file>
+** ape&cue2flac
+ffmpeg -i <ape_file> <wav_file>
+bchunk -w <wav_file> <cue_file> <new_file_prefix>
+flac --best <new_file_prefix>*
+** standard sample rates
+192 224 256 320
+
+* firefox
+** uri_2_fileuri
+~/.mozilla/firefox/defaults/profile/user.js:
+    user_pref("capability.policy.policynames", "localfilelinks");
+    user_pref("capability.policy.localfilelinks.sites", "<site1_url> <site2_url>");
+    user_pref("capability.policy.localfilelinks.checkloaduri.enabled", "allAccess");
+    user_pref("browser.backspace_action", 0);
+    user_pref("browser.startup.homepage", "<home_url>")
 
 * thunderbird
 network.protocol-handler.warn-external.ftp = true
@@ -736,78 +780,6 @@ network.protocol-handler.warn-external.http = true
 network.protocol-handler.warn-external.https = true
 mail.biff.use_system_alert = true
 
-* usb install media
-# dd bs=4M if=/path/to/archlinux.iso of=/dev/sdx status=progress oflag=sync
-
-* ssd
-vi /etc/fstab
-relatime,discard
-cat /proc/sys/vm/swappiness
-vi /etc/sysctl.d/99-sysctl.conf
-vm.swappiness=1
-vi /etc/udev/rules.d/60-ioschedulers.rules
-cat /sys/block/sda/queue/scheduler
-# set noop scheduler for non-rotating disks
-ACTION=="add|change", KERNEL=="sda", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="noop"
-
-* arch install
-# ls /sys/firmware/efi/efivars
-# ping archlinux.org
-# timedatectl set-ntp true
-
-# fdisk -l
-# parted /dev/sdx
-(parted) mklabel gpt
-(parted) mkpart ESP fat32 1MiB 1GiB
-(parted) set 1 boot on
-(parted) mkpart primary ext4 1GiB 230GiB
-(parted) mkpart primary linux-swap 230GiB 100%
-(parted) q
-# fdisk -l
-# mkfs.fat -F32 /dev/sda1
-# mkfs.ext4 /dev/sda2
-# mkswap /dev/sda3
-# swapon /dev/sda3
-
-# mount /dev/sda2 /mnt
-# mkdir /mnt/boot
-# mount /dev/sda1 /mnt/boot
-vi /etc/pacman.d/mirrorlist
-# pacstrap /mnt base
-# genfstab -U /mnt >> /mnt/etc/fstab
-> fstab
-
-# arch-chroot /mnt
-# ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-# hwclock --systohc
-vi /etc/locale.gen
-# locale-gen
-vi /etc/locale.conf
-LANG=en_US.UTF-8
-vi /etc/hostname
-my_host_name
-vi /etc/hosts
-127.0.0.1	localhost
-::1		localhost
-127.0.1.1	my_host_name.localdomain	my_host_name
-
-server: dhcpcd
-laptop: iw, wpa_supplicant, NetworkManager(nmcli)
-
-# mkinitcpio -p linux
-# passwd
-> efibootmgr
-
-intel: intel-ucode
-> efibootmgr:intel
-
-# exit
-# umount -R /mnt
-# reboot
-
-* services
-dhcpcd.service
-sshd.socket
-nftables.service
-smb.service
-cronie.service
+* android
+** nexus
+sed -i 's/ro.setupwizard.network_required=true/ro.setupwizard.network_required=false/g' /system/build.prop

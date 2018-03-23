@@ -28,9 +28,9 @@ class BlockAdmin(admin.ModelAdmin):
 
 class FlowAdmin(admin.ModelAdmin):
     """flow admin"""
-    list_display = ("id", "name", "block", "owner", "created_time", "status")
+    list_display = ("id", "name", "block", "owner", "created_time", "status", "comment")
     list_filter = ["created_time"]
-    search_field = ["name", "block", "owner", "created_time", "status", "data"]
+    search_field = ["name", "block", "owner", "created_time", "status", "comment", "data"]
 
 class StageAdmin(admin.ModelAdmin):
     """stage admin"""

@@ -92,7 +92,7 @@
                    this.remove(params.index)
                  }
                }
-             }, "Delete")
+             }, "Hide")
            ])
          }
        })
@@ -222,6 +222,23 @@
        })
        if (this.level === "flow") {
          this.col_ary.push({
+           title: "Current Stage",
+           key: "cur_stage",
+           width: 200,
+           sortable: true,
+           filters: this.filter_ary_obj.cur_stage,
+           filterMultiple: true,
+           filterMethod: function (value, row) {
+             return row.cur_stage === value
+           }
+         })
+         this.col_ary.push({
+           title: "Comment",
+           key: "comment",
+           width: 200,
+           sortable: true
+         })
+         this.col_ary.push({
            title: "Block",
            key: "block",
            width: 150,
@@ -262,8 +279,10 @@
        this.filter_ary_obj = {obj_name: [], owner: [], status: []}
        var unique_ary_obj = {obj_name: [], owner: [], status: []}
        if (this.level === "flow") {
+         this.filter_ary_obj.cur_stage = []
          this.filter_ary_obj.block = []
          this.filter_ary_obj.proj = []
+         unique_ary_obj.cur_stage = []
          unique_ary_obj.block = []
          unique_ary_obj.proj = []
        } else if (this.level === "stage") {
@@ -276,9 +295,11 @@
            obj_pk: qs_obj.id,
            obj_name: qs_obj.name,
            created_time: qs_obj.created_time.slice(0, 19).replace("T", " "),
-           status: qs_obj.status,
+           status: qs_obj.status
          }
          if (this.level === "flow") {
+           data_dic.cur_stage = qs_obj.cur_stage,
+           data_dic.comment = qs_obj.comment,
            data_dic.block = qs_obj.block.name,
            data_dic.proj = qs_obj.block.proj.name
          } else if (this.level === "stage") {

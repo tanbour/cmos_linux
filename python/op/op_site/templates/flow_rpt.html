@@ -16,49 +16,46 @@
     {% endverbatim %}
     <div class="layout-content">
       <div class="layout-content-main" style="background-image:url({% static 'images/background_1200x600.jpg' %})">
-        <div v-if="level === 'detail'" style="background:#eee; padding:20px">
-          <div v-if="cur_data.data">
-            <Card v-for="key in Object.keys(cur_data.data).sort()" v-if="key !== 'status'" :key="key" :bordered="false" style="font-family:monospace; color:black">
+        <i-input v-model="searchQuery" placeholder="Search" clearable style="width:200px"></i-input>
+        <br>
+        <div style="margin:10px">
+          Display border <i-switch v-model="showBorder" style="margin-right:5px"></i-switch>
+          Display stripe <i-switch v-model="showStripe" style="margin-right:5px"></i-switch>
+          Display index <i-switch v-model="showIndex" style="margin-right:5px"></i-switch>
+          Display multi choice <i-switch v-model="showCheckbox" style="margin-right:5px"></i-switch>
+          Display header <i-switch v-model="showHeader" style="margin-right:5px"></i-switch>
+          Table scrolling <i-switch v-model="fixedHeader" style="margin-right:5px"></i-switch>
+          <br>
+        </div>
+        <i-table :border="showBorder" :stripe="showStripe" :show-header="showHeader" :height="fixedHeader?300:''" :columns="table_col" :data="s_table_data" size="small" ref="table"></i-table>
+        <div style="margin:10px; overflow:hidden">
+          <div style="float:right">
+            <Page :total="dataCount" :page-size="pageSize" show-total @on-change="changePage"></Page>
+          </div>
+        </div>
+        <br>
+        <i-button @click="handleSelectAll(true)">Set all selected</i-button>
+        <i-button @click="handleSelectAll(false)">Cancel all selected</i-button>
+        <i-button @click="deleteSelections()">Hide selected</i-button>
+        <i-button v-if="level === 'stage'" :disabled="comp_dis" type="primary" shape="circle" @click="compareSelections()">Compare selected</i-button>
+        <br>
+        <br>
+        <i-button type="primary" size="large" @click="exportData(1)"><icon type="ios-download-outline"></icon> Export source data</i-button>
+        <i-button type="primary" size="large" @click="exportData(2)"><icon type="ios-download-outline"></icon> Export sorting and filtered data</i-button>
+        <i-button type="primary" size="large" @click="exportData(3)"><icon type="ios-download-outline"></icon> Export custom data</i-button>
+        <div v-if="level === 'detail' && Object.keys(detail_raw_obj).length !== 0">
+          <br>
+          <hr>
+          <br>
+          <div style="background:#eee; padding:20px">
+            <Card v-for="key in Object.keys(detail_raw_obj).sort()" :key="key" :bordered="false" style="font-family:monospace; color:black">
               {% verbatim %}
-              <div v-if="check_vhtml_key(key)">
-                <p slot="title">{{ key }}</p>
-                <p v-html="cur_data.data[key]"></p>
-              </div>
-              <div v-else>
-                <p slot="title">{{ key }}</p>
-                <p><pre>{{ cur_data.data[key] }}</pre></p>
-              </div>
+              <p slot="title">{{ key }}</p>
+              <p v-html="detail_raw_obj[key]"></p>
+              <!-- <p><pre>{{ cur_data.data[key] }}</pre></p> -->
               {% endverbatim %}
             </Card>
           </div>
-        </div>
-        <div v-else>
-          <i-input v-model="searchQuery" placeholder="Search" clearable style="width:200px"></i-input>
-          <br>
-          <div style="margin:10px">
-            Display border <i-switch v-model="showBorder" style="margin-right:5px"></i-switch>
-            Display stripe <i-switch v-model="showStripe" style="margin-right:5px"></i-switch>
-            Display index <i-switch v-model="showIndex" style="margin-right:5px"></i-switch>
-            Display multi choice <i-switch v-model="showCheckbox" style="margin-right:5px"></i-switch>
-            Display header <i-switch v-model="showHeader" style="margin-right:5px"></i-switch>
-            Table scrolling <i-switch v-model="fixedHeader" style="margin-right:5px"></i-switch>
-            <br>
-          </div>
-          <i-table :border="showBorder" :stripe="showStripe" :show-header="showHeader" :height="fixedHeader?300:''" :columns="table_col" :data="s_table_data" size="small" ref="table"></i-table>
-          <div style="margin:10px; overflow:hidden">
-            <div style="float:right">
-              <Page :total="dataCount" :page-size="pageSize" show-total @on-change="changePage"></Page>
-            </div>
-          </div>
-          <br>
-          <i-button @click="handleSelectAll(true)">Set all selected</i-button>
-          <i-button @click="handleSelectAll(false)">Cancel all selected</i-button>
-          <i-button @click="deleteSelections()">Delete selected</i-button>
-          <br>
-          <br>
-          <i-button type="primary" size="large" @click="exportData(1)"><icon type="ios-download-outline"></icon> Export source data</i-button>
-          <i-button type="primary" size="large" @click="exportData(2)"><icon type="ios-download-outline"></icon> Export sorting and filtered data</i-button>
-          <i-button type="primary" size="large" @click="exportData(3)"><icon type="ios-download-outline"></icon> Export custom data</i-button>
         </div>
       </div>
     </div>
@@ -74,6 +71,7 @@
        table_data: [],
        col_ary: [],
        data_ary: [],
+       detail_raw_obj: {},
        filter_ary_obj: {},
        searchQuery: "",
        showBorder: false,
@@ -83,7 +81,7 @@
        showCheckbox: true,
        fixedHeader: false,
        dataCount: 0,
-       pageSize: 10,
+       pageSize: 20,
        rsp_data: {},
        rsp_title: {},
        level: "",
@@ -112,7 +110,9 @@
          l2: {},
          l3: {},
          l4: {}
-       }
+       },
+       comp_ary: [],
+       comp_dis: false
      }
    },
    computed: {
@@ -167,7 +167,7 @@
                    this.remove(params.index)
                  }
                }
-             }, "Delete")
+             }, "Hide")
            ])
          }
        })
@@ -176,7 +176,7 @@
      s_table_data: function () {
        var searchQuery = this.searchQuery && this.searchQuery.toLowerCase()
        if (searchQuery) {
-         data = this.table_data.filter(function (row) {
+         var data = this.table_data.filter(function (row) {
            return Object.keys(row).some(function (key) {
              return String(row[key]).toLowerCase().indexOf(searchQuery) > -1
            })
@@ -199,8 +199,11 @@
            if (this.level !== "detail") {
              this.procDataAry()
              this.procColAry()
-             this.pageTableData()
+           } else {
+             this.procDataAryDetail()
+             this.procColAryDetail()
            }
+           this.pageTableData()
          }).catch((error) => {
            console.log(error)
          })
@@ -212,26 +215,31 @@
        if (this.level === "proj") {
          this.cur_data = this.rsp_data
          this.cb_data.l0.text = "projects"
+         this.comp_dis = false
        } else if (this.level === "block") {
          this.cur_data = this.rsp_data.block_proj
          this.cb_data.l0.text = this.rsp_data.name
          this.cb_data.l1.url_id = this.rsp_data.id
          this.cb_data.l1.text = "blocks"
+         this.comp_dis = false
        } else if (this.level === "flow") {
          this.cur_data = this.rsp_data.flow_block
          this.cb_data.l1.text = this.rsp_data.name
          this.cb_data.l2.url_id = this.rsp_data.id
          this.cb_data.l2.text = "flows"
+         this.comp_dis = false
        } else if (this.level === "stage") {
          this.cur_data = this.rsp_data.stage_flow
          this.cb_data.l2.text = this.rsp_data.name
          this.cb_data.l3.url_id = this.rsp_data.id
          this.cb_data.l3.text = "stages"
+         this.comp_dis = false
        } else if (this.level == "detail") {
          this.cur_data = this.rsp_data
          this.cb_data.l3.text = this.rsp_data.name
          this.cb_data.l4.url_id = this.rsp_data.id
          this.cb_data.l4.text = "details"
+         this.comp_dis = false
        }
        if (this.level !== "detail") {
          this.cur_title = this.rsp_title[this.level]
@@ -305,6 +313,14 @@
            }
          })
        }
+       if (this.level === "flow") {
+         this.col_ary.push({
+           title: "Comment",
+           key: "comment",
+           width: 200,
+           sortable: true
+         })
+       }
        if (this.level === "stage") {
          this.col_ary.push({
            title: "Version",
@@ -340,41 +356,116 @@
          })
        }
      },
+     procColAryDetail: function () {
+       this.col_ary = [
+         {
+           title: "Key",
+           key: "key",
+           /* "fixed": "left",*/
+           width: 200,
+           sortable: true,
+           sortType: "asc"
+         },
+         {
+           title: "Value",
+           key: "value",
+           width: 1200,
+           sortable: true
+         }
+       ]
+     },
+     procColAryComp: function () {
+       for (var i = 0; i < this.cur_data.length; i++) {
+         for (var key in this.cur_data[i].data) {
+           if (!key.endsWith("_raw") && this.comp_ary.indexOf(key) === -1)
+             this.comp_ary.push(key)
+         }
+       }
+       this.comp_ary.sort()
+       this.col_ary = [{
+         title: "name",
+         key: "name",
+         width: 200,
+         sortable: true
+       }]
+       for (var i = 0; i < this.comp_ary.length; i++) {
+         this.col_ary.push({
+           title: this.comp_ary[i],
+           key: this.comp_ary[i],
+           width: 100,
+           sortable: true
+         })
+       }
+     },
      procDataAry: function () {
        this.data_ary = []
        this.filter_ary_obj = {obj_name: [], owner: []}
        var unique_ary_obj = {obj_name: [], owner: []}
        for (var i = 0; i < this.cur_data.length; i++) {
          var qs_obj = this.cur_data[i]
-         data_dic = {
+         var data_obj = {
            obj_pk: qs_obj.id,
            obj_name: qs_obj.name
          }
          if (qs_obj.owner === null) {
-           data_dic.owner = "NA"
+           data_obj.owner = "NA"
          } else {
-           data_dic.owner = qs_obj.owner.name
+           data_obj.owner = qs_obj.owner.name
          }
          if (this.level === "flow" || this.level === "stage") {
-           data_dic.created_time = qs_obj.created_time.slice(0, 19).replace("T", " ")
-           data_dic.status = qs_obj.status
+           data_obj.created_time = qs_obj.created_time.slice(0, 19).replace("T", " ")
+           data_obj.status = qs_obj.status
          }
          if (this.level === "stage") {
-           data_dic.version = qs_obj.version
+           data_obj.comment = qs_obj.comment
+         }
+         if (this.level === "stage") {
+           data_obj.version = qs_obj.version
          }
          if (this.level === "block") {
-           data_dic.milestone = qs_obj.milestone
+           data_obj.milestone = qs_obj.milestone
          }
          for (var key in qs_obj.data) {
-           data_dic[key] = qs_obj.data[key]
+           data_obj[key] = qs_obj.data[key]
          }
-         this.data_ary.push(data_dic)
+         this.data_ary.push(data_obj)
          for (var key in this.filter_ary_obj) {
-           if (unique_ary_obj[key].indexOf(data_dic[key]) === -1) {
-             this.filter_ary_obj[key].push({"label": data_dic[key], "value": data_dic[key]})
-             unique_ary_obj[key].push(data_dic[key])
+           if (unique_ary_obj[key].indexOf(data_obj[key]) === -1) {
+             this.filter_ary_obj[key].push({"label": data_obj[key], "value": data_obj[key]})
+             unique_ary_obj[key].push(data_obj[key])
            }
          }
+       }
+     },
+     procDataAryDetail: function () {
+       this.data_ary = []
+       this.detail_raw_obj = {}
+       for (var cd_key in this.cur_data.data) {
+         if (cd_key.endsWith("_raw")) {
+           this.detail_raw_obj[cd_key.slice(0, -4)] = this.cur_data.data[cd_key]
+         } else {
+           this.data_ary.push({
+             key: cd_key,
+             value: this.cur_data.data[cd_key]
+           })
+         }
+       }
+     },
+     procDataAryComp: function () {
+       this.data_ary = []
+       for (var i = 0; i < this.cur_data.length; i++) {
+         var qs_obj = this.cur_data[i]
+         var data_obj = {"name": qs_obj.name}
+         for (var j = 0; j < this.comp_ary.length; j++) {
+           var comp_ary_str = this.comp_ary[j]
+           var data_str = qs_obj.data[comp_ary_str]
+           if (data_str) {
+             data_obj[comp_ary_str] = data_str
+           } else {
+             data_obj[comp_ary_str] = ""
+           }
+         }
+         this.data_ary.push(data_obj)
        }
      },
      pageTableData: function () {
@@ -411,10 +502,24 @@
      handleSelectAll: function (status) {
        this.$refs.table.selectAll(status)
      },
+     compareSelections: function () {
+       var sel_obj = this.$refs.table.getSelection()
+       this.cur_data = this.cur_data.filter(function (data_item) {
+         return sel_obj.some(function (sel_item) {
+           return sel_item.obj_pk === data_item.id
+         })
+       })
+       this.handleSelectAll(false)
+       this.procColAryComp()
+       this.procDataAryComp()
+       this.pageTableData()
+       this.cb_data.l3.text = "comparison"
+       this.comp_dis = true
+     },
      deleteSelections: function () {
-       var sel_dic = this.$refs.table.getSelection()
-       for (var i = sel_dic.length-1; i >= 0; i--) {
-         this.table_data.splice(sel_dic[i], 1)
+       var sel_obj = this.$refs.table.getSelection()
+       for (var i = sel_obj.length-1; i >= 0; i--) {
+         this.table_data.splice(sel_obj[i], 1)
        }
      },
      show: function (index) {
@@ -429,9 +534,6 @@
      },
      remove: function (index) {
        this.table_data.splice(index, 1)
-     },
-     check_vhtml_key: function (key) {
-       return key.endsWith("img") || key.endsWith("link")
      }
    },
    /* created: function () {

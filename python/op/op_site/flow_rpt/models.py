@@ -18,7 +18,7 @@ class Title(models.Model):
 
 class Proj(models.Model):
     """project models"""
-    name = models.CharField(max_length=20, unique=True)
+    name = models.CharField(max_length=50, unique=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="proj_owner", blank=True, null=True)
     data = JSONField(default=dict, blank=True)
     def __str__(self):
@@ -26,7 +26,7 @@ class Proj(models.Model):
 
 class Block(models.Model):
     """block models"""
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=50)
     proj = models.ForeignKey(Proj, on_delete=models.CASCADE, related_name="block_proj")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="block_owner", blank=True, null=True)
     milestone = models.ForeignKey("Stage", on_delete=models.SET_NULL, related_name="block_milestone", blank=True, null=True)
@@ -38,25 +38,29 @@ class Block(models.Model):
 
 class Flow(models.Model):
     """flow models"""
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=100)
     block = models.ForeignKey(Block, on_delete=models.CASCADE, related_name="flow_block")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="flow_owner")
     created_time = models.DateTimeField()
     status = models.CharField(max_length=20)
+    comment = models.CharField(max_length=200, blank=True)
     data = JSONField(default=dict, blank=True)
     def __str__(self):
         return f"{self.name}__{self.block}"
     class Meta:
         unique_together = ("name", "block", "owner", "created_time")
+        ordering = ["-created_time"]
 
 class Stage(models.Model):
     """stage models"""
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=200)
     flow = models.ManyToManyField(Flow, related_name="stage_flow")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="stage_owner")
     created_time = models.DateTimeField()
     status = models.CharField(max_length=20)
-    version = models.CharField(max_length=20)
+    version = models.CharField(max_length=50)
     data = JSONField(default=dict, blank=True)
     def __str__(self):
         return f"{self.name}__{self.flow}"
+    class Meta:
+        ordering = ["-created_time"]

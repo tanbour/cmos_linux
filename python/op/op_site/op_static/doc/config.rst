@@ -5,6 +5,67 @@ Config User Manual
 
 Config types
 ----------------------------------------
+Unix config files are the only interface between platform and users. The config files are different from projects(modules) to projects(modules). The option values of config files will influent the behavior of platform.
+
+OP has the following types of config files:
+
+- $PROJ_ROOT/share/config/proj.cfg
+
+- $PROJ_ROOT/share/config/lib
+
+- $PROJ_ROOT/share/config/lib.cfg
+
+- $PROJ_ROOT/share/config/flow.cfg
+
+- $PROJ_ROOT/share/config/flow
+
+- $PROJ_ROOT/share/config/filter.cfg
+
+- $PROJ_ROOT/share/config/lib.cfg
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
 配置文件是平台对用户的唯一接口，并且根据项目的不同、module的不同而不同，如果将平台看成一个类的话，配置文件就相当于平台根据项目例化时的构造函数，配置文件里提供了所有的参数一同影响平台的行为
 
 平台在项目中有一下几种配置文件：

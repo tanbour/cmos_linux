@@ -11,6 +11,8 @@ from django.utils import timezone as tz
 from django.conf import settings
 import dateutil.parser
 import pytz
+import os
+import shutil
 
 class TitleList(generics.ListAPIView):
     """flow report title list"""
@@ -27,7 +29,7 @@ class ProjList(generics.ListAPIView):
     queryset = Proj.objects.all()
     serializer_class = ProjSerializer
     def get_queryset(self, *args, **kwargs):
-        name = self.request.data.get("name")
+        name = self.request.data.get("proj")
         return self.queryset.filter(name=name) if name else self.queryset.all()
 
 class ProjDetail(generics.RetrieveAPIView):
@@ -40,7 +42,7 @@ class BlockList(generics.ListAPIView):
     queryset = Block.objects.all()
     serializer_class = BlockSerializer
     def get_queryset(self, *args, **kwargs):
-        name = self.request.data.get("name")
+        name = self.request.data.get("block")
         proj = self.request.data.get("proj")
         queryset = self.queryset.filter(name=name) if name else self.queryset.all()
         queryset = queryset.filter(proj__name=proj) if proj else queryset
@@ -56,7 +58,7 @@ class FlowList(generics.ListAPIView):
     queryset = Flow.objects.all()
     serializer_class = FlowSerializer
     def get_queryset(self, *args, **kwargs):
-        name = self.request.data.get("name")
+        name = self.request.data.get("flow")
         block = self.request.data.get("block")
         proj = self.request.data.get("proj")
         owner = self.request.data.get("owner")
@@ -86,7 +88,7 @@ class StageList(generics.ListAPIView):
     queryset = Stage.objects.all()
     serializer_class = StageSerializer
     def get_queryset(self, *args, **kwargs):
-        name = self.request.data.get("name")
+        name = self.request.data.get("stage")
         flow = self.request.data.get("flow")
         block = self.request.data.get("block")
         proj = self.request.data.get("proj")
@@ -108,7 +110,7 @@ class UserList(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     def get_queryset(self, *args, **kwargs):
-        name = self.request.data.get("name")
+        name = self.request.data.get("user")
         return self.queryset.filter(name=name) if name else self.queryset.all()
 
 class UserDetail(generics.RetrieveAPIView):
@@ -119,7 +121,7 @@ class UserDetail(generics.RetrieveAPIView):
 class RunnerProj(views.APIView):
     """runner platform post proj info"""
     def post(self, request, format=None):
-        proj_name = request.data.get("name")
+        proj_name = request.data.get("proj")
         owner_name = request.data.get("owner")
         if not proj_name:
             return Response({"message": "proj name is NA"}, status=status.HTTP_400_BAD_REQUEST)
@@ -134,7 +136,7 @@ class RunnerProj(views.APIView):
 class RunnerBlock(views.APIView):
     """runner platform post block info"""
     def post(self, request, format=None):
-        block_name = request.data.get("name")
+        block_name = request.data.get("block")
         proj_name = request.data.get("proj")
         owner_name = request.data.get("owner")
         if not block_name:
@@ -154,14 +156,15 @@ class RunnerBlock(views.APIView):
 class RunnerFlow(views.APIView):
     """runner platform post flow info"""
     def post(self, request, format=None):
-        flow_name = request.data.get("name")
+        flow_name = request.data.get("flow")
         block_name = request.data.get("block")
         proj_name = request.data.get("proj")
         owner_name = request.data.get("owner")
         created_time = request.data.get("created_time", "")
         created_time = pytz.timezone(settings.TIME_ZONE).localize(dateutil.parser.parse(
             created_time) if created_time else tz.datetime.now())
-        status = request.data.get("status", "NA")
+        status = request.data.get("status", "")
+        comment = request.data.get("comment", "")
         if not flow_name:
             return Response({"message": "flow name is NA"}, status=status.HTTP_400_BAD_REQUEST)
         if not block_name:
@@ -176,7 +179,7 @@ class RunnerFlow(views.APIView):
             {"name": block_name, "proj": proj_obj}, name=block_name, proj=proj_obj)
         flow_obj, created_flg = Flow.objects.update_or_create(
             {"name": flow_name, "block": block_obj, "owner": owner_obj,
-             "created_time": created_time, "status": status,
+             "created_time": created_time, "status": status, "comment": comment,
              "data": request.data.get("data", {})},
             name=flow_name, block=block_obj, owner=owner_obj, created_time=created_time)
         return Response({"flow_name": flow_obj.name, "created_flg": created_flg})
@@ -184,7 +187,7 @@ class RunnerFlow(views.APIView):
 class RunnerStage(views.APIView):
     """runner platform post stage info"""
     def post(self, request, format=None):
-        stage_name = request.data.get("name")
+        stage_name = request.data.get("stage")
         flow_name = request.data.get("flow")
         block_name = request.data.get("block")
         proj_name = request.data.get("proj")
@@ -192,12 +195,11 @@ class RunnerStage(views.APIView):
         created_time = request.data.get("created_time", "")
         created_time = pytz.timezone(settings.TIME_ZONE).localize(dateutil.parser.parse(
             created_time) if created_time else tz.datetime.now())
-        status = request.data.get("status", "NA")
-        version = request.data.get("version", "NA")
+        status = request.data.get("status", "")
+        version = request.data.get("version", "")
         f_created_time = request.data.get("f_created_time", "")
         f_created_time = pytz.timezone(settings.TIME_ZONE).localize(dateutil.parser.parse(
             f_created_time) if f_created_time else tz.datetime.now())
-        f_status = request.data.get("f_status", "NA")
         if not stage_name:
             return Response({"message": "stage name is NA"}, status=status.HTTP_400_BAD_REQUEST)
         if not flow_name:
@@ -214,7 +216,7 @@ class RunnerStage(views.APIView):
             {"name": block_name, "proj": proj_obj}, name=block_name, proj=proj_obj)
         flow_obj, _ = Flow.objects.get_or_create(
             {"name": flow_name, "block": block_obj, "owner": owner_obj,
-             "created_time": f_created_time, "status": f_status},
+             "created_time": f_created_time},
             name=flow_name, block=block_obj, owner=owner_obj, created_time=f_created_time)
         stage_obj, created_flg = Stage.objects.update_or_create(
             {"name": stage_name, "owner": owner_obj,
@@ -223,3 +225,35 @@ class RunnerStage(views.APIView):
             name=stage_name, owner=owner_obj, created_time=created_time)
         stage_obj.flow.add(flow_obj)
         return Response({"stage_name": stage_obj.name, "created_flg": created_flg})
+
+class RunnerUpload(views.APIView):
+    """runner platform upload files"""
+    def post(self, request, format=None):
+        file_obj = request.FILES.get("file_obj")
+        stage_name = request.data.get("stage")
+        flow_name = request.data.get("flow")
+        block_name = request.data.get("block")
+        proj_name = request.data.get("proj")
+        owner_name = request.data.get("owner")
+        created_time = request.data.get("created_time", "")
+        if not file_obj:
+            return Response({"message": "file content is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        if not stage_name:
+            return Response({"message": "stage name is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        if not flow_name:
+            return Response({"message": "flow name is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        if not block_name:
+            return Response({"message": "block name is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        if not proj_name:
+            return Response({"message": "proj name is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        if not owner_name:
+            return Response({"message": "owner name is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        file_name = os.path.basename(file_obj.name)
+        tar_dir = os.path.join("flow_rpt", owner_name, proj_name, block_name, f"{flow_name}__{stage_name}")
+        url_tar_dir = os.path.join(settings.MEDIA_URL, tar_dir)
+        real_tar_dir = os.path.join(settings.MEDIA_ROOT, tar_dir)
+        ts_file_name = f"{created_time}__{file_name}"
+        os.makedirs(real_tar_dir, exist_ok=True)
+        with open(os.path.join(real_tar_dir, ts_file_name), "wb+") as r_f:
+            shutil.copyfileobj(file_obj, r_f)
+        return Response({"file_url": os.path.join(url_tar_dir, ts_file_name)})

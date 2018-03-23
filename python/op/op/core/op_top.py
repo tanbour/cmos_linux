@@ -93,6 +93,9 @@ def gen_flow_parser(subparsers):
     flow_parser.add_argument(
         "-no_lib", dest="flow_no_lib", action="store_true",
         help="toggle flows to run flow without liblist generation")
+    flow_parser.add_argument(
+        "-c", dest="flow_comment", default="",
+        help="input flow comments to be shown and distinguished with others")
     me_group.add_argument(
         "-show_var", dest="flow_show_var_lst", nargs="*",
         help="toggle and input flows to list all variables passed to templates")

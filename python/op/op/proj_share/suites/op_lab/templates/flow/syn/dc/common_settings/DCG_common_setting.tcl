@@ -2,6 +2,7 @@
 #=================== DCG common setting =============================
 #===================================================================
 set sh_enable_page_mode false
+set dc_cpu_number   "[lindex "{{local._job_cpu_number}}" end]"
 set_host_options -max_cores {{local.dc_cpu_number}}
 #
 # constant
@@ -10,7 +11,6 @@ set_host_options -max_cores {{local.dc_cpu_number}}
 # set compile_seqmap_propagate_constants_size_only true
 
 set_app_var hdlin_infer_multibit default_all 
-set_multibit_options -mode non_timing_driven 
 # register_merging
 #set compile_enable_register_merging false
 set compile_enable_register_merging  true

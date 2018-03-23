@@ -43,7 +43,7 @@ proc write_check_dont_touch_net { { dont_touch_nets dont_touch_nets.tcl } { chec
   puts $output_file "# DATE:        [date]"
   puts $output_file "# DESCRIPTION: Checking dont_touch net in PrimeTime"
   puts $output_file "#              Keep original connection and NO buffer's allowed on specific nets"
-  puts $output_file "# USAGE:       check_dont_touch_net ?<check_dont_touch_net.rep>"
+  puts $output_file "# USAGE:       check_dont_touch_net ?<check_dont_touch_net.rpt>"
   puts $output_file "# UPDATE:      updated by Felix <felix_yuan@alchip.com>    2018-03-09 "      
   puts $output_file "# Item :       GE-02-08"      
   puts $output_file "#################################################################################################"

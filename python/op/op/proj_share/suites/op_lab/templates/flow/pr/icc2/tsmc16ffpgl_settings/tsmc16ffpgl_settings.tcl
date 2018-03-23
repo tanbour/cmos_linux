@@ -23,8 +23,8 @@ set_app_options -list {opt.common.do_physical_checks legalize}
 ### placer
 {%- if cur.sub_stage == "02_place.tcl" %} 
 # placement abut rule (Only needed in place stage)
-create_abut_rules -number_of_references 4 -output {{cur.flow_scripts_dir}}/lib_space_rule.tcl
-source {{cur.flow_scripts_dir}}/lib_space_rule.tcl
+create_abut_rules -number_of_references 4 -output {{cur.flow_scripts_dir}}/pr/lib_space_rule.tcl
+source {{cur.cur_flow_scripts_dir}}/pr/lib_space_rule.tcl
 {%- endif %}
 # general
 set_app_options -list {place.rules.min_od_filler_size 2}

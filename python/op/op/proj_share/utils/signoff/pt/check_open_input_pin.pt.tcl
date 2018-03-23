@@ -1,13 +1,14 @@
-########################################################################
+############################################################################################
 # PROGRAM     : check_open_input_pin.tcl
 # CREATOR     : Hideki Abe <abe@alchip.com>
 # DATE        : Thu April 27 14:05:00 2017
 # DESCRIPTION : Check open input pins in PrimeTime.
-# USAGE       : check_open_input_pin ?<check_open_input_pin.rep>
+# USAGE       : check_open_input_pin ?<check_open_input_pin.rpt>
+# UPDATE      : updated by Felix <felix_yuan@alchip.com>    2018-03-15
 # ITEM        : GE-02-02
-########################################################################
+############################################################################################
 
-proc check_open_input_pin { {output_rpt_open check_open_input_pin.rep} } {
+proc check_open_input_pin { {output_rpt_open check_open_input_pin.rpt} } {
      puts "Alchip-info: Starting to signoff check open input pin in PrimeTime\n"
      set file [ open $output_rpt_open w ]
      set cells [ get_cells * -hierarchical -filter "is_hierarchical != true" ]

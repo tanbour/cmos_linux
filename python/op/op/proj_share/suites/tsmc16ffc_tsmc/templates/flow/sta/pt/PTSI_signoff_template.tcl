@@ -5,7 +5,6 @@ set_host_options -max_cores $cpu_number
 file mkdir -p {{cur.flow_scripts_dir}}/.trach/TMP
 set  pt_tmp_dir {{cur.flow_scripts_dir}}/.trach/TMP
 file mkdir -p {{cur.cur_flow_rpt_dir}}/${SESSION}
-file mkdir -p {{cur.cur_flow_data_dir}}/${SESSION}
 file mkdir -p {{cur.cur_flow_log_dir}}/${SESSION}
 
 exec touch {{cur.flow_scripts_dir}}/.trach/.start
@@ -173,17 +172,17 @@ redirect -append {{cur.cur_flow_rpt_dir}}/${SESSION}/output_port_loading.rpt   {
 redirect -tee {{cur.cur_flow_log_dir}}/${SESSION}/update_timing.log { update_timing }
 {%- if local.SAVE_SESSION_LIST is string %}
 {%- if local.SAVE_SESSION_LIST == "all" %}
-save_session ${TOP}_${SESSION}.session	;# -only_used_libraries
+save_session {{cur.cur_flow_data_dir}}/${TOP}.${SESSION}.session	;# -only_used_libraries
 {%- elif local.SAVE_SESSION_LIST  == local._multi_inst %} 
-save_session ${TOP}_${SESSION}.session	;# -only_used_libraries
+save_session {{cur.cur_flow_data_dir}}/${TOP}.${SESSION}.session	;# -only_used_libraries
 {%- endif %}
 {%- endif %}
 {%- if local.SAVE_SESSION_LIST is sequence %}
 {%- for save_session in local.SAVE_SESSION_LIST %}
 {%- if save_session == "all" %}
-save_session ${TOP}_${SESSION}.session
+save_session {{cur.cur_flow_data_dir}}/${TOP}.${SESSION}.session
 {% elif  save_session  == local._multi_inst %} 
-save_session ${TOP}_${SESSION}.session	;# -only_used_libraries
+save_session {{cur.cur_flow_data_dir}}/${TOP}.${SESSION}.session	;# -only_used_libraries
 {%- endif %}
 {%- endfor %}
 {%- endif %}

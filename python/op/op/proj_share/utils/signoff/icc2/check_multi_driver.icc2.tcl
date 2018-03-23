@@ -7,35 +7,6 @@
 # UPDATER     : Felix Yuan <felix_yuan@alchip.com>  
 # ITEM        : GE-02-03                                                     
 ####################################################################################################################
-proc gl { arg } {
-    if { [sizeof_collection [ get_net $arg -quiet ] ] == 1 } {
-        set tmp_net $arg
-    } else {
-        if { [sizeof_collection [ get_pins $arg -filter "direction == in" -quiet ]] == 1 } {
-            echo "Error: pin $arg is an input pin"
-            return 0
-        } else {
-            set alc [ all_connected [ get_pins $arg ] ]
-            if { [sizeof_collection $alc ] == 0 } {
-                return $alc
-            }
-            set tmp_net [ get_attr $alc full_name ]
-        }
-    }
-    set net [get_attr [ get_net -top -seg $tmp_net ] full_name ]
-
-    if {[sizeof_collection [ get_port $net -quiet ] ] == 1 } {
-        return [ get_ports $net ]
-    } else {
-        set load_pin [ filter_collection [ all_connected [ get_net $net ] -leaf ] "direction != out" ]
-#       if { [ sizeof_collection $load_pin ] != 0 } {
-#           return $load_pin
-#       } else {
-#           echo "Warning: net $arg has no loading!!"
-#           return 0
-#       }
-    }
-}
 
 proc check_multi_driver { {output_rpt_multi_driver check_multi_driver.rpt} } {
      puts "Alchip-info: Starting to signoff check multi-driver in ICC2\n"
@@ -137,4 +108,34 @@ proc check_multi_driver { {output_rpt_multi_driver check_multi_driver.rpt} } {
 	puts "##### NO_SINK_NET : $no_sink_net #####"
 	close $report
         puts "Alchip-info: Completed to signoff check multi-driver in ICC2\n"
+}
+
+proc gl { arg } {
+    if { [sizeof_collection [ get_net $arg -quiet ] ] == 1 } {
+        set tmp_net $arg
+    } else {
+        if { [sizeof_collection [ get_pins $arg -filter "direction == in" -quiet ]] == 1 } {
+            echo "Error: pin $arg is an input pin"
+            return 0
+        } else {
+            set alc [ all_connected [ get_pins $arg ] ]
+            if { [sizeof_collection $alc ] == 0 } {
+                return $alc
+            }
+            set tmp_net [ get_attr $alc full_name ]
+        }
+    }
+    set net [get_attr [ get_net -top -seg $tmp_net ] full_name ]
+
+    if {[sizeof_collection [ get_port $net -quiet ] ] == 1 } {
+        return [ get_ports $net ]
+    } else {
+        set load_pin [ filter_collection [ all_connected [ get_net $net ] -leaf ] "direction != out" ]
+#       if { [ sizeof_collection $load_pin ] != 0 } {
+#           return $load_pin
+#       } else {
+#           echo "Warning: net $arg has no loading!!"
+#           return 0
+#       }
+    }
 }

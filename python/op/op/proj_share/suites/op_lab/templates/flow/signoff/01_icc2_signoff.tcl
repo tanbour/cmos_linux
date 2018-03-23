@@ -56,23 +56,23 @@ set footprint_tie  "{{local.footprint_tie}}"
 set wire_length_limitation  "{{local.wire_length_limitation}}"
 set signal_wire_length_limitation  "{{local.signal_wire_length_limitation}}"
 set clock_wire_length_limitation  "{{local.clock_wire_length_limitation}}"
-set clock_pin_list_file "{{cur.config_plugins_dir}}/signoff_icc2/clk_pin.list"
+set clock_pin_list_file "{{cur.config_plugins_dir}}/signoff/icc2/clk_pin.list"
 
 set tie_wire_length_limitation  "{{local.tie_wire_length_limitation}}"
 
 set tie_cell_type "{{local.tie_cell_type}}"
 set mem_ref_names  "{{local.mem_ref_names}}"
-set mem_orientation_file "{{cur.config_plugins_dir}}/signoff_icc2/allowed_orientation.list"
-set net_file_name "{{cur.config_plugins_dir}}/signoff_icc2/clock_net.list"
-set clock_file_name "{{cur.config_plugins_dir}}/signoff_icc2/clock_cell.list"
+set mem_orientation_file "{{cur.config_plugins_dir}}/signoff/icc2/allowed_orientation.list"
+set net_file_name "{{cur.config_plugins_dir}}/signoff/icc2/clock_net.list"
+set clock_file_name "{{cur.config_plugins_dir}}/signoff/icc2/clock_cell.list"
 
 set physical_partition_reference_names  "{{local.physical_partition_reference_names}}"
 set ip_reference_names  "{{local.ip_reference_names}}"
 set ip_wire_length_limitation  "{{local.ip_wire_length_limitation}}"
 set port_wire_length_limitation  "{{local.port_wire_length_limitation}}"
-set check_clock_decap_file "{{cur.config_plugins_dir}}/signoff_icc2/clock_cell_nets.list"
-set size_only_cell "{{cur.config_plugins_dir}}/signoff_icc2/size_only_cell.list"
-set dont_touch_nets "{{cur.config_plugins_dir}}/signoff_icc2/dont_touch_nets.list"
+set check_clock_decap_file "{{cur.config_plugins_dir}}/signoff/icc2/clock_cell_nets.list"
+set size_only_cell "{{cur.config_plugins_dir}}/signoff/icc2/size_only_cell.list"
+set dont_touch_nets "{{cur.config_plugins_dir}}/signoff/icc2/dont_touch_nets.list"
 
 set delay_cell_type  "{{local.delay_cell_type}}"
 set filler_cell_type  "{{local.filler_cell_type}}"
@@ -126,8 +126,8 @@ foreach file [ glob {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/icc2/*.tcl ] {
         check_multi_drive_cell_type  > $cur_flow_log_dir/{{env.BLK_NAME}}.icc2.check_multi_drive_cell_type.log
 
 
-# Move report to signoff dir
-sh mv check_size_only_cell.pt.tcl check_dont_touch_net.pt.tcl "{{cur.config_plugins_dir}}/signoff_pt/" 
+# Move reports to signoff dir
+sh mv check_size_only_cell.pt.tcl check_dont_touch_net.pt.tcl "{{cur.config_plugins_dir}}/signoff/pt/" 
 sh cp -rf ./* $cur_flow_rpt_dir/
 
 exit

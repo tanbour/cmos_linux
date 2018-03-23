@@ -1,0 +1,184 @@
+#! /usr/bin/env python3
+'''
+OnePiece License Issue
+
+Created on Wed Jan 24
+@author: minato
+'''
+
+from cryptography.hazmat import backends
+from cryptography.hazmat.primitives import serialization
+from truepy import LicenseData, License
+from datetime import date, timedelta
+import sys, os, re, getpass
+import argparse
+
+import logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+
+# license pre-shared key
+psk = b'preshared_license_key'
+
+
+def parse_args_top(prog):
+  ''' OP License Server argument parser '''
+  parser = argparse.ArgumentParser(description="OP License Issuer")
+
+  parser.add_argument("-k", "--server_key", type=argparse.FileType('rb'), required=True,
+                      help="SSL Server key.")
+
+  parser.add_argument("-c", "--server_certificate", type=argparse.FileType('rb'), required=True,
+                      help="SSL Server Certificate.")
+
+  parser.add_argument("-I", "--server_hostid", nargs='+', required=True,
+                      help="Host ID of the license server.")
+
+  parser.add_argument("-F", "--feature_name", nargs='+', default=[ "OnePiece4", ],
+                      help="Feature Name of the license. (default: OnePiece4)")
+
+  parser.add_argument("-n", "--feature_count", nargs='+', type=int, default=[ 999, ],
+                      help="Number of the license. (default: 999)")
+
+  parser.add_argument("-v", "--feature_version", default=None,
+                      help="Version of the license. (default: accept all version)")
+
+  parser.add_argument("-H", "--feature_hostid", nargs='*', default=None,
+                      help="host ID. (default: no running server limitation)")
+
+  parser.add_argument("-s", "--not_before", default=None,
+                      help="Begining date of the license. (default: today)")
+
+  parser.add_argument("-e", "--not_after", required=True,
+                      help="Expiration date of the license.")
+
+  parser.add_argument("-f", "--license_file", type=argparse.FileType('wb'), required=True,
+                      help="The license file.")
+
+  return parser.parse_args()
+
+
+def dump_args(args):
+  ''' dump server options '''
+  logging.debug('Debug: Server arguments:')
+  for attr in ( 'server_key', 'server_certificate', 'server_hostid', 'feature_name', 'feature_count', 'feature_version', 'feature_hostid', 'not_before', 'not_after', 'license_file' ):
+    logging.debug('Debug:   %s = %s', attr, getattr(args, attr))
+
+
+def parse_datestr(datestr, offset=date.today()):
+  ''' parse date string '''
+  try:
+    # example datestr: 2018/1/31
+    m = re.match(r'^(\d\d\d\d)[\.,-/ ](\d\d?)[\.,-/ ](\d\d?)$', datestr)
+    if m:
+      year  = int(m[1])
+      month = int(m[2])
+      day   = int(m[3])
+      target = date(year, month, day)
+    else:
+      # example datestr: 1Y, 2years, 3months, ...
+      m = re.match(r'^(\d+)(y|years?|m|months?|d|days?)$', datestr.lower())
+      if m:
+        if m[2][0] == 'y':
+          dy = int(m[1])
+          target = offset.replace(year=offset.year + dy) - timedelta(days=1)
+        elif m[2][0] == 'm':
+          dm = int(m[1])
+          dy = int((offset.month + dm) / 12)
+          mm = (offset.month + dm) % 12
+          if not mm: dy, mm = (dy-1, 12)
+          target = offset.replace(year=offset.year + dy, month=mm) - timedelta(days=1)
+        elif m[2][0] == 'd':
+          dd = int(m[1])
+          target = offset + timedelta(days=dd-1)
+      else:
+        logging.error('Error: Invalid date string: %s', datestr)
+        raise SystemExit(-1)
+  except ValueError:
+    logging.error('Error: Value/range error on the date string: %s', datestr)
+    raise SystemExit(-1)
+  return target
+
+
+def dump_license(license):
+  data = license.data
+  logging.info('')
+  logging.info('License data:')
+  logging.info('  Not before : %s', data.not_before.strftime('%Y/%m/%d'))
+  logging.info('  Not after  : %s', data.not_after.strftime('%Y/%m/%d'))
+
+  extra = eval(data.extra, {'null':None})
+  logging.info('  Host IDs of license server: %s', extra['serverids'])
+  #
+  hostids = extra.get('hostids')
+  if not hostids:
+    hostids = 'unlimited'
+  #
+  logging.info('  Servers for software running: %s', hostids)
+  #
+  version = extra.get('version')
+  if not version:
+    version = 'unlimited'
+  logging.info('  Supporting software version: %s', version)
+  #
+  for feat, cnt in extra['features'].items():
+    logging.info('  Feature: %s (%d)', feat, cnt)
+
+
+if __name__ == '__main__':
+  prog = os.path.basename(sys.argv[0])
+  args = parse_args_top(prog)
+  dump_args(args)
+
+  # Load the certificate
+  certificate = args.server_certificate.read()
+
+  # Load the private key
+  try:
+    password = getpass.getpass(prompt='Input password to open the server private key: ')
+    key = serialization.load_pem_private_key(
+      args.server_key.read(),
+      password=password.encode(),
+      backend=backends.default_backend()
+    )
+  except KeyboardInterrupt:
+    logging.info('Canceled.')
+    raise SystemExit(0)
+  except ValueError as e:
+    logging.error('Error: %s', str(e))
+    raise SystemExit(-1)
+
+  # License Data
+  today = date.today()
+  tomorrow = today + timedelta(days=1)
+  if args.not_before:
+    not_before = parse_datestr(args.not_before, tomorrow)
+  else:
+    not_before = today
+  #
+  not_after = parse_datestr(args.not_after, not_before)
+  #
+  extra = dict()
+  extra['serverids'] = args.server_hostid
+  extra['version']   = args.feature_version
+  extra['hostids']   = args.feature_hostid
+  features = dict()
+  for feature in args.feature_name:
+    if len(args.feature_count) == 0:
+      count = 999
+    else:
+      count = args.feature_count.pop()
+    features[feature] = count
+  extra['features']  = features
+
+  # Issue the license
+  license = License.issue(
+    certificate,
+    key,
+    license_data=LicenseData(not_before.strftime('%Y-%m-%dT00:00:00'), not_after.strftime('%Y-%m-%dT23:59:59'), extra=extra)
+  )
+
+  # Store the license
+  license.store(args.license_file, psk)
+
+  dump_license(license)
+

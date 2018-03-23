@@ -1,10 +1,10 @@
 ####################################################################################################################
-# PROGRAM     : check_multi_drive_cell_type.icc2.tcl 
-# EDITOR      : Alchip                                
+# PROGRAM     : check_multi_drive_cell_type.pt.tcl 
+# CREATOR     : Alchip                                
 # DATE        : 2018-03-03                                                   
 # DESCRIPTION : check  multi-drive cell type  in PrimeTime 
-# USAGE       : check_multi_drive_cell_type 
-# UPDATE      : updated by Felix <felix_yuan@alchip.com>    2018-03-04
+# USAGE       : check_multi_drive_cell_type ?<check_multi_drive_cell_type.rpt> 
+# UPDATER     : Felix Yuan <felix_yuan@alchip.com>  
 # ITEM        : GE-02-03 CK-01-16
 ####################################################################################################################
 

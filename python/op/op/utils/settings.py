@@ -7,9 +7,15 @@ Description: op settings
 import os
 
 # op related settings
+DEBUG = False
+
 BACKEND = True
-BE_URL = "http://op.alchip.com.cn:8000"
-# BE_URL = "http://utah:8000"
+
+if DEBUG:
+    BE_URL = "http://localhost:8000"
+else:
+    BE_URL = "http://op.alchip.com.cn:8000"
+    # BE_URL = "http://utah:8000"
 
 OP_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 OP_PROJ = f"{OP_ROOT}{os.sep}proj_share{os.sep}suites"

@@ -1,12 +1,13 @@
 #!/usr/bin/tclsh
-########################################################################
-# PROGRAM:     check_clock_net_xtalk_delta_delay.pt.tcl
-# CREATOR:     Zachary Shi <zacharys@alchip.com>
-# DATE:        Thu Mar 30 15:30:54 CST 2017
-# DESCRIPTION: Check clock net xtalk delta delay in PrimeTime.
-# USAGE:       check_clock_net_xtalk_delta_delay ?threshold? ?<report_name>?
-# FOR:         GE-06-05
-########################################################################
+##################################################################################################################################################################
+# PROGRAM     : check_clock_net_xtalk_delta_delay.pt.tcl
+# CREATOR     : Zachary Shi <zacharys@alchip.com>
+# DATE        : Thu Mar 30 15:30:54 CST 2017
+# DESCRIPTION : Check clock net xtalk delta delay in PrimeTime.
+# USAGE       : check_clock_net_xtalk_delta_delay ?<threshold> ?<output_rpt_clock_pt>
+# UPDATE:      updated by Felix <felix_yuan@alchip.com>    2018-03-06
+# ITEM        : GE-06-05
+##################################################################################################################################################################
 proc get_annotated_delay_delta { clock_net min_max } {
 
   set driver_pins  [ get_attribute [ get_pins -of_objects $clock_net -filter "direction == out || direction == inout" -leaf -quiet ] full_name ]
@@ -123,7 +124,7 @@ proc get_clock_nets {} {
 }
 
 
-proc check_clock_net_xtalk_delta_delay { {clock_threshold 0.02} {output_rpt_clock_pt check_clock_net_xtalk_delta_delay.rep} } {
+proc check_clock_net_xtalk_delta_delay { {clock_threshold 0.02} {output_rpt_clock_pt check_clock_net_xtalk_delta_delay.rpt} } {
 
   puts "Information: Checking started: [date]\n"
   set viol_list ""

@@ -1,12 +1,15 @@
 ################################################################################################################################################
-# Date      :    2018-02-13                                                                              
-# Modifier  :    Felix <felix_yuan@alchip.com>                                                           
-# Function  :    check high_vth / low_drive / non_symmetric cell in PrimeTime.                           
-# Usage     :    report_clock_cell_type ?<high_vth_cell_ref_name> ?<low_drive_cell_ref_name> ?<report_clock_cell_type.rep> 
-# Item      :    CK-01-03 CK-01-04 CK-01-05                                                              
+# PROGRAM   : report_clock_cell_type.pt.tcl 
+# CREATOR   : Alchip                                
+# DATE      : 2018-02-13                                                                              
+# Modifier  : Felix <felix_yuan@alchip.com>                                                           
+# Function  : check high_vth / low_drive / non_symmetric cell in PrimeTime.                           
+# Usage     : report_clock_cell_type ?<high_vth_cell_ref_name> ?<low_drive_cell_ref_name> ?<report_clock_cell_type.rpt> 
+# UPDATER   : Felix Yuan <felix_yuan@alchip.com>  
+# ITEM      : CK-01-03 ;  CK-01-04 ; CK-01-05                                                              
 ################################################################################################################################################
 
-proc report_clock_cell_type {{high_vth_cell_ref_name *HVT} {low_drive_cell_ref_name *D[01]HVT} {output_rpt_clock_cell report_clock_cell_type.rep} } {
+proc report_clock_cell_type {{high_vth_cell_ref_name *HVT} {low_drive_cell_ref_name *D[01]HVT} {output_rpt_clock_cell report_clock_cell_type.rpt} } {
      puts "Alchip-info: Starting to signoff check clock cell type in PrimeTime\n"
      set file [ open $output_rpt_clock_cell w ]
 

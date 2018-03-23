@@ -1,18 +1,14 @@
 puts "this is icc2 finish settings"
 
-puts "Alchip-info : Running script [info script]\n"
-
-####################################
-## signoff_create_metal_fill settings
-####################################
-
+###==================================================================##
+## signoff_create_metal_fill settings                                ##
+##===================================================================##
 {%- if local.chip_finish_create_metal_fill == "true" %}
-## Runset (not required for track-based metal fill)
 if {[file exists $finish_create_metal_fill_runset]} {set_app_options -name signoff.create_metal_fill.runset -value $finish_create_metal_fill_runset}
 if {[file exists $finish_drc_icv_runset]} {set_app_options -name signoff.check_drc.runset -value $finish_drc_icv_runset} 
 set_app_options -name signoff.create_metal_fill.flat -value true ;# default false
 
-## Timing driven metal fill related settings
+## Timing driven metal fill related settings---------------------------------------
 {%- if local.finish_create_metal_fill_timing_driven_threshold %}
 # Extraction options
 set_extraction_options -real_metalfill_extraction none
@@ -25,12 +21,9 @@ set_extraction_options -real_metalfill_extraction none
 {%- endif %}
 {%- endif %}
 
-####################################
-## ECO route
-####################################
+## ECO route settings----------------------------------------------------------------------
 ## Disable soft-rule-based timing optimization during ECO routing.
 #  This is to limit spreading which can touch multiple nets and impact convergence.
 set_app_options -name route.detail.eco_route_use_soft_spacing_for_timing_optimization -value false
 
-puts "Alchip-info : Completed script [info script]\n"
 

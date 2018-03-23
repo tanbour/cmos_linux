@@ -1,14 +1,11 @@
-
-##########################################################################################
-# Tool: IC Compiler II
-##########################################################################################
+######################################################################
+## Tool: IC Compiler II
+######################################################################
 puts "Alchip-info : Running script [info script]\n"
 
 ##===================================================================##
 ## SETUP                                                             ##
 ##===================================================================##
-
-source {{cur.flow_scripts_dir}}/pr/00_setup.tcl
 source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
 
 set pre_stage "{{pre.sub_stage}}"
@@ -17,7 +14,9 @@ set cur_stage "{{cur.sub_stage}}"
 set pre_stage [lindex [split $pre_stage .] 0]
 set cur_stage [lindex [split $cur_stage .] 0]
 
+set blk_name          "{{env.BLK_NAME}}"
 set blk_rpt_dir       "{{cur.cur_flow_rpt_dir}}"
+set blk_utils_dir     "{{env.PROJ_UTILS}}"
 set pre_flow_data_dir "{{pre.flow_data_dir}}/{{pre.stage}}"
 set cur_design_library "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
 set icc2_cpu_number   "[lindex "{{local._job_cpu_number}}" end]"
@@ -26,14 +25,29 @@ set_host_option -max_cores $icc2_cpu_number
 set pre_design_library  "$pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.nlib"
 set cur_design_library "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
 
+set ocv_mode          "{{local.ocv_mode}}" 
 set optimization_flow "{{local.optimization_flow}}"
 set place_opt_active_scenario_list "{{local.place_opt_active_scenario_list}}"
 set switch_activity_file "{{local.switch_activity_file}}" 
 set switch_activity_file_power_scenario "{{local.switch_activity_file_power_scenario}}" 
 set enable_place_reporting "{{local.enable_place_reporting}}"
-##===================================================================##
-## back up database
-## copy block and lib from previous stage
+set use_usr_common_scripts_connect_pg_net_tcl "{{local.use_usr_common_scripts_connect_pg_net_tcl}}"
+set write_def_convert_icc2_site_to_lef_site_name_list "{{local.write_def_convert_icc2_site_to_lef_site_name_list}}"
+set icc_icc2_gds_layer_mapping_file "{{local.icc_icc2_gds_layer_mapping_file}}"
+{%- if local.tcl_placement_spacing_label_rule_file %}
+set TCL_PLACEMENT_SPACING_LABEL_RULE_FILE "{{local.tcl_placement_spacing_label_rule_file}}"
+{%- else %}
+set TCL_PLACEMENT_SPACING_LABEL_RULE_FILE "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/placement_spacing_rule.tcl"
+{%- endif %}
+{%- if local.tcl_icc2_cts_ndr_rule_file %}
+set TCL_ICC2_CTS_NDR_RULE_FILE  "{{local.tcl_icc2_cts_ndr_rule_file}}"
+{%- else %}
+set TCL_ICC2_CTS_NDR_RULE_FILE  "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/icc2_cts_ndr_rule.tcl"
+{%- endif %}
+{% include 'icc2/00_icc2_setup.tcl' %}
+###==================================================================##
+##  back up database                                                 ##
+##  copy block and lib from previous stage                           ## 
 ##===================================================================##
 set bak_date [exec date +%m%d]
 if {[file exist ${cur_design_library}] } {
@@ -42,7 +56,7 @@ exec rm -rf ${cur_design_library}_bak_${bak_date}
 }
 exec mv -f ${cur_design_library} ${cur_design_library}_bak_${bak_date}
 }
-## copy block and lib from previous stage
+## copy block and lib from previous stage ----------------------------
 copy_lib -from_lib ${pre_design_library} -to_lib ${cur_design_library} -no_design
 open_lib ${pre_design_library}
 copy_block -from ${pre_design_library}:{{env.BLK_NAME}}/${pre_stage} -to ${cur_design_library}:{{env.BLK_NAME}}/${cur_stage}
@@ -53,10 +67,9 @@ current_block {{env.BLK_NAME}}/${cur_stage}
 link_block
 save_lib
 
-####################################
-## Timing constraints
-####################################
-
+###==================================================================##
+## Timing constraints                                                ##
+##===================================================================##
 {% if local.place_opt_active_scenario_list != "" %} 
 set_scenario_status -active false [get_scenarios -filter active]
 set_scenario_status -active true $place_opt_active_scenario_list
@@ -64,14 +77,14 @@ set_scenario_status -active true $place_opt_active_scenario_list
 set_scenario_status -active true [all_scenarios]
 {% endif %}  
 
-########################################################################
-## Additional timer related setups :prects uncertainty 	
-########################################################################
+###==================================================================##
+##  Additional timer related setups :prects uncertainty              ##
+##===================================================================##
 
-########################################################################
-## place_opt settings	
-########################################################################
-## Reset all app options in current block
+###==================================================================##
+## place_opt settings                                                ##
+##===================================================================##
+## Reset all app options in current block------------------------------
 reset_app_options -block [current_block] *
 
 puts "Alchip-info: settings icc2_settings/icc2_common.tcl"
@@ -80,17 +93,16 @@ puts "Alchip-info: settings icc2_settings/icc2_common.tcl"
 puts "Alchip-info: settings icc2_settings/icc2_place.tcl "
 {% include  'icc2/icc2_settings/icc2_place.tcl' %} 
 
-puts "Alchip-info: Sourcing  tsmc16ffpgl settings"
-{% include 'icc2/tsmc16ffpgl_settings/tsmc16ffpgl_settings.tcl'%} 
+puts "Alchip-info: Sourcing  tsmc16ffc settings"
+{% include 'icc2/tsmc16ffc_settings/tsmc16ffc_settings.tcl'%} 
 
 puts "Alchip-info: Sourcing  set_lib_cell_purpose.tcl"
-source -e -v "{{cur.config_plugins_dir}}/icc2_scripts/common_scripts/set_lib_cell_purpose.tcl"
+source -e -v "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/set_lib_cell_purpose.tcl"
 
-####################################
-## Enable AOCV 	
-####################################
+###==================================================================##
+## Enable AOCV or POCV                                               ##
+##===================================================================##
 {%- if local.ocv_mode == "aocv" %} 
-## Enable the AOCV analysis
 set_app_options -name time.aocvm_enable_analysis -value true ;# default false
 {%- elif local.ocv_mode == "pocv" %} 
 set_app_options -name  time.pocvm_enable_analysis -value true ; ;# default false
@@ -99,9 +111,9 @@ set_app_options -name time.aocvm_enable_analysis -value false ;# default false
 set_app_options -name  time.pocvm_enable_analysis -value false ; ;# default false
 {% endif %}
 
-####################################
-## read_saif 
-####################################
+###==================================================================##
+##  read_saif                                                        ##
+##===================================================================##
 {%- if local.switch_activity_file %}
 	if {$switch_activity_file_power_scenario != ""} {
 		set read_saif_cmd "read_saif $switch_activity_file -scenarios $switch_activity_file_power_scenario"
@@ -114,18 +126,17 @@ set_app_options -name  time.pocvm_enable_analysis -value false ; ;# default fals
 	eval $read_saif_cmd
 {%- endif %}
 
-####################################
-## Pre-place_opt customizations
-####################################
+###==================================================================##
+## Pre-place_opt customizations                                      ##
+##===================================================================##
 source {{cur.config_plugins_dir}}/icc2_scripts/02_place/00_usr_pre_place.tcl
-####################################
-## report place_opt start non default app options
-####################################
+
+# report place_opt start non default app options-----------------------
 redirect -tee -file $blk_rpt_dir/$cur_stage.app_options.start.rpt {report_app_options -non_default}
 
-####################################
-## place_opt run command 
-####################################
+###==================================================================##
+## place_opt run command                                             ##
+##===================================================================##
 {#- source usr place_opt command file from plugins #}
 {%- if local.use_usr_place_opt_cmd_tcl == "true" %}
 source {{cur.config_plugins_dir}}/icc2_scripts/02_place/01_usr_place_opt_cmd.tcl
@@ -133,9 +144,8 @@ save_block
 {%- else %}
 {#- OPTIMIZATION_FLOW: ttr  : runs two pass place_opt #}
 {%- if  local.optimization_flow == "ttr"  %}
-#######################################################################
-#OPTIMIZATION_FLOW: ttr: runs single place_opt	
-#######################################################################
+## OPTIMIZATION_FLOW: ttr: runs single place_opt-----------------------
+
 {%- if local.use_spg_flow == "true" %}
 set_app_options -name place_opt.flow.do_spg -value true
 {%- endif %}
@@ -143,9 +153,7 @@ place_opt
 {%- endif %}
 {# OPTIMIZATION_FLOW: qor  : runs two pass place_opt #}
 {%- if  local.optimization_flow == "qor"  %}
-#######################################################################
-#OPTIMIZATION_FLOW: qor  : runs two pass place_opt	
-#######################################################################
+## OPTIMIZATION_FLOW: qor  : runs two pass place_opt------------------
 
 puts "Alchip-info: Running place_opt -to initial_drc"
 place_opt -to initial_drc
@@ -194,9 +202,7 @@ split_multibit -slack_threshold 0
 {%- endif %}
 {# OPTIMIZATION_FLOW: hplp  : runs two pass place_opt #}
 {%- if local.optimization_flow == "hplp" %} 
-#######################################################################
-#OPTIMIZATION_FLOW:  hplp  : runs two pass place_opt	
-#######################################################################
+## OPTIMIZATION_FLOW:  hplp  : runs two pass place_opt-----------------
 
 puts "Alchip-info: Running place_opt -to initial_drc"
 place_opt -to initial_drc
@@ -243,9 +249,8 @@ save_block
 {%- endif %}
 {# OPTIMIZATION_FLOW: arlp  : runs two pass place_opt #}
 {%- if local.optimization_flow == "arlp" %} 
-#######################################################################
-##OPTIMIZATION_FLOW: arlp  : runs two pass place_opt	
-#######################################################################
+## OPTIMIZATION_FLOW: arlp  : runs two pass place_opt------------------
+
 puts "Alchip-info: Running place_opt -to initial_drc"
 place_opt -to initial_drc
 puts "Alchip-info: Running update_timing -full"
@@ -290,14 +295,11 @@ save_block
 {%- endif %}
 {# OPTIMIZATION_FLOW: hc  : runs two pass place_opt #}
 {%- if local.optimization_flow == "hc" %} 
-########################################################################## 
-#OPTIMIZATION_FLOW: hc : runs two pass place_opt
-########################################################################## 
+## OPTIMIZATION_FLOW: hc : runs two pass place_opt---------------------
 
-		#  CDR: The following is WITH congestion-driven restructuring (CDR) enabled.
-		#  SPG: For designs starting with SPG input, since seed placement comes from SPG,
-		#       initial placement of CDR is skipped by enabling place_opt.flow.do_spg during CDR.
-
+#  CDR: The following is WITH congestion-driven restructuring (CDR) enabled.
+#  SPG: For designs starting with SPG input, since seed placement comes from SPG,
+#       initial placement of CDR is skipped by enabling place_opt.flow.do_spg during CDR.
 {%- if local.place_opt_spg_flow == "false" %} 
 puts "RM-info: Running place_opt -to initial_drc"
 place_opt -to initial_drc
@@ -350,14 +352,14 @@ split_multibit -slack_threshold 0
 {%- endif %}
 {%- endif %}
 
-####################################
-## Post-place_opt customizations
-####################################
+###==================================================================##
+##  Post-place_opt customizations                                    ##
+##===================================================================##
 source {{cur.config_plugins_dir}}/icc2_scripts/02_place/00_usr_post_place.tcl
 
-####################################
-## refine_opt	
-####################################
+###==================================================================##
+## refine_opt                                                        ##
+##===================================================================##
 source {{cur.config_plugins_dir}}/icc2_scripts/02_place/02_usr_pre_refine_opt.tcl
 {#- source usr refine_opt command file from plugins #}
 {%- if local.use_usr_refine_opt_cmd_tcl == "true" %}
@@ -384,43 +386,34 @@ save_block
 {%- endif %}
 source {{cur.config_plugins_dir}}/icc2_scripts/02_place/02_usr_post_refine_opt.tcl
 
-####################################
-## Connect pg net	
-####################################
-{# commnets by DM: 
-Info: recommand PL modify "connect_pg_net directly on this line base on block name instead of using script."
-For example : 
-if {$blk_name == orange } {
-connect_pg_net -net VDD [get_port VDD] 
-} 
--#}
+## Connect pg net------------------------------------------------------
 
-set connect_pg_net_body [open {{cur.config_plugins_dir}}/icc2_scripts/common_scripts/connect_pg_net.tcl  r]
-if {[gets $connect_pg_net_body line1] >= 0} {
-        puts "Alchip-info : Sourcing [which $TCL_USER_CONNECT_PG_NET_SCRIPT]"
-        source -e -v $TCL_USER_CONNECT_PG_NET_SCRIPT
-} else {
+{%- if local.use_usr_common_scripts_connect_pg_net_tcl == "true" %}
+source {{env.PROJ_SHARE_CMN}}/icc2_common_scripts/connect_pg_net.tcl
+{%- else %}
 puts "Alchip-info: Running connect_pg_net command"
-	connect_pg_net
-	# For non-MV designs with more than one PG, you should use connect_pg_net in manual mode.
-}
-close $connect_pg_net_body
+connect_pg_net
+{%- endif %}
 
-####################################
-## save design
-####################################
+## save design---------------------------------------------------------
 save_block
 save_block -as {{env.BLK_NAME}}
-####################################
-## Report and output
-####################################			 
+
+###==================================================================##
+##  output data                                                      ##
+##===================================================================##
 {%- if local.place_use_usr_write_data_tcl == "true" %}
 source {{cur.config_plugins_dir}}/icc2_scripts/02_place/08_usr_write_data.tcl
 {%- else %}
 {%- if local.place_write_data == "true" %} 
-write_verilog -compress gzip -exclude {leaf_module_declarations pg_objects} -hierarchy all {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.v
-
-write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.pg.v
+# write_verilog (no pg, and no physical only cells)
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations pg_objects end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells} -hierarchy all {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.v
+## write_verilog for LVS (with pg, and with physical only cells)
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.lvs.v
+## write_verilog for Formality (with pg, no physical only cells, and no supply statements)
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells supply_statements} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.fm.v
+## write_verilog for PT (no pg, no physical only cells but with diodes and DCAP for leakage power analysis)
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations pg_objects end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.pt.v
 
 {% if local.write_def_convert_icc2_site_to_lef_site_name_list != "" %} 
 write_def -include_tech_via_definitions -convert_sites { $write_def_convert_icc2_site_to_lef_site_name_list } -compress gzip {{cur.cur_flow_data_dir}}/.${cur_stage}{{env.BLK_NAME}}.def
@@ -430,18 +423,13 @@ write_def -include_tech_via_definitions -compress gzip {{cur.cur_flow_data_dir}}
 {%- endif %}
 {%- endif %}
 
-####################################
-## report place_opt end non default app options
-####################################
+## report place_opt end non default app options-----------------------
 redirect -tee -file $blk_rpt_dir/$cur_stage.app_options.end.rpt {report_app_options -non_default}
 
-####################################
-## generate early touch file
-####################################	
+## generate early touch file-------------------------------------------
 exec touch {{cur.cur_flow_sum_dir}}/${cur_stage}.{{env.BLK_NAME}}.early_complete
-####################################
-## create abstract
-####################################	
+
+## create abstract-----------------------------------------------------
 {%- if local.place_create_abstract == "true" %}
 open_block  {{env.BLK_NAME}} 
 create_abstract
@@ -449,9 +437,7 @@ create_frame
 save_lib
 {%- endif %}
 
-####################################
-## Report and output
-####################################			 
+## Report ------------------------------------------------------------
 {%- if local.place_use_usr_report_tcl == "true" %}
 source -v {{cur.config_plugins_dir}}/icc2_scripts/02_place/09_usr_place_report.tcl
 {%- else %}
@@ -462,7 +448,8 @@ source -v -e $REPORT_QOR_SCRIPT
 {%- endif %}
 {%- endif %}
 source -v -e {{env.PROJ_UTILS}}/icc2_utils/snapshot.tcl
-####################################
-## exit icc2
-####################################
+
+###==================================================================##
+## exit icc2                                                         ##
+##===================================================================##
 puts "Alchip-info : Completed script [info script]\n"

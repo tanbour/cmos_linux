@@ -1,10 +1,10 @@
 ####################################################################################################################
 # PROGRAM     : check_multi_driver.pt.tcl 
-# EDITOR      : Alchip                                
-# DATE        : 2018-03-03                                                   
+# CREATOR     : Alchip                                
+# DATE        : 2018-03-05                                                   
 # DESCRIPTION : check  hign-fanout net / multi-drive net / undirven net /undriven pin  in PrimeTime 
 # USAGE       : check_multi_driver ?<check_multi_driver.rpt>
-# UPDATE:       updated by Felix <felix_yuan@alchip.com>    2018-03-03
+# UPDATER     : Felix Yuan <felix_yuan@alchip.com>  
 # ITEM        : GE-02-03                                                     
 ####################################################################################################################
 

@@ -4,12 +4,12 @@
 # CREATOR:     Zachary Shi <zacharys@alchip.com>
 # DATE:        Wed Mar 29 10:37:45 CST 2017
 # DESCRIPTION: Check dont_use cell script in PrimeTime.
-# USAGE:       check_dont_use_cell ?<check_dont_use_cell.rep>
+# USAGE:       check_dont_use_cell ?<check_dont_use_cell.rpt>
 # UPDATE:      updated by Felix <felix_yuan@alchip.com>    2018-03-06
 # FOR:         GE-02-16
 #########################################################################################################
 
-proc check_dont_use_cell {{output_rpt_dont_use_cell check_dont_use_cell.rep} } {
+proc check_dont_use_cell {{output_rpt_dont_use_cell check_dont_use_cell.rpt} } {
      puts "Alchip-info: Starting to signoff check dont use cell in PrimeTime\n"
      set file [ open $output_rpt_dont_use_cell w ]
 

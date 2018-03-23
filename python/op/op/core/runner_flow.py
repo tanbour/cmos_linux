@@ -46,6 +46,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         self.force_stage = False
         self.force_dic = False
         self.lib_flg = True
+        self.comment = ""
     def list_env(self):
         """to list all current project or block op environment variables"""
         LOG.info(":: all op internal env variables")
@@ -117,6 +118,13 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                                 f"defined in flow config section {sec_k}")
                             raise SystemExit()
                         self.ver_dic[sec_k][ver_key] = opt_v
+            v_rtl = self.ver_dic[sec_k].get("rtl", "")
+            v_netlist = self.ver_dic[sec_k].get("netlist", "")
+            v_rn = f"r{v_rtl}_n{v_netlist}"
+            if not v_rn:
+                LOG.error(f"rtl and netlist version of flow {sec_k} are both NA in flow.cfg")
+                raise SystemExit()
+            self.ver_dic[sec_k]["rtl_netlist"] = v_rn
     def proc_force(self):
         """to process force dic info"""
         if self.force_stage is None:
@@ -163,30 +171,30 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             if prex_dir_k in stage_dic:
                 continue
             stage_dic[prex_dir_k] = prex_dir_v
-    def proc_flow(self, flow):
+    def proc_flow(self, l_flow):
         """to process particular flow"""
-        v_net = self.ver_dic.get(flow, {}).get("netlist", "")
-        if not v_net:
-            LOG.error(f"netlist version of flow {flow} is NA in flow.cfg")
-            raise SystemExit()
         proj_tmp_dir = self.ced["PROJ_SHARE_TMP"].rstrip(os.sep)
         flow_liblist_dir = os.path.join(self.ced["BLK_RUN"], "liblist")
         liblist_var_dic = self.gen_liblist(
             self.ced["PROJ_LIB"], flow_liblist_dir,
             self.dir_cfg_dic["lib"]["DEFAULT"]["liblist"],
-            self.cfg_dic["lib"][flow] if flow in self.cfg_dic["lib"]
+            self.cfg_dic["lib"][l_flow] if l_flow in self.cfg_dic["lib"]
             else self.cfg_dic["lib"]["DEFAULT"], self.lib_flg)
         pre_stage_dic = {}
         pre_file_mt = 0.0
         force_flg = False
         flow_if_dic = {
-            "name": flow, "block": self.ced["BLK_NAME"], "proj": self.ced["PROJ_NAME"],
+            "flow": l_flow, "block": self.ced["BLK_NAME"], "proj": self.ced["PROJ_NAME"],
             "owner": self.ced["USER"], "created_time": self.ced["DATETIME"].isoformat(),
-            "status": "failed"}
-        for flow_dic in exp_stages([], self.cfg_dic["flow"], flow):
+            "status": "running", "comment": self.comment}
+        if self.run_flg:
+            db_if.w_flow(flow_if_dic)
+        for flow_dic in exp_stages([], self.cfg_dic["flow"], l_flow):
             flow_name = flow_dic.get("flow", "")
             stage_name = flow_dic.get("stage", "")
             sub_stage_name = flow_dic.get("sub_stage", "")
+            flow_ver_dic = self.ver_dic.get(flow_name, {})
+            flow_ver = flow_ver_dic.get("rtl_netlist", "")
             # force_flg FSM
             if not force_flg:
                 if self.force_dic == {} or self.force_dic == {
@@ -199,24 +207,25 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                     f"template file {tmp_file} is NA, "
                     f"used by flow {flow_name} stage {stage_name}")
                 continue
-            flow_root_dir = f"{self.ced['BLK_RUN']}{os.sep}v{v_net}{os.sep}{flow_name}"
+            flow_root_dir = f"{self.ced['BLK_RUN']}{os.sep}{flow_ver}{os.sep}{flow_name}"
             local_dic = pcom.ch_cfg(
                 self.dir_cfg_dic.get("flow", {}).get(flow_name, {}).get(stage_name, {})).get(
                     sub_stage_name, {})
             stage_dic = {
-                "flow": flow_name, "stage": stage_name, "sub_stage": sub_stage_name,
-                "flow_root_dir": flow_root_dir, "flow_liblist_dir": flow_liblist_dir,
+                "l_flow": l_flow, "flow": flow_name, "stage": stage_name,
+                "sub_stage": sub_stage_name, "flow_root_dir": flow_root_dir,
+                "flow_liblist_dir": flow_liblist_dir,
                 "flow_scripts_dir": f"{flow_root_dir}{os.sep}scripts",
                 "config_plugins_dir":
                 f"{self.ced['BLK_CFG_FLOW']}{os.sep}{flow_name}{os.sep}plugins"}
             self.proc_prex(stage_dic)
             self.opvar_lst.append(
                 {"local": local_dic, "cur": stage_dic, "pre": pre_stage_dic,
-                 "ver": self.ver_dic.get(flow, {})})
+                 "ver": flow_ver_dic})
             tmp_dic = {
                 "global": pcom.ch_cfg(self.cfg_dic["proj"]), "env": self.ced,
                 "local": local_dic, "liblist": liblist_var_dic,
-                "cur": stage_dic, "pre": pre_stage_dic, "ver": self.ver_dic.get(flow, {})}
+                "cur": stage_dic, "pre": pre_stage_dic, "ver": flow_ver_dic}
             pre_stage_dic = stage_dic
             multi_inst_lst = [c_c.strip() for c_c in pcom.rd_cfg(
                 self.dir_cfg_dic.get("flow", {}).get(flow_name, {}).get(stage_name, {}),
@@ -229,13 +238,21 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                 "force_flg": force_flg}
             if self.run_flg:
                 try:
-                    with Pool(settings.MP_POOL, initializer=pcom.sig_init) as mip:
-                        file_mt_lst = mip.starmap(
-                            self.proc_inst, zip(multi_inst_lst, [inst_dic]*len(multi_inst_lst)))
+                    if settings.DEBUG:
+                        file_mt_lst = []
+                        for multi_inst in multi_inst_lst:
+                            file_mt_lst.append(self.proc_inst(multi_inst, inst_dic))
+                    else:
+                        with Pool(settings.MP_POOL, initializer=pcom.sig_init) as mip:
+                            file_mt_lst = mip.starmap(
+                                self.proc_inst,
+                                zip(multi_inst_lst, [inst_dic]*len(multi_inst_lst)))
                 except KeyboardInterrupt:
+                    flow_if_dic["status"] = "failed"
                     db_if.w_flow(flow_if_dic)
                     raise KeyboardInterrupt
                 if any([c_c is True for c_c in file_mt_lst if c_c]):
+                    flow_if_dic["status"] = "failed"
                     db_if.w_flow(flow_if_dic)
                     raise SystemExit()
                 pre_file_mt = max(file_mt_lst)
@@ -249,6 +266,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         """to process particular inst"""
         flow_root_dir = inst_dic["stage_dic"]["flow_root_dir"]
         flow_name = inst_dic["stage_dic"]["flow"]
+        l_flow = inst_dic["stage_dic"]["l_flow"]
         stage_name = inst_dic["stage_dic"]["stage"]
         sub_stage_name = inst_dic["stage_dic"]["sub_stage"]
         tmp_dic = inst_dic["tmp_dic"]
@@ -310,11 +328,10 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                     # stages followed up have to be forced run
                     file_mt = os.path.getmtime(dst_file)
                 file_p = file_proc.FileProc(
-                    {"src": dst_file, "file": dst_run_file, "flow": flow_name,
-                     "stage": stage_name, "sub_stage": sub_stage_name,
-                     "multi_inst": multi_inst, "filter_dic": filter_dic,
-                     "flow_root_dir": flow_root_dir, "ced": self.ced,
-                     "ver_dic": self.ver_dic}, f_flg)
+                    {"src": dst_file, "file": dst_run_file, "l_flow": l_flow, "flow": flow_name,
+                     "stage": stage_name, "sub_stage": sub_stage_name, "multi_inst": multi_inst,
+                     "filter_dic": filter_dic, "flow_root_dir": flow_root_dir, "ced": self.ced,
+                     "ver_dic": self.ver_dic.get(flow_name, {})}, f_flg)
                 p_run = file_p.proc_run_file()
                 if p_run is True:
                     return p_run
@@ -345,6 +362,7 @@ def run_flow(args):
         f_p.proc_flow_lst(args.flow_gen_lst)
     elif args.flow_run_lst is not None:
         f_p.run_flg = True
+        f_p.comment = args.flow_comment
         f_p.force_stage = args.flow_force
         if args.flow_no_lib:
             f_p.lib_flg = False

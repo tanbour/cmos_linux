@@ -19,7 +19,7 @@ class FileProc(object):
     """base class of log processor"""
     def __init__(self, run_dic, f_flg=True):
         self.run_dic = run_dic
-        self.ced = run_dic["ced"]
+        self.ced = ced = run_dic["ced"]
         self.run_file = run_file = self.run_dic.get("file", "")
         self.run_src_file = self.run_dic.get("src", "")
         self.file_dic = {
@@ -27,6 +27,14 @@ class FileProc(object):
             "pass": f"{run_file}.pass",
             "fin": f"{run_file}.fin",
             "stat": f"{run_file}.stat"}
+        self.db_stage = db_stage = ":".join(
+            [run_dic["stage"], run_dic["sub_stage"], run_dic["multi_inst"]])
+        self.db_stage_dic = {
+            "stage": db_stage, "flow": run_dic["l_flow"], "block": ced["BLK_NAME"],
+            "proj": ced["PROJ_NAME"], "owner": ced["USER"],
+            "created_time": dt.datetime.now().isoformat(), "status": "running",
+            "version": run_dic.get("ver_dic", {}).get("rtl_netlist", ""),
+            "f_created_time": ced["DATETIME"].isoformat()}
         self.f_flg = f_flg
         self.log_dic = {}
     def proc_run_log(self):
@@ -67,20 +75,30 @@ class FileProc(object):
         inst_name = self.run_dic.get("multi_inst", "")
         pcd = log_parser.PARSER_CFG_DIC.get(stage_name, {}).get(sub_stage_name, {})
         log_par = log_parser.LogParser()
+        self.log_dic["data"] = {}
         for p_k, p_v in pcd.items():
-            if not p_k.endswith("key"):
-                continue
-            sub_stage = os.path.splitext(sub_stage_name)[0]
-            key_path = os.path.join(
-                flow_root_dir, "rpt", stage_name, inst_name, f"{sub_stage}.{p_v}.rpt")
-            # key_path = f"{self.run_dic['file']}.log"
-            if not os.path.isfile(key_path):
-                LOG.error(f"log file {key_path} to be parsed is NA")
-                return True
-            log_par.add_parser(
-                key_path, pcd.get(f"{p_k}_type", ""),
-                pcd.get(f"{p_k}_exp_lst", []), pcd.get(f"{p_k}_tpl", ""))
-        self.log_dic["data"] = log_par.run_parser()
+            if p_k.endswith("_key"):
+                key_path = os.path.join(
+                    flow_root_dir, "rpt", stage_name, inst_name, p_v)
+                # key_path = f"{self.run_dic['file']}.log"
+                if not os.path.isfile(key_path):
+                    LOG.warning(f"log file {key_path} to be parsed is NA")
+                    continue
+                log_par.add_parser(
+                    key_path, pcd.get(f"{p_k}_type", ""),
+                    pcd.get(f"{p_k}_exp_lst", []), pcd.get(f"{p_k}_tpl", ""))
+            elif p_k.endswith("_img"):
+                file_path = os.path.join(
+                    flow_root_dir, "rpt", stage_name, inst_name, p_v)
+                if not os.path.isfile(file_path):
+                    LOG.warning(f"file {file_path} to be uploaded is NA")
+                    continue
+                with open(file_path, "rb") as f_p:
+                    file_url = db_if.w_file(self.db_stage_dic, {"file_obj": f_p}).get("file_url")
+                if not file_url:
+                    continue
+                self.log_dic["data"][f"{p_k}_raw"] = f"<img src='{file_url}'>"
+        self.log_dic["data"].update(log_par.run_parser())
         return False
     def proc_run_file(self):
         """to process generated oprun files for running flows"""
@@ -91,10 +109,8 @@ class FileProc(object):
         if not os.path.isfile(self.run_file):
             LOG.error(f"run file {self.run_file} is NA")
             return True
-        db_stage = ":".join(
-            [self.run_dic["stage"], self.run_dic["sub_stage"], self.run_dic["multi_inst"]])
         LOG.info(
-            f":: running flow {self.run_dic['flow']}::{db_stage}, "
+            f":: running flow {self.run_dic['flow']}::{self.db_stage}, "
             f"op log {self.run_file}.log ...")
         if not self.f_flg and os.path.isfile(self.file_dic["pass"]) and os.path.getmtime(
                 self.file_dic["pass"]) > file_mt:
@@ -102,18 +118,12 @@ class FileProc(object):
             if os.path.isfile(self.file_dic["json"]) and os.path.getmtime(
                     self.file_dic["json"]) > file_mt:
                 with open(self.file_dic["json"]) as j_f:
-                    self.log_dic = json.load(j_f)
-                    self.log_dic["f_created_time"] = self.ced["DATETIME"].isoformat()
-                    db_if.w_stage(self.log_dic)
+                    pre_log_dic = json.load(j_f)
+                    pre_log_dic["f_created_time"] = self.ced["DATETIME"].isoformat()
+                    pre_log_dic["flow"] = self.run_dic["l_flow"]
+                    db_if.w_stage(pre_log_dic)
             return False
-        db_stage_dic = {
-            "name": db_stage, "flow": self.run_dic["flow"], "block": self.ced["BLK_NAME"],
-            "proj": self.ced["PROJ_NAME"], "owner": self.ced["USER"],
-            "created_time": dt.datetime.now().isoformat(), "status": "running",
-            "version": self.run_dic.get(
-                "ver_dic", {}).get(self.run_dic["flow"], {}).get("netlist", ""),
-            "f_created_time": self.ced["DATETIME"].isoformat(), "f_status": "running"}
-        db_if.w_stage(db_stage_dic)
+        db_if.w_stage(self.db_stage_dic)
         if self.f_flg or not os.path.isfile(self.file_dic["fin"]) or os.path.getmtime(
                 self.file_dic["fin"]) <= file_mt:
             with open(f"{self.run_file}.blog", "w") as rfl, \
@@ -122,15 +132,15 @@ class FileProc(object):
         if not os.path.isfile(self.file_dic["stat"]) or os.path.getmtime(
                 self.file_dic["stat"]) <= file_mt:
             LOG.error(f"sub process {self.run_file} is terminated")
-            db_stage_dic["status"] = "failed"
-            db_if.w_stage(db_stage_dic)
+            self.db_stage_dic["status"] = "failed"
+            db_if.w_stage(self.db_stage_dic)
             return True
         if self.proc_run_log() is True or self.proc_logs() is True:
             return True
-        db_stage_dic.update(self.log_dic)
-        db_if.w_stage(db_stage_dic)
+        self.db_stage_dic.update(self.log_dic)
+        db_if.w_stage(self.db_stage_dic)
         with open(self.file_dic["json"], "w") as j_f:
-            json.dump(db_stage_dic, j_f)
+            json.dump(self.db_stage_dic, j_f)
         if self.log_dic.get("fin", False):
             open(self.file_dic["fin"], "w").close()
         else:

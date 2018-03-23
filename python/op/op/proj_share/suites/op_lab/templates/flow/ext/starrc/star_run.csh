@@ -15,7 +15,8 @@ set cur_stage = `echo $cur_stage | cut -d . -f 1`
 set pre_flow_data_dir = "{{pre.flow_data_dir}}/{{pre.stage}}"
 
 ##link previous stage data
-ln -sf $pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.v.gz {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.v.gz
+ln -sf $pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.pt.v.gz {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.pt.v.gz
+ln -sf $pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.def.gz {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.def.gz
 
 echo "delete exsting smc files and starrc command file"
 rm {{cur.flow_scripts_dir}}/{{cur.stage}}/*.smc
@@ -24,7 +25,6 @@ rm {{cur.flow_scripts_dir}}/{{cur.stage}}/*.cmd
 #################################
 ## STAR flow                   ##
 #################################
-set tech_node                   = "{{local.tech_node}}"
 set star_flow_type              = "{{local.star_flow_type}}"
 set ndm_block_name              = "{{local.ndm_block_name}}"
 set BLK_NAME                    = "{{env.BLK_NAME}}"
@@ -233,7 +233,7 @@ absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:tru
 
 
 if ( $star_flow_type == "deflef" || $star_flow_type == "mw") then
-mv {{env.BLK_NAME}}.star_sum {{cur.cur_flow_log_dir}}/${cur_stage}.{{env.BLK_NAME}}.star_sum
+mv {{env.BLK_NAME}}.star_sum {{cur.cur_flow_rpt_dir}}/${cur_stage}.star_sum
 endif
 
 if ( $star_flow_type == "ndm") then
@@ -241,17 +241,17 @@ if ( $star_flow_type == "ndm") then
 set block_name = `echo $ndm_block_name | cut -d / -f 1`
 set label_name = `echo $ndm_block_name | cut -d / -f 2`
 
-mv ${block_name}.star_sum {{cur.cur_flow_log_dir}}/${cur_stage}.{{env.BLK_NAME}}.star_sum
+mv ${block_name}.star_sum {{cur.cur_flow_rpt_dir}}/${cur_stage}.star_sum
 endif
 
-mv  ./star/xtract.tech {{cur.cur_flow_log_dir}}/${cur_stage}.{{env.BLK_NAME}}.xtract.tech
-mv ./star/tech_file.asc {{cur.cur_flow_log_dir}}/${cur_stage}.{{env.BLK_NAME}}.tech_file.asc
+mv  ./star/xtract.tech {{cur.cur_flow_rpt_dir}}/${cur_stage}.xtract.tech
+mv ./star/tech_file.asc {{cur.cur_flow_rpt_dir}}/${cur_stage}.tech_file.asc
 
 if (-e ./star/shorts_all.sum) then
-mv ./star/shorts_all.sum {{cur.cur_flow_log_dir}}/${cur_stage}.{{env.BLK_NAME}}.shorts_all.sum
+mv ./star/shorts_all.sum {{cur.cur_flow_rpt_dir}}/${cur_stage}.shorts_all.sum
 endif
 if (-e ./star/opens.sum) then
-mv ./star/opens.sum {{cur.cur_flow_log_dir}}/${cur_stage}.{{env.BLK_NAME}}.opens.sum
+mv ./star/opens.sum {{cur.cur_flow_rpt_dir}}/${cur_stage}.opens.sum
 endif
 
 #./scr/signoff_check/csh/check_starrc_log.csh $RUN_DIR $BLOCK_NAME $OP4_dst_eco

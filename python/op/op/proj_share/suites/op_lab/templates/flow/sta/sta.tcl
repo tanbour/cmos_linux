@@ -1,3 +1,4 @@
+{%- include 'stage_ctrl/stage_ctrl.tcl' %}
 ###===================================================================###
 ###   pt setup                                                        ###
 ###===================================================================###
@@ -29,7 +30,7 @@ set VNET                           " {{pre.flow_data_dir}}/{{pre.stage}}/$pre_st
 set VNET                            "{{env.BLK_NETLIST}}/{{ver.netlist}}/{{env.BLK_NAME}}.v"
 }
 set SDC_LIST                        "{{env.BLK_SDC}}/{{ver.sdc}}/{{env.BLK_NAME}}.${MODE}.sdc"
-set SPEF                            "{{pre.flow_data_dir}}/{{pre.stage}}/{{env.BLK_NAME}}.${RC_CORNER}.spef.gz"
+set SPEF                            "{{pre.flow_data_dir}}/{{pre.stage}}/${pre_stage}.{{env.BLK_NAME}}.${RC_CORNER}.spef.gz"
 set CLK_MODE                        "{{local.CLK_MODE}}"
 set XTK                             "{{local.XTK}}"
 set PBA_MODE                        "{{local.PBA_MODE}}"
@@ -37,7 +38,6 @@ set PATH_TYPE                       "{{local.PATH_TYPE}}"
 set NWORST_NUM                      "{{local.NWORST_NUM}}"
 set PBA_PATH_NUM                    "{{local.PBA_PATH_NUM}}"
 set MAX_PATH_NUM                    "{{local.MAX_PATH_NUM}}"
-set SAVE_SESSION                    "{{local.SAVE_SESSION}}"
 set GEN_SDF                         "{{local.GEN_SDF}}"
 set GEN_ETM                         "{{local.GEN_ETM}}"
 set GEN_ILM                         "{{local.GEN_ILM}}"
@@ -51,6 +51,9 @@ set ENABLE_POCV                     "{{local.ENABLE_POCV}}"
 ###  source liblist                                                   ###
 ###===================================================================###
 source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+
+sh ln -sf {{pre.flow_data_dir}}/{{pre.stage}}/$pre_stage.{{env.BLK_NAME}}.def.gz {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.def.gz
+sh ln -sf {{pre.flow_data_dir}}/{{pre.stage}}/$pre_stage.{{env.BLK_NAME}}.${RC_CORNER}.spef.gz {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.${RC_CORNER}.spef.gz
 
 ###===================================================================###
 ###  run PT flow                                                      ###

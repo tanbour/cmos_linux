@@ -1,0 +1,279 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>OP LAB GUIDE Introduction &#8212; OP Platform 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="OP enviroment setup" href="env_setup.html" />
+    <link rel="prev" title="Web Architecture Introduction" href="web.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="env_setup.html" title="OP enviroment setup"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="web.html" title="Web Architecture Introduction"
+             accesskey="P">previous</a> |</li>
+<li><a href="http://op.alchip.com.cn:8000">HOME</a> &raquo;</li>
+
+        <li class="nav-item nav-item-0"><a href="index.html">OP Platform 1.0 documentation</a> &#187;</li>
+ 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">OP LAB GUIDE Introduction</a><ul>
+<li><a class="reference internal" href="#op-lab-overview">OP lab overview</a></li>
+<li><a class="reference internal" href="#op-core-command-introduction">OP core command introduction</a></li>
+<li><a class="reference internal" href="#matters-need-attention-for-lab">Matters need attention for LAB</a></li>
+<li><a class="reference internal" href="#project-setup-pl">Project Setup (PL)</a></li>
+<li><a class="reference internal" href="#lib-hash-and-liblist-generation-pl">Lib hash and liblist generation (PL)</a></li>
+<li><a class="reference internal" href="#block-data-setup-pl">Block data setup (PL)</a></li>
+<li><a class="reference internal" href="#block-run-block-owner">Block run (block owner)</a></li>
+<li><a class="reference internal" href="#check-output-data">Check output data</a></li>
+<li><a class="reference internal" href="#error-filter">Error Filter</a></li>
+<li><a class="reference internal" href="#op-web-interface">OP web interface</a></li>
+<li><a class="reference internal" href="#appendix-a-1-flow-config-introduction">Appendix A-1 (flow config introduction)</a></li>
+<li><a class="reference internal" href="#appendix-a-2-share-and-block-config-work-mechanism">Appendix A-2 (share and block config work mechanism)</a></li>
+<li><a class="reference internal" href="#appendix-b-lib-config-work-mechanism">Appendix B (lib config work mechanism)</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="web.html"
+                        title="previous chapter">Web Architecture Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="env_setup.html"
+                        title="next chapter">OP enviroment setup</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/op_lab_guide.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="op-lab-guide-introduction">
+<span id="op-lab-guide"></span><h1>OP LAB GUIDE Introduction<a class="headerlink" href="#op-lab-guide-introduction" title="Permalink to this headline">¶</a></h1>
+<p>OP(Onepiece4) lab is developed base on a small design with TSMC16FFC process.
+Lab guide can help you quickly familiar with OP enviroment.</p>
+<ul class="simple">
+<li>Content:<ul>
+<li><a class="reference internal" href="#ref-op-lab-overview"><span class="std std-ref">OP lab overview</span></a></li>
+<li><a class="reference internal" href="#ref-op-core-command-introduction"><span class="std std-ref">OP core command introduction</span></a></li>
+<li><a class="reference internal" href="#ref-matters"><span class="std std-ref">Matters need attention for LAB</span></a></li>
+<li><a class="reference internal" href="#ref-project-setup"><span class="std std-ref">Project Setup (PL)</span></a></li>
+<li><a class="reference internal" href="#ref-lib-hash"><span class="std std-ref">Lib hash and liblist generation (PL)</span></a></li>
+<li><a class="reference internal" href="#ref-block-setup"><span class="std std-ref">Block data setup (PL)</span></a></li>
+<li><a class="reference internal" href="#ref-block-run"><span class="std std-ref">Block run (block owner)</span></a></li>
+<li><a class="reference internal" href="#ref-check-output"><span class="std std-ref">Check output data</span></a></li>
+<li><a class="reference internal" href="#ref-error-filter"><span class="std std-ref">Error Filter</span></a></li>
+<li><a class="reference internal" href="#ref-op-web"><span class="std std-ref">OP web interface</span></a></li>
+<li><a class="reference internal" href="#ref-appendix-a-1"><span class="std std-ref">Appendix A-1 (flow config introduction)</span></a></li>
+<li><a class="reference internal" href="#ref-appendix-a-2"><span class="std std-ref">Appendix A-2 (share and block config work mechanism)</span></a></li>
+<li><a class="reference internal" href="#ref-appendix-b"><span class="std std-ref">Appendix B (lib config work mechanism)</span></a></li>
+</ul>
+</li>
+</ul>
+<p>OP is under active development, and maybe have feature modification may affect OP LAB.</p>
+<p>Welcome to try our OP platform LAB, and any questions or suggestions about platform,</p>
+<p>please contact <strong>guanyu_yi&#64;alchip.com</strong> , <strong>simonz&#64;alchip.com</strong></p>
+<p>You can also download OP lab guide here <a class="reference download internal" href="_downloads/op_lab_guide_v2.9.8.pdf" download=""><code class="xref download docutils literal notranslate"><span class="pre">op_lab_guide_v2.9.8.pdf</span></code></a></p>
+<div class="section" id="op-lab-overview">
+<span id="ref-op-lab-overview"></span><h2>OP lab overview<a class="headerlink" href="#op-lab-overview" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><div class="figure">
+<img alt="_images/1.PNG" src="_images/1.PNG" />
+</div>
+<div class="figure">
+<img alt="_images/2.PNG" src="_images/2.PNG" />
+</div>
+<div class="figure">
+<img alt="_images/3.PNG" src="_images/3.PNG" />
+</div>
+<div class="figure">
+<img alt="_images/4.PNG" src="_images/4.PNG" />
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="op-core-command-introduction">
+<span id="ref-op-core-command-introduction"></span><h2>OP core command introduction<a class="headerlink" href="#op-core-command-introduction" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><div class="figure">
+<img alt="_images/5.PNG" src="_images/5.PNG" />
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="matters-need-attention-for-lab">
+<span id="ref-matters"></span><h2>Matters need attention for LAB<a class="headerlink" href="#matters-need-attention-for-lab" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><div class="figure">
+<img alt="_images/6.PNG" src="_images/6.PNG" />
+</div>
+<div class="figure">
+<img alt="_images/7_1.PNG" src="_images/7_1.PNG" />
+</div>
+<div class="figure">
+<img alt="_images/8.PNG" src="_images/8.PNG" />
+</div>
+<div class="figure">
+<img alt="_images/9.PNG" src="_images/9.PNG" />
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="project-setup-pl">
+<span id="ref-project-setup"></span><h2>Project Setup (PL)<a class="headerlink" href="#project-setup-pl" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><div class="figure">
+<img alt="_images/10.PNG" src="_images/10.PNG" />
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="lib-hash-and-liblist-generation-pl">
+<span id="ref-lib-hash"></span><h2>Lib hash and liblist generation (PL)<a class="headerlink" href="#lib-hash-and-liblist-generation-pl" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><div class="figure">
+<img alt="_images/11.PNG" src="_images/11.PNG" />
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="block-data-setup-pl">
+<span id="ref-block-setup"></span><h2>Block data setup (PL)<a class="headerlink" href="#block-data-setup-pl" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><div class="figure">
+<img alt="_images/12.PNG" src="_images/12.PNG" />
+</div>
+<div class="figure">
+<img alt="_images/13.PNG" src="_images/13.PNG" />
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="block-run-block-owner">
+<span id="ref-block-run"></span><h2>Block run (block owner)<a class="headerlink" href="#block-run-block-owner" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><div class="figure">
+<img alt="_images/14.PNG" src="_images/14.PNG" />
+</div>
+<div class="figure">
+<img alt="_images/15.PNG" src="_images/15.PNG" />
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="check-output-data">
+<span id="ref-check-output"></span><h2>Check output data<a class="headerlink" href="#check-output-data" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><div class="figure">
+<img alt="_images/16.PNG" src="_images/16.PNG" />
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="error-filter">
+<span id="ref-error-filter"></span><h2>Error Filter<a class="headerlink" href="#error-filter" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><div class="figure">
+<img alt="_images/17.PNG" src="_images/17.PNG" />
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="op-web-interface">
+<span id="ref-op-web"></span><h2>OP web interface<a class="headerlink" href="#op-web-interface" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><div class="figure">
+<img alt="_images/18.PNG" src="_images/18.PNG" />
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="appendix-a-1-flow-config-introduction">
+<span id="ref-appendix-a-1"></span><h2>Appendix A-1 (flow config introduction)<a class="headerlink" href="#appendix-a-1-flow-config-introduction" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><div class="figure">
+<img alt="_images/19.PNG" src="_images/19.PNG" />
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="appendix-a-2-share-and-block-config-work-mechanism">
+<span id="ref-appendix-a-2"></span><h2>Appendix A-2 (share and block config work mechanism)<a class="headerlink" href="#appendix-a-2-share-and-block-config-work-mechanism" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><div class="figure">
+<img alt="_images/20.PNG" src="_images/20.PNG" />
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="appendix-b-lib-config-work-mechanism">
+<span id="ref-appendix-b"></span><h2>Appendix B (lib config work mechanism)<a class="headerlink" href="#appendix-b-lib-config-work-mechanism" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><div class="figure">
+<img alt="_images/21.PNG" src="_images/21.PNG" />
+</div>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="env_setup.html" title="OP enviroment setup"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="web.html" title="Web Architecture Introduction"
+             >previous</a> |</li>
+<li><a href="http://op.alchip.com.cn:8000">HOME</a> &raquo;</li>
+
+        <li class="nav-item nav-item-0"><a href="index.html">OP Platform 1.0 documentation</a> &#187;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Guanyu Yi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+    </div>
+  </body>
+</html>

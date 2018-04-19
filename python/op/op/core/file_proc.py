@@ -11,6 +11,7 @@ import json
 import datetime as dt
 from utils import pcom
 from utils import db_if
+from utils import log_parser_cfg
 from core import log_parser
 
 LOG = pcom.gen_logger(__name__)
@@ -54,18 +55,27 @@ class FileProc(object):
             LOG.error("log file is empty")
             return True
         self.log_dic["fin"] = True if fin_str and fin_str in rl_con else False
-        if not err_kw_lst:
-            err_lst = []
-        else:
-            err_exp = "|".join([f".*{c_c}.*" for c_c in err_kw_lst if c_c]).strip("|")
+        err_lst = []
+        if err_kw_lst:
+            # err_exp = "|".join([f".*{c_c}.*" for c_c in err_kw_lst if c_c]).strip("|")
             wav_exp = rf"^$|{'|'.join([re.escape(c_c) for c_c in wav_kw_lst if c_c])}".strip("|")
-            err_lst = [c_c for c_c in re.findall(err_exp, rl_con) if not re.search(wav_exp, c_c)]
+            rl_con_lst = rl_con.split(os.linesep)
+            for err_kw in err_kw_lst:
+                for line in rl_con_lst:
+                    if not line.strip():
+                        continue
+                    if re.search(f"{err_kw}", line) and not re.search(wav_exp, line):
+                        err_lst.append(line)
         if err_lst:
             self.log_dic["status"] = "failed"
             self.log_dic["err_lst"] = err_lst
-        else:
+        elif self.log_dic["fin"]:
             self.log_dic["status"] = "passed"
             self.log_dic["err_lst"] = []
+        else:
+            self.log_dic["status"] = "failed"
+            self.log_dic["err_lst"] = [
+                "job not finished due to finished string configured in proj.cfg missing"]
         return False
     def proc_logs(self):
         """to process all logs to dump database"""
@@ -73,7 +83,7 @@ class FileProc(object):
         stage_name = self.run_dic.get("stage", "")
         sub_stage_name = self.run_dic.get("sub_stage", "")
         inst_name = self.run_dic.get("multi_inst", "")
-        pcd = log_parser.PARSER_CFG_DIC.get(stage_name, {}).get(sub_stage_name, {})
+        pcd = log_parser_cfg.PARSER_CFG_DIC.get(stage_name, {}).get(sub_stage_name, {})
         log_par = log_parser.LogParser()
         self.log_dic["data"] = {}
         for p_k, p_v in pcd.items():
@@ -94,7 +104,8 @@ class FileProc(object):
                     LOG.warning(f"file {file_path} to be uploaded is NA")
                     continue
                 with open(file_path, "rb") as f_p:
-                    file_url = db_if.w_file(self.db_stage_dic, {"file_obj": f_p}).get("file_url")
+                    file_url = db_if.w_file(
+                        self.db_stage_dic, {"file_obj": f_p}).get("file_url", "")
                 if not file_url:
                     continue
                 self.log_dic["data"][f"{p_k}_raw"] = f"<img src='{file_url}'>"

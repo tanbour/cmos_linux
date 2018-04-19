@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import User, Title, Proj, Block, Flow, Stage
+from django.db.models import Q
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,17 +46,48 @@ class UserRelatedSerializer(serializers.ModelSerializer):
         model = User
         fields = ("id", "name", "proj_owner", "block_owner", "flow_owner", "stage_owner")
 
+# class ProjRelatedSerializer(serializers.ModelSerializer):
+#     block_proj = BlockSerializer(many=True, read_only=True)
+#     class Meta:
+#         model = Proj
+#         fields = ("id", "name", "block_proj")
+
 class ProjRelatedSerializer(serializers.ModelSerializer):
-    block_proj = BlockSerializer(many=True, read_only=True)
+    block_proj = serializers.SerializerMethodField()
     class Meta:
         model = Proj
         fields = ("id", "name", "block_proj")
+    def get_block_proj(self, proj_obj):
+        queryset = Block.objects.filter(proj=proj_obj)
+        user = self.context["request"].GET.get("user")
+        if user:
+            user_obj = User.objects.filter(name=user).first()
+            if proj_obj not in user_obj.proj_admin.all():
+                q_filter = Q()
+                block_set = set()
+                for query_obj in Flow.objects.filter(block__proj=proj_obj, owner__name=user):
+                    block_name = query_obj.block.name
+                    if block_name in block_set:
+                        continue
+                    block_set.add(query_obj.block.name)
+                    q_filter = q_filter|Q(name=block_name)
+                queryset = queryset.filter(q_filter) if q_filter else queryset.none()
+        serializer = BlockSerializer(instance=queryset, many=True, read_only=True)
+        return serializer.data
 
 class BlockRelatedSerializer(serializers.ModelSerializer):
-    flow_block = FlowSerializer(many=True, read_only=True)
+    flow_block = serializers.SerializerMethodField()
     class Meta:
         model = Block
         fields = ("id", "name", "flow_block")
+    def get_flow_block(self, block_obj):
+        queryset = Flow.objects.filter(block=block_obj)
+        user = self.context["request"].GET.get("user")
+        user_obj = User.objects.filter(name=user).first()
+        if block_obj.proj not in user_obj.proj_admin.all():
+            queryset = queryset.filter(owner__name=user)
+        serializer = FlowSerializer(instance=queryset, many=True, read_only=True)
+        return serializer.data
 
 class FlowRelatedSerializer(serializers.ModelSerializer):
     stage_flow = StageSerializer(many=True, read_only=True)

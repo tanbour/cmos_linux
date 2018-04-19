@@ -67,6 +67,7 @@
  Vue.component("flow_rpt", {
    template: "#flow_rpt",
    data: function () {
+     var url_pstr = "?user=" + this.$pCookie().user
      return {
        table_data: [],
        col_ary: [],
@@ -86,10 +87,10 @@
        rsp_title: {},
        level: "",
        level_url: {
-         index: "{% url 'flow_rpt:proj_list' %}",
+         index: "{% url 'flow_rpt:proj_list' %}" + url_pstr,
          title: "{% url 'flow_rpt:title_detail' '1' %}",
-         proj: "{% url 'flow_rpt:proj_detail' 'djst_var' %}",
-         block: "{% url 'flow_rpt:block_detail' 'djst_var' %}",
+         proj: "{% url 'flow_rpt:proj_detail' 'djst_var' %}" + url_pstr,
+         block: "{% url 'flow_rpt:block_detail' 'djst_var' %}" + url_pstr,
          flow: "{% url 'flow_rpt:flow_detail' 'djst_var' %}",
          stage: "{% url 'flow_rpt:stage_detail' 'djst_var' %}",
          detail: ""

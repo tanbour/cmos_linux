@@ -1,0 +1,152 @@
+#!/bin/csh -f
+
+%REPL_OP4
+source "$RUN_DIR/scr/flow/opus.$OP4_dst_branch.$OP4_dst_eco/$BLOCK_NAME.dir.$OP4_dst_branch.csh"
+#===================================================================
+#===================  delete existing run file and folder ==========
+#===================================================================
+if (-e $FLOW_BRANCH_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.run) then
+\rm $FLOW_BRANCH_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.run -rf
+endif
+if (-e $RPT_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.run_time) then
+\rm \$RPT_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.run_time -rf
+endif
+touch \$RPT_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.run_time
+#===================================================================
+#=================== set opus input files ==========================
+#===================================================================
+set gds_files                        = "$GDS_STD $GDS_MEM $GDS_IP $GDS_IO"
+set map_file                         = "$OPUS_MAPPING_FILE" 
+set tech_file                        = "$OPUS_TECH_FILE"
+set run_time                         = ".\$RPT_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.run_time"
+set gds_plugin_file                  = "$FLOW_BRANCH_DIR/plugin/opus_oa_lib_plugin.list"
+set opus_skip_gen_standard_lib       = "$OPUS_SKIP_GEN_STANDARD_LIB"
+set cds_lib                          = ""
+REPL_OP4%
+#===================================================================
+#=================== opus strmin setting         ========================
+#===================================================================
+
+%REPL_OP4
+set display_drf                      = "$OPUS_DISPLAY_DRF"
+set log_file                         = ".\$LOG_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.log"
+set sum_file                         = ".\$RPT_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.rep"
+set scr_file                         = ".$FLOW_BRANCH_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.run"
+set run_dir                          = "./opus_oa_lib"
+REPL_OP4%
+
+#===================================================================
+#==================  transfer STD/MEM/IO/IP gds to OA ==============
+#===================================================================
+if ( "$opus_skip_gen_standard_lib" == True ) then 
+echo "Alchip-info:the lib of STD/MEM/IP/IO is already exist,and this step will be skipped!"
+else
+if ( -d ./opus_oa_lib ) then
+set date = `date +%m%d`
+mv ./opus_oa_lib ./opus_oa_lib_$data
+endif
+mkdir ./opus_oa_lib
+if ($display_drf != "") then
+\cp $display_drf  ./opus_oa_lib -f
+endif
+cd ${run_dir}
+foreach gds_file  ( $gds_files )
+echo $gds_file
+set lib_name         = `basename ${gds_file} | sed "s#.gds.*##"`
+
+#=================== generate STD/MEM/IO/IP strmin script ===========
+
+cat <<strmin_setting >! ${scr_file}
+#-- database setting -------------------
+runDir                             "."                 # - Run Directory
+topCell                            ""                  # - Top Cell(s) to Translate
+strmFile                           "${gds_file}"       # - Stream File Name
+layerMap                           "${map_file}"       # - Layer Map File Name
+loadTechFile                       "${tech_file}"      # - ASCII Technology File Name
+refLibList                         " "                 # - Rerferrence Library List File
+view                               "layout"            # - View Name(s) to Translate
+library                            "${lib_name}"       # - Library Name
+logFile                            "${log_file}"                  # - Log File Name
+summaryFile                        "${sum_file}"       # - Summary File Name
+
+#-- common setting ---------------------
+pinAttNum                           0                  # - (0-127) - Stream Attribute Number To Preserve Pin
+dbuPerUU                            0                  # - DB Units Per User Units
+hierDepth                           32                 # - (0-32767) - Hierarchy Depth Limit
+case                               "preserve"          # - preserve | upper | lower - Case Sensitivity
+labelCase                          "preserve"          # - preserve | upper | lower - Label Case Sensitivity
+strmTextNS                         "cdba"              # - Text NameSpace
+maxCellsInTargetLib                 20000              # - Maximum Cells in Target Library
+numThreads                          1                  # - Number of threads to execute simultaneously
+propSeparator                      ","                 # - Property Separator Character
+strmin_setting
+
+#=================== run STD/MEM/IO/IP strmin ========================
+
+echo "opus_oa" >> $run_time
+echo "start " `date "+%F %T %a"` >> $run_time
+mkdir -p ../openlava
+%REPL_OP4
+bsub -Is  -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -R "rusage[mem=${strmin_MEM_REQUIREMENT}]"  \
+"strmin -templateFile \${scr_file}"   
+REPL_OP4%
+end
+echo "finish" `date "+%F %T %a"` >> $run_time
+cd ..
+endif
+
+#===================================================================
+#===================   generate plugin lib =========================
+#===================================================================
+#cd ${run_dir}
+sed -i -e '/^$/d' -e '/#.*$/d' ${gds_plugin_file}
+if ( ${gds_plugin_file} == "" ) then
+echo "Alchip-info:no plugin gds!"
+else
+ if (!(-d ./opus_oa_lib )) then
+ mkdir -p ./opus_oa_lib
+ cp -rf $cds_lib ./opus_oa_lib/
+ endif
+cd ${run_dir}
+foreach gds_file (`cat .${gds_plugin_file}`)
+echo $gds_file
+set lib_name         = `basename ${gds_file} | cut -d . -f1`
+#=================== generate plugin strmin script ==================
+cat <<strmin_setting >! ${scr_file}
+#-- database setting -------------------
+runDir                             "."                 # - Run Directory
+topCell                            " "                 # - Top Cell(s) to Translate
+strmFile                           "${gds_file}"       # - Stream File Name
+layerMap                           "${map_file}"       # - Layer Map File Name
+loadTechFile                       "${tech_file}"      # - ASCII Technology File Name
+refLibList                         " "                 # - Rerferrence Library List File
+view                               "layout"            # - View Name(s) to Translate
+library                            "${lib_name}"       # - Library Name
+logFile                            "${log_file}"                  # - Log File Name
+summaryFile                        "${sum_file}"       # - Summary File Name
+
+#-- common setting ---------------------
+pinAttNum                           0                  # - (0-127) - Stream Attribute Number To Preserve Pin
+dbuPerUU                            0                  # - DB Units Per User Units
+hierDepth                           32                 # - (0-32767) - Hierarchy Depth Limit
+case                               "preserve"          # - preserve | upper | lower - Case Sensitivity
+labelCase                          "preserve"          # - preserve | upper | lower - Label Case Sensitivity
+strmTextNS                         "cdba"              # - Text NameSpace
+maxCellsInTargetLib                 20000              # - Maximum Cells in Target Library
+numThreads                          1                  # - Number of threads to execute simultaneously
+propSeparator                      ","                 # - Property Separator Character
+strmin_setting
+
+#=================== plugin strmin run  =============================
+echo "opus_oa" >> $run_time
+echo "start " `date "+%F %T %a"` >> $run_time
+mkdir -p ../openlava
+%REPL_OP4
+bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -R "rusage[mem=${strmin_MEM_REQUIREMENT}]"  \
+"strmin -templateFile \${scr_file}"   
+REPL_OP4%
+end
+echo "finish" `date "+%F %T %a"` >> $run_time
+cd ..
+endif
+

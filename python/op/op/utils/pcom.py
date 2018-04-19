@@ -141,6 +141,8 @@ def find_iter(path, pattern, dir_flg=False, cur_flg=False, i_lst=None):
                     yield root_find_name
     else:
         for root_name, dir_name_lst, file_name_lst in os.walk(path, followlinks=True):
+            if i_lst and any([c_c in root_name for c_c in i_lst]):
+                continue
             find_lst = dir_name_lst if dir_flg else file_name_lst
             for find_name in fnmatch.filter(find_lst, pattern):
                 if i_lst and any([c_c in find_name for c_c in i_lst]):

@@ -26,6 +26,8 @@ Thirdly, the missing back-end database will cause the precious history data lost
 
 Overall, the OP platform will follow KISS principle ("keep it simple, stupid") as the general guideline, and expects to be more flexible, re-usable and scalable.
 
+.. figure:: images/op_application.PNG
+
 Components
 ----------------------------------------
 The platform has the following components:
@@ -45,3 +47,7 @@ The platform has the following components:
 
   + OP back-end, which provides database and web services for user to check, query and analyze data/reports.
   + Details in :ref:`web`
+
+- Relationship 
+
+.. figure:: images/op_Framework.PNG

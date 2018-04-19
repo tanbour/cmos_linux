@@ -1,0 +1,211 @@
+#!/bin/csh -f
+
+%REPL_OP4
+source "$RUN_DIR/scr/flow/opus.$OP4_dst_branch.$OP4_dst_eco/$BLOCK_NAME.dir.$OP4_dst_branch.csh"
+
+#===================================================================
+#===================  delete existing run file and folder ==========
+#===================================================================
+
+if (`ls \$RPT_DIR | wc -l` !=  0 ) then 
+\rm \$RPT_DIR/* -rf
+endif
+#===================================================================
+#===============  set opus common input files    ===================
+#===================================================================
+set map_file                        = "$OPUS_MAPPING_FILE" 
+set tech_file                       = "$OPUS_TECH_FILE"
+set display_drf                     = "$OPUS_DISPLAY_DRF"
+#set cds_lib                         = "./opus_oa_lib/cds.lib"                                     # if necessary,user can change this path
+set cds_lib                         = "$PROJ_DIR/LIB/Techfile/OPUS_LIB/cds.lib"                                     # if necessary,user can change this path
+set run_time                        = "\$RPT_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.run_time"
+set run_dir                         = "\$RPT_DIR"
+REPL_OP4%
+
+\cp -rf $cds_lib  ${run_dir}
+if ( $display_drf != "" ) then
+\cp -f $display_drf ${run_dir}
+endif
+touch ${run_time}
+############ transfer subblock gds in plugin file to OA #################
+%REPL_OP4
+set block_gds_plugin_file                  = "$FLOW_BRANCH_DIR/plugin/opus_block_lib_plugin.list"
+REPL_OP4%
+sed -i -e '/^$/d' -e '/^#.*$/d' ${block_gds_plugin_file}
+if ( -s ${block_gds_plugin_file} ) then
+foreach block_gds_file (`cat ${block_gds_plugin_file}`)
+echo ${block_gds_file}
+set block_topcell_name                         = `basename ${block_gds_file} | cut -d . -f1`
+%REPL_OP4
+set block_log_file                         = "../.\$LOG_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.\${block_topcell_name}.log"
+set block_sum_file                         = "../.\$RPT_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.\${block_topcell_name}.rep"
+set block_scr_file                         = "$FLOW_BRANCH_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.\${block_topcell_name}.run"
+REPL_OP4%
+#=================== generate plugin strmin script ==================
+cat <<block_strmin_setting >! ${block_scr_file}
+#-- database setting -------------------
+runDir                             "."        # - Run Directory
+topCell                            "${block_topcell_name}"                 # - Top Cell(s) to Translate
+strmFile                           "${block_gds_file}"       # - Stream File Name
+layerMap                           "${map_file}"       # - Layer Map File Name
+loadTechFile                       "${tech_file}"      # - ASCII Technology File Name
+refLibList                         "XST_CDS_LIB "        # - Rerferrence Library List File
+view                               "layout"            # - View Name(s) to Translate
+library                            "${block_topcell_name}"       # - Library Name
+logFile                            "${block_log_file}"                  # - Log File Name
+summaryFile                        "${block_sum_file}"       # - Summary File Name
+
+#-- common setting ---------------------
+pinAttNum                           0                  # - (0-127) - Stream Attribute Number To Preserve Pin
+dbuPerUU                            0                  # - DB Units Per User Units
+hierDepth                           32                 # - (0-32767) - Hierarchy Depth Limit
+case                               "preserve"          # - preserve | upper | lower - Case Sensitivity
+labelCase                          "preserve"          # - preserve | upper | lower - Label Case Sensitivity
+strmTextNS                         "cdba"              # - Text NameSpace
+maxCellsInTargetLib                 20000              # - Maximum Cells in Target Library
+numThreads                          1                  # - Number of threads to execute simultaneously
+propSeparator                      ","                 # - Property Separator Character
+block_strmin_setting
+
+#=================== plugin strmin run  =============================
+mkdir -p ./openlava
+echo "strmin_${block_topcell_name}" >> $run_time
+echo "  start " `date "+%F %T %a"` >> $run_time
+cd ${run_dir}
+%REPL_OP4
+bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -R "rusage[mem=${strmin_MEM_REQUIREMENT}]"  \
+"strmin -templateFile ../.\${block_scr_file}"   
+REPL_OP4%
+\rm -rf ${block_log_file}
+cd  ../..
+echo "  finish" `date "+%F %T %a"` >> $run_time
+end
+endif
+#################### transfer the top gds to OA ####################
+#===================================================================
+#===================   set top gds file  ===========================
+#===================================================================
+%REPL_OP4
+set gds_file         = "../.\$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.gds.gz"
+REPL_OP4%
+echo $gds_file
+#===================================================================
+#=================== strmin file setting  ==========================
+#===================================================================
+
+%REPL_OP4
+set top_name         = "$BLOCK_NAME"
+set log_strmin_file  = "../.\$LOG_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.strmin.log"
+set sum_strmin_file  = "../.\$RPT_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.strmin.rep"
+set scr_strmin_file  = "$FLOW_BRANCH_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.strmin.run"
+
+#===================================================================
+#=================== strmout file setting   ========================
+#===================================================================
+
+set scr_strmout_file = "$FLOW_BRANCH_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.strmout.run"
+set gds_strmout_file = "../.\$DST_DATA_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.merge.gds.gz"
+set log_strmout_file = "../.\$LOG_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.strmout.log"
+set sum_strmout_file = "../.\$RPT_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.strmout.rep"
+REPL_OP4%
+
+#===================================================================
+#=== copy cds_lib and display_drf to current run directory==========
+#=== cds_lib need to be renamed and move to LIB           ==========
+#=== after new cds lib file genereated                    ==========
+#===================================================================
+
+set key_text = `basename ${cds_lib}`
+if ( `grep " ${top_name} " ${run_dir}/${key_text} | wc -l ` == 1 ) then
+   echo "Error : cds.lib have included ${top_name}, please delete it !"
+   exit
+endif
+
+#===================================================================
+#================== generate stream-in run script     ==============
+#===================================================================
+
+cat <<strmin_setting >! ${scr_strmin_file}
+#-- database setting -------------------
+runDir                             "."                 # - Run Directory
+topCell                            "${top_name}"       # - Top Cell(s) to Translate
+strmFile                           "${gds_file}"       # - Stream File Name
+layerMap                           "${map_file}"       # - Layer Map File Name
+loadTechFile                       "${tech_file}"      # - ASCII Technology File Name
+refLibList                         "XST_CDS_LIB"        # - Rerferrence Library List File
+view                               "layout"            # - View Name(s) to Translate
+library                            "${top_name}"       # - Library Name
+logFile                            "${log_strmin_file}"       # - Log File Name
+summaryFile                        "${sum_strmin_file}"       # - Summary File Name
+
+#-- common setting ---------------------
+pinAttNum                           0                  # - (0-127) - Stream Attribute Number To Preserve Pin
+dbuPerUU                            0                  # - DB Units Per User Units
+hierDepth                           32                 # - (0-32767) - Hierarchy Depth Limit
+case                               "preserve"          # - preserve | upper | lower - Case Sensitivity
+labelCase                          "preserve"          # - preserve | upper | lower - Label Case Sensitivity
+strmTextNS                         "cdba"              # - Text NameSpace
+maxCellsInTargetLib                 20000              # - Maximum Cells in Target Library
+numThreads                          1                  # - Number of threads to execute simultaneously
+propSeparator                      ","                 # - Property Separator Character
+strmin_setting
+
+#===================================================================
+#==================== generate stream-out run script  ==============
+#===================================================================
+
+cat <<strmout_setting >! ${scr_strmout_file}
+#-- database setting -------------------
+runDir                             "."                 #- Run Directory
+topCell                            "${top_name}"       #- Top Cell(s) to Translate
+strmFile                           "${gds_strmout_file}"       #- Stream File Name
+layerMap                           "${map_file}"       #- Layer Map File Name
+outputDir                          ""                  #- The Output Directory for Stream File
+refLibList                         ""                  #- Referrence Library List File Name
+view                               "layout"            #- View Name(s) to Translate
+library                            "${top_name}"       #- Library Name
+logFile                            "${log_strmout_file}" #- Log File Name
+summaryFile                        "${sum_strmout_file}" #- Summary File Name
+#-- common setting ---------------------
+pinAttNum                           0                  #- (0-127) - Stream Attribute Number for Preserving Pins
+dbuPerUU                            0                  #- DB Units Per User Units
+hierDepth                           32                 #- (0-32767) - Hierarchy Depth Limit
+case                               "preserve"          #- preserve | upper | lower - Case Sensitivity
+labelCase                          "preserve"          #- preserve | upper | lower - Label Case Sensitivity
+strmTextNS                         "cdba"              #- Text NameSpace
+convertDot                         "ignore"            #- polygon | node | ignore - Convert Dots to
+viaCutArefThreshold                 0                  #- Write a STRUCT if the number of cuts are more the specified
+convertPin                         "geometry"          #- geometry | text | geometryAndText | ignore - Convert Pin to
+labelDepth                          1                  #- Hierarchical depth to add labels to
+strmout_setting
+%REPL_OP4
+if ($OPUS_IGNORE_MISSING_CELLS == "True") then
+echo "ignoreMissingCells                 t                   #- Ignore Missing cellViews During Translation and Continue Translation" >> \${scr_strmout_file}
+endif
+REPL_OP4%
+#-- run strmin -------------------------
+mkdir -p ./openlava
+echo "strmin_${top_name}" >> $run_time
+echo "  start " `date "+%F %T %a"` >> $run_time
+cd ${run_dir}
+%REPL_OP4
+bsub -Is  -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -R " rusage[mem=${strmin_MEM_REQUIREMENT}]"   \
+"strmin -templateFile ../.\${scr_strmin_file}"   
+REPL_OP4%
+cd ../..
+echo "  finish" `date "+%F %T %a"` >> $run_time
+
+
+#-- run strmout -------------------------
+echo "strmout_${top_name}" >> $run_time
+echo "  start " `date "+%F %T %a"` >> $run_time
+cd ${run_dir}
+%REPL_OP4
+bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -R " rusage[mem=${strmout_MEM_REQUIREMENT}]"     \
+"strmout -templateFile ../.\${scr_strmout_file}"
+REPL_OP4%
+\rm -rf ${log_strmin_file}
+\rm -rf ${log_strmout_file}
+cd ../..
+echo "  finish" `date "+%F %T %a"` >> $run_time
+

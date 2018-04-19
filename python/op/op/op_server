@@ -6,50 +6,55 @@ Created on Wed Jan 24
 @author: minato
 '''
 
-from utils import opserver
-import sys, os, locale, time
+import sys
+import os
 import argparse
+from utils import opserver
 
 def parse_args_top(prog):
-  ''' OP License Server argument parser '''
-  parser = argparse.ArgumentParser(description="OP License Server")
+    ''' OP License Server argument parser '''
+    parser = argparse.ArgumentParser(description="OP License Server")
 
-  parser.add_argument("-f", "--license_file", required=True,
-		      help="License key file to be invoked.")
+    parser.add_argument("-f", "--license_file", required=True,
+                        help="License key file to be invoked.")
 
-  parser.add_argument("-p", "--port", type=int, default=3661,
-		      help="Port number to communicate with clients. (default: 3661)")
+    parser.add_argument("-p", "--port", type=int, default=3661,
+                        help="Port number to communicate with clients. (default: 3661)")
 
-  log_file = prog + '.log'
-  parser.add_argument("-l", "--log_file", default=log_file,
-		      help="Log file name. (default: %s)" % log_file, )
+    log_file = prog + '.log'
+    parser.add_argument("-l", "--log_file", default=log_file,
+                        help="Log file name. (default: %s)" % log_file, )
 
-  parser.add_argument("--log", dest="log_level", choices=['debug', 'info', 'warning', 'error', 'critical'], default='info',
-		      help="Log level. (default: 'info')")
+    parser.add_argument("--log", dest="log_level",
+                        choices=['debug', 'info', 'warning', 'error', 'critical'],
+                        default='info',
+                        help="Log level. (default: 'info')")
 
-  parser.add_argument("-fg", "--fore_ground", action="store_true",
-		      help="Run on fore ground mode. In this mode, Log messages will be shown at terminal.")
+    parser.add_argument("-fg", "--fore_ground", action="store_true",
+                        help=("Run on fore ground mode."
+                              "In this mode, Log messages will be shown at terminal."))
 
-  return parser.parse_args()
+    return parser.parse_args()
 
 
 def dump_args(logger, args):
-  ''' dump server options '''
-  logger.debug('Server arguments:')
-  for attr in ( 'license_file', 'port', 'log_file', 'log_level', 'fore_ground' ):
-    logger.debug('  %s = %s', attr, getattr(args, attr))
+    ''' dump server options '''
+    logger.debug('Server arguments:')
+    for attr in ('license_file', 'port', 'log_file', 'log_level', 'fore_ground'):
+        logger.debug('  %s = %s', attr, getattr(args, attr))
 
 
 
 if __name__ == '__main__':
-  prog = os.path.basename(sys.argv[0])
-  args = parse_args_top(prog)
+    PROG = os.path.basename(sys.argv[0])
+    ARGS = parse_args_top(PROG)
 
-  SRV = opserver.OPServer(prog, args.fore_ground, args.log_file, args.log_level)
+    SRV = opserver.OPServer(PROG, ARGS.fore_ground, ARGS.log_file, ARGS.log_level)
 
-  dump_args(SRV.logger, args)
+    dump_args(SRV.logger, ARGS)
 
-  SRV.load_license(args.license_file)
+    SRV.load_license(ARGS.license_file)
 
-  SRV.start(args.port)
+    SRV.start(ARGS.port)
 
+# eof

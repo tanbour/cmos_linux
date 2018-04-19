@@ -13,8 +13,13 @@ Contents:
 
    op_intro
    config
+   lib_config
+   eda_tool_config
    runner
    web
+   op_lab_guide
+   env_setup
+   template
 
 Indices and tables
 ==================

@@ -44,7 +44,7 @@
        rsp_data: {},
        level: "",
        level_url: {
-         index: "{% url 'flow_rpt:flow_status_list' %}",
+         index: "{% url 'flow_rpt:flow_status_list' %}" + "?user=" + this.$pCookie().user,
          flow: "{% url 'flow_rpt:flow_status_detail' 'djst_var' %}"
        },
        cur_data: [],
@@ -132,7 +132,7 @@
          this.cb_data.l0.text = "flows"
        } else if (this.level === "stage") {
          this.cur_data = this.rsp_data.stage_flow
-         this.cb_data.l0.text = this.rsp_data.block.name + ":" + this.rsp_data.block.proj.name + ":" + this.rsp_data.name
+         this.cb_data.l0.text = this.rsp_data.block.proj.name + ":" + this.rsp_data.block.name + ":" + this.rsp_data.name
          this.cb_data.l1.url_id = this.rsp_data.id
          this.cb_data.l1.text = "stages"
        }

@@ -32,7 +32,7 @@ mkdir -p $cur_flow_scripts_dir
 
 
 ##link previous stage data
-ln -sf $pre_flow_log_dir/*  $cur_flow_data_dir
+ln -sf $pre_flow_log_dir/*  $cur_flow_data_dir/$signoff_dir/
 
 set BLOCK_NAME = "{{env.BLK_NAME}}"
 
@@ -53,21 +53,22 @@ set path_cdl    = "{{cur.config_plugins_dir}}/signoff/perl/IP.cdl"
 ##################################
 ## Item: check netlist and statistic chip size / cell type & number & area and so on.
 # check low-drive / high-drive cell / no-bs
-perl {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/perl/check_netlist.pl ${netlist_1}  > $cur_flow_log_dir/{{env.BLK_NAME}}.perl.check_netlist.log
+perl {{env.PROJ_UTILS}}/${signoff_dir}/perl/check_netlist.pl ${netlist_1}  > $cur_flow_log_dir/{{env.BLK_NAME}}.perl.check_netlist.log
 
 # check max_size cell / min_size cell error / min_area cell
-perl {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/perl/check_cellsize.pl ${netlist_2} > $cur_flow_log_dir/{{env.BLK_NAME}}.perl.check_cellsize.log
+perl {{env.PROJ_UTILS}}/${signoff_dir}/perl/check_cellsize.pl ${netlist_2} > $cur_flow_log_dir/{{env.BLK_NAME}}.perl.check_cellsize.log
 
 # check chip size / logic gate size (Mgate) / SC area-ratio of each VTH cells
-perl {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/perl/check_netlist_statistic.pl ${netlist_3}  > $cur_flow_log_dir/{{env.BLK_NAME}}.perl.check_netlist_statistic.log
+#perl {{env.PROJ_UTILS}}/${signoff_dir}/perl/check_netlist_statistic.pl ${netlist_3}  > $cur_flow_log_dir/{{env.BLK_NAME}}.perl.check_netlist_statistic.log
 
 ## Item: check IP cdl bus order
-perl {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/perl/check_ip_cdl_bus_order.pl ${path_cdl} > $cur_flow_log_dir/{{env.BLK_NAME}}.perl.check_ip_cdl_bus_order.log
+perl {{env.PROJ_UTILS}}/${signoff_dir}/perl/check_ip_cdl_bus_order.pl ${path_cdl} > $cur_flow_log_dir/{{env.BLK_NAME}}.perl.check_ip_cdl_bus_order.log
 
 ##################################
 # check starrc log 
 ##################################
 # Usage: check_starrc_log.csh <starrc_log_dir> <block_name>
-{{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/csh/check_starrc_log.csh $pre_flow_log_dir {{env.BLK_NAME}}  > $cur_flow_log_dir/{{env.BLK_NAME}}.starrc_log_check.log
+{{env.PROJ_UTILS}}/${signoff_dir}/csh/check_starrc_log.csh $pre_flow_log_dir {{env.BLK_NAME}}  > $cur_flow_log_dir/{{env.BLK_NAME}}.starrc_log_check.log
 
+echo  "{{env.FIN_STR}}\n" 
 echo  "Alchip-info : Completed signoff-check script--> logs.check [info script]\n"

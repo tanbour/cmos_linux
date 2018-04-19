@@ -40,9 +40,13 @@
               </i-button>
               <div class="layout-ceiling-main">
                 <a @click="changeContent('home')" href="/">Home</a> |
-                <a href="/static/doc/_build/html/index.html">Documents</a> |
-                <a href="#">Contact Us</a> |
-                <a href="#">Sign In</a>
+                <a v-if="ss_flg" href="/static/doc/_build/html/index.html">Documents</a><span v-if="ss_flg"> |</span>
+                <a v-if="ss_flg" href="/static/cu/_build/html/index.html">Contact Us</a><span v-if="ss_flg"> |</span>
+                <a v-if="ss_flg" @click="confirmLogout" href="#">Sign Out</a>
+                <a v-else @click="confirmLogin" href="#">Sign In</a>
+                {% verbatim %}
+                <span v-if="ss_flg" style="color:orange">  {{user}}</span>
+                {% endverbatim %}
               </div>
             </div>
             {% block content %}
@@ -56,12 +60,24 @@
     </div>
 
     <script src="{% static 'npm/node_modules/vue/dist/vue.js' %}"></script>
+    <script src="{% static 'npm/node_modules/vue-router/dist/vue-router.js' %}"></script>
     <script src="{% static 'npm/node_modules/axios/dist/axios.js' %}"></script>
     <script src="{% static 'npm/node_modules/iview/dist/iview.js' %}"></script>
     <script src="{% static 'npm/node_modules/iview/dist/locale/en-US.js' %}"></script>
     <script>iview.lang("en-US")</script>
     <script src="{% static 'npm/node_modules/ckeditor-full/ckeditor.js' %}"></script>
     <script src="{% static 'npm/node_modules/js-cookie/src/js.cookie.js' %}"></script>
+
+    <script>
+     Vue.prototype.$pCookie = function () {
+       var ops = Cookies.get("op_session")
+       if (ops) {
+         return JSON.parse(ops)
+       } else {
+         return {}
+       }
+     }
+    </script>
 
     {% block component %}
     {% endblock %}
@@ -72,7 +88,10 @@
          return {
            spanLeft: 2,
            spanRight: 22,
-           content_id: "home"
+           content_id: "home",
+           ss_flg: false,
+           user: "",
+           password: ""
          }
        },
        computed: {
@@ -82,7 +101,10 @@
        },
        methods: {
          changeContent: function (con) {
-           this.content_id = con
+           if (this.ss_flg)
+             this.content_id = con
+           else
+             this.$Message.warning("Please log in first!")
          },
          toggleClick: function () {
            if (this.spanLeft === 2) {
@@ -92,7 +114,109 @@
              this.spanLeft = 2
              this.spanRight = 22
            }
-         }
+         },
+         checkPW: function () {
+           var csrftoken = Cookies.get("csrftoken")
+           axios({
+             method: "post",
+             url: "{% url 'user_auth:check' %}",
+             headers: {"X-CSRFToken": csrftoken},
+             data: {
+               "user": this.user,
+               "password": this.password
+             }
+           }).then((response) => {
+             this.ss_flg = true
+             this.$Message.success("User " + this.user + " logged in!")
+             Cookies.set("op_session", {"user": this.user, "p_w": this.password}, {expires: 7})
+           }).catch((error) => {
+             this.ss_flg = false
+             this.$Message.error("User " + this.user + " is unauthorized!")
+             console.log(error)
+           })
+         },
+         checkCookie: function () {
+           var ops = Cookies.get("op_session")
+           if (ops) {
+             c_obj = this.$pCookie()
+             this.user = c_obj.user
+             this.password = c_obj.p_w
+             this.checkPW()
+           } else {
+             this.ss_flg = false
+           }
+         },
+         removeCookie: function () {
+           Cookies.remove("op_session")
+           this.$Message.success("User " + this.user + " logged out!")
+           this.ss_flg = false
+         },
+         confirmLogout: function () {
+           var content = "Please confirm to log out the following user:<br>" + this.user
+           this.$Modal.confirm({
+             title: "Logout Confirm",
+             content: content,
+             loading: true,
+             onOk: () => {
+               this.$Modal.remove()
+               this.removeCookie()
+               this.content_id = "home"
+             }
+           })
+         },
+         confirmLogin: function () {
+           this.$Modal.confirm({
+             title: "Login Confirm",
+             render: (h) => {
+               return h("i-form", [
+                 h("form-item", {
+                   props: {
+                     label: "User name:"
+                   }
+                 }, [
+                   h("i-input", {
+                     props: {
+                       user: this.user,
+                       autofocus: true,
+                       placeholder: "Please enter your name..."
+                     },
+                     on: {
+                       input: (val) => {
+                         this.user = val
+                       }
+                     }
+                   })
+                 ]),
+                 h("form-item", {
+                   props: {
+                     label: "Password:"
+                   }
+                 }, [
+                   h("i-input", {
+                     props: {
+                       password: this.password,
+                       type: "password",
+                       placeholder: "Please enter your password..."
+                     },
+                     on: {
+                       input: (val) => {
+                         this.password = val
+                       }
+                     }
+                   })
+                 ])
+               ])
+             },
+             loading: true,
+             onOk: () => {
+               this.$Modal.remove()
+               this.checkPW()
+             }
+           })
+         },
+       },
+       created: function () {
+         this.checkCookie()
        }
      }
      var Component = Vue.extend(Main)

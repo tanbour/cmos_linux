@@ -53,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'OP Platform'
-copyright = '2016, Guanyu Yi'
+copyright = '2018, Guanyu Yi'
 author = 'Guanyu Yi'
 
 # The version info for the project you're documenting, acts as replacement for

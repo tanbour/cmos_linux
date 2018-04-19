@@ -5,6 +5,7 @@ from .models import User, Title, Proj, Block, Flow, Stage
 class UserAdmin(admin.ModelAdmin):
     """user admin"""
     list_display = ("id", "name")
+    filter_horizontal = ("proj_admin",)
     list_filter = ["name"]
     search_field = ["name", "data"]
 

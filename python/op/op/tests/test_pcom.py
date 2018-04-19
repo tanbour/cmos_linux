@@ -83,7 +83,7 @@ class TestFindIter(unittest.TestCase):
             f"{test_dir_tup[2]}{os.sep}test3.log",
             f"{test_dir_tup[2]}{os.sep}test3.txt",
             f"{test_dir_tup[2]}{os.sep}test3.cfg")
-        test_test_dir_tup = (f"{cc}{os.sep}test" for cc in test_dir_tup)
+        test_test_dir_tup = tuple(f"{cc}{os.sep}test" for cc in test_dir_tup)
         for test_dir in test_dir_tup+test_test_dir_tup:
             os.makedirs(test_dir)
         for test_file in test_tup+test1_tup+test2_tup+test3_tup:

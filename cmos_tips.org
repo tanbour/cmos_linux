@@ -27,7 +27,7 @@ blender, cinelerra-cv, subtitleeditor, audacity, puddletag
 adobe-source-han-sans-cn-fonts
 ibus, ibus-sunpinyin
 ** python
-beautifulsoup4, diff-match-patch, Django, djangorestframework, httpie, django-reversion, ipython, jupyter, Jinja2, matplotlib, networkx, nltk, numpy, openpyxl, cython, pandas, Pillow, pip, psycopg2, mysqlclient, pytz, pyverilog, scikit-learn, scipy, setuptools, sympy, uwsgi, xlrd, xlutils, xlwt, sphinx, jieba, SQLAlchemy, texttable, nested-dict, gitpython, line_profiler, memory_profiler, pycurl, flask, paramiko, psutil, virtualenv, tox, pylint, pylint-django, nose
+beautifulsoup4, diff-match-patch, Django, djangorestframework, httpie, django-reversion, ipython, jupyter, Jinja2, matplotlib, networkx, nltk, numpy, openpyxl, cython, pandas, Pillow, pip, psycopg2, mysqlclient, pytz, pyverilog, scikit-learn, scipy, setuptools, sympy, uwsgi, xlrd, xlutils, xlwt, sphinx, jieba, SQLAlchemy, texttable, nested-dict, gitpython, line_profiler, memory_profiler, pycurl, flask, paramiko, psutil, virtualenv, tox, pylint, pylint-django, nose, truepy
 ** npm
 vue, iview, axios, js-cookie, ckeditor
 ** emacs
@@ -169,6 +169,17 @@ python -m line_profiler myscript.py.lprof
 index-url = https://mirrors.ustc.edu.cn/pypi/web/simple
 [list]
 format = columns
+** license
+# cert generation
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out certificate.pem -days 3565
+to embed content of certificate.pem to core/op_lic.py
+# license service kick off
+op_license -k key.pem -c certificate.pem -f license_2018.key -I 005056ADB9A1 -e 2018/12/31
+op_server -f license_2018.key
+# license update
+op_license -k key.pem -c certificate.pem -f license_20190630.key -I 005056ADB9A1 -e 2019/6/30
+kill <PID of op_server>
+op_server -f license_20190630.key
 
 * perl
 perl Makefile.PL PREFIX=<local_dir>

@@ -1,0 +1,483 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>EDA Tool Config User Manual &#8212; OP Platform 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Runner User Manual" href="runner.html" />
+    <link rel="prev" title="LIB Config User Manual" href="lib_config.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="runner.html" title="Runner User Manual"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="lib_config.html" title="LIB Config User Manual"
+             accesskey="P">previous</a> |</li>
+<li><a href="http://op.alchip.com.cn:8000">HOME</a> &raquo;</li>
+
+        <li class="nav-item nav-item-0"><a href="index.html">OP Platform 1.0 documentation</a> &#187;</li>
+ 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">EDA Tool Config User Manual</a><ul>
+<li><a class="reference internal" href="#config-file-syn-cfg-and-plugins-dc-scripts">Config file syn.cfg and plugins/dc_scripts</a></li>
+<li><a class="reference internal" href="#config-file-pr-cfg-and-plugins-icc2-scripts">Config file pr.cfg and plugins/icc2_scripts</a></li>
+<li><a class="reference internal" href="#config-file-ext-cfg">Config file ext.cfg</a></li>
+<li><a class="reference internal" href="#config-file-sta-cfg-and-plugins-pt-scripts">Config file sta.cfg and plugins/pt_scripts</a></li>
+<li><a class="reference internal" href="#config-file-fm-cfg">Config file fm.cfg</a></li>
+<li><a class="reference internal" href="#config-file-pv-cfg">Config file pv.cfg</a></li>
+<li><a class="reference internal" href="#config-file-ele-cfg">Config file ele.cfg</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="lib_config.html"
+                        title="previous chapter">LIB Config User Manual</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="runner.html"
+                        title="next chapter">Runner User Manual</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/eda_tool_config.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="eda-tool-config-user-manual">
+<span id="eda-tool-config"></span><h1>EDA Tool Config User Manual<a class="headerlink" href="#eda-tool-config-user-manual" title="Permalink to this headline">¶</a></h1>
+<p>EDA tool config and plugin files are used to configurate tools run flow.</p>
+<p>User can change config and plugin files to customize a suitable block flow.</p>
+<ul>
+<li><p class="first">$PROJ_ROOT/share/config/flow/&lt;type&gt;.cfg (syn.cfg, pr.cfg, ext.cfg …)</p>
+<ul class="simple">
+<li>After PL initialize project, All EDA tool’s config files and plugin files are contain in this directory.</li>
+</ul>
+</li>
+<li><p class="first">$Block_root/run/$netlist_version/$flow_name/&lt;type&gt;.cfg (syn.cfg, pr.cfg, ext.cfg …)</p>
+<ul class="simple">
+<li>By default, block config file are checkout from <code class="docutils literal notranslate"><span class="pre">share/</span></code>.</li>
+<li>By default, all variables in block config file are comment with “#”.</li>
+<li>Remove “#”, variables will be overwritten <code class="docutils literal notranslate"><span class="pre">share/</span></code> variables.</li>
+<li>The variables in block config start with “#” always take the value from share,
+even the value are different.</li>
+</ul>
+</li>
+<li><p class="first">Config file variable overwritten</p>
+<div class="figure">
+<img alt="_images/20.PNG" src="_images/20.PNG" />
+</div>
+</li>
+</ul>
+<p>EDA config file list:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>+ $PROJ_ROOT/share/config/flow/syn.cfg
++ $PROJ_ROOT/share/config/flow/pr.cfg
++ $PROJ_ROOT/share/config/flow/ext.cfg
++ $PROJ_ROOT/share/config/flow/sta.cfg
++ $PROJ_ROOT/share/config/flow/fm.cfg
++ $PROJ_ROOT/share/config/flow/pv.cfg
++ $PROJ_ROOT/share/config/flow/ele.cfg
++ other EDA tool config files ...
+</pre></div>
+</div>
+<p>EDA plugin directory list:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>+ $PROJ_ROOT/share/config/flow/plugins/icc2_scripts
++ $PROJ_ROOT/share/config/flow/plugins/dc_scripts
++ $PROJ_ROOT/share/config/flow/plugins/spyglass_scripts
++ $PROJ_ROOT/share/config/flow/plugins/fm_scripts
++ $PROJ_ROOT/share/config/flow/plugins/pt_scripts
++ $PROJ_ROOT/share/config/flow/plugins/signoff_scripts
++ other EDA tool plugin directory ...
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Block owner can only change config and plugin files to affect render-out scripts.</p>
+<p>Template files should only been control and modified by PL</p>
+<p class="last">Of cause, PL can assign delicate engineer maintain template.</p>
+</div>
+<div class="section" id="config-file-syn-cfg-and-plugins-dc-scripts">
+<h2>Config file syn.cfg and plugins/dc_scripts<a class="headerlink" href="#config-file-syn-cfg-and-plugins-dc-scripts" title="Permalink to this headline">¶</a></h2>
+<p>The syn.cfg is used for synthesis (DC/DCG) run control.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">stage name:</th><td class="field-body">syn</td>
+</tr>
+<tr class="field-even field"><th class="field-name">sub stage name:</th><td class="field-body">syn.tcl</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><dl class="first docutils">
+<dt>Sections</dt>
+<dd><dl class="first last docutils">
+<dt>Section:</dt>
+<dd><ul class="first last simple">
+<li>[DEFAULT]</li>
+<li>[syn.tcl]</li>
+</ul>
+</dd>
+<dt>Description:</dt>
+<dd><ul class="first last simple">
+<li>[DEFAULT] section is used to define common varaibles used for all tempaltes at syn stage.</li>
+<li>[syn.tcl] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">syn.tcl</span></code> only.</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><p class="first">Variables</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">_job_cmd</span></code>        : job submit command, ex.bsub -Is</li>
+<li><code class="docutils literal notranslate"><span class="pre">_job_queue</span></code>      : job queue name, ex.-q mars</li>
+<li><code class="docutils literal notranslate"><span class="pre">_job_cpu_number</span></code> : job core number, ex, -n 4</li>
+<li><code class="docutils literal notranslate"><span class="pre">_job_resource</span></code>   : job resource required, ex. -R “centos6 span[hosts=1]” / -R “centos6 select[mem&gt;20000] rusage[mem=20000]”</li>
+<li><code class="docutils literal notranslate"><span class="pre">_exec_cmd</span></code>       : EDA run command, ex. dc_shell -output_log_file dc.log -f</li>
+<li><code class="docutils literal notranslate"><span class="pre">_exec_tool</span></code>      : module load EDA tool version, ex. module load synopsys/syn_vM-2016.12-SP2</li>
+<li><code class="docutils literal notranslate"><span class="pre">......</span></code></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Due to paragraph limit, not all the variables are explian in this Manual.
+We will plan to expend varaibles explication in this Manual in the future accroding to user’s feedback.</p>
+</div>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">_job_cmd</span>                                           <span class="o">=</span> <span class="n">bsub</span> <span class="o">-</span><span class="n">Is</span>
+<span class="n">_job_queue</span>                                         <span class="o">=</span> <span class="o">-</span><span class="n">q</span> <span class="n">beige</span>
+<span class="n">_job_cpu_number</span>                                    <span class="o">=</span> <span class="o">-</span><span class="n">n</span> <span class="mi">4</span>
+<span class="n">_job_resource</span>                                      <span class="o">=</span> <span class="o">-</span><span class="n">R</span> <span class="s2">&quot;centos6 span[hosts=1]&quot;</span>
+
+<span class="n">_exec_cmd</span>                                          <span class="o">=</span> <span class="n">dc_shell</span> <span class="o">-</span><span class="n">output_log_file</span> <span class="n">dc</span><span class="o">.</span><span class="n">log</span> <span class="o">-</span><span class="n">f</span>
+<span class="n">_exec_tool</span>                                         <span class="o">=</span> <span class="n">module</span> <span class="n">load</span> <span class="n">synopsys</span><span class="o">/</span><span class="n">syn_vM</span><span class="o">-</span><span class="mf">2016.12</span><span class="o">-</span><span class="n">SP2</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>Variables defined in [DEFAULT] can be re-defined in other section, other section’s value will overwrite [DEFAULT] one.</p>
+<p>Example:</p>
+<p>[DEFAULT]</p>
+<p>_job_cpu_number                                    = -n 4</p>
+<p>[syn.tcl]</p>
+<p>_job_cpu_number                                    = -n 8</p>
+<p class="last">In rendered syn.tcl scripts, _job_cpu_number is equal to “-n 8”</p>
+</div>
+</div>
+<div class="section" id="config-file-pr-cfg-and-plugins-icc2-scripts">
+<h2>Config file pr.cfg and plugins/icc2_scripts<a class="headerlink" href="#config-file-pr-cfg-and-plugins-icc2-scripts" title="Permalink to this headline">¶</a></h2>
+<p>The pr.cfg is used for P&amp;R stage (ICC2/Innovus) run control.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">stage name:</th><td class="field-body">pr</td>
+</tr>
+<tr class="field-even field"><th class="field-name">sub stage name:</th><td class="field-body">01_fp.tcl, 02_place.tcl, 03_clock.tcl, 04_clock_opt.tcl, 05_route.tcl, 06_route_opt.tcl, 07_eco.tcl, 08_finish.tcl</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><dl class="first docutils">
+<dt>Sections</dt>
+<dd><dl class="first last docutils">
+<dt>Section:</dt>
+<dd><ul class="first last simple">
+<li>[DEFAULT]</li>
+<li>[01_fp.tcl]</li>
+<li>[02_place.tcl]</li>
+<li>[03_clock.tcl]</li>
+<li>[04_clock_opt.tcl]</li>
+<li>[05_route.tcl]</li>
+<li>[06_route_opt.tcl]</li>
+<li>[07_eco.tcl]</li>
+<li>[08_finish.tcl]</li>
+</ul>
+</dd>
+<dt>Description:</dt>
+<dd><ul class="first last simple">
+<li>[DEFAULT] section is used to define common varaibles used for all tempaltes at pr stage.</li>
+<li>[01_fp.tcl] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">01_fp.tcl</span></code> only.</li>
+<li>[02_place.tcl] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">02_place.tcl</span></code> only.</li>
+<li>[03_clock.tcl] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">03_clock.tcl</span></code> only.</li>
+<li>[04_clock_opt.tcl] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">04_clock_opt.tcl</span></code> only.</li>
+<li>[05_route.tcl] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">05_route.tcl</span></code> only.</li>
+<li>[06_route_opt.tcl] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">06_route_opt.tcl</span></code> only.</li>
+<li>[07_eco.tcl] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">07_eco.tcl</span></code> only.</li>
+<li>[08_finish.tcl] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">08_finish.tcl</span></code> only.</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Variables</dt>
+<dd><p class="first">Every substage can control it’s own job submit resource and cpu requiremenet as well as PR tool and version</p>
+<ul class="simple">
+<li>pr stage tool exection and version</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">_exec_cmd</span>       <span class="p">:</span> <span class="n">EDA</span> <span class="n">run</span> <span class="n">command</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span> <span class="n">icc2_shell</span> <span class="o">-</span><span class="n">output_log_file</span> <span class="n">icc2_fp</span><span class="o">.</span><span class="n">log</span> <span class="o">-</span><span class="n">f</span>
+<span class="n">_exec_tool</span>      <span class="p">:</span> <span class="n">module</span> <span class="n">load</span> <span class="n">EDA</span> <span class="n">tool</span> <span class="n">version</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span> <span class="n">module</span> <span class="n">load</span> <span class="n">synopsys</span><span class="o">/</span><span class="n">icc2_vM</span><span class="o">-</span><span class="mf">2016.12</span><span class="o">-</span><span class="n">SP4</span>
+</pre></div>
+</div>
+<ul>
+<li><p class="first">pr stage reporting control</p>
+<p>- “<em>One Botton Report</em>”, user can enable or disable reporting for each pr substage by one varaible <code class="docutils literal notranslate"><span class="pre">enable_&lt;pr:substage&gt;_reporting</span></code>.</p>
+<p>- “<em>Report Item Control</em>”, user can enable or disable each report item.</p>
+<p>- “<em>Report Customization</em>”, user can customize personal report in <code class="docutils literal notranslate"><span class="pre">plugins/icc2_scripts/&lt;sub_stage&gt;/09_usr_&lt;sub_stage&gt;_report.tcl</span></code></p>
+</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">enable_fp_reporting</span>          <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">01</span><span class="n">_fp</span> <span class="n">reporting</span> <span class="n">feature</span> <span class="n">will</span> <span class="n">enalbe</span>
+<span class="n">enable_place_reporting</span>       <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">02</span><span class="n">_place</span> <span class="n">reporting</span> <span class="n">feature</span> <span class="n">will</span> <span class="n">enalbe</span>
+<span class="n">enable_clock_reporting</span>       <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">03</span><span class="n">_clock</span> <span class="n">reporting</span> <span class="n">feature</span> <span class="n">will</span> <span class="n">enalbe</span>
+<span class="n">enable_clock_opt_reporting</span>   <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">04</span><span class="n">_clock_opt</span> <span class="n">reporting</span> <span class="n">feature</span> <span class="n">will</span> <span class="n">enalbe</span>
+<span class="n">enable_route_reporting</span>       <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">05</span><span class="n">_route</span> <span class="n">reporting</span> <span class="n">feature</span> <span class="n">will</span> <span class="n">enalbe</span>
+<span class="n">enable_route_opt_reporting</span>   <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">06</span><span class="n">_route_opt</span> <span class="n">reporting</span> <span class="n">feature</span> <span class="n">will</span> <span class="n">enalbe</span>
+<span class="n">enable_finish_reporting</span>      <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">08</span><span class="n">_finish</span> <span class="n">reporting</span> <span class="n">feature</span> <span class="n">will</span> <span class="n">enalbe</span>
+
+<span class="n">fp_use_usr_report_tcl</span>        <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">01</span><span class="n">_fp</span> <span class="n">use</span> <span class="n">usr</span> <span class="n">plugin</span> <span class="n">report</span> <span class="n">script</span> <span class="n">be</span> <span class="n">used</span>
+<span class="n">place_use_usr_report_tcl</span>     <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">02</span><span class="n">_place</span> <span class="n">use</span> <span class="n">usr</span> <span class="n">plugin</span> <span class="n">report</span> <span class="n">script</span> <span class="n">be</span> <span class="n">used</span>
+<span class="n">clock_use_usr_report_tcl</span>     <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">03</span><span class="n">_clock</span> <span class="n">use</span> <span class="n">usr</span> <span class="n">plugin</span> <span class="n">report</span> <span class="n">script</span> <span class="n">be</span> <span class="n">used</span>
+<span class="n">clock_opt_use_usr_report_tcl</span> <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">04</span><span class="n">_clock_opt</span> <span class="n">use</span> <span class="n">usr</span> <span class="n">plugin</span> <span class="n">report</span> <span class="n">script</span> <span class="n">be</span> <span class="n">used</span>
+<span class="n">route_use_usr_report_tcl</span>     <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">05</span><span class="n">_route</span> <span class="n">use</span> <span class="n">usr</span> <span class="n">plugin</span> <span class="n">report</span> <span class="n">script</span> <span class="n">be</span> <span class="n">used</span>
+<span class="n">route_opt_use_usr_report_tcl</span> <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">06</span><span class="n">_route_opt</span> <span class="n">use</span> <span class="n">usr</span> <span class="n">plugin</span> <span class="n">report</span> <span class="n">script</span> <span class="n">be</span> <span class="n">used</span>
+<span class="n">finish_use_usr_report_tcl</span>    <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">08</span><span class="n">_finish</span> <span class="n">use</span> <span class="n">usr</span> <span class="n">plugin</span> <span class="n">report</span> <span class="n">script</span> <span class="n">be</span> <span class="n">used</span>
+
+<span class="o">-</span> <span class="n">Report</span> <span class="n">Item</span> <span class="n">control</span> <span class="n">variables</span>
+
+<span class="n">common_report_scenario</span>                    <span class="p">:</span> <span class="n">report</span> <span class="n">scenario</span> <span class="n">information</span>
+<span class="n">common_report_pvt</span>                         <span class="p">:</span> <span class="n">report</span> <span class="n">pvt</span> <span class="n">information</span>
+<span class="n">common_report_qor</span>                         <span class="p">:</span> <span class="n">report</span> <span class="n">qor</span> <span class="n">information</span>
+<span class="n">common_report_timing</span>                      <span class="p">:</span> <span class="n">report</span> <span class="n">timing</span> <span class="p">(</span><span class="nb">max</span><span class="p">)</span>
+<span class="n">common_report_constraint</span>                  <span class="p">:</span> <span class="n">report</span> <span class="n">constraint</span> <span class="p">(</span><span class="n">max_fanout</span><span class="o">/</span><span class="n">max_transition</span><span class="o">/</span><span class="n">max_capacitance</span><span class="p">)</span>
+<span class="n">common_report_congestion_map</span>              <span class="p">:</span> <span class="n">report</span> <span class="n">congestion</span> <span class="n">status</span>
+<span class="n">common_report_threshold_voltage_group</span>     <span class="p">:</span> <span class="n">report</span> <span class="n">VT</span> <span class="n">cell</span> <span class="n">count</span> <span class="ow">and</span> <span class="n">area</span> <span class="n">ratio</span>
+<span class="n">common_report_power</span>                       <span class="p">:</span> <span class="n">report</span> <span class="n">power</span>
+<span class="n">common_report_mv_path</span>                     <span class="p">:</span> <span class="n">report</span> <span class="n">multi</span><span class="o">-</span><span class="n">voltage</span> <span class="n">path</span>
+<span class="n">common_report_utilization</span>                 <span class="p">:</span> <span class="n">report</span> <span class="n">design</span> <span class="n">utilization</span>
+<span class="n">common_report_units</span>                       <span class="p">:</span> <span class="n">report</span> <span class="n">design</span> <span class="n">units</span>
+<span class="n">common_report_detail_timing</span>               <span class="p">:</span> <span class="n">report</span> <span class="n">detail</span> <span class="n">timing</span> <span class="n">report</span> <span class="n">by</span> <span class="s2">&quot;perl&quot;</span> <span class="n">scripts</span>
+<span class="n">fp_report_zero_interconnect_delay_timing</span>  <span class="p">:</span> <span class="n">report</span> <span class="n">ZIC</span> <span class="n">timing</span><span class="p">,</span> <span class="n">only</span> <span class="n">at</span> <span class="mi">01</span><span class="n">_fp</span> <span class="n">stage</span>
+<span class="n">cts_report_clock_tree_info</span>                <span class="p">:</span> <span class="n">report</span> <span class="n">clock</span> <span class="n">tree</span> <span class="n">info</span>
+<span class="n">route_no_si_timing_report</span>                 <span class="p">:</span> <span class="n">report</span> <span class="n">no</span><span class="o">-</span><span class="n">SI</span> <span class="n">timing</span> <span class="n">at</span> <span class="mi">05</span><span class="n">_route</span> <span class="ow">and</span> <span class="mi">06</span><span class="n">_route_opt</span> <span class="n">stage</span>
+<span class="n">route_check_route</span>                         <span class="p">:</span> <span class="n">report</span> <span class="n">check</span> <span class="n">route</span> <span class="n">result</span><span class="p">,</span> <span class="n">focus</span> <span class="n">on</span> <span class="n">DRC</span> <span class="nb">type</span> <span class="ow">and</span> <span class="n">number</span>
+</pre></div>
+</div>
+<ul>
+<li><p class="first">pr stage data writing control</p>
+<p>- “<em>One Botton Dump data</em>”, user can enable or disable reporting for each pr substage by one varaible <code class="docutils literal notranslate"><span class="pre">&lt;pr:substage&gt;_write_data</span></code>.</p>
+<p>- “<em>Dump data Customization</em>”, user can customize personal report in <code class="docutils literal notranslate"><span class="pre">plugins/icc2_scripts/&lt;sub_stage&gt;/08_usr_write_data.tcl</span></code></p>
+</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fp_write_data</span>        <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">01</span><span class="n">_fp</span> <span class="n">write_data</span> <span class="n">feature</span> <span class="n">will</span> <span class="n">enalbe</span>
+<span class="n">place_write_data</span>     <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">02</span><span class="n">_place</span> <span class="n">write_data</span> <span class="n">feature</span> <span class="n">will</span> <span class="n">enalbe</span>
+<span class="n">clock_write_data</span>     <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">03</span><span class="n">_clock</span> <span class="n">write_data</span> <span class="n">feature</span> <span class="n">will</span> <span class="n">enalbe</span>
+<span class="n">clock_opt_write_data</span> <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">04</span><span class="n">_clock_opt</span> <span class="n">write_data</span> <span class="n">feature</span> <span class="n">will</span> <span class="n">enalbe</span>
+<span class="n">route_write_data</span>     <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">05</span><span class="n">_route</span> <span class="n">write_data</span> <span class="n">feature</span> <span class="n">will</span> <span class="n">enalbe</span>
+<span class="n">route_opt_write_data</span> <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">06</span><span class="n">_route_opt</span> <span class="n">write_data</span> <span class="n">feature</span> <span class="n">will</span> <span class="n">enalbe</span>
+<span class="n">finish_write_data</span>    <span class="p">:</span> <span class="k">if</span> <span class="s2">&quot;true&quot;</span> <span class="mi">08</span><span class="n">_finish</span> <span class="n">write_data</span> <span class="n">feature</span> <span class="n">will</span> <span class="n">enalbe</span>
+</pre></div>
+</div>
+<ul>
+<li><p class="first">pr manual floorplan</p>
+<p><code class="docutils literal notranslate"><span class="pre">enable_manual_floorplan</span></code> : if true, during 01_fp stage, icc2 will read verilog and mcmm.tcl then stop waiting for your manual work</p>
+<p>After manual work, dump out floorplan def file. Now you have two ways to continue flow.</p>
+<p>Solution 1 - run flow 01_fp again with dumpped out floorplan:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>create a new fp version in $block_root/&lt;fp_version&gt;</li>
+<li>copy dump out floorplan to it with name “block.def.gz”, ex. $block_root/0808/orange.def.gz</li>
+<li>run flow from 01_fp again</li>
+</ol>
+</div></blockquote>
+<p>Solution 2 - skip 01_fp force flow start with 02_place:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>After manual floorplan save database</li>
+<li>run “op flow -run &lt;flow_name&gt; -begin &lt;flow_name&gt;::pr:02_place</li>
+</ol>
+</div></blockquote>
+</li>
+<li><p class="first">pr sub_stage use user run command instead of pre-set run command</p>
+<p>PR flow provide varaible and plugin for user to switch default run command to user own run command</p>
+</li>
+</ul>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span>use_usr_place_opt_cmd_tcl   : if true, use $block_root/config/flow/&lt;flow_name&gt;/plugins/icc2_scripts/02_usr_place_opt_cmd.tcl
+use_usr_refine_opt_cmd_tcl  : if true, use $block_root/config/flow/&lt;flow_name&gt;/plugins/icc2_scripts/02_usr_refine_opt_cmd.tcl
+use_usr_clock_cmd_tcl       : if true, use $block_root/config/flow/&lt;flow_name&gt;/plugins/icc2_scripts/02_usr_clock_cmd.tcl
+use_usr_clock_opt_cmd_tcl   : if true, use $block_root/config/flow/&lt;flow_name&gt;/plugins/icc2_scripts/02_usr_clock_opt_cmd.tcl
+use_usr_route_cmd_tcl       : if true, use $block_root/config/flow/&lt;flow_name&gt;/plugins/icc2_scripts/02_usr_route_cmd.tcl
+use_usr_route_opt_cmd_tcl   : if true, use $block_root/config/flow/&lt;flow_name&gt;/plugins/icc2_scripts/02_usr_route_opt_cmd.tcl
+use_usr_finish_cmd_tcl      : if true, use $block_root/config/flow/&lt;flow_name&gt;/plugins/icc2_scripts/02_usr_finish_cmd.tcl
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Block owner can only change config and plugin files to affect render-out scripts.</p>
+<p>For common used scripts in all flow for block, user can put them in <code class="docutils literal notranslate"><span class="pre">$block_root/blk_common/icc2_common_scripts</span></code>,
+and source those file in plugin files.</p>
+<p class="last">All the settings and core run command can be replaced by plugin files.</p>
+</div>
+</div>
+<div class="section" id="config-file-ext-cfg">
+<h2>Config file ext.cfg<a class="headerlink" href="#config-file-ext-cfg" title="Permalink to this headline">¶</a></h2>
+<p>The ext.cfg is used for RC extraction (StarRC/QRC) run control.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">stage name:</th><td class="field-body">ext</td>
+</tr>
+<tr class="field-even field"><th class="field-name">sub stage name:</th><td class="field-body">ext.tcl</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><dl class="first docutils">
+<dt>Sections</dt>
+<dd><dl class="first last docutils">
+<dt>Section:</dt>
+<dd><ul class="first last simple">
+<li>[DEFAULT]</li>
+<li>[ext.csh]</li>
+</ul>
+</dd>
+<dt>Description:</dt>
+<dd><ul class="first last simple">
+<li>[DEFAULT] section is used to define common varaibles used for all tempaltes at syn stage.</li>
+<li>[ext.csh] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">ext.csh</span></code> only.</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Variables</dt>
+<dd><p class="first last">ext stage use STARRC for RC extract is different from pr tools, the template is a “csh” scripts.
+And the starting way is use “source ext.csh”, StarRC run command is pre-set within star_run.csh template file.</p>
+</dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> star_mem_requirement : starrc memory requirement for bsub
+ star_cpu_number      : starrc cpu number for run
+ openlava_batch_queue : bsub queue name
+
+ _exec_cmd            : EDA run command, ex. csh
+ _exec_tool           : module load EDA tool version, ex. module load synopsys/starrc_vM-2017.06
+ ......
+
++ select input data type for Extraction
+
+  ``star_flow_type``  : specify star flow type, available value is : ndm/deflef/milkyway
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">StarRC run command need to be review for each project team because different process and foundry may be different signoff requirement.</p>
+</div>
+</div>
+<div class="section" id="config-file-sta-cfg-and-plugins-pt-scripts">
+<h2>Config file sta.cfg and plugins/pt_scripts<a class="headerlink" href="#config-file-sta-cfg-and-plugins-pt-scripts" title="Permalink to this headline">¶</a></h2>
+<p>The sta.cfg is used for static timing analysis stage (Prime-Time) run control.</p>
+<p>TBD</p>
+</div>
+<div class="section" id="config-file-fm-cfg">
+<h2>Config file fm.cfg<a class="headerlink" href="#config-file-fm-cfg" title="Permalink to this headline">¶</a></h2>
+<p>The fm.cfg is used for formal stage (Formality/Conformal) run control.</p>
+<p>TBD</p>
+</div>
+<div class="section" id="config-file-pv-cfg">
+<h2>Config file pv.cfg<a class="headerlink" href="#config-file-pv-cfg" title="Permalink to this headline">¶</a></h2>
+<p>The pv.cfg is used for pv stage (OPUS/Calibre) run control.</p>
+<p>TBD</p>
+</div>
+<div class="section" id="config-file-ele-cfg">
+<h2>Config file ele.cfg<a class="headerlink" href="#config-file-ele-cfg" title="Permalink to this headline">¶</a></h2>
+<p>The ele.cfg is used for electrical stage (OPUS/Calibre) run control.</p>
+<p>TBD</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="runner.html" title="Runner User Manual"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="lib_config.html" title="LIB Config User Manual"
+             >previous</a> |</li>
+<li><a href="http://op.alchip.com.cn:8000">HOME</a> &raquo;</li>
+
+        <li class="nav-item nav-item-0"><a href="index.html">OP Platform 1.0 documentation</a> &#187;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Guanyu Yi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+    </div>
+  </body>
+</html>

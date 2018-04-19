@@ -5,6 +5,7 @@ from django.contrib.postgres.fields import JSONField
 class User(models.Model):
     """user models"""
     name = models.CharField(max_length=20, unique=True)
+    proj_admin = models.ManyToManyField("Proj", related_name="user_proj", blank=True)
     data = JSONField(default=dict, blank=True)
     def __str__(self):
         return self.name

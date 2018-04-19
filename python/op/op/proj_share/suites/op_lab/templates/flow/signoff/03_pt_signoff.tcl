@@ -28,7 +28,7 @@ exec mkdir -p $cur_flow_data_dir/${SESSION}
 exec mkdir -p $cur_flow_rpt_dir/${SESSION}
 exec mkdir -p $cur_flow_log_dir/${SESSION}
 exec mkdir -p $cur_flow_sum_dir/${SESSION}
-exec mkdir -p $cur_flow_scripts_dir/${SESSION}
+#exec mkdir -p $cur_flow_scripts_dir/${SESSION}
 
 set start_time [clock seconds]
 set BLOCK_NAME  "{{env.BLK_NAME}}"
@@ -36,27 +36,29 @@ set signoff_pt_cpu_number "{{local.signoff_pt_cpu_number}}"
 set_host_options -max_cores  ${signoff_pt_cpu_number}
 set ANNOTATED_FILE_FORMAT  "{{local.ANNOTATED_FILE_FORMAT}}"
 
-## Restore PT sesseion
-set SESSION         "{{local._multi_inst}}"
+## Link data
+exec ln -sf $pre_flow_data_dir/${SESSION}/${BLOCK_NAME}.${SESSION}.session $cur_flow_data_dir/${signoff_dir}/${SESSION}/
 
-if {[file isdirectory $pre_flow_data_dir/${BLOCK_NAME}_${SESSION}.session]} {
-	restore_session $pre_flow_data_dir/${BLOCK_NAME}_${SESSION}.session
+## Restore PT session
+
+if {[file isdirectory $pre_flow_data_dir/${SESSION}/${BLOCK_NAME}.${SESSION}.session]} {
+	restore_session $pre_flow_data_dir/${SESSION}/${BLOCK_NAME}.${SESSION}.session
 } else {
-	puts "Alchip-error : $pre_flow_data_dir/${BLOCK_NAME}_${SESSION}.session no exist!\n"
+	puts "Alchip-error : $pre_flow_data_dir/${SESSION}/${BLOCK_NAME}.${SESSION}.session no exist!\n"
 	exit
 }
 
 # proc
-#foreach file [ glob {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/proc/*.tcl ] {
+#foreach file [ glob {{env.PROJ_UTILS}}/${signoff_dir}/proc/*.tcl ] {
 #source -e -v $file
 #}
-source -e -v {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/proc/procs.tcl
-source -e -v {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/proc/useful_procs.tcl
-source -e -v {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/proc/get_drivers.tcl
-source -e -v {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/proc/global_utility.tcl
+source -e -v {{env.PROJ_UTILS}}/${signoff_dir}/proc/procs.tcl
+source -e -v {{env.PROJ_UTILS}}/${signoff_dir}/proc/useful_procs.tcl
+source -e -v {{env.PROJ_UTILS}}/${signoff_dir}/proc/get_drivers.tcl
+source -e -v {{env.PROJ_UTILS}}/${signoff_dir}/proc/global_utility.tcl
 
 # PT global setting
-#source -e -v {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/global_variable_setting.tcl
+#source -e -v {{env.PROJ_UTILS}}/${signoff_dir}/global_variable_setting.tcl
 set clock_threshold  "{{local.clock_threshold}}"
 set ip_clock_duty_spec_file  "{{local.ip_clock_duty_spec_file}}"
 #set ip_clock_duty_spec_file "{{cur.config_plugins_dir}}/signoff/pt/ip_clock_duty_spec.list" 
@@ -65,12 +67,13 @@ set pt_cmd_file  "{{local.pt_cmd_file}}"
 set high_vth_cell_ref_name  "{{local.high_vth_cell_ref_name}}"
 set low_drive_cell_ref_name  "{{local.low_drive_cell_ref_name}}"
 
-source -e -v {{cur.config_plugins_dir}}/signoff/pt/check_size_only_cell.pt.tcl
-source -e -v {{cur.config_plugins_dir}}/signoff/pt/check_dont_touch_net.pt.tcl
 
-foreach file [ glob {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/pt/*.tcl ] {
+foreach file [ glob {{env.PROJ_UTILS}}/${signoff_dir}/pt/*.tcl ] {
         source -e -v $file
    }
+# add
+source -e -v {{cur.config_plugins_dir}}/signoff/pt/check_size_only_cell.pt.tcl
+source -e -v {{cur.config_plugins_dir}}/signoff/pt/check_dont_touch_net.pt.tcl
 	# check multi driver
 	check_multi_driver  > $cur_flow_log_dir/${SESSION}/{{env.BLK_NAME}}.pt.check_multi_driver.log
 	# check multi drive nets
@@ -90,9 +93,9 @@ foreach file [ glob {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/pt/*.tcl ] {
         # check_signal_net_xtalk_delta_delay
         #check_signal_net_xtalk_delta_delay ${signal_threshold}  > $cur_flow_log_dir/${SESSION}/{{env.BLK_NAME}}.pt.check_signal_net_xtalk_delta_delay.log
         # check_dont_touch_net   
-        check_dont_touch_net  > $cur_flow_log_dir/${SESSION}/{{env.BLK_NAME}}.pt.check_dont_touch_net.log
+#        check_dont_touch_net  > $cur_flow_log_dir/${SESSION}/{{env.BLK_NAME}}.pt.check_dont_touch_net.log
         # check_size_only_cell  
-        check_size_only_cell > $cur_flow_log_dir/${SESSION}/{{env.BLK_NAME}}.pt.check_size_only_cell.log
+#        check_size_only_cell > $cur_flow_log_dir/${SESSION}/{{env.BLK_NAME}}.pt.check_size_only_cell.log
         # report_clock_summary
         report_clock_summary  > $cur_flow_log_dir/${SESSION}/{{env.BLK_NAME}}.pt.report_clock_summary.log
         # report_clock_cell_type
@@ -100,6 +103,8 @@ foreach file [ glob {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/pt/*.tcl ] {
 
 # Move reports to signoff dir
 sh cp -rf ./* $cur_flow_rpt_dir/${SESSION}
+puts "{{env.FIN_STR}}\n" 
+
 exit
 
 puts "Alchip-info : Completed signoff-check script--> pt.check [info script]\n"

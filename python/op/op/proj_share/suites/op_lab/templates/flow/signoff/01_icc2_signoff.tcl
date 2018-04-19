@@ -34,22 +34,24 @@ set BLOCK_NAME  "{{env.BLK_NAME}}"
 set signoff_icc2_cpu_number "{{local.signoff_icc2_cpu_number}}"
 set_host_options -max_cores  ${signoff_icc2_cpu_number}
 
+# Link data
+exec ln -sf $pre_flow_data_dir/${pre_stage}.{{env.BLK_NAME}}.nlib  $cur_flow_data_dir/$signoff_dir/ 
 # Open design 
 open_lib -read "$pre_flow_data_dir/${pre_stage}.{{env.BLK_NAME}}.nlib"
 open_block -read {{env.BLK_NAME}}
 link_block
 
 # proc
-#foreach file [ glob {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/proc/*.tcl ] {
+#foreach file [ glob {{env.PROJ_UTILS}}/${signoff_dir}/proc/*.tcl ] {
 #source -e -v $file
 #}
-source -e -v {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/proc/procs.tcl
-source -e -v {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/proc/useful_procs.tcl
-source -e -v {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/proc/get_drivers.tcl
-source -e -v {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/proc/global_utility.tcl
+source -e -v {{env.PROJ_UTILS}}/${signoff_dir}/proc/procs.tcl
+source -e -v {{env.PROJ_UTILS}}/${signoff_dir}/proc/useful_procs.tcl
+source -e -v {{env.PROJ_UTILS}}/${signoff_dir}/proc/get_drivers.tcl
+source -e -v {{env.PROJ_UTILS}}/${signoff_dir}/proc/global_utility.tcl
 
 # ICC2 global setting
-#source -e -v {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/global_variable_setting.tcl
+#source -e -v {{env.PROJ_UTILS}}/${signoff_dir}/global_variable_setting.tcl
 set footprint_buf  "{{local.footprint_buf}}"
 set footprint_inv  "{{local.footprint_inv}}"
 set footprint_tie  "{{local.footprint_tie}}"
@@ -79,7 +81,7 @@ set filler_cell_type  "{{local.filler_cell_type}}"
 set dcap_cell_type  "{{local.dcap_cell_type}}"
 set eco_cell_type  "{{local.eco_cell_type}}"
 
-foreach file [ glob {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/icc2/*.tcl ] {
+foreach file [ glob {{env.PROJ_UTILS}}/${signoff_dir}/icc2/*.tcl ] {
         source -e -v $file
    }
 	# check signal wire length
@@ -127,9 +129,10 @@ foreach file [ glob {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/icc2/*.tcl ] {
 
 
 # Move reports to signoff dir
-sh mv check_size_only_cell.pt.tcl check_dont_touch_net.pt.tcl "{{cur.config_plugins_dir}}/signoff/pt/" 
+#sh mv check_size_only_cell.pt.tcl check_dont_touch_net.pt.tcl "{{cur.config_plugins_dir}}/signoff/pt/" 
 sh cp -rf ./* $cur_flow_rpt_dir/
 
+puts "{{env.FIN_STR}}\n" 
 exit
 
 puts "Alchip-info : Completed signoff-check script--> icc2.check [info script]\n"

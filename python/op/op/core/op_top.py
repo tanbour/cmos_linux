@@ -6,9 +6,12 @@ Description: op platform top entrence
 
 import argparse
 from utils import pcom
+from utils import settings
 from core import runner_admin
 from core import runner_init
 from core import runner_flow
+from core import runner_backup
+from core.op_lic import OPClient
 
 LOG = pcom.gen_logger(__name__)
 
@@ -91,6 +94,9 @@ def gen_flow_parser(subparsers):
         "-force", dest="flow_force", default=False, nargs="?",
         help="toggle and input begin sub-stage to run force to ignore last status")
     flow_parser.add_argument(
+        "-begin", dest="flow_begin", default="",
+        help="input begin sub-stage to run")
+    flow_parser.add_argument(
         "-no_lib", dest="flow_no_lib", action="store_true",
         help="toggle flows to run flow without liblist generation")
     flow_parser.add_argument(
@@ -99,11 +105,29 @@ def gen_flow_parser(subparsers):
     me_group.add_argument(
         "-show_var", dest="flow_show_var_lst", nargs="*",
         help="toggle and input flows to list all variables passed to templates")
+    me_group.add_argument(
+        "-restore", dest="flow_restore", default="",
+        help="input flow::stage:sub-stage to restore")
     flow_parser.set_defaults(func=main_flow)
 
 def main_flow(args):
     """flow sub cmd top function"""
     runner_flow.run_flow(args)
+
+def gen_backup_parser(subparsers):
+    """to generate backup parser"""
+    backup_parser = subparsers.add_parser(
+        "backup",
+        help="sub cmd about backup project directories")
+    me_group = backup_parser.add_mutually_exclusive_group()
+    me_group.add_argument(
+        "-p", dest="backup_proj_name",
+        help="input the proj name which to be backup by super user")
+    backup_parser.set_defaults(func=main_backup)
+
+def main_backup(args):
+    """backup sub cmd top function"""
+    runner_backup.run_backup(args)
 
 def gen_args_top():
     """to generate top args help for op"""
@@ -115,6 +139,7 @@ def gen_args_top():
     gen_admin_parser(subparsers)
     gen_init_parser(subparsers)
     gen_flow_parser(subparsers)
+    gen_backup_parser(subparsers)
     return parser.parse_args()
 
 def main():
@@ -123,12 +148,20 @@ def main():
     if args.version:
         print("OnePiece Platform Version: op 4.0.0")
         return
+    if not settings.DEBUG:
+        opclient = OPClient()
+        opclient.set_license_server()
+        opclient.checkout_license()
     if hasattr(args, "func"):
         try:
             args.func(args)
         except KeyboardInterrupt:
             LOG.critical("op terminated")
+        except SystemExit:
+            LOG.critical("op failed")
         else:
             LOG.info("op completed")
     else:
         LOG.critical("sub cmd is NA, please use -h to check all sub cmds")
+    if not settings.DEBUG:
+        opclient.checkin_license()

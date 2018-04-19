@@ -45,6 +45,10 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         self.run_flg = False
         self.force_stage = False
         self.force_dic = False
+        self.begin_stage = ""
+        self.begin_dic = {}
+        self.restore_stage = ""
+        self.restore_dic = {}
         self.lib_flg = True
         self.comment = ""
     def list_env(self):
@@ -144,6 +148,44 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             if not all([bool(c_c) for c_c in self.force_dic.values()]):
                 LOG.error(err_log_str)
                 raise SystemExit()
+    def proc_begin(self):
+        """to process begin info"""
+        if self.begin_stage:
+            self.begin_stage = self.begin_stage.strip("""'":""")
+            err_log_str = (
+                "begin sub-stage format is incorrect, "
+                "it should be <flow>::<stage>:<sub_stage>")
+            try:
+                self.begin_dic["flow"], stage_str = self.begin_stage.split("::")
+                self.begin_dic["stage"], self.begin_dic["sub_stage"] = stage_str.split(":")
+            except ValueError:
+                LOG.error(err_log_str)
+                raise SystemExit()
+            if not all([bool(c_c) for c_c in self.begin_dic.values()]):
+                LOG.error(err_log_str)
+                raise SystemExit()
+    def proc_restore(self):
+        """to process restore info"""
+        restore_flow = ""
+        if self.restore_stage:
+            self.restore_stage = self.restore_stage.strip("""'":""")
+            err_log_str = (
+                "restore sub-stage format is incorrect, "
+                "it should be <flow>::<stage>:<sub_stage>")
+            try:
+                self.restore_dic["flow"], stage_str = self.restore_stage.split("::")
+                self.restore_dic["stage"], self.restore_dic["sub_stage"] = stage_str.split(":")
+            except ValueError:
+                LOG.error(err_log_str)
+                raise SystemExit()
+            if not all([bool(c_c) for c_c in self.restore_dic.values()]):
+                LOG.error(err_log_str)
+                raise SystemExit()
+            restore_flow = self.restore_dic["flow"]
+        if not restore_flow:
+            LOG.error("restore flow and stage name is NA")
+            raise SystemExit()
+        return restore_flow
     def proc_flow_lst(self, flow_lst):
         """to process flow list from arguments"""
         if not self.blk_flg:
@@ -174,9 +216,8 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
     def proc_flow(self, l_flow):
         """to process particular flow"""
         proj_tmp_dir = self.ced["PROJ_SHARE_TMP"].rstrip(os.sep)
-        flow_liblist_dir = os.path.join(self.ced["BLK_RUN"], "liblist")
         liblist_var_dic = self.gen_liblist(
-            self.ced["PROJ_LIB"], flow_liblist_dir,
+            self.ced["PROJ_LIB"], self.ced["BLK_RUN"],
             self.dir_cfg_dic["lib"]["DEFAULT"]["liblist"],
             self.cfg_dic["lib"][l_flow] if l_flow in self.cfg_dic["lib"]
             else self.cfg_dic["lib"]["DEFAULT"], self.lib_flg)
@@ -189,7 +230,17 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             "status": "running", "comment": self.comment}
         if self.run_flg:
             db_if.w_flow(flow_if_dic)
-        for flow_dic in exp_stages([], self.cfg_dic["flow"], l_flow):
+        flow_dic_lst = exp_stages([], self.cfg_dic["flow"], l_flow)
+        if self.force_dic and self.force_dic not in flow_dic_lst:
+            LOG.error(f"force stage {self.force_dic} not in flow {l_flow}")
+            raise SystemExit()
+        if self.begin_dic and self.begin_dic not in flow_dic_lst:
+            LOG.error(f"begin stage {self.begin_dic} not in flow {l_flow}")
+            raise SystemExit()
+        if self.restore_dic and self.restore_dic not in flow_dic_lst:
+            LOG.error(f"restore stage {self.restore_dic} not in flow {l_flow}")
+            raise SystemExit()
+        for flow_dic in flow_dic_lst:
             flow_name = flow_dic.get("flow", "")
             stage_name = flow_dic.get("stage", "")
             sub_stage_name = flow_dic.get("sub_stage", "")
@@ -214,7 +265,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             stage_dic = {
                 "l_flow": l_flow, "flow": flow_name, "stage": stage_name,
                 "sub_stage": sub_stage_name, "flow_root_dir": flow_root_dir,
-                "flow_liblist_dir": flow_liblist_dir,
+                "flow_liblist_dir": self.ced["BLK_RUN"],
                 "flow_scripts_dir": f"{flow_root_dir}{os.sep}scripts",
                 "config_plugins_dir":
                 f"{self.ced['BLK_CFG_FLOW']}{os.sep}{flow_name}{os.sep}plugins"}
@@ -227,6 +278,16 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                 "local": local_dic, "liblist": liblist_var_dic,
                 "cur": stage_dic, "pre": pre_stage_dic, "ver": flow_ver_dic}
             pre_stage_dic = stage_dic
+            if self.restore_dic and self.restore_dic != {
+                    "flow": flow_name, "stage": stage_name, "sub_stage": sub_stage_name}:
+                continue
+            if self.restore_dic:
+                tmp_dic["cur"]["op_restore"] = "true"
+            if self.begin_dic and self.begin_dic != {
+                    "flow": flow_name, "stage": stage_name, "sub_stage": sub_stage_name}:
+                self.opvar_lst.pop()
+                continue
+            self.begin_dic = {}
             multi_inst_lst = [c_c.strip() for c_c in pcom.rd_cfg(
                 self.dir_cfg_dic.get("flow", {}).get(flow_name, {}).get(stage_name, {}),
                 sub_stage_name, "_multi_inst") if c_c.strip()]
@@ -275,6 +336,8 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         pre_file_mt = inst_dic["pre_file_mt"]
         force_flg = inst_dic["force_flg"]
         file_mt = 0.0
+        if self.restore_dic:
+            sub_stage_name = f".restore_{sub_stage_name}"
         dst_file = os.path.join(
             flow_root_dir, "scripts", stage_name, multi_inst,
             sub_stage_name) if multi_inst else os.path.join(
@@ -288,14 +351,20 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         pcom.mkdir(LOG, os.path.dirname(dst_op_file))
         local_dic["_multi_inst"] = multi_inst
         LOG.info(f":: generating file {dst_file} ...")
+        if os.path.isfile(dst_file):
+            shutil.copyfile(dst_file, f"{dst_file}.pre")
         pcom.ren_tempfile(LOG, tmp_file, dst_file, tmp_dic)
         if "_exec_cmd" in local_dic:
             tool_str = local_dic.get("_exec_tool", "")
+            jcn_str = (
+                local_dic.get("_job_restore_cpu_number", "") if self.restore_dic
+                else local_dic.get("_job_cpu_number", ""))
+            jr_str = (
+                local_dic.get("_job_restore_resource", "") if self.restore_dic
+                else local_dic.get("_job_resource", ""))
             job_str = (
                 f"{local_dic.get('_job_cmd', '')} {local_dic.get('_job_queue', '')} "
-                f"{local_dic.get('_job_cpu_number', '')} "
-                f"{local_dic.get('_job_resource', '')}"
-                if "_job_cmd" in local_dic else "")
+                f"{jcn_str} {jr_str}" if "_job_cmd" in local_dic else "")
             jn_str = (
                 f"""{job_str} -J '{self.ced["USER"]}::{flow_name}::"""
                 f"""{stage_name}:{sub_stage_name}:{multi_inst}'""") if job_str else ""
@@ -356,25 +425,38 @@ def run_flow(args):
     elif args.flow_init_lst:
         f_p.init(args.flow_init_lst)
     elif args.flow_gen_lst is not None:
-        if args.flow_no_lib:
-            f_p.lib_flg = False
+        f_p.lib_flg = not args.flow_no_lib
+        f_p.begin_stage = args.flow_begin
         f_p.proc_ver()
+        f_p.proc_begin()
         f_p.proc_flow_lst(args.flow_gen_lst)
     elif args.flow_run_lst is not None:
         f_p.run_flg = True
         f_p.comment = args.flow_comment
         f_p.force_stage = args.flow_force
-        if args.flow_no_lib:
-            f_p.lib_flg = False
+        f_p.lib_flg = not args.flow_no_lib
+        f_p.begin_stage = args.flow_begin
         f_p.proc_force()
         f_p.proc_ver()
+        f_p.proc_begin()
         f_p.proc_flow_lst(args.flow_run_lst)
     elif args.flow_show_var_lst is not None:
-        if args.flow_no_lib:
-            f_p.lib_flg = False
+        f_p.lib_flg = not args.flow_no_lib
+        f_p.begin_stage = args.flow_begin
         f_p.proc_ver()
+        f_p.proc_begin()
         f_p.proc_flow_lst(args.flow_show_var_lst)
         f_p.show_var()
+    elif args.flow_restore:
+        f_p.run_flg = True
+        f_p.comment = args.flow_comment
+        f_p.force_stage = None
+        f_p.lib_flg = not args.flow_no_lib
+        f_p.restore_stage = args.flow_restore
+        f_p.proc_force()
+        f_p.proc_ver()
+        l_flow = f_p.proc_restore()
+        f_p.proc_flow_lst([l_flow])
     else:
         LOG.critical("no actions specified in op flow sub cmd")
         raise SystemExit()

@@ -9,7 +9,7 @@ import os
 # op related settings
 DEBUG = False
 
-BACKEND = True
+BACKEND = True if not DEBUG else False
 
 if DEBUG:
     BE_URL = "http://localhost:8000"

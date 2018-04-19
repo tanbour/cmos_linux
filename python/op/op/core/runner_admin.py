@@ -116,6 +116,18 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                                 ncf.write(line)
                             else:
                                 ncf.write(f"# {line}")
+            proj_share_dir = os.path.expandvars(settings.PROJ_SHARE).rstrip(os.sep)
+            proj_blk_cmn_dir = f"{proj_share_dir}{os.sep}block_common"
+            blk_cmn_dir = f"{blk_root_dir}{os.sep}block_common"
+            if not os.path.isdir(proj_blk_cmn_dir):
+                continue
+            if os.path.isdir(blk_cmn_dir):
+                LOG.info(
+                    f"block level common directory {blk_cmn_dir} already exists, "
+                    f"please confirm to overwrite it")
+                pcom.cfm()
+            shutil.rmtree(blk_cmn_dir, True)
+            shutil.copytree(proj_blk_cmn_dir, blk_cmn_dir)
     def update_blocks(self, blk_lst):
         """to obtain blocks input data from release directory"""
         env_boot.EnvBoot.__init__(self)

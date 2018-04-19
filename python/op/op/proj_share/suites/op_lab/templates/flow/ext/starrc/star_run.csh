@@ -218,12 +218,12 @@ absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:tru
     set i = 1
     set tmp =  `echo $selected_corner | awk '{print $i}'`
     if (-e {{cur.cur_flow_data_dir}}/${SESSION}.spef) then
-    mv {{cur.cur_flow_data_dir}}/${SESSION}.spef {{cur.cur_flow_data_dir}}/${SESSION}.spef.$tmp
+    mv -f {{cur.cur_flow_data_dir}}/${SESSION}.spef {{cur.cur_flow_data_dir}}/${SESSION}.spef.$tmp
     endif
 
     if ( -e {{cur.cur_flow_data_dir}}/${SESSION}.spef.$tmp ) then
-    gzip {{cur.cur_flow_data_dir}}/${SESSION}.spef.$tmp
-    mv {{cur.cur_flow_data_dir}}/${SESSION}.spef.$tmp.gz {{cur.cur_flow_data_dir}}/{{env.BLK_NAME}}.$tmp.spef.gz
+    gzip -f {{cur.cur_flow_data_dir}}/${SESSION}.spef.$tmp
+    mv -f {{cur.cur_flow_data_dir}}/${SESSION}.spef.$tmp.gz {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.$tmp.spef.gz
     endif
     end
 
@@ -233,7 +233,7 @@ absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:tru
 
 
 if ( $star_flow_type == "deflef" || $star_flow_type == "mw") then
-mv {{env.BLK_NAME}}.star_sum {{cur.cur_flow_rpt_dir}}/${cur_stage}.star_sum
+mv -f {{env.BLK_NAME}}.star_sum {{cur.cur_flow_rpt_dir}}/${cur_stage}.star_sum
 endif
 
 if ( $star_flow_type == "ndm") then
@@ -241,11 +241,11 @@ if ( $star_flow_type == "ndm") then
 set block_name = `echo $ndm_block_name | cut -d / -f 1`
 set label_name = `echo $ndm_block_name | cut -d / -f 2`
 
-mv ${block_name}.star_sum {{cur.cur_flow_rpt_dir}}/${cur_stage}.star_sum
+mv -f ${block_name}.star_sum {{cur.cur_flow_rpt_dir}}/${cur_stage}.star_sum
 endif
 
-mv  ./star/xtract.tech {{cur.cur_flow_rpt_dir}}/${cur_stage}.xtract.tech
-mv ./star/tech_file.asc {{cur.cur_flow_rpt_dir}}/${cur_stage}.tech_file.asc
+mv -f ./star/xtract.tech {{cur.cur_flow_rpt_dir}}/${cur_stage}.xtract.tech
+mv -f ./star/tech_file.asc {{cur.cur_flow_rpt_dir}}/${cur_stage}.tech_file.asc
 
 if (-e ./star/shorts_all.sum) then
 mv ./star/shorts_all.sum {{cur.cur_flow_rpt_dir}}/${cur_stage}.shorts_all.sum

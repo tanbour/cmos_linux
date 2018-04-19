@@ -7,6 +7,7 @@ from .models import User, Title, Proj, Block, Flow, Stage
 from .serializers import UserSerializer, TitleSerializer, ProjSerializer, BlockSerializer, FlowSerializer, StageSerializer
 from .serializers import UserRelatedSerializer, ProjRelatedSerializer, BlockRelatedSerializer, FlowRelatedSerializer, StageDetailSerializer
 from .serializers import FlowStatusSerializer, FlowStatusRelatedSerializer
+from django.db.models import Q
 from django.utils import timezone as tz
 from django.conf import settings
 import dateutil.parser
@@ -29,8 +30,26 @@ class ProjList(generics.ListAPIView):
     queryset = Proj.objects.all()
     serializer_class = ProjSerializer
     def get_queryset(self, *args, **kwargs):
-        name = self.request.data.get("proj")
-        return self.queryset.filter(name=name) if name else self.queryset.all()
+        queryset = self.queryset.all()
+        user = self.request.GET.get("user")
+        if user:
+            q_filter = Q()
+            proj_set = set()
+            user_obj = User.objects.filter(name=user).first()
+            for pa_obj in user_obj.proj_admin.all():
+                pa_name = pa_obj.name
+                if pa_name in proj_set:
+                    continue
+                proj_set.add(pa_name)
+                q_filter = q_filter|Q(name=pa_name)
+            for query_obj in Flow.objects.filter(owner__name=user):
+                proj_name = query_obj.block.proj.name
+                if proj_name in proj_set:
+                    continue
+                proj_set.add(query_obj.block.proj.name)
+                q_filter = q_filter|Q(name=proj_name)
+            queryset = queryset.filter(q_filter) if q_filter else queryset.none()
+        return queryset
 
 class ProjDetail(generics.RetrieveAPIView):
     """flow report project detail"""
@@ -42,8 +61,8 @@ class BlockList(generics.ListAPIView):
     queryset = Block.objects.all()
     serializer_class = BlockSerializer
     def get_queryset(self, *args, **kwargs):
-        name = self.request.data.get("block")
-        proj = self.request.data.get("proj")
+        name = self.request.GET.get("block")
+        proj = self.request.GET.get("proj")
         queryset = self.queryset.filter(name=name) if name else self.queryset.all()
         queryset = queryset.filter(proj__name=proj) if proj else queryset
         return queryset
@@ -58,10 +77,10 @@ class FlowList(generics.ListAPIView):
     queryset = Flow.objects.all()
     serializer_class = FlowSerializer
     def get_queryset(self, *args, **kwargs):
-        name = self.request.data.get("flow")
-        block = self.request.data.get("block")
-        proj = self.request.data.get("proj")
-        owner = self.request.data.get("owner")
+        name = self.request.GET.get("flow")
+        block = self.request.GET.get("block")
+        proj = self.request.GET.get("proj")
+        owner = self.request.GET.get("owner")
         queryset = self.queryset.filter(name=name) if name else self.queryset.all()
         queryset = queryset.filter(block__name=block) if block else queryset
         queryset = queryset.filter(block__proj__name=proj) if proj else queryset
@@ -77,6 +96,19 @@ class FlowStatusList(generics.ListAPIView):
     """flow report flow status list"""
     queryset = Flow.objects.all()
     serializer_class = FlowStatusSerializer
+    def get_queryset(self, *args, **kwargs):
+        queryset = self.queryset.all()
+        user = self.request.GET.get("user")
+        if user:
+            q_filter = Q(owner__name=user)
+            user_obj = User.objects.filter(name=user).first()
+            for pa_obj in user_obj.proj_admin.all():
+                q_filter = q_filter|Q(block__proj__name=pa_obj.name)
+            queryset = queryset.filter(q_filter)
+        if queryset:
+            fct = queryset.first().created_time
+            queryset = queryset.filter(created_time__gte=fct-tz.timedelta(weeks=1))
+        return queryset
 
 class FlowStatusDetail(generics.RetrieveAPIView):
     """flow report flow status detail"""
@@ -88,11 +120,11 @@ class StageList(generics.ListAPIView):
     queryset = Stage.objects.all()
     serializer_class = StageSerializer
     def get_queryset(self, *args, **kwargs):
-        name = self.request.data.get("stage")
-        flow = self.request.data.get("flow")
-        block = self.request.data.get("block")
-        proj = self.request.data.get("proj")
-        owner = self.request.data.get("owner")
+        name = self.request.GET.get("stage")
+        flow = self.request.GET.get("flow")
+        block = self.request.GET.get("block")
+        proj = self.request.GET.get("proj")
+        owner = self.request.GET.get("owner")
         queryset = self.queryset.filter(name=name) if name else self.queryset.all()
         queryset = queryset.filter(flow__name=flow) if flow else queryset
         queryset = queryset.filter(flow__block__name=block) if block else queryset
@@ -110,7 +142,7 @@ class UserList(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     def get_queryset(self, *args, **kwargs):
-        name = self.request.data.get("user")
+        name = self.request.GET.get("user")
         return self.queryset.filter(name=name) if name else self.queryset.all()
 
 class UserDetail(generics.RetrieveAPIView):

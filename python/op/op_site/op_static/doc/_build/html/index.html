@@ -4,28 +4,19 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Welcome to OP Platform’s documentation! &#8212; OP Platform 1.0 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="OP Platform" href="op_intro.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -61,12 +52,14 @@
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -90,34 +83,69 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="config.html">Config User Manual</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="config.html#config-types">Config types</a></li>
-<li class="toctree-l2"><a class="reference internal" href="config.html#id1">配置文件格式</a></li>
-<li class="toctree-l2"><a class="reference internal" href="config.html#proj-cfg">proj.cfg配置文件</a></li>
-<li class="toctree-l2"><a class="reference internal" href="config.html#c-cfg">c.cfg配置文件</a></li>
-<li class="toctree-l2"><a class="reference internal" href="config.html#simv-cfg">simv.cfg配置文件</a></li>
-<li class="toctree-l2"><a class="reference internal" href="config.html#case-cfg">case.cfg配置文件</a></li>
-<li class="toctree-l2"><a class="reference internal" href="config.html#runner-pj">利用平台runner(pj)工作</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html#config-file-format">Config file format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html#config-file-proj-cfg">Config file proj.cfg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html#config-file-flow-cfg">Config file flow.cfg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html#config-file-filter-cfg">Config file filter.cfg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html#config-directory-lib">Config directory lib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html#config-directory-flow">Config directory flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html#using-runner-op-to-work">Using runner(op) to work</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="runner.html">runner(pj)使用手册</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="runner.html#pj">初始化pj</a></li>
-<li class="toctree-l2"><a class="reference internal" href="runner.html#id1">子命令参数模式</a></li>
-<li class="toctree-l2"><a class="reference internal" href="runner.html#id2">查看pj子命令</a></li>
-<li class="toctree-l2"><a class="reference internal" href="runner.html#id3">pj子命令参数详细说明</a></li>
-<li class="toctree-l2"><a class="reference internal" href="runner.html#id4">平台目录结构</a></li>
-<li class="toctree-l2"><a class="reference internal" href="runner.html#id5">开发阶段说明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lib_config.html">LIB Config User Manual</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="lib_config.html#op-liblist-mechanism-overview">OP liblist mechanism overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lib_config.html#lib-config-type">lib config type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lib_config.html#lib-config-directory">lib config directory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lib_config.html#config-file-lib-cfg">config file lib.cfg</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="web.html">backend构架介绍</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="eda_tool_config.html">EDA Tool Config User Manual</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="eda_tool_config.html#config-file-syn-cfg-and-plugins-dc-scripts">Config file syn.cfg and plugins/dc_scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eda_tool_config.html#config-file-pr-cfg-and-plugins-icc2-scripts">Config file pr.cfg and plugins/icc2_scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eda_tool_config.html#config-file-ext-cfg">Config file ext.cfg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eda_tool_config.html#config-file-sta-cfg-and-plugins-pt-scripts">Config file sta.cfg and plugins/pt_scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eda_tool_config.html#config-file-fm-cfg">Config file fm.cfg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eda_tool_config.html#config-file-pv-cfg">Config file pv.cfg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eda_tool_config.html#config-file-ele-cfg">Config file ele.cfg</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="runner.html">Runner User Manual</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="runner.html#op-initialization">OP initialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="runner.html#sub-command-parameter-mode">Sub command parameter mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="runner.html#checking-op-sub-cmds">Checking OP sub cmds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="runner.html#op-sub-cmds-parameters-manual">OP sub cmds parameters manual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="runner.html#platform-directory-hierarchy">Platform directory hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="runner.html#platform-development-announcement">Platform development announcement</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="web.html">Web Architecture Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="web.html#database">Database</a></li>
 <li class="toctree-l2"><a class="reference internal" href="web.html#web-framework">Web Framework</a></li>
-<li class="toctree-l2"><a class="reference internal" href="web.html#id1">如何访问平台</a></li>
-<li class="toctree-l2"><a class="reference internal" href="web.html#kopete">中区即时通讯工具Kopete</a></li>
-<li class="toctree-l2"><a class="reference internal" href="web.html#regr-app">regr app</a></li>
-<li class="toctree-l2"><a class="reference internal" href="web.html#dc-app">dc app</a></li>
-<li class="toctree-l2"><a class="reference internal" href="web.html#mp-app">mp app</a></li>
-<li class="toctree-l2"><a class="reference internal" href="web.html#id2">开发阶段说明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="web.html#how-to-access-platform-web">How to access platform web</a></li>
+<li class="toctree-l2"><a class="reference internal" href="web.html#spa-flow-status">SPA Flow Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="web.html#spa-flow-reports">SPA Flow Reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="web.html#spa-proj-checker">SPA Proj Checker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="web.html#platform-development-announcement">Platform development announcement</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="op_lab_guide.html">OP LAB GUIDE Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="op_lab_guide.html#op-lab-overview">OP lab overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="op_lab_guide.html#op-core-command-introduction">OP core command introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="op_lab_guide.html#matters-need-attention-for-lab">Matters need attention for LAB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="op_lab_guide.html#project-setup-pl">Project Setup (PL)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="op_lab_guide.html#lib-hash-and-liblist-generation-pl">Lib hash and liblist generation (PL)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="op_lab_guide.html#block-data-setup-pl">Block data setup (PL)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="op_lab_guide.html#block-run-block-owner">Block run (block owner)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="op_lab_guide.html#check-output-data">Check output data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="op_lab_guide.html#error-filter">Error Filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="op_lab_guide.html#op-web-interface">OP web interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="op_lab_guide.html#appendix-a-1-flow-config-introduction">Appendix A-1 (flow config introduction)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="op_lab_guide.html#appendix-a-2-share-and-block-config-work-mechanism">Appendix A-2 (share and block config work mechanism)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="op_lab_guide.html#appendix-b-lib-config-work-mechanism">Appendix B (lib config work mechanism)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="env_setup.html">OP enviroment setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="template.html">OP Template User Manual</a></li>
 </ul>
 </div>
 </div>
@@ -152,8 +180,8 @@
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2016, Guanyu Yi.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
+        &#169; Copyright 2018, Guanyu Yi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
     </div>
   </body>
 </html>

@@ -115,7 +115,9 @@ sh mkdir -p $output_dir
 if {$route_check_route == "true" } {
 if {$cur_stage == "03_clock"| $cur_stage == "04_clock_opt" | $cur_stage == "05_route" | $cur_stage == "06_route_opt"} {
 	puts "Alchip-info: Verifying and checking routing ...\n"
-	redirect -file $blk_rpt_dir/$cur_stage.check_routes.log {check_routes}
+	redirect -file $blk_rpt_dir/$cur_stage.check_routes.rpt {check_routes}
+    redirect -file $blk_rpt_dir/$cur_stage.report_routing_rules.rpt {report_routing_rules -verbose}
+    redirect -file $blk_rpt_dir/$cur_stage.report_clock_routing_rules.rpt {report_clock_routing_rules}
 }
 }
 

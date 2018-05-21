@@ -335,6 +335,12 @@ efibootmgr --create --disk /dev/sda --part 1 --gpt --label "Arch Linux" --loader
 # umount -R /mnt
 # reboot
 
+* arch debug
+systemctl --failed
+systemctl reset-failed
+journalctl -b 0
+dmesg -l err
+
 * amd vi
 ** iommu
 enable iommu in uefi

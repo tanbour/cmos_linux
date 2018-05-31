@@ -746,6 +746,8 @@ shopt -s extglob
 rm !(<file1>|<dir1>|<file2>)
 ** login shell modification
 chsh -s <shell> <user>
+** find exec
+find -type f -perm -a+x -exec chmod -x {} \;
 
 * integrity check
 pwck

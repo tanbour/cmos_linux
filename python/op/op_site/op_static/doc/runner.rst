@@ -147,9 +147,18 @@ Current OP all sub cmds:
 
 OP sub cmds parameters manual
 ----------------------------------------
+OP sub cmds list: 
+
++--------------+-------------+-------------+--------------+ 
+| ``op admin`` | ``op init`` | ``op flow`` | ``op clean`` | 
++--------------+-------------+-------------+--------------+ 
+
+See bellow detail information about op sub commands.
 
 Sub cmd admin
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    Sub command op ``admin`` is used for PL initialize project.
+
 - To check all parameters:
 
   + ``$ op admin -h``
@@ -185,6 +194,8 @@ Sub cmd admin
 
 Sub cmd init
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    Sub command op ``init`` is used for Block Owner to initialize block. 
+
 - To check all parameters:
 
   + ``$ op init -h``
@@ -203,6 +214,8 @@ Sub cmd init
 
 Sub cmd flow
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    Sub command op ``flow`` is used for flow run, flow initialization and flow restore.
+
 - To check all parameters:
 
   + ``$ op flow -h``
@@ -280,6 +293,25 @@ Sub cmd flow
   + ``$ op flow -restore <flow>::<stage>:<sub_stage>:<multi_inst>``
   + this option is used to restore the particular sub_stage for EDA tool
 
+Sub cmd clean
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    Sub command op ``clean`` is used for op flow data removal.
+
+- To check all parameters:
+
+  + ``$ op clean -h``
+
+- To remove specific flow:
+
+  + ``$ op clean -flow  <flow>::<stage>:<sub_stage>:<multi_inst>``
+  + run in block directory only
+
+- To prevent specific files been removed from clean flow :
+ 
+  + ``$ op clean -excludes <file_pattern>``
+  + <file_pattern> can be key words in files
+  + run in block directory only
+
 Platform directory hierarchy
 ----------------------------------------
 This section introduces the related directory hierarchy of platform.
@@ -291,29 +323,32 @@ PROJ_ROOT/share/config/
 The main directory of project level config
 ::
 
-   config
-   ├── filter.cfg
-   ├── flow
-   │   ├── eco.cfg
-   │   ├── ext.cfg
-   │   ├── fm.cfg
-   │   ├── plugins/
-   │   ├── pr.cfg
-   │   ├── pv.cfg
-   │   ├── signoff.cfg
-   │   ├── spg.cfg
-   │   ├── sta.cfg
-   │   └── syn.cfg
-   ├── flow.cfg
-   ├── lib
-   │   ├── io.cfg
-   │   ├── ip.cfg
-   │   ├── liblist.cfg
-   │   ├── mem.cfg
-   │   ├── std.cfg
-   │   └── tech.cfg
-   ├── lib.cfg
-   └── proj.cfg
+    config
+    ├── filter.cfg
+    ├── flow
+    │   ├── eco.cfg
+    │   ├── ele.cfg
+    │   ├── ext.cfg
+    │   ├── fm.cfg
+    │   ├── plugins
+    │   ├── pricc2.cfg
+    │   ├── prinvs.cfg
+    │   ├── pv.cfg
+    │   ├── signoff.cfg
+    │   ├── spg.cfg
+    │   ├── sta.cfg
+    │   └── syn.cfg
+    ├── flow.cfg
+    ├── lib
+    │   ├── io.cfg
+    │   ├── ip.cfg
+    │   ├── liblist.cfg
+    │   ├── mem.cfg
+    │   ├── std.cfg
+    │   └── tech.cfg
+    ├── lib.cfg
+    ├── pr.cfg
+    └── proj.cfg
 
 PROJ_ROOT/BLK_ROOT
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -321,6 +356,15 @@ The main directory of BLK_ROOT
 ::
 
    BLK_ROOT
+    ├── block_common
+    ├── config
+    ├── fp
+    ├── inter_release
+    ├── netlist
+    ├── rtl
+    ├── run
+    └── sdc
+
 
 If no specified file configured, the generated execution files will follow the default value in share/config to be rendered.
 

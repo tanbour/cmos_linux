@@ -10,6 +10,7 @@ import logging.config
 import fnmatch
 import configparser
 import itertools
+import json
 import pprint
 import signal
 import psutil
@@ -161,12 +162,14 @@ def cfm(exit_str="action aborted"):
     if apply_rsp.strip() not in ("yes", "ye", "y"):
         raise SystemExit(exit_str)
 
-def pp_list(pp_obj, str_flg=False):
+def pp_list(pp_obj, str_flg=False, json_flg=False):
     """to pretty print list infomation"""
     appfix_str = '*'*30
     print(appfix_str)
     if str_flg:
         print(pp_obj)
+    elif json_flg:
+        print(json.dumps(pp_obj, indent=4))
     else:
         pprint.pprint(pp_obj, width=-1)
     print(appfix_str)
@@ -185,7 +188,7 @@ def pkill(proc_pid):
         sub_proc.kill()
     proc.kill()
 
-def ren_tempfile(log, temp_in, temp_out, temp_dic):
+def ren_tempfile(log, temp_in, temp_out, temp_dic, q_flg=False):
     """to render jinja2 template file"""
     try:
         template_loader = jinja2.FileSystemLoader(os.path.dirname(temp_in))
@@ -200,6 +203,11 @@ def ren_tempfile(log, temp_in, temp_out, temp_dic):
             with open(temp_out) as tof:
                 temp_pre_con = tof.read()
             if temp_pre_con != temp_con:
+                if q_flg:
+                    log.info("generated file is modified, please input yes/no to overwrite/keep")
+                    q_rsp = input("--> yes or no? ")
+                    if q_rsp.strip() not in ("yes", "ye", "y"):
+                        return
                 with open(temp_out, "w") as ttf:
                     ttf.write(temp_con)
     except jinja2.exceptions.TemplateSyntaxError as err:
@@ -236,6 +244,16 @@ def mkdir(log, path):
 def sig_init():
     """to initialize multiprocessing pool"""
     signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+def gen_pcf_lst(pcf):
+    """read proj_cfg files for comparing with blk_cfg"""
+    pcf_lst = []
+    for line in pcf:
+        if line.strip().startswith("["):
+            pcf_lst.append(line)
+        else:
+            pcf_lst.append(f"# {line}")
+    return pcf_lst
 
 class ColoredFormatter(logging.Formatter):
     """op colored logging formatter"""

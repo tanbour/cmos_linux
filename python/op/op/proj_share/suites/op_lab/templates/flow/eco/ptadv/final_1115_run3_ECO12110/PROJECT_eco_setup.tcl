@@ -1,0 +1,492 @@
+# Modified by Julia Zhu on: Thu Sep 22 22:00:32 CST 2016 END
+###TCD & mems lef.
+# LEF_file
+# HOLD_BUF
+# DONT_USE_FILE
+set ADD_LEFS [list /proj/IPU-A/techfile/EDATechfile/designrule/N16_ICOVL_library_kit_FF+_20150528/lef/topMxMxaMxc_M7/N16_ICOVL_v1d0a.lef /proj/IPU-A/techfile/EDATechfile/designrule/N16_DTCD_library_kit_20160111/lef/topMxyMxe_M7/N16_DTCD_v1d0a.lef]
+
+set LEF_FILES [list \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp16p90cpd_100f/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp16p90cpd_100a/lef/tcbn16ffcllbwp16p90cpd.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp16p90cpdlvt_100f/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp16p90cpdlvt_100a/lef/tcbn16ffcllbwp16p90cpdlvt.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp16p90cpdmb_100c/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp16p90cpdmb_100a/lef/tcbn16ffcllbwp16p90cpdmb.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp16p90cpdmblvt_100c/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp16p90cpdmblvt_100a/lef/tcbn16ffcllbwp16p90cpdmblvt.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp16p90cpdmbulvt_100c/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp16p90cpdmbulvt_100a/lef/tcbn16ffcllbwp16p90cpdmbulvt.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp16p90cpdpm_100d/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp16p90cpdpm_100a/lef/tcbn16ffcllbwp16p90cpdpm.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp16p90cpdpmlvt_100d/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp16p90cpdpmlvt_100a/lef/tcbn16ffcllbwp16p90cpdpmlvt.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp16p90cpdpmulvt_100d/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp16p90cpdpmulvt_100a/lef/tcbn16ffcllbwp16p90cpdpmulvt.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp16p90cpdulvt_100f/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp16p90cpdulvt_100a/lef/tcbn16ffcllbwp16p90cpdulvt.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp20p90cpd_100e/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp20p90cpd_100a/lef/tcbn16ffcllbwp20p90cpd.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp20p90cpdlvt_100e/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp20p90cpdlvt_100a/lef/tcbn16ffcllbwp20p90cpdlvt.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp20p90cpdmb_100b/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp20p90cpdmb_100a/lef/tcbn16ffcllbwp20p90cpdmb.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp20p90cpdmblvt_100b/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp20p90cpdmblvt_100a/lef/tcbn16ffcllbwp20p90cpdmblvt.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp20p90cpdmbulvt_100b/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp20p90cpdmbulvt_100a/lef/tcbn16ffcllbwp20p90cpdmbulvt.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp20p90cpdpm_100d/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp20p90cpdpm_100a/lef/tcbn16ffcllbwp20p90cpdpm.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp20p90cpdpmlvt_100d/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp20p90cpdpmlvt_100a/lef/tcbn16ffcllbwp20p90cpdpmlvt.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp20p90cpdpmulvt_100d/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp20p90cpdpmulvt_100a/lef/tcbn16ffcllbwp20p90cpdpmulvt.lef \
+/proj/IPU-A/lib/SC/tcbn16ffcllbwp20p90cpdulvt_100e/TSMCHOME/digital/Back_End/lef/tcbn16ffcllbwp20p90cpdulvt_100a/lef/tcbn16ffcllbwp20p90cpdulvt.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllshdspsbsram/ts1n16ffcllsblvtd1024x72m4swbsocp_100b/LEF/ts1n16ffcllsblvtd1024x72m4swbsocp_100b_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllshdspsbsram/ts1n16ffcllsblvtd512x72m4swbsocp_100b/LEF/ts1n16ffcllsblvtd512x72m4swbsocp_100b_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllshdspsbsram/ts1n16ffcllsblvtd2048x64m8swbshocp_100b/LEF/ts1n16ffcllsblvtd2048x64m8swbshocp_100b_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllshdspsbsram/ts1n16ffcllsblvtd2048x64m8swbsocp_100b/LEF/ts1n16ffcllsblvtd2048x64m8swbsocp_100b_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllshdspsbsram/ts1n16ffcllsblvtd512x64m4swbshocp_100b/LEF/ts1n16ffcllsblvtd512x64m4swbshocp_100b_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllshdspsbsram/ts1n16ffcllsblvtd512x64m4swbsocp_100b/LEF/ts1n16ffcllsblvtd512x64m4swbsocp_100b_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllshdspsbsram/ts1n16ffcllsblvtd1024x64m4swbsocp_100b/LEF/ts1n16ffcllsblvtd1024x64m4swbsocp_100b_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllshdspsbsram/ts1n16ffcllsblvtd1024x64m4swbshocp_100b/LEF/ts1n16ffcllsblvtd1024x64m4swbshocp_100b_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllspsram/ts1n16ffclllvta1024x72m4swbshocp_110a/LEF/ts1n16ffclllvta1024x72m4swbshocp_110a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllspsram/ts1n16ffclllvta1024x64m4swbshocp_110a/LEF/ts1n16ffclllvta1024x64m4swbshocp_110a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllspsram/ts1n16ffclllvta2048x64m4swbshocp_110a/LEF/ts1n16ffclllvta2048x64m4swbshocp_110a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllspsram/ts1n16ffclllvta2048x72m4swbshocp_110a/LEF/ts1n16ffclllvta2048x72m4swbshocp_110a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllspsram/ts1n16ffclllvta512x64m4swbshocp_110a/LEF/ts1n16ffclllvta512x64m4swbshocp_110a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllhdspsbsram/ts1n16ffcllsblvtc1024x64m4swbshocp_100a/LEF/ts1n16ffcllsblvtc1024x64m4swbshocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllhdspsbsram/ts1n16ffcllsblvtc1024x64m4swbsocp_100a/LEF/ts1n16ffcllsblvtc1024x64m4swbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllhdspsbsram/ts1n16ffcllsblvtc2048x64m8swbsocp_100a/LEF/ts1n16ffcllsblvtc2048x64m8swbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllhdspsbsram/ts1n16ffcllsblvtc2048x64m8swbshocp_100a/LEF/ts1n16ffcllsblvtc2048x64m8swbshocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllhdspsbsram/ts1n16ffcllsblvtc2048x64m8swbsho_100a/LEF/ts1n16ffcllsblvtc2048x64m8swbsho_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllhdspsbsram/ts1n16ffcllsblvtc512x64m4swbshocp_100a/LEF/ts1n16ffcllsblvtc512x64m4swbshocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcllhdspsbsram/ts1n16ffcllsblvtc512x64m4swbsocp_100a/LEF/ts1n16ffcllsblvtc512x64m4swbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclldpsram/tsdn16ffclllvta512x72m4wbsocp_110a/LEF/tsdn16ffclllvta512x72m4wbsocp_110a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclldpsram/tsdn16ffclllvta64x36m4wbsocp_110a/LEF/tsdn16ffclllvta64x36m4wbsocp_110a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclldpsram/tsdn16ffclllvta64x72m4wbsocp_110a/LEF/tsdn16ffclllvta64x72m4wbsocp_110a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb1024x72m4wbsocp_100a/LEF/ts6n16ffclllvtb1024x72m4wbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb128x72m1wbsocp_100a/LEF/ts6n16ffclllvtb128x72m1wbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb280x72m2wbsocp_100a/LEF/ts6n16ffclllvtb280x72m2wbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb320x128m2wbsocp_100a/LEF/ts6n16ffclllvtb320x128m2wbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb320x130m2wbsocp_100a/LEF/ts6n16ffclllvtb320x130m2wbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb32x72m1wbso_100a/LEF/ts6n16ffclllvtb32x72m1wbso_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb32x72m1wbsocp_100a/LEF/ts6n16ffclllvtb32x72m1wbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb32x74m1wbso_100a/LEF/ts6n16ffclllvtb32x74m1wbso_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb32x74m1wbsocp_100a/LEF/ts6n16ffclllvtb32x74m1wbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb32x82m1wbsocp_100a/LEF/ts6n16ffclllvtb32x82m1wbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb32x88m1wbso_100a/LEF/ts6n16ffclllvtb32x88m1wbso_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb32x88m1wbsocp_100a/LEF/ts6n16ffclllvtb32x88m1wbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb512x72m2wbsocp_100a/LEF/ts6n16ffclllvtb512x72m2wbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb544x72m4wbsocp_100a/LEF/ts6n16ffclllvtb544x72m4wbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb64x102m1wbsocp_100a/LEF/ts6n16ffclllvtb64x102m1wbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb64x16m1wbsocp_100a/LEF/ts6n16ffclllvtb64x16m1wbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd2prf/ts6n16ffclllvtb80x32m1wbso_100a/LEF/ts6n16ffclllvtb80x32m1wbso_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclluhd1prf/ts7n16ffclllvta64x72m1swbsocp_100a/LEF/ts7n16ffclllvta64x72m1swbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcll1prf/ts5n16ffclllvta128x32m2swbsho_100a/LEF/ts5n16ffclllvta128x32m2swbsho_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcll1prf/ts5n16ffclllvta256x31m2swbshocp_100a/LEF/ts5n16ffclllvta256x31m2swbshocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcll1prf/ts5n16ffclllvta512x31m4swbshocp_100a/LEF/ts5n16ffclllvta512x31m4swbshocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcll1prf/ts5n16ffclllvta288x72m4swbso_100a/LEF/ts5n16ffclllvta288x72m4swbso_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcll1prf/ts5n16ffclllvta288x72m4swbsocp_100a/LEF/ts5n16ffclllvta288x72m4swbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcll1prf/ts5n16ffclllvta512x72m4swbso_100a/LEF/ts5n16ffclllvta512x72m4swbso_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcll1prf/ts5n16ffclllvta128x72m1swbsocp_100a/LEF/ts5n16ffclllvta128x72m1swbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcll1prf/ts5n16ffclllvta256x72m4swbsocp_100a/LEF/ts5n16ffclllvta256x72m4swbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcll1prf/ts5n16ffclllvta256x72m2swbsocp_100a/LEF/ts5n16ffclllvta256x72m2swbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcll1prf/ts5n16ffclllvta512x36m4swbsocp_100a/LEF/ts5n16ffclllvta512x36m4swbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcll1prf/ts5n16ffclllvta512x31m4swbsocp_100a/LEF/ts5n16ffclllvta512x31m4swbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffcll1prf/ts5n16ffclllvta128x32m2swbsocp_100a/LEF/ts5n16ffclllvta128x32m2swbsocp_100a_m4xdh.lef \
+/proj/IPU-A/lib/MEM/latest/tsn16ffclldpsram/tsdn16ffclllvta2048x72m4wbsocp_110a/LEF/tsdn16ffclllvta2048x72m4wbsocp_110a_m4xdh.lef \
+/proj/IPU-A/WORK/carrieg/DATA/N16_Encounter_11M_2Xa1Xd3Xe2Y2R_UTRDL_9T_CPODE_1.2a.tlef \
+/alchip/home/shawnc/unit.lef \
+/proj/IPU-A/WORK/carlislel/MW/MuliBuf_BBpin/MuliBuf_4.lef \
+/proj/IPU-A/WORK/carlislel/MW/MuliBuf_BBpin/MuliBuf_8.lef \
+/proj/IPU-A/WORK/carlislel/MW/MuliBuf_BBpin/MuliBuf_2.lef \
+/proj/IPU-A/lib/IP/PLL/latest/PLLTS16FFCLAFRAC2_2017_10_12_v3p64p5p0p4_BE/PLLTS16FFCLAFRAC2/lef/PLLTS16FFCLAFRAC2.lef \
+/proj/IPU-A/lib/IP/PVT/latest/lef/mr74129.lef \
+/proj/IPU-A/lib/IP/PVT/latest/lef/mr74141.lef \
+/proj/IPU-A/lib/IP/PVT/latest/lef/mr74130.lef \
+/proj/IPU-A/lib/IP/PCIE/latest/PCIE/cdn_sd0301pbnx_t16ffc_88_vf180_2xa1xdh3xevhv2y2r/sd0301_t16ffc_88_vf180_2xa1xdh3xevhv2y2r/models/lef/sd0301_t16ffc_88_vf180_2xa1xdh3xevhv2y2r.lef \
+/proj/IPU-A/lib/IP/DDR/latest/20171205_ddr_update/institute.shanghai.n1-IPU_DDR__20171201-31-BE_Final_plus_ibis_diemodel/institute.shanghai.n1-IPU_DDR__20171201-BE_FINAL-HS_DDRPHY_Hard_Phy_EW/cdn_hs_phy_top/lef/cdn_hs_phy_top.lef \
+/proj/IPU-A/lib/IP/GPIO/TSMCHOME/digital/Back_End/lef/tphn16ffcllgv18e_110e/mt/11m/11M_2XA1XD_H_3XE_VHV_2Y2R/lef/tphn16ffcllgv18e_11lm.lef \
+/proj/IPU-A/lib/IP/Efuse/TSMCHOME/efuse/Back_End/lef/tef16fcll256x32hd18_phrm_100a/5M_2XA1XDH1XEV/lef/tef16fcll256x32hd18_phrm_100a_5lm.lef \
+/proj/IPU-A/lib/IP/Efuse_esd/tef16fcllesd_p_110a/0E61005_20170824/TSMCHOME/efuse/Back_End/lef/tef16fcllesd_p_100a/4M_2XA1XDH/lef/tef16fcllesd_p_100a_4lm.lef \
+/proj/IPU-A/lib/IP/Bump/TSMCHOME/digital/Back_End/lef/tpbn16v_090a/fc/fc_lf_bu/APRDL/lef/tpbn16v.lef \
+/proj/IPU-A/lib/IP/GPIO/TSMCHOME/digital/Back_End/lef/tphn16ffcllgv18e_110e/mt/11m/11M_2XA1XD_H_3XE_VHV_2Y2R/lef/tphn16ffcllgv18e_11lm.lef \
+/proj/IPU-A/techfile/EDATechfile/designrule/N16_DTCD_library_kit_20160111/lef/topMxyMxe_M7/N16_DTCD_v1d0a.lef \
+/proj/IPU-A/techfile/EDATechfile/designrule/N16_ICOVL_library_kit_FF+_20150528/lef/topMxMxaMxc_M7/N16_ICOVL_v1d0a.lef \
+/proj/IPU-A/lib/IP/20pf/moscap_0p8v_20pf/moscap_0p8v_20pf.lef \
+/proj/IPU-A/lib/IP/20pf/moscap_1p8v_18pf/moscap_1p8v_18pf.lef \
+/proj/IPU-A/lib/IP/20pf/moscap_1p8v_20pf/moscap_1p8v_20pf.lef \
+]
+
+set LEF_FILES [concat $LEF_FILES $ADD_LEFS]
+
+set HOLD_BUFFER_LIST [list \
+	BUFFD1BWP20P90CPD \
+	DEL025D1BWP20P90CPD \
+	DEL050D1BWP20P90CPD \
+	DEL075D1BWP20P90CPD \
+	DEL100D1BWP20P90CPD \
+	DEL125D1BWP20P90CPD \
+	DEL150D1BWP20P90CPD \
+	DEL175D1BWP20P90CPD \
+	DEL200D1BWP20P90CPD \
+	BUFFD1BWP16P90CPD \
+	DEL025D1BWP16P90CPD \
+	DEL050D1BWP16P90CPD \
+	DEL075D1BWP16P90CPD \
+	DEL100D1BWP16P90CPD \
+	DEL125D1BWP16P90CPD \
+	DEL150D1BWP16P90CPD \
+	DEL175D1BWP16P90CPD \
+	DEL200D1BWP16P90CPD \
+	BUFFD1BWP20P90CPDLVT \
+	DEL025D1BWP20P90CPDLVT \
+	DEL050D1BWP20P90CPDLVT \
+	DEL075D1BWP20P90CPDLVT \
+	DEL100D1BWP20P90CPDLVT \
+	DEL125D1BWP20P90CPDLVT \
+	DEL150D1BWP20P90CPDLVT \
+	DEL175D1BWP20P90CPDLVT \
+	DEL200D1BWP20P90CPDLVT \
+	BUFFD1BWP16P90CPDLVT \
+	DEL025D1BWP16P90CPDLVT \
+	DEL050D1BWP16P90CPDLVT \
+	DEL075D1BWP16P90CPDLVT \
+	DEL100D1BWP16P90CPDLVT \
+	DEL125D1BWP16P90CPDLVT \
+	DEL150D1BWP16P90CPDLVT \
+	DEL175D1BWP16P90CPDLVT \
+	DEL200D1BWP16P90CPDLVT \
+	DEL025D1BWP20P90CPDLVT \
+	DEL050D1BWP20P90CPDLVT \
+	DEL075D1BWP20P90CPDLVT \
+	DEL100D1BWP20P90CPDLVT \
+	DEL125D1BWP20P90CPDLVT \
+	DEL150D1BWP20P90CPDLVT \
+	DEL175D1BWP20P90CPDLVT \
+	DEL200D1BWP20P90CPDLVT \
+	BUFFD1BWP16P90CPDLVT \
+	DEL025D1BWP16P90CPDLVT \
+	DEL050D1BWP16P90CPDLVT \
+	DEL075D1BWP16P90CPDLVT \
+	DEL100D1BWP16P90CPDLVT \
+	DEL125D1BWP16P90CPDLVT \
+	DEL150D1BWP16P90CPDLVT \
+	DEL175D1BWP16P90CPDLVT \
+	DEL200D1BWP16P90CPDLVT \
+]
+
+set DRC_BUFFER_LIST [list \
+  BUFFD1BWP20P90CPD \
+  BUFFD1BWP20P90CPDLVT \
+  BUFFD1BWP20P90CPDLVT \
+  BUFFD2BWP20P90CPD \
+  BUFFD2BWP20P90CPDLVT \
+  BUFFD2BWP20P90CPDLVT \
+  BUFFD3BWP20P90CPD \
+  BUFFD3BWP20P90CPDLVT \
+  BUFFD3BWP20P90CPDLVT \
+  BUFFD4BWP20P90CPD \
+  BUFFD4BWP20P90CPDLVT \
+  BUFFD4BWP20P90CPDLVT \
+  BUFFD5BWP20P90CPD \
+  BUFFD5BWP20P90CPDLVT \
+  BUFFD5BWP20P90CPDLVT \
+  BUFFD6BWP20P90CPD \
+  BUFFD6BWP20P90CPDLVT \
+  BUFFD6BWP20P90CPDLVT \
+  BUFFD8BWP20P90CPD \
+  BUFFD8BWP20P90CPDLVT \
+  BUFFD8BWP20P90CPDLVT \
+  BUFFD10BWP20P90CPD \
+  BUFFD10BWP20P90CPDLVT \
+  BUFFD10BWP20P90CPDLVT \
+  BUFFD12BWP20P90CPD \
+  BUFFD12BWP20P90CPDLVT \
+  BUFFD12BWP20P90CPDLVT \
+ ] 
+
+set FIXSETUP_BUF [list \
+   BUFFD6BWP16P90CPDLVT \
+   BUFFD8BWP16P90CPDLVT \
+   BUFFD4BWP16P90CPDLVT \
+   BUFFD3BWP16P90CPDLVT \
+   BUFFD2BWP16P90CPDLVT \
+   BUFFD10BWP16P90CPDLVT \
+   BUFFD12BWP16P90CPDLVT \
+]
+
+
+set dont_use_pattern [list \
+*/*D18* \
+*/*D20BWP* \
+*/*D24BWP* \
+*/*DCAP* \
+*/*DF*CSN* \
+*/*DFM* \
+*/*EDF* \
+*/*TIE* \
+*/ANT* \
+*/CK* \
+*/CMP* \
+*/DCCK* \
+*/DEL* \
+*/G* \
+*/LH* \
+*/LN* \
+*/MB* \
+*/INV*D0*BWP* \
+*/INV*D1BWP* \
+*/BUFF*D0*BWP* \
+*/BUFF*D1BWP* \
+*/*P18*LVT \
+*/CKLN*CPD \
+*/CKLN*CPDLVT \
+*/AOI222* \
+*/AOI33* \
+*/MUX4* \
+*/OAI222* \
+*/OAI33* \
+*/OAI32*D1BWP* \
+*/OAI31*D1BWP* \
+*/OAI221*D1BWP* \
+*/OAI22*D1BWP* \
+*/OAI211*D1BWP* \
+*/OAI21*D1BWP* \
+*/ND2*D1BWP* \
+*/*OPT* \
+*/*SK* \
+*/BHD* \
+*/BUFT* \
+*/*BWP16P90 \
+*/*BWP16P90LVT \
+*/*BWP16P90ULVT \
+]
+
+#*/MAOI* \
+#*/MOAI* \
+
+set All_FILLER_CELLS [list \
+DCAP64BWP20P90CPDLVT \
+DCAP64BWP20P90CPDLVT \
+DCAP64BWP20P90CPD \
+DCAP64BWP16P90CPDLVT \
+DCAP64BWP16P90CPDLVT \
+DCAP64BWP16P90CPD \
+DCAP32BWP20P90CPDLVT \
+DCAP32BWP20P90CPDLVT \
+DCAP32BWP20P90CPD \
+DCAP32BWP16P90CPDLVT \
+DCAP32BWP16P90CPDLVT \
+DCAP32BWP16P90CPD \
+DCAP16BWP20P90CPDLVT \
+DCAP16BWP20P90CPDLVT \
+DCAP16BWP20P90CPD \
+DCAP16BWP16P90CPDLVT \
+DCAP16BWP16P90CPDLVT \
+DCAP16BWP16P90CPD \
+DCAP8BWP20P90CPDLVT \
+DCAP8BWP20P90CPDLVT \
+DCAP8BWP20P90CPD \
+DCAP8BWP16P90CPDLVT \
+DCAP8BWP16P90CPDLVT \
+DCAP8BWP16P90CPD \
+DCAP4BWP20P90CPDLVT \
+DCAP4BWP20P90CPDLVT \
+DCAP4BWP20P90CPD \
+DCAP4BWP16P90CPDLVT \
+DCAP4BWP16P90CPDLVT \
+DCAP4BWP16P90CPD \
+GDCAP12MCOBWP20P90CPDLVT \
+GDCAP12MCOBWP20P90CPDLVT \
+GDCAP12MCOBWP20P90CPD \
+GDCAP12MCOBWP16P90CPDLVT \
+GDCAP12MCOBWP16P90CPDLVT \
+GDCAP12MCOBWP16P90CPD \
+GDCAP11MCOBWP20P90CPDLVT \
+GDCAP11MCOBWP20P90CPDLVT \
+GDCAP11MCOBWP20P90CPD \
+GDCAP11MCOBWP16P90CPDLVT \
+GDCAP11MCOBWP16P90CPDLVT \
+GDCAP11MCOBWP16P90CPD \
+GDCAP10MCOBWP20P90CPDLVT \
+GDCAP10MCOBWP20P90CPDLVT \
+GDCAP10MCOBWP20P90CPD \
+GDCAP10MCOBWP16P90CPDLVT \
+GDCAP10MCOBWP16P90CPDLVT \
+GDCAP10MCOBWP16P90CPD \
+GDCAP9MCOBWP20P90CPDLVT \
+GDCAP9MCOBWP20P90CPDLVT \
+GDCAP9MCOBWP20P90CPD \
+GDCAP9MCOBWP16P90CPDLVT \
+GDCAP9MCOBWP16P90CPDLVT \
+GDCAP9MCOBWP16P90CPD \
+GDCAP8MCOBWP20P90CPDLVT \
+GDCAP8MCOBWP20P90CPDLVT \
+GDCAP8MCOBWP20P90CPD \
+GDCAP8MCOBWP16P90CPDLVT \
+GDCAP8MCOBWP16P90CPDLVT \
+GDCAP8MCOBWP16P90CPD \
+GDCAP6MCOBWP20P90CPDLVT \
+GDCAP6MCOBWP20P90CPDLVT \
+GDCAP6MCOBWP20P90CPD \
+GDCAP6MCOBWP16P90CPDLVT \
+GDCAP6MCOBWP16P90CPDLVT \
+GDCAP6MCOBWP16P90CPD \
+GDCAP5MCOBWP20P90CPDLVT \
+GDCAP5MCOBWP20P90CPDLVT \
+GDCAP5MCOBWP20P90CPD \
+GDCAP5MCOBWP16P90CPDLVT \
+GDCAP5MCOBWP16P90CPDLVT \
+GDCAP5MCOBWP16P90CPD \
+GDCAP4MCOBWP20P90CPDLVT \
+GDCAP4MCOBWP20P90CPDLVT \
+GDCAP4MCOBWP20P90CPD \
+GDCAP4MCOBWP16P90CPDLVT \
+GDCAP4MCOBWP16P90CPDLVT \
+GDCAP4MCOBWP16P90CPD \
+GDCAP3MCOBWP20P90CPDLVT \
+GDCAP3MCOBWP20P90CPDLVT \
+GDCAP3MCOBWP20P90CPD \
+GDCAP3MCOBWP16P90CPDLVT \
+GDCAP3MCOBWP16P90CPDLVT \
+GDCAP3MCOBWP16P90CPD \
+GDCAP2MCOBWP20P90CPDLVT \
+GDCAP2MCOBWP20P90CPDLVT \
+GDCAP2MCOBWP20P90CPD \
+GDCAP2MCOBWP16P90CPDLVT \
+GDCAP2MCOBWP16P90CPDLVT \
+GDCAP2MCOBWP16P90CPD \
+GDCAP1MCOBWP20P90CPDLVT \
+GDCAP1MCOBWP20P90CPDLVT \
+GDCAP1MCOBWP20P90CPD \
+GDCAP1MCOBWP16P90CPDLVT \
+GDCAP1MCOBWP16P90CPDLVT \
+GDCAP1MCOBWP16P90CPD \
+FILL64BWP20P90CPDLVT \
+FILL64BWP20P90CPDLVT \
+FILL64BWP20P90CPD \
+FILL64BWP16P90CPDLVT \
+FILL64BWP16P90CPDLVT \
+FILL64BWP16P90CPD \
+FILL32BWP20P90CPDLVT \
+FILL32BWP20P90CPDLVT \
+FILL32BWP20P90CPD \
+FILL32BWP16P90CPDLVT \
+FILL32BWP16P90CPDLVT \
+FILL32BWP16P90CPD \
+FILL16BWP20P90CPDLVT \
+FILL16BWP20P90CPDLVT \
+FILL16BWP20P90CPD \
+FILL16BWP16P90CPDLVT \
+FILL16BWP16P90CPDLVT \
+FILL16BWP16P90CPD \
+FILL8BWP20P90CPDLVT \
+FILL8BWP20P90CPDLVT \
+FILL8BWP20P90CPD \
+FILL8BWP16P90CPDLVT \
+FILL8BWP16P90CPDLVT \
+FILL8BWP16P90CPD \
+FILL4BWP20P90CPDLVT \
+FILL4BWP20P90CPDLVT \
+FILL4BWP20P90CPD \
+FILL4BWP16P90CPDLVT \
+FILL4BWP16P90CPDLVT \
+FILL4BWP16P90CPD \
+FILL3BWP20P90CPDLVT \
+FILL3BWP20P90CPDLVT \
+FILL3BWP20P90CPD \
+FILL3BWP16P90CPDLVT \
+FILL3BWP16P90CPDLVT \
+FILL3BWP16P90CPD \
+FILL3_P4N3BWP20P90CPDLVT \
+FILL3_P4N3BWP20P90CPDLVT \
+FILL3_P4N3BWP20P90CPD \
+FILL3_P4N3BWP16P90CPDLVT \
+FILL3_P4N3BWP16P90CPDLVT \
+FILL3_P4N3BWP16P90CPD \
+FILL3_P4N2BWP20P90CPDLVT \
+FILL3_P4N2BWP20P90CPDLVT \
+FILL3_P4N2BWP20P90CPD \
+FILL3_P4N2BWP16P90CPDLVT \
+FILL3_P4N2BWP16P90CPDLVT \
+FILL3_P4N2BWP16P90CPD \
+FILL3_P3N4BWP20P90CPDLVT \
+FILL3_P3N4BWP20P90CPDLVT \
+FILL3_P3N4BWP20P90CPD \
+FILL3_P3N4BWP16P90CPDLVT \
+FILL3_P3N4BWP16P90CPDLVT \
+FILL3_P3N4BWP16P90CPD \
+FILL3_P3N3BWP20P90CPDLVT \
+FILL3_P3N3BWP20P90CPDLVT \
+FILL3_P3N3BWP20P90CPD \
+FILL3_P3N3BWP16P90CPDLVT \
+FILL3_P3N3BWP16P90CPDLVT \
+FILL3_P3N3BWP16P90CPD \
+FILL3_P3N2BWP20P90CPDLVT \
+FILL3_P3N2BWP20P90CPDLVT \
+FILL3_P3N2BWP20P90CPD \
+FILL3_P3N2BWP16P90CPDLVT \
+FILL3_P3N2BWP16P90CPDLVT \
+FILL3_P3N2BWP16P90CPD \
+FILL3_P2N4BWP20P90CPDLVT \
+FILL3_P2N4BWP20P90CPDLVT \
+FILL3_P2N4BWP20P90CPD \
+FILL3_P2N4BWP16P90CPDLVT \
+FILL3_P2N4BWP16P90CPDLVT \
+FILL3_P2N4BWP16P90CPD \
+FILL3_P2N3BWP20P90CPDLVT \
+FILL3_P2N3BWP20P90CPDLVT \
+FILL3_P2N3BWP20P90CPD \
+FILL3_P2N3BWP16P90CPDLVT \
+FILL3_P2N3BWP16P90CPDLVT \
+FILL3_P2N3BWP16P90CPD \
+FILL3_P2N2BWP20P90CPDLVT \
+FILL3_P2N2BWP20P90CPDLVT \
+FILL3_P2N2BWP20P90CPD \
+FILL3_P2N2BWP16P90CPDLVT \
+FILL3_P2N2BWP16P90CPDLVT \
+FILL3_P2N2BWP16P90CPD \
+FILL2BWP20P90CPDLVT \
+FILL2BWP20P90CPDLVT \
+FILL2BWP20P90CPD \
+FILL2BWP16P90CPDLVT \
+FILL2BWP16P90CPDLVT \
+FILL2BWP16P90CPD \
+FILL2_P4N3BWP20P90CPDLVT \
+FILL2_P4N3BWP20P90CPDLVT \
+FILL2_P4N3BWP20P90CPD \
+FILL2_P4N3BWP16P90CPDLVT \
+FILL2_P4N3BWP16P90CPDLVT \
+FILL2_P4N3BWP16P90CPD \
+FILL2_P4N2BWP20P90CPDLVT \
+FILL2_P4N2BWP20P90CPDLVT \
+FILL2_P4N2BWP20P90CPD \
+FILL2_P4N2BWP16P90CPDLVT \
+FILL2_P4N2BWP16P90CPDLVT \
+FILL2_P4N2BWP16P90CPD \
+FILL2_P3N4BWP20P90CPDLVT \
+FILL2_P3N4BWP20P90CPDLVT \
+FILL2_P3N4BWP20P90CPD \
+FILL2_P3N4BWP16P90CPDLVT \
+FILL2_P3N4BWP16P90CPDLVT \
+FILL2_P3N4BWP16P90CPD \
+FILL2_P3N3BWP20P90CPDLVT \
+FILL2_P3N3BWP20P90CPDLVT \
+FILL2_P3N3BWP20P90CPD \
+FILL2_P3N3BWP16P90CPDLVT \
+FILL2_P3N3BWP16P90CPDLVT \
+FILL2_P3N3BWP16P90CPD \
+FILL2_P3N2BWP20P90CPDLVT \
+FILL2_P3N2BWP20P90CPDLVT \
+FILL2_P3N2BWP20P90CPD \
+FILL2_P3N2BWP16P90CPDLVT \
+FILL2_P3N2BWP16P90CPDLVT \
+FILL2_P3N2BWP16P90CPD \
+FILL2_P2N4BWP20P90CPDLVT \
+FILL2_P2N4BWP20P90CPDLVT \
+FILL2_P2N4BWP20P90CPD \
+FILL2_P2N4BWP16P90CPDLVT \
+FILL2_P2N4BWP16P90CPDLVT \
+FILL2_P2N4BWP16P90CPD \
+FILL2_P2N3BWP20P90CPDLVT \
+FILL2_P2N3BWP20P90CPDLVT \
+FILL2_P2N3BWP20P90CPD \
+FILL2_P2N3BWP16P90CPDLVT \
+FILL2_P2N3BWP16P90CPDLVT \
+FILL2_P2N3BWP16P90CPD \
+FILL2_P2N2BWP20P90CPDLVT \
+FILL2_P2N2BWP20P90CPDLVT \
+FILL2_P2N2BWP20P90CPD \
+FILL2_P2N2BWP16P90CPDLVT \
+FILL2_P2N2BWP16P90CPDLVT \
+FILL2_P2N2BWP16P90CPD \
+]
+
+set VT_RULES [list \
+/proj/IPU-A/template/PTADV/16FFC_advanced_techfile.tcl.gz \
+/proj/IPU-A/lib/SC/PR_PlacementConstraint/N16FFC_9T_Constraint/N16FFC_9T_CPODE_par.tcl \
+]

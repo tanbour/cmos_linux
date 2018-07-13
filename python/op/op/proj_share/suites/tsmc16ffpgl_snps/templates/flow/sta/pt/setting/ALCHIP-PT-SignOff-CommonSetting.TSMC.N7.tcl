@@ -28,7 +28,11 @@ set timing_input_port_default_clock          "false"
 
 # some Ganesha PT_SI setting
 set sh_enable_page_mode false
-set link_create_black_boxes false
+# Modified by Julia Zhu on: Sat Feb 17 05:07:52 CST 2018 END
+#  modify link_create_black_boxes : false --> true (defalt)
+#$# set link_create_black_boxes false
+### End modified by Julia Zhu on: Sat Feb 17 05:08:42 CST 2018 END
+#
 # set timing_global_derate_compatibility "true" ; # default = "false"
 set lib_thresholds_per_lib                    true
 set default_oc_per_lib                        true

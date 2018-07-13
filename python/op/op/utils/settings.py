@@ -7,15 +7,14 @@ Description: op settings
 import os
 
 # op related settings
-DEBUG = False
+DEBUG = True
 
 BACKEND = True if not DEBUG else False
+MAIL_ALERT = True if not DEBUG else False
 
-if DEBUG:
-    BE_URL = "http://localhost:8000"
-else:
-    BE_URL = "http://op.alchip.com.cn:8000"
-    # BE_URL = "http://utah:8000"
+BE_URL = "http://op.alchip.com.cn:8000"
+# BE_URL = "http://localhost:8000"
+# BE_URL = "http://utah:8000"
 
 OP_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 OP_PROJ = f"{OP_ROOT}{os.sep}proj_share{os.sep}suites"
@@ -39,3 +38,9 @@ REPO_AUTH_ERR_STR_LST = ["Authentication failed", "401 while accessing"]
 REPO_BRANCH_ERR_STR = "Couldn't find remote ref master"
 
 MP_POOL = 8
+
+# json proc
+MAIL_DOMAIN_LST = ['@alchip.com']
+AUTO_MAIL_DIR = '/alchip/home/public/op/mail_alert/'
+LOCAL_RPT_CMN_LST = ["openlava"]
+# AUTO_MAIL_DIR = '/tmp/mail_tmp'

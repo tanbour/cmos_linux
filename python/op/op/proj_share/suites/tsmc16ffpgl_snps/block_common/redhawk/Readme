@@ -1,0 +1,10 @@
+set block = "xm_cpu" # you must to set block name
+set EDA_def = "" # you must to set block def
+set EDA_spef = "MISS" # optional [spef dir] or [MISS]
+set EDA_timingFile = "MISS" # optional [timing file dir ] or [MISS]
+set EDA_ploc = "MISS" # optional [ploc dir] or [MISS]
+set EDA_ptSession = "MISS" # optional [pt session dir] or [MISS]
+set EDA_enableDynamic = "0" # if set 0 , use TR; if set 1, use VCD
+set EDA_dynamicFile = 'MISS' # optional [VCD dir] or [MISS]
+set func = 'static' # you can set [power] [static] [dynamic] [res] [FP] [CPM]
+set subworkdir = "test" # work dir name 

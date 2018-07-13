@@ -1,7 +1,7 @@
 #=========================== INTERFACE ==========================#
 ## INPUTS
 #	* LIB_CORNER
-# 	* OTHER_VOLTAGE
+# 	* VOLTAGE
 #	* SUB_BLOCKS
 # 	* SUB_BLOCKS_FILE
 # 	* MV_INSTANCES
@@ -27,8 +27,11 @@
 
 #========================== MAIN ===============================#
 array unset MV_LIBRARY_INST_MAP *
-set defaultVoltage $VOLT
-set MV_LIBRARY_INST_MAP($VOLT) ""
+set VOLTAGE "$VOLT"
+set defaultVoltage [lindex $VOLTAGE 0]
+foreach volt $VOLTAGE {
+    set MV_LIBRARY_INST_MAP($volt) [list]
+}
 foreach type [list verilog lib ilm bbox] {
     set SUB_BLOCKS_CELL_MAP($type) [list]
 }
@@ -85,11 +88,20 @@ if {[info exists MV_INSTANCES]  && [llength $MV_INSTANCES] > 0} {
             set libVolt [lindex $instList 0]
         }
        set MV_LIBRARY_INST_MAP($libVolt) [concat $MV_LIBRARY_INST_MAP($libVolt) $instNames]
+       set VOLTAGE [concat $VOLTAGE $libVolt]
     }
 }
 
-set OTHER_VOLTAGE [array names MV_LIBRARY_INST_MAP]
-set VOLTAGE [concat $defaultVoltage $OTHER_VOLTAGE]
+## re-define VOLTAGE
+foreach vv $VOLTAGE {
+   if {[llength [lsearch -all $VOLTAGE $vv]] >= 2 } {
+      set i [lsearch $VOLTAGE $vv]
+      set VOLTAGE [lreplace $VOLTAGE $i $i]
+      puts "INFO: remove the unused voltage: $vv from VOLTAGE variable."
+      puts "$VOLTAGE"
+    }
+}
+
 array unset lnLibrary *
 set lLimit [string toupper $LIB_CORNER]
 set dbPrefix CCS
@@ -118,8 +130,8 @@ set cLimit [string toupper $CHECK_TYPE]
 foreach volt $VOLTAGE {
     set aocvLibrary($volt) [list]
     set vLimit [string toupper $volt]
-    if { [llength [info globals AOCV_*_${vLimit}_${lLimit}_${cLimit}]] >= 1 } {
-        foreach vr [info globals AOCV_*_${vLimit}_${lLimit}_${cLimit}] {
+    if { [llength [info globals AOCV_${vLimit}_${lLimit}_${cLimit}]] >= 1 } {
+        foreach vr [info globals AOCV_${vLimit}_${lLimit}_${cLimit}] {
              set cmd " \
              set aocvLibrary($volt) \[concat $aocvLibrary($volt) \$$vr\] \
              "; eval $cmd
@@ -133,8 +145,8 @@ set cLimit [string toupper $CHECK_TYPE]
 foreach volt $VOLTAGE {
     set pocvLibrary($volt) [list]
     set vLimit [string toupper $volt]
-    if { [llength [info globals SPM_*_${vLimit}_${lLimit}]] >= 1 } {
-        foreach vr [info globals SPM_*_${vLimit}_${lLimit}] {
+    if { [llength [info globals POCV_${vLimit}_${lLimit}]] >= 1 } {
+        foreach vr [info globals POCV_${vLimit}_${lLimit}] {
              set cmd " \
              set pocvLibrary($volt) \[concat $pocvLibrary($volt) \$$vr\] \
              "; eval $cmd

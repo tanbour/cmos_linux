@@ -1,0 +1,77 @@
+#!/bin/csh -f
+
+%REPL_OP4
+source "$RUN_DIR/scr/flow/clbre.$OP4_dst_branch.$OP4_dst_eco/$BLOCK_NAME.dir.$OP4_dst_branch.csh"
+
+#===================================================================
+#===================  delete existing tmp cdl file =================
+#===================================================================
+
+if ( -e \$DST_DATA_DIR/lib_to_cdl_by_v2lvs.$OP4_dst_eco.cdl) then
+\rm "\$DST_DATA_DIR/lib_to_cdl_by_v2lvs.$OP4_dst_eco.cdl" -f
+endif
+touch \$DST_DATA_DIR/lib_to_cdl_by_v2lvs.$OP4_dst_eco.cdl
+if ( -d \$RPT_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_eco ) then
+rm -rf \$RPT_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_eco
+endif
+#===================================================================
+#===================   set input files    ==========================
+#===================================================================
+
+set vnet_file      =  "../../.\$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.lvs.v"
+set cdl_std_files  = "$CDL_STD"
+set cdl_mem_files  = "$CDL_MEM"
+set cdl_ip_files   = "$CDL_IP"
+set cdl_io_files   = "$CDL_IO"
+set cdl_all_files  = "cdl_std_files cdl_mem_files cdl_ip_files cdl_io_files"
+set v2lvs_cdl_tmp  = "\$DST_DATA_DIR/lib_to_cdl_by_v2lvs.$OP4_dst_eco.cdl"
+set run_time       = "../../.\$RPT_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_eco.run_time"
+set plugin_file    = "$FLOW_BRANCH_DIR/plugin/clbre_v2lvs_plugin.rule"
+REPL_OP4%
+
+#===================================================================
+#=================== create std/mem/IP/IO cdl files  ===============
+#===================================================================
+foreach cdl_files ( $cdl_all_files )
+foreach cdl_file (`eval echo '$'$cdl_files`)
+cat >> $v2lvs_cdl_tmp << create_cdl
+.INCLUDE $cdl_file
+create_cdl
+end
+end
+sed -i -e '/^$/d' -e '/^#.*$/d' $plugin_file
+if ( -s $plugin_file ) then
+foreach cdl_file_from_plugin ( `cat $plugin_file` )
+echo ".INCLUDE $cdl_file_from_plugin" >> $v2lvs_cdl_tmp 
+end
+endif
+
+#===================================================================
+#=================== generate netlist to spice =====================
+#===================================================================
+
+%REPL_OP4
+cd \$RPT_DIR
+mkdir $BLOCK_NAME.$OP4_dst.$OP4_dst_eco
+cd $BLOCK_NAME.$OP4_dst.$OP4_dst_eco
+
+echo "clbre_v2lvs" >! \$run_time
+echo "start " `date "+%F %T %a"` >> \$run_time
+mkdir -p ../../../openlava
+#-- if \$CALIBRE_HOME contain "ixl",use the centos5 to run lvs-----------
+set clbre_version = `basename \$CALIBRE_HOME | awk 'BEGIN{FS="_"} {print $1}'`
+if ( \$clbre_version == ixl ) then
+set host_version = centos5
+endif
+#-- if \$CALIBRE_HOME contain "aoi",use the centos6 to run lvs------------
+if ( \$clbre_version == aoi ) then
+set host_version = centos6
+endif
+bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n 1 -R "\$host_version span[hosts=1]" \
+"v2lvs   -64  -v \${vnet_file}  -s ../../.\${v2lvs_cdl_tmp} -o ../../.\$DST_DATA_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.cdl"
+echo "finish" `date "+%F %T %a"` >> \$run_time
+grep "Running" ./v2lvs.log >> ../../.\$LOG_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.log
+rm -rf ./v2lvs.log
+cd ../../..
+REPL_OP4%
+

@@ -1,0 +1,6 @@
+IGNORE_CELLS {
+  xofiller*
+  boundarycell*  
+  TAPCELL*
+}
+

@@ -18,7 +18,7 @@ def run_init(args):
     elif args.init_list_lab:
         init_repo.list_lab()
     elif args.init_proj_name:
-        init_repo.repo_proj(args.init_proj_name)
+        init_repo.repo_proj(args.init_proj_name, args.init_block_name_lst)
     else:
         LOG.critical("no actions specified in op init sub cmd")
         raise SystemExit()

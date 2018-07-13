@@ -1,0 +1,72 @@
+#!/bin/csh
+
+%REPL_OP4
+#===================================================================
+#===================   set tech files    ===========================
+#===================================================================
+set tech_file                = "$LAKER_TECH_FILE"
+set map_file                 = "$LAKER_MAPPING_FILE"
+set laker_resource_file      = "./laker_gen_lib/laker.rc"
+#===================================================================
+#===================   set input files    ==========================
+#===================================================================
+set GDS_STD                           = "$GDS_STD"
+set GDS_MEM                           = "$GDS_MEM"
+set GDS_IP                            = "$GDS_IP"
+set GDS_IO                            = "$GDS_IO"
+set gds_files                         = "GDS_STD  GDS_MEM GDS_IP GDS_IO"
+set gds_plugin_file                   = "$FLOW_BRANCH_DIR/plugin/laker_gen_lib_plugin.list"
+set laker_skip_gen_standard_lib       = "$LAKER_SKIP_GEN_STANDARD_LIB"
+REPL_OP4%
+#===================================================================
+#===================  generate IP lib    ===========================
+#===================================================================
+if ( "$laker_skip_gen_standard_lib" == True ) then 
+echo "Alchip-info:the lib of STD/MEM/IP/IO is already exist,and this step will be skipped!"
+else
+if (-d ./laker_gen_lib) then
+\rm -rf ./laker_gen_lib
+endif
+mkdir ./laker_gen_lib
+cd laker_gen_lib
+foreach GDS_file ( $gds_files )
+set LIB_NAME = `echo $GDS_file | cut -d _ -f 2`
+foreach GDSIn_file (`eval echo '$'$GDS_file`)
+echo "Alchip-info:lib name is $LIB_NAME"
+echo "Alchip-info:GDSIn file is $GDSIn_file"
+%REPL_OP4
+bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${laker_CPU_NUMBER} -R "rusage[mem=${laker_MEM_REQUIREMENT}]" \
+REPL_OP4%
+blitzGdsIn -t $tech_file \
+            -o $LIB_NAME   -case Preserve -label Preserve \
+            -l $map_file $GDSIn_file 
+end
+end
+cd ..
+endif
+#===================================================================
+#===================   generate plugin lib =========================
+#===================================================================
+sed -i '/#.*$/d' $gds_plugin_file 
+set gds_lib_list = `grep -A 100000 'LIBRARY_NAME' $gds_plugin_file`
+if ( "$gds_lib_list" == "") then
+echo "Alchip-info:no plugin gds!"
+else
+cd laker_gen_lib
+foreach GDSIn_file ( $gds_lib_list )
+set key_text = `echo $GDSIn_file | cut -d : -f 1`
+if ( $key_text == LIBRARY_NAME ) then
+set LIB_NAME = `echo $GDSIn_file | cut -d : -f 2`
+else 
+echo "Alchip-info:lib name is $LIB_NAME"
+echo "Alchip-info:GDSIn file is $GDSIn_file"
+%REPL_OP4
+bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${laker_CPU_NUMBER} -R "rusage[mem=${laker_MEM_REQUIREMENT}]" \
+REPL_OP4%
+blitzGdsIn -t $tech_file \
+            -o $LIB_NAME -case Preserve -label Preserve \
+            -l $map_file  $GDSIn_file 
+endif
+end 
+endif
+cd ..

@@ -2,12 +2,13 @@
 # Tool: IC Compiler II
 ##########################################################################################
 puts "Alchip-info : Running script [info script]\n"
+set sh_continue_on_error true
 
 ##===================================================================##
 ## SETUP                                                             ##
 ##===================================================================##
-source {{cur.flow_scripts_dir}}/pr/00_setup.tcl
 source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+source {{cur.cur_flow_sum_dir}}/{{cur.sub_stage}}.op._job.tcl
 
 set pre_stage "{{pre.sub_stage}}"
 set cur_stage "{{cur.sub_stage}}"
@@ -18,10 +19,10 @@ set cur_stage [lindex [split $cur_stage .] 0]
 set blk_name          "{{env.BLK_NAME}}"
 set blk_rpt_dir       "{{cur.cur_flow_rpt_dir}}"
 set blk_utils_dir     "{{env.PROJ_UTILS}}"
-set blk_plugins_dir   "{{cur.config_plugins_dir}}/icc2_scripts/08_eco"
+set blk_plugins_dir   "{{cur.config_plugins_dir}}/icc2_scripts/07_eco"
 set pre_flow_data_dir "{{pre.flow_data_dir}}/{{pre.stage}}"
 set cur_design_library "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
-set icc2_cpu_number   "[lindex "{{local._job_cpu_number}}" end]"
+set icc2_cpu_number   "[lindex "${_job_cpu_number}" end]"
 set_host_option -max_cores $icc2_cpu_number
 
 set pre_design_library  "$pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.nlib"

@@ -1,0 +1,51 @@
+#===================================================================
+#=================== xm_cpu for power ==============================
+#===================================================================
+
+POWER_ANALYSIS_MODE averaged
+DYNAMIC_SIMULATION_TIME 500000e-12
+VCD_FILE {
+ xm_cpu /proj/Mars2_new/from_customer/20161205/VCD_for_chip_power/core0_2.2Ghz_13000ns_13500ns.vcd.gz
+ FILE_TYPE       VCD
+# SELECT_RANGE    -1 -1
+ START_TIME      13000000
+ END_TIME        13500000
+ FRONT_PATH      "chip_tb/mars_u/panel_u0/mpc0_core0/"
+ SUBSTITUTE_PATH ""
+ TRUE_TIME       1
+}
+
+#===================================================================
+#=================== xm_cpu new 1110 ===============================
+#===================================================================
+
+#POWER_ANALYSIS_MODE averaged
+#DYNAMIC_SIMULATION_TIME 54600e-12
+#VCD_FILE {
+# xm_cpu /proj/Mars2_new/from_customer/20161110/xm_cpu_20161011_netlist_without_sdf_dhrystone64.fsdb.gz
+# FILE_TYPE       FSDB
+## SELECT_RANGE    -1 -1
+# START_TIME      7502495
+# END_TIME        7557095
+# FRONT_PATH      "execution_tb/uXIAOMI/ucpu0/"
+# SUBSTITUTE_PATH ""
+# TRUE_TIME       1
+#}
+
+#===================================================================
+#=================== xm_cpu new 1110 ===============================
+#===================================================================
+
+#POWER_ANALYSIS_MODE averaged
+#DYNAMIC_SIMULATION_TIME 82355e-12
+#VCD_FILE {
+# xm_cpu /proj/Mars2_new/from_customer/20161110/xm_cpu_20161011_netlist_without_sdf_saxpy64.fsdb.gz
+# FILE_TYPE       FSDB
+# SELECT_RANGE    -1 -1
+## START_TIME      5685680
+## END_TIME        5768035
+# FRONT_PATH      "execution_tb/uXIAOMI/ucpu0/"
+# SUBSTITUTE_PATH ""
+# TRUE_TIME       1
+#}
+

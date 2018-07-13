@@ -1,0 +1,21 @@
+puts "RM-info: Running script [info script]\n"
+
+##########################################################################################
+# Tool: IC Compiler II
+# Script: init_design.tcl.7nm_t.pg
+# Version: N-2017.09-SP2 (February 20, 2018)
+# Copyright (C) 2014-2018 Synopsys, Inc. All rights reserved.
+##########################################################################################
+
+## Ensure input PG is colored and marked as fixed
+#  The following colors only the uncolored shapes and honors plan.pgroute.set_mask_fixed true from set_technology -node 7 (except for cuts)
+#	derive_pg_mask_constraint
+#  Optionally, do the following to completely recolor the entire PG:
+	derive_pg_mask_constraint -overwrite
+
+## Via cuts coloring
+#  Follow the example below in case there are still unfixed mask constraints for via cuts
+#	set_attribute [get_vias -filter "via_def_name=~your_via_naming_convention"] -name is_cut_mask_fixed -value true ;# replace your_via_naming_convention with your own via naming convention.
+
+puts "RM-info: Completed script [info script]\n"
+

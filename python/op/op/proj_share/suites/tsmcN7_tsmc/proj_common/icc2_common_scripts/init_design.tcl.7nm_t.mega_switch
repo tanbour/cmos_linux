@@ -1,0 +1,15 @@
+puts "RM-info: Running script [info script]\n"
+
+##########################################################################################
+# Tool: IC Compiler II
+# Script: init_design.tcl.7nm_t.mega_switch
+# Version: N-2017.09-SP2 (February 20, 2018)
+# Copyright (C) 2014-2018 Synopsys, Inc. All rights reserved.
+##########################################################################################
+
+## For 7nm specific mega switch
+puts "RM-info: Setting 7nm specific mega switch"
+set_technology -node 7
+get_attribute [current_block] technology_node
+
+puts "RM-info: Completed script [info script]\n"

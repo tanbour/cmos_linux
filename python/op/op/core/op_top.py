@@ -10,7 +10,10 @@ from utils import settings
 from core import runner_admin
 from core import runner_init
 from core import runner_flow
+from core import runner_clean
 from core import runner_backup
+from core import runner_merge
+from core import runner_email
 from core.op_lic import OPClient
 
 LOG = pcom.gen_logger(__name__)
@@ -39,6 +42,12 @@ def gen_admin_parser(subparsers):
     me_group.add_argument(
         "-lib", dest="admin_lib", action="store_true",
         help="toggle to generate library mapping links and related files")
+    me_group.add_argument(
+        "-release_check", dest="admin_release_check", action="store_true",
+        help="toggle to check the block released json files")
+    me_group.add_argument(
+        "-release", dest="admin_release", action="store_true",
+        help="toggle to release block files")
     admin_parser.set_defaults(func=main_admin)
 
 def main_admin(args):
@@ -60,6 +69,9 @@ def gen_init_parser(subparsers):
     me_group.add_argument(
         "-p", dest="init_proj_name",
         help="input the proj name which will be check out from repository")
+    init_parser.add_argument(
+        "-b", dest="init_block_name_lst", nargs="+",
+        help="input the block name which will be check out from repository")
     init_parser.set_defaults(func=main_init)
 
 def main_init(args):
@@ -81,6 +93,11 @@ def gen_flow_parser(subparsers):
     me_group.add_argument(
         "-list_flow", dest="flow_list_flow", action="store_true",
         help="toggle to list all available flows")
+    me_group.add_argument(
+        "-list_diff", dest="flow_list_diff", nargs='?', const='DEFAULT',
+        metavar='FLOW_NAME',
+        help="""toggle to demonstrate the diff between block level config/plugins
+             and proj level one (default: FLOW_NAME=DEFAULT)""")
     me_group.add_argument(
         "-init", dest="flow_init_lst", nargs="+",
         help="input flow initial name list to generate flow config files")
@@ -108,11 +125,35 @@ def gen_flow_parser(subparsers):
     me_group.add_argument(
         "-restore", dest="flow_restore", default="",
         help="input flow::stage:sub-stage to restore")
+    me_group.add_argument(
+        "-release", dest="flow_release_lst", nargs="+",
+        help="input multiple flow::stage:sub-stage to release")
+    flow_parser.add_argument(
+        "-yes", dest="flow_cfm_yes", action="store_true",
+        help="toggle flows to give all yes response to flow inline prompt hint")
     flow_parser.set_defaults(func=main_flow)
 
 def main_flow(args):
     """flow sub cmd top function"""
     runner_flow.run_flow(args)
+
+def gen_clean_parser(subparsers):
+    """to generate clean parser"""
+    clean_parser = subparsers.add_parser(
+        "clean",
+        help="sub cmd about cleaning unnecessary data")
+    me_group = clean_parser.add_mutually_exclusive_group()
+    me_group.add_argument(
+        "-flow", dest="clean_flow", nargs="+",
+        help="input multiple flow::stage:sub-stage to clean")
+    clean_parser.add_argument(
+        "-excludes", dest="excludes_lst", nargs="+",
+        help="input pattern of exclude files to clean")
+    clean_parser.set_defaults(func=main_clean)
+
+def main_clean(args):
+    """clean sub cmd top function"""
+    runner_clean.run_clean(args)
 
 def gen_backup_parser(subparsers):
     """to generate backup parser"""
@@ -129,6 +170,37 @@ def main_backup(args):
     """backup sub cmd top function"""
     runner_backup.run_backup(args)
 
+def gen_merge_parser(subparsers):
+    """to generate merge parser"""
+    merge_parser = subparsers.add_parser(
+        "merge",
+        help="sub cmd about merging the generic scripts")
+    merge_parser.add_argument(
+        "-refer", dest="refer_dir", required=True,
+        help="reference directory to merge")
+    merge_parser.add_argument(
+        "-tool", dest="tool",
+        help="merge tool name")
+    merge_parser.set_defaults(func=main_merge)
+
+def main_merge(args):
+    """merge sub cmd top function"""
+    runner_merge.run_merge(args)
+
+def gen_email_parser(subparsers):
+    """to generate email parser"""
+    email_parser = subparsers.add_parser(
+        "email",
+        help="sub cmd about sending specified emails")
+    email_parser.add_argument(
+        "-local_rpt", dest="email_local_rpt",
+        help="parsing local report to email violation users")
+    email_parser.set_defaults(func=main_email)
+
+def main_email(args):
+    """email sub cmd top function"""
+    runner_email.run_email(args)
+
 def gen_args_top():
     """to generate top args help for op"""
     parser = argparse.ArgumentParser()
@@ -139,7 +211,10 @@ def gen_args_top():
     gen_admin_parser(subparsers)
     gen_init_parser(subparsers)
     gen_flow_parser(subparsers)
+    gen_clean_parser(subparsers)
     gen_backup_parser(subparsers)
+    gen_merge_parser(subparsers)
+    gen_email_parser(subparsers)
     return parser.parse_args()
 
 def main():

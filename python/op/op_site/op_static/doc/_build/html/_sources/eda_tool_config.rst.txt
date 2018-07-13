@@ -4,13 +4,17 @@ EDA Tool Config User Manual
 ==============================
 EDA tool config and plugin files are used to configurate tools run flow.
 
+EDA flow overview:
+
+.. figure:: images/op_flow_new.PNG
+
 User can change config and plugin files to customize a suitable block flow.
 
-- $PROJ_ROOT/share/config/flow/<type>.cfg (syn.cfg, pr.cfg, ext.cfg ...)
+- $PROJ_ROOT/share/config/flow/<type>.cfg (syn.cfg, pricc2.cfg, prinvs.cfg, ext.cfg ...)
 
   + After PL initialize project, All EDA tool's config files and plugin files are contain in this directory.
 
-- $Block_root/run/$netlist_version/$flow_name/<type>.cfg (syn.cfg, pr.cfg, ext.cfg ...)
+- $Block_root/run/$netlist_version/$flow_name/<type>.cfg (syn.cfg, pricc2.cfg, prinvs.cfg, ext.cfg ...)
 
   + By default, block config file are checkout from ``share/``.
   + By default, all variables in block config file are comment with "#".
@@ -25,7 +29,8 @@ User can change config and plugin files to customize a suitable block flow.
 EDA config file list::
 
   + $PROJ_ROOT/share/config/flow/syn.cfg
-  + $PROJ_ROOT/share/config/flow/pr.cfg
+  + $PROJ_ROOT/share/config/flow/pricc2.cfg
+  + $PROJ_ROOT/share/config/flow/prinvs.cfg
   + $PROJ_ROOT/share/config/flow/ext.cfg
   + $PROJ_ROOT/share/config/flow/sta.cfg
   + $PROJ_ROOT/share/config/flow/fm.cfg
@@ -36,6 +41,7 @@ EDA config file list::
 EDA plugin directory list::
 
   + $PROJ_ROOT/share/config/flow/plugins/icc2_scripts
+  + $PROJ_ROOT/share/config/flow/plugins/invs_scripts
   + $PROJ_ROOT/share/config/flow/plugins/dc_scripts
   + $PROJ_ROOT/share/config/flow/plugins/spyglass_scripts
   + $PROJ_ROOT/share/config/flow/plugins/fm_scripts
@@ -106,11 +112,11 @@ Example::
 
    In rendered syn.tcl scripts, _job_cpu_number is equal to "-n 8"
 
-Config file pr.cfg and plugins/icc2_scripts
+Config file pricc2.cfg and plugins/icc2_scripts
 ------------------------------------------------------------
-The pr.cfg is used for P&R stage (ICC2/Innovus) run control.
+The pricc2.cfg is used for P&R stage (ICC2) run control.
 
-:stage name: pr
+:stage name: pricc2
 :sub stage name: 01_fp.tcl, 02_place.tcl, 03_clock.tcl, 04_clock_opt.tcl, 05_route.tcl, 06_route_opt.tcl, 07_eco.tcl, 08_finish.tcl
 
 - Sections
@@ -260,7 +266,7 @@ The ext.cfg is used for RC extraction (StarRC/QRC) run control.
     + [ext.csh]
    
    Description:
-    + [DEFAULT] section is used to define common varaibles used for all tempaltes at syn stage.
+    + [DEFAULT] section is used to define common varaibles used for all tempaltes at RC-Extraction stage.
     + [ext.csh] section is used to define variables used for this tempalte ``ext.csh`` only.
 
 - Variables
@@ -289,24 +295,194 @@ Config file sta.cfg and plugins/pt_scripts
 ------------------------------------------------------------
 The sta.cfg is used for static timing analysis stage (Prime-Time) run control.
 
-TBD
+STA support multi-thread job run simultaneously base on scenairo defined in sta.config with ``_multi_inst``.
+
+**sta.config + sta.tcl = <scenario>/sta.tcl**
+
+:stage name: sta
+:sub stage name: sta.tcl
+
+- Sections
+   Section:
+    + [DEFAULT]
+    + [sta.tcl]
+   
+   Description:
+    + [DEFAULT] section is used to define common varaibles used for all tempaltes at STA stage.
+    + [sta.tcl] section is used to define variables used for this tempalte ``sta.tcl`` only.
+
+- Variables
+   Every substage can control it's own job submit resource and cpu requiremenet as well as STA tool and version
+   
+   + sta stage tool exection and version 
+   
+   ::
+
+    _exec_cmd       : EDA run command, ex. pt_shell -output_log_file pt.log -f
+    _exec_tool      : module load EDA tool version, ex. module load synopsys/pts_vM-2016.12-SP3-2  
+
+    _multi_inst     : scenairos for STA analysis, OP run scenario tasks in parrallel 
+
+Here is a document for PT template structrue :download:`OP4-Hier-Primetime-Flow.pdf<_static/OP4-Hier-Primetime-Flow.pdf>`
 
 Config file fm.cfg 
 ------------------------------------------------------------
 The fm.cfg is used for formal stage (Formality/Conformal) run control.
 
-TBD
+- Sections
+   Section:
+    + [DEFAULT]
+    + [fm.tcl]
+   
+   Description:
+    + [DEFAULT] section is used to define common varaibles used for all tempaltes at formal(FM) stage.
+    + [sta.tcl] section is used to define variables used for this tempalte ``fm.tcl`` only.
+
+- Variables
+   Every substage can control it's own job submit resource and cpu requiremenet as well as formal tool and version
+   
+   + fm stage tool exection and version 
+
+::
+
+    _exec_cmd       : EDA run command, ex. fm -f
+    _exec_tool      : module load EDA tool version, ex. module load synopsys/fm_vM-2016.12-SP4   
+
+    fm_implementation_vnet_list : implementation netlist file, if leave empty for this variable op will use previous stage's netlist 
+    fm_reference_vnet_list      : reference netlist file, it must been filled with as reference netlist
+    fm_save_session             : if true, fm session will be saved in <flow>/run/data dir
+    ......
+
+Config file ele.cfg 
+------------------------------------------------------------
+The ele.cfg is used for electrical stage (PT-PX/Redhawk) run control.
+
+- Sections
+   Section:
+    + [DEFAULT]
+    + [ptpx.tcl]
+    + [rh.csh]
+   
+   Description:
+    + [DEFAULT] section is used to define common varaibles used for all tempaltes at electrical(ELE) stage.
+    + [ptpx.tcl] section is used to define variables used for this tempalte ``ptpx.tcl`` only.
+    + [rh.csh] section is used to define variables used for this tempalte ``rh.csh`` only.
+
+- Variables for ``PTPX``
+   Every substage can control it's own job submit resource and cpu requiremenet as well as ptpx tool and version
+   
+   + ptpx stage tool exection and version 
+
+::
+    
+    _exec_cmd       : EDA run command, ex. pt_shell -output_log_file ptpx.log -f
+    _exec_tool      : module load EDA tool version, ex. module load synopsys/pts_vM-2016.12-SP3-2   
+
+    scenario        : specify scenario list for PTPX, 
+                      format: <mode>.<lib_norminal_voltage>.<lib_corner>.<rc_corner_temprature>.<anaysis_type>
+
+    ......
+
+- Variables for ``Redhawk``
+   Every substage can control it's own job submit resource and cpu requiremenet as well as redhawk tool and version
+   
+   + redhawk analysis stage tool exection and version 
+
+::
+    
+    _exec_cmd       : EDA run command, ex. csh, (redhawk run command will execute within c-shell script) 
+    _exec_tool      : module load EDA tool version, ex. module load redhawk/RedHawk_Linux64e5-int_V17.1.6p1   
+
+    scenario        : specify scenario list for PTPX, 
+                      format: <mode>.<lib_norminal_voltage>.<lib_corner>.<rc_corner_temprature>.<anaysis_type>
+    func            : specify with redhawk analysis type 
+                      available value "power | static | dynamic | res | FP | CPM" 
+    ......
+
+   
+- Redhawk scripts usage
+
+::
+
+    block_info: fill block name in block_info file
+    gsr files: 
+                gsr
+                ├── apl
+                ├── assign
+                ├── basic
+                ├── design
+                ├── lef
+                ├── lib
+                ├── ploc
+                ├── tech
+                └── vcd
+
+.. Note::
+   section ``[rh.csh]`` is used to generate redhawk run scripts and run redhawk in directory "<flow_root>/sum/ele/.trach"
+
+   Redahwk gsr files can be find in "<block_root>/block_common/redhawk/scripts/gsr".
+
+   Redhawk cmd scripts can be find in "<block_root>/block_common/redhawk/scripts/cmd".
+
+   Redhawk setup scripts can be find in "<block_root>/block_common/redhawk/scripts/setup".
+
+   Redahwk tcl files can be find in "<block_root>/block_common/redhawk/scripts/tcl".
+
 
 Config file pv.cfg 
 ------------------------------------------------------------
 The pv.cfg is used for pv stage (OPUS/Calibre) run control.
 
-TBD
+- Sections
+   Section:
+    + [DEFAULT]
+    + [opus_oa.csh]
+    + [opus.csh]
+    + [opus_dummy.csh]
+    + [drc.csh]
+    + [ant.csh]
+    + [v2lvs.csh]
+    + [lvs.csh]
+   
+   Description:
+    + [DEFAULT] section is used to define common varaibles used for all tempaltes at physical verification(PV) stage.
+    + [opus_oa.csh] section is used to define variables used for this tempalte ``opus_oa.csh`` only.
+    + [opus.csh] section is used to define variables used for this tempalte ``opus.csh`` only.
+    + [opus_dummy.csh] section is used to define variables used for this tempalte ``opus_dummy.csh`` only.
+    + [drc.csh] section is used to define variables used for this tempalte ``drc.csh`` only.
+    + [ant.csh] section is used to define variables used for this tempalte ``ant.csh`` only.
+    + [v2lvs.csh] section is used to define variables used for this tempalte ``v2lvs.csh`` only.
+    + [lvs.csh] section is used to define variables used for this tempalte ``lvs.csh`` only.
 
-Config file ele.cfg 
-------------------------------------------------------------
-The ele.cfg is used for electrical stage (OPUS/Calibre) run control.
+- Variables for ``opus``
+   Every substage can control it's own job submit resource and cpu requiremenet as well as gds merge tool and version
+   
+   + opus stage tool exection and version 
 
-TBD
+::
+    
+    _exec_cmd       : EDA run command, ex. csh (opus gds merge streamin and streamout command execute with in script) 
+    _exec_tool      : module load EDA tool version, ex. module load cadence/IC06.16.005 
+
+    dummy_metal_creat : "true" mean creat dummy_metal, "false" not
+    dummy_odpo_creat  : "true" mean creat dummy_odpo, "false" not
+    dummy_cod_creat   : "true" mean creat dummy_cod, "false" not
+    ......
+
+.. Note::
+   1. section ``[opus_oa.csh]`` is used to convert library to oa library, if ao is already generated, please skip this stage.
+   
+   2. section ``[opus_dummy.csh]`` is used to merge dummy gds (metal/odpo/cod) with design gds. 
+
+      dummy merge can use ``calibre`` or ``opus`` by variable ``tool_use_to_merge_dummy_gds``.
+
+   3. OS version requirement for Calibre
+
+      - if $CALIBRE_HOME contain "ixl",use the centos5 to run drc 
+        ex. _job_resource = -R "centos5 span[host=1] rusage[mem=5000]"
+      
+      - if $CALIBRE_HOME contain "aoi",use the centos6 to run drc
+        ex. ex. _job_resource = -R "centos6 span[host=1] rusage[mem=5000]"
+
 
 

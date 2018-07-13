@@ -1,0 +1,5 @@
+INSTANCE_TOGGLE_RATE {
+iou/iou_drt/drt_read/rdata_buf/array/array 0.7
+iou/iou_drt/write_split/drtwch_dfifo/array0 0.7
+iou/iou_drt/write_split/drtwch_dfifo/array1 0.7
+}

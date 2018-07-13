@@ -1,0 +1,6 @@
+//#-- input text file (this ia a template,if you want to use it,please delete // at the head of sentense) 
+//LAYOUT CELL LIST list1 " "        //fill top name in ""
+//LAYOUT IGNORE TEXT CELL LIST list1 DATABASE  
+//INCLUDE " "
+
+

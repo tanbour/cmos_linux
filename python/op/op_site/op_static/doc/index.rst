@@ -20,6 +20,7 @@ Contents:
    op_lab_guide
    env_setup
    template
+   openlava
 
 Indices and tables
 ==================

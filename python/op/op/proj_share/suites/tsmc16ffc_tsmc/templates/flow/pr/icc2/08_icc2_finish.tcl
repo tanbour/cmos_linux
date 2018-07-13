@@ -2,12 +2,13 @@
 # Tool: IC Compiler II
 ##########################################################################################
 puts "Alchip-info : Running script [info script]\n"
+set sh_continue_on_error true
 
 ##===================================================================##
 ## SETUP                                                             ##
 ##===================================================================##
-source {{cur.flow_scripts_dir}}/pr/00_setup.tcl
 source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+source {{cur.cur_flow_sum_dir}}/{{cur.sub_stage}}.op._job.tcl
 
 set pre_stage "{{pre.sub_stage}}"
 set cur_stage "{{cur.sub_stage}}"
@@ -15,55 +16,61 @@ set cur_stage "{{cur.sub_stage}}"
 set pre_stage [lindex [split $pre_stage .] 0]
 set cur_stage [lindex [split $cur_stage .] 0]
 
-set blk_name          "{{env.BLK_NAME}}"
-set blk_rpt_dir       "{{cur.cur_flow_rpt_dir}}"
-set blk_utils_dir     "{{env.PROJ_UTILS}}"
-set pre_flow_data_dir "{{pre.flow_data_dir}}/{{pre.stage}}"
-set cur_design_library "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
-set icc2_cpu_number   "[lindex "{{local._job_cpu_number}}" end]"
+set blk_name                                         "{{env.BLK_NAME}}"
+set blk_rpt_dir                                      "{{cur.cur_flow_rpt_dir}}"
+set blk_utils_dir                                    "{{env.PROJ_UTILS}}"
+set pre_flow_data_dir                                "{{pre.flow_data_dir}}/{{pre.stage}}"
+set cur_design_library                               "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
+set icc2_cpu_number                                  "[lindex "${_job_cpu_number} end"]"
 set_host_option -max_cores $icc2_cpu_number
 
-set pre_design_library  "$pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.nlib"
-set cur_design_library "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
+set pre_design_library                               "$pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.nlib"
+set cur_design_library                               "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
 
-set ocv_mode          "{{local.ocv_mode}}" 
-set optimization_flow "{{local.optimization_flow}}"
-set finish_active_scenario_list "{{local.finish_active_scenario_list}}"
-set finish_create_metal_fill_runset "{{local.finish_create_metal_fill_runset}}"
-set finish_create_metal_fill_timing_driven_threshold "{{local.finish_create_metal_fill_timing_driven_threshold}}"
-set finish_drc_icv_runset  "{{local.finish_drc_icv_runset}}"
-set finish_metal_filler_gdcap_prefix "{{local.finish_metal_filler_gdcap_prefix}}" 
-set finish_metal_filler_dcap_prefix  "{{local.finish_metal_filler_dcap_prefix}}" 
-set finish_non_metal_filler_prefix   "{{local.finish_non_metal_filler_prefix}}"
-set finish_metal_filler_gdcap_cell_list "{{local.finish_metal_filler_gdcap_cell_list}}"
-set finish_metal_filler_dcap_cell_list  "{{local.finish_metal_filler_dcap_cell_list}}"
-set finish_non_metal_filler_lib_cell_list "{{local.finish_non_metal_filler_lib_cell_list}}"
-set finish_metal_fller_gdcap_rule "{{local.finish_metal_fller_gdcap_rule}}" 
-set finish_metal_fller_dcap_rule  "{{local.finish_metal_fller_dcap_rule}}"
-set finish_non_metal_fller_rule   "{{local.finish_non_metal_fller_rule}}"
-set use_usr_metal_fill_cmd_tcl "{{local.use_usr_metal_fill_cmd_tcl}}"
-set use_usr_filler_cell_insertion_cmd_file "{{local.use_usr_filler_cell_insertion_cmd_file}}"
-set finish_create_metal_fill  "{{local.finish_create_metal_fill}}"
-set metal_fill_insertion_select_layers "{{local.metal_fill_insertion_select_layers}}"
-set finish_use_usr_write_data_tcl "{{local.route_opt_use_usr_write_data_tcl}}"       
-set finish_use_usr_report_tcl "{{local.route_opt_use_usr_write_data_tcl}}"       
-set finish_write_data             "{{local.route_opt_write_data}}"
-set finish_create_abstract        "{{local.route_opt_create_abstract}}"
-set enable_finish_reporting       "{{local.enable_finish_reporting}}"
-set finish_write_gds              "{{local.finish_write_gds}}"
-set icc_icc2_gds_layer_mapping_file "{{local.icc_icc2_gds_layer_mapping_file}}"
-set use_usr_common_scripts_connect_pg_net_tcl "{{local.use_usr_common_scripts_connect_pg_net_tcl}}"
+set ocv_mode                                         "{{local.ocv_mode}}" 
+set optimization_flow                                "{{local.optimization_flow}}"
+{%- if local.finish_active_scenario_list  is string %}
+set finish_active_scenario_list                      "{{local.finish_active_scenario_list}}"
+{%- elif local.finish_active_scenario_list is sequence %}
+set finish_active_scenario_list                      "{{local.finish_active_scenario_list|join (' ')}}"
+{%- endif %}
+
+set finish_create_metal_fill_runset                   "{{local.finish_create_metal_fill_runset}}"
+set finish_create_metal_fill_timing_driven_threshold  "{{local.finish_create_metal_fill_timing_driven_threshold}}"
+set finish_drc_icv_runset                             "{{local.finish_drc_icv_runset}}"
+set finish_metal_filler_gdcap_prefix                  "{{local.finish_metal_filler_gdcap_prefix}}" 
+set finish_metal_filler_dcap_prefix                   "{{local.finish_metal_filler_dcap_prefix}}" 
+set finish_non_metal_filler_prefix                    "{{local.finish_non_metal_filler_prefix}}"
+set finish_metal_filler_gdcap_cell_list               "{{local.finish_metal_filler_gdcap_cell_list}}"
+set finish_metal_filler_dcap_cell_list                "{{local.finish_metal_filler_dcap_cell_list}}"
+set finish_non_metal_filler_lib_cell_list             "{{local.finish_non_metal_filler_lib_cell_list}}"
+set finish_metal_fller_gdcap_rule                     "{{local.finish_metal_fller_gdcap_rule}}" 
+set finish_metal_fller_dcap_rule                      "{{local.finish_metal_fller_dcap_rule}}"
+set finish_non_metal_fller_rule                       "{{local.finish_non_metal_fller_rule}}"
+set use_usr_metal_fill_cmd_tcl                        "{{local.use_usr_metal_fill_cmd_tcl}}"
+set use_usr_filler_cell_insertion_cmd_file            "{{local.use_usr_filler_cell_insertion_cmd_file}}"
+set finish_create_metal_fill                          "{{local.finish_create_metal_fill}}"
+set metal_fill_insertion_select_layers                "{{local.metal_fill_insertion_select_layers}}"
+set finish_use_usr_write_data_tcl                     "{{local.route_opt_use_usr_write_data_tcl}}"       
+set finish_use_usr_report_tcl                         "{{local.route_opt_use_usr_write_data_tcl}}"       
+set finish_write_data                                 "{{local.route_opt_write_data}}"
+set finish_create_abstract                            "{{local.route_opt_create_abstract}}"
+set enable_finish_reporting                           "{{local.enable_finish_reporting}}"
+set finish_write_gds                                  "{{local.finish_write_gds}}"
+set icc_icc2_gds_layer_mapping_file                   "{{local.icc_icc2_gds_layer_mapping_file}}"
+set use_usr_common_scripts_connect_pg_net_tcl         "{{local.use_usr_common_scripts_connect_pg_net_tcl}}"
 set write_def_convert_icc2_site_to_lef_site_name_list "{{local.write_def_convert_icc2_site_to_lef_site_name_list}}"
-set icc_icc2_gds_layer_mapping_file "{{local.icc_icc2_gds_layer_mapping_file}}"
+set icc_icc2_gds_layer_mapping_file                   "{{local.icc_icc2_gds_layer_mapping_file}}"
+
 {%- if local.tcl_placement_spacing_label_rule_file %}
-set TCL_PLACEMENT_SPACING_LABEL_RULE_FILE "{{local.tcl_placement_spacing_label_rule_file}}"
+set TCL_PLACEMENT_SPACING_LABEL_RULE_FILE             "{{local.tcl_placement_spacing_label_rule_file}}"
 {%- else %}
-set TCL_PLACEMENT_SPACING_LABEL_RULE_FILE "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/placement_spacing_rule.tcl"
+set TCL_PLACEMENT_SPACING_LABEL_RULE_FILE             "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/placement_spacing_rule.tcl"
 {%- endif %}
 {%- if local.tcl_icc2_cts_ndr_rule_file %}
-set TCL_ICC2_CTS_NDR_RULE_FILE  "{{local.tcl_icc2_cts_ndr_rule_file}}"
+set TCL_ICC2_CTS_NDR_RULE_FILE                        "{{local.tcl_icc2_cts_ndr_rule_file}}"
 {%- else %}
-set TCL_ICC2_CTS_NDR_RULE_FILE  "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/icc2_cts_ndr_rule.tcl"
+set TCL_ICC2_CTS_NDR_RULE_FILE                        "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/icc2_cts_ndr_rule.tcl"
 {%- endif %}
 {% include 'icc2/00_icc2_setup.tcl' %}
 
@@ -98,10 +105,6 @@ set_scenario_status -active true $finish_active_scenario_list
 {%- else %}
 set_scenario_status -active true [all_scenarios]
 {% endif %}  
-
-###==================================================================##
-## Additional timer related setups :prects uncertainty               ##
-##===================================================================##
 
 ###==================================================================##
 ## finish settings                                                   ##
@@ -159,7 +162,7 @@ source -v {{cur.config_plugins_dir}}/icc2_scripts/08_finish/01_usr_finish_filler
     {%- endif %}
     puts "Alchip-info : $create_stdcell_filler_gdcap_metal_cmd"
 	eval {	eval ${create_stdcell_filler_gdcap_metal_cmd} }
-	connect_pg_net
+	connect_pg_net -automatic
 	remove_stdcell_fillers_with_violation
 {%- endif %}
 ## Metal filler (DCAP cells)----------------------------------------------
@@ -173,7 +176,7 @@ source -v {{cur.config_plugins_dir}}/icc2_scripts/08_finish/01_usr_finish_filler
     {%- endif %}
     puts "Alchip-info : $create_stdcell_filler_dcap_metal_cmd"
 	eval {	eval ${create_stdcell_filler_dcap_metal_cmd} }
-	connect_pg_net
+	connect_pg_net -automatic
 	remove_stdcell_fillers_with_violation
 {%- endif %}
 ## Non-metal filler ----------------------------------------------------------
@@ -187,7 +190,7 @@ source -v {{cur.config_plugins_dir}}/icc2_scripts/08_finish/01_usr_finish_filler
     {%- endif %}
     puts "Alchip-info : $create_stdcell_filler_non_metal_cmd"
 	eval {	eval ${create_stdcell_filler_non_metal_cmd} }
-	connect_pg_net
+	connect_pg_net -automatic
 {%- endif %}
 
 # To remove filler cells in the design :
@@ -227,7 +230,7 @@ source -v {{cur.config_plugins_dir}}/icc2_scripts/08_finish/00_usr_post_finish.t
 source {{env.PROJ_SHARE_CMN}}/icc2_common_scripts/connect_pg_net.tcl
 {%- else %}
 puts "Alchip-info: Running connect_pg_net command"
-connect_pg_net
+connect_pg_net -automatic
 {%- endif %}
 
 ## save design---------------------------------------------------------------
@@ -237,15 +240,29 @@ save_block -as {{env.BLK_NAME}}
 ###==================================================================##
 ##  output data                                                      ##
 ##===================================================================##
+## Write SPEF
+{%- if local.write_spef_by_tool  == "true" %}
+{% include 'icc2/icc2_write_spef.tcl' %}
+{%- endif %}
+
 {%- if local.finish_use_usr_write_data_tcl == "true" %}
 source -v {{cur.config_plugins_dir}}/icc2_scripts/08_finish/08_usr_write_data.tcl
 {%- else %}
 {%- if local.finish_write_data == "true" %} 
-write_verilog -compress gzip -exclude {leaf_module_declarations pg_objects} -hierarchy all {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.v
+# write_verilog (no pg, and no physical only cells)
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations pg_objects end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells} -hierarchy all {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.ori.v
+## write_verilog for LVS (with pg, and with physical only cells)
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.lvs.v
+## write_verilog for Formality (with pg, no physical only cells, and no supply statements)
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells supply_statements} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.fm.v
+## write_verilog for PT (no pg, no physical only cells but with diodes and DCAP for leakage power analysis)
+{%- if local.finish_metal_filler_gdcap_cell_list or local.finish_metal_filler_dcap_cell_list %}
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations pg_objects end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells} -hierarchy all -force_reference { {{local.finish_metal_filler_gdcap_cell_list}} {{local.finish_metal_filler_dcap_cell_list}}  } {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.pt.v 
+{%- else %}
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations pg_objects end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.pt.v
+{%- endif %}
 
-write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.pg.v
-
-{% if local.write_def_convert_icc2_site_to_lef_site_name_list != "" %} 
+{%- if local.write_def_convert_icc2_site_to_lef_site_name_list != "" %} 
 write_def -include_tech_via_definitions -convert_sites { $write_def_convert_icc2_site_to_lef_site_name_list } -compress gzip {{cur.cur_flow_data_dir}}/.${cur_stage}{{env.BLK_NAME}}.def
 {%- else %}
 write_def -include_tech_via_definitions -compress gzip {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.def

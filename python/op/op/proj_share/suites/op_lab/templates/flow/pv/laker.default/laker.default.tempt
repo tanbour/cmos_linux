@@ -1,0 +1,51 @@
+#!/bin/csh -f 
+
+%REPL_OP4
+source "$RUN_DIR/scr/flow/laker.$OP4_dst_branch.$OP4_dst_eco/$BLOCK_NAME.dir.$OP4_dst_branch.csh"
+#===================================================================
+#===================   delete exist files ==========================
+#===================================================================
+if (-d \$RPT_DIR) then
+\rm -rf \$RPT_DIR/*
+endif 
+#===================================================================
+#===================   set tech files    ===========================
+#===================================================================
+set tech_file                = "$LAKER_TECH_FILE"
+set map_file                 = "$LAKER_MAPPING_FILE"
+set laker_resource_file      = "$PROJ_DIR/LIB/Techfile/LAKER_LIB/laker.rc"
+#===================================================================
+#===================   set input files    ==========================
+#===================================================================
+set LIB_NAME                 = "$BLOCK_NAME"
+set CELL_NAME                = "$BLOCK_NAME"
+set gdsIn_file               = "../.\$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.gds.gz"
+set gdsOut_file              = "../.\$DST_DATA_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.merge.gds"
+set run_dir                  = "\$RPT_DIR"
+REPL_OP4%
+\cp -rf $laker_resource_file  ${run_dir}
+#===================================================================
+#===================   laker GdsIn    ==============================
+#===================================================================
+cd ${run_dir}
+%REPL_OP4
+bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE}  -n ${laker_CPU_NUMBER} -R "rusage[mem=${laker_MEM_REQUIREMENT}]" \
+REPL_OP4%
+blitzGdsIn -t $tech_file \
+           -o $LIB_NAME -case Preserve -label Preserve \
+           -l $map_file  $gdsIn_file
+#===================================================================
+#===================  laker GdsOut     =============================
+#===================================================================
+%REPL_OP4
+bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${laker_CPU_NUMBER} -R "rusage[mem=${laker_MEM_REQUIREMENT}]" \
+REPL_OP4%
+blitzGdsOut -l $map_file -o $gdsOut_file -topCells $CELL_NAME $LIB_NAME -ref
+cd ../..
+
+%REPL_OP4
+gzip -f  \$DST_DATA_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.merge.gds
+REPL_OP4%
+
+ 
+

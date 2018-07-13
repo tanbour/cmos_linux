@@ -5,7 +5,6 @@ set_host_options -max_cores $cpu_number
 file mkdir -p {{cur.flow_scripts_dir}}/.trach/TMP
 set  pt_tmp_dir {{cur.flow_scripts_dir}}/.trach/TMP
 file mkdir -p {{cur.cur_flow_rpt_dir}}/${SESSION}
-file mkdir -p {{cur.cur_flow_data_dir}}/${SESSION}
 file mkdir -p {{cur.cur_flow_log_dir}}/${SESSION}
 
 exec touch {{cur.flow_scripts_dir}}/.trach/.start
@@ -29,6 +28,32 @@ if {[file isfile $flow_root_dir/${SESSION}.ready]} {file delete $flow_root_dir/$
 ########################################################################
 {% include 'pt/setting/ALCHIP-PT-SignOff-CommonSetting.TSMC.N7.tcl' %} 
 
+{%- if local.UseHyperScaleMode == "constrain_only" %} 
+## UseHyperScaleMode == constrain_only
+set hier_enable_analysis true
+set hier_characterize_context_mode constraints_only
+{%- elif local.UseHyperScaleMode == "block" %}
+## UseHyperScaleMode == block
+set hier_enable_analysis true
+{%- elif local.UseHyperScaleMode == "top" %}
+## UseHyperScaleMode == top
+set hier_enable_analysis true
+set hier_constraint_write_context {{local.hier_constraint_write_context_topMode}}
+set timing_save_hier_context_data {{local.timing_save_hier_context_data_topMode}}
+
+{%- if local.set_hier_config_File_topMode %}
+source -e -v {{local.set_hier_config_File_topMode}} > {{cur.cur_flow_log_dir}}/${SESSION}/set_hier_config.log
+{%- else %}
+file delete -force {{cur.cur_flow_log_dir}}/${SESSION}/set_hier_config.log
+foreach blk $SUB_BLOCKS_CELL_MAP($type) {
+  set blk_context $BLOCK_RELEASE_DIR/context/${blk}_hierdata
+  set cmd "set_hier_config -block $blk -path $blk_context"
+  redirect -append {{cur.cur_flow_log_dir}}/${SESSION}/set_hier_config.log {puts "$cmd ([lindex [exec ls -rlt $blk_context] end]"; eval $cmd}
+}
+{%- endif %}
+{%- endif %}
+
+
 ########################################################################
 # READ DESIGN
 ########################################################################
@@ -38,14 +63,16 @@ redirect -append {{cur.cur_flow_log_dir}}/${SESSION}/read_verilog.log {read_veri
 foreach type [array names SUB_BLOCKS_CELL_MAP] {
     if {[regexp {verilog} $type]} {
         foreach blk $SUB_BLOCKS_CELL_MAP($type) {
-            set SVNET $BLOCK_RELEASE_DIR/$blk/vnet/${blk}.v.gz
-            redirect -append {{cur.cur_flow_log_dir}}/${SESSION}/read_verilog.log {puts "read_verilog ${SVNET}"}
+           # set SVNET $BLOCK_RELEASE_DIR/$blk/vnet/${blk}.v.gz
+            set SVNET $BLOCK_RELEASE_DIR/vnet/${blk}.v.gz
+            redirect -append {{cur.cur_flow_log_dir}}/${SESSION}/read_verilog.log {puts "read_verilog ${SVNET} ([lindex [exec ls -rlt ${SVNET}] end])"}
             redirect -append {{cur.cur_flow_log_dir}}/${SESSION}/read_verilog.log {read_verilog ${SVNET}}
         }
     } elseif { [regexp {ilm} $type]} {
         foreach blk $SUB_BLOCKS_CELL_MAP($type) {
-            set SVNET $BLOCK_RELEASE_DIR/$blk/ilm/${SESSION}_ILM/${blk}.v.gz
-            redirect -append {{cur.cur_flow_log_dir}}/${SESSION}/read_verilog.log {puts "read_verilog ${SVNET}"}
+         #   set SVNET $BLOCK_RELEASE_DIR/$blk/ilm/${SESSION}_ILM/${blk}.v.gz
+            set SVNET $BLOCK_RELEASE_DIR/ilm/${SESSION}_ILM/${blk}.v.gz
+            redirect -append {{cur.cur_flow_log_dir}}/${SESSION}/read_verilog.log {puts "read_verilog ${SVNET} ([lindex [exec ls -rlt ${SVNET}] end])"}
             redirect -append {{cur.cur_flow_log_dir}}/${SESSION}/read_verilog.log {read_verilog ${SVNET}}
         }
     }
@@ -80,7 +107,7 @@ redirect -append {{cur.cur_flow_rpt_dir}}/${SESSION}/output_port_loading.rpt   {
 ########################################################################
 # SIGNOFF_CRITERIA SETTING
 #
-{% if local.CLK_MODE == "propagated" %} 
+{% if local.CLK_MODE == "propagated" and pre.sub_stage != "pr:02_place.tcl" %} 
     set_propagated_clock [ all_clocks ]
 {%- else %}
     remove_propagated_clock [get_clocks *]
@@ -90,7 +117,7 @@ redirect -append {{cur.cur_flow_rpt_dir}}/${SESSION}/output_port_loading.rpt   {
     remove_clock_uncertainty -setup [get_clocks *]
     remove_clock_uncertainty -hold [get_clocks *]
 {%- else %}
-{%- include 'pt/criteria/ALCHIP-PT-SignOff-Criteria.TSMC.N7.tcl' %}  
+{%- include 'pt/criteria/ALCHIP-PT-SignOff-Criteria.tcl' %}  
 {%- endif %}
 
 ########################################################################
@@ -120,7 +147,7 @@ redirect -append {{cur.cur_flow_rpt_dir}}/${SESSION}/output_port_loading.rpt   {
                 if {[info exist hinstflip($inst_name)]&&[info exist hinstorigin($inst_name)]} {
                     set x_offset [format "%.0f" [expr [lindex $hinstorigin($inst_name) 0] * 1000]]
                     set y_offset [format "%.0f" [expr [lindex $hinstorigin($inst_name) 1] * 1000]]
-                    echo "Reading ${SPEF} ..."                                                                                  >> {{cur.cur_flow_log_dir}}/${SESSION}/read_parasitics.log
+                    echo "Reading ${SPEF} ([lindex [exec ls -rlt ${SPEF}] end]) ..."                                                                                  >> {{cur.cur_flow_log_dir}}/${SESSION}/read_parasitics.log
                     echo "read_parasitics -format ${ANNOTATED_FILE_FORMAT} -keep_capacitive_coupling -rotation rotate_none -axis_flip $hinstflip($inst_name) -x_offset $x_offset -y_offset $y_offset -path $inst_name ${SPEF}"  >> {{cur.cur_flow_log_dir}}/${SESSION}/read_parasitics.log
                     read_parasitics -format ${ANNOTATED_FILE_FORMAT} -keep_capacitive_coupling -rotation rotate_none -axis_flip $hinstflip($inst_name) -x_offset $x_offset -y_offset $y_offset -path $inst_name ${SPEF}         >> {{cur.cur_flow_log_dir}}/${SESSION}/read_parasitics.log
                 } else {
@@ -155,7 +182,7 @@ redirect -append {{cur.cur_flow_rpt_dir}}/${SESSION}/output_port_loading.rpt   {
     foreach sdc $SDC_LIST {
        redirect -append {{cur.cur_flow_log_dir}}/${SESSION}/read_sdc.${MODE}.SDF.log { source -echo -verbose ${sdc} }
     }
-    {% if local.CLK_MODE == "propagated" %} 
+    {% if local.CLK_MODE == "propagated" and pre.stage != "pr" %} 
         set_propagated_clock [ all_clocks ]
     {%- else %}
         remove_propagated_clock [get_clocks *]
@@ -167,23 +194,56 @@ redirect -append {{cur.cur_flow_rpt_dir}}/${SESSION}/output_port_loading.rpt   {
 
 {%- endif %}
 
+{%- if local.UseHyperScaleMode == "constrain_only" %}
+## UseHyperScaleMode == constrain_only
+{%- if local.characterize_context_File_constrainMode %}
+source -e -v {{local.characterize_context_File_constrainMode}} > {{cur.cur_flow_log_dir}}/${SESSION}/characterize_context.log
+{%- else %}
+file delete -force {{cur.cur_flow_log_dir}}/${SESSION}/characterize_context.log 
+foreach blk $SUB_BLOCKS_CELL_MAP($type) {
+  set cmd "characterize_context -block $blk"
+  redirect -append {{cur.cur_flow_log_dir}}/${SESSION}/characterize_context.log {puts "$cmd"; eval $cmd}
+}
+{%- endif %}
+exec mkdir -p ./context
+write_context -nosplit -format ptsh -output ./context
+{%- elif local.UseHyperScaleMode == "block" %}
+{%- if local.read_context_File_blockMode %}
+source -e -v {{local.read_context_File_blockMode}} > {{cur.cur_flow_log_dir}}/${SESSION}/read_context.log
+{%- else %}
+set top_context $BLOCK_RELEASE_DIR/context/${top}_hierdata
+set cmd "read_context $top_context"
+redirect {{cur.cur_flow_log_dir}}/${SESSION}/read_context.log {puts "$cmd"; eval $cmd}
+{%- endif %}
+{%- endif %}
+
 ########################################################################
 # UPDATE TIMING & SAVE SESSION
-#
+sh mkdir -p {{cur.cur_flow_data_dir}}/${SESSION}
 redirect -tee {{cur.cur_flow_log_dir}}/${SESSION}/update_timing.log { update_timing }
+
+{%- if local.UseHyperScaleMode != "none" %}
+set_noise_parameters -enable_propagation -analysis_mode report_at_endpoint
+check_noise > {{cur.cur_flow_rpt_dir}}/${SESSION}/check_noise.report
+update_noise
+write_hier_data ${TOP}_hierdata
+exec touch ${TOP}_hierdata.ready
+{%- endif %}
+
+
 {%- if local.SAVE_SESSION_LIST is string %}
 {%- if local.SAVE_SESSION_LIST == "all" %}
-save_session ${TOP}_${SESSION}.session	;# -only_used_libraries
+save_session {{cur.cur_flow_data_dir}}/${SESSION}/${TOP}.${SESSION}.session	;# -only_used_libraries
 {%- elif local.SAVE_SESSION_LIST  == local._multi_inst %} 
-save_session ${TOP}_${SESSION}.session	;# -only_used_libraries
+save_session {{cur.cur_flow_data_dir}}/${SESSION}/${TOP}.${SESSION}.session	;# -only_used_libraries
 {%- endif %}
 {%- endif %}
 {%- if local.SAVE_SESSION_LIST is sequence %}
 {%- for save_session in local.SAVE_SESSION_LIST %}
 {%- if save_session == "all" %}
-save_session ${TOP}_${SESSION}.session
+save_session {{cur.cur_flow_data_dir}}/${SESSION}/${TOP}.${SESSION}.session
 {% elif  save_session  == local._multi_inst %} 
-save_session ${TOP}_${SESSION}.session	;# -only_used_libraries
+save_session {{cur.cur_flow_data_dir}}/${SESSION}/${TOP}.${SESSION}.session	;# -only_used_libraries
 {%- endif %}
 {%- endfor %}
 {%- endif %}
@@ -203,13 +263,13 @@ if {[info exists CHECK_TYPE]} 	{
 }
 # ======================= report_timing options ========================
 # setup with io or hold with io
-eval $command > {{cur.cur_flow_rpt_dir}}/${SESSION}/${TOP}.${SESSION}.w_io.rpt
+eval $command > {{cur.cur_flow_rpt_dir}}/${SESSION}/w_io.rpt
 sh /usr/bin/perl {{env.PROJ_UTILS}}/pt_utils/check_violation_summary.pl \
-     {{cur.cur_flow_rpt_dir}}/${SESSION}/${TOP}.${SESSION}.w_io.rpt \
-   > {{cur.cur_flow_rpt_dir}}/${SESSION}/${TOP}.${SESSION}.w_io.rpt.summary
+     {{cur.cur_flow_rpt_dir}}/${SESSION}/w_io.rpt \
+   > {{cur.cur_flow_rpt_dir}}/${SESSION}/w_io.rpt.summary
 set new_command $command
 append new_command " -variation -derate -transition"
-eval $new_command > {{cur.cur_flow_rpt_dir}}/${SESSION}/${TOP}.${SESSION}.w_io.rpt.more
+eval $new_command > {{cur.cur_flow_rpt_dir}}/${SESSION}/w_io.rpt.more
 
 ########################################################################
 # EXPORT (ILM)
@@ -261,8 +321,13 @@ eval $new_command > {{cur.cur_flow_rpt_dir}}/${SESSION}/${TOP}.${SESSION}.w_io.r
 ########################################################################
 # EXPORT (REDHAWK)
 #
-{% if local.GEN_RH == "true" %} {
-}
+{% if local.GEN_RH == "true" %} 
+  source {{local.REDHAWK_FILE}}
+  set_propagated_clock [ all_clocks ]
+  set ADS_ALLOW_IDEAL_CLOCKS 1
+  set ADS_ALLOWED_PCT_OF_NON_CLOCKED_REGISTERS 50
+  getSTA * -noexit  -nocompact
+  exec mv ${TOP}.timing {{cur.cur_flow_data_dir}}/${SESSION}/${TOP}.${SESSION}.timing
 {%- endif %}
 
 ########################################################################
@@ -280,11 +345,11 @@ set all_data_outputs [ remove_from_collection [ all_outputs ] $all_clock_inputs 
 set_false_path -from $all_data_inputs
 set_false_path -to $all_data_outputs
 
-eval $command > {{cur.cur_flow_rpt_dir}}/${SESSION}/${TOP}.${SESSION}.wo_io.rpt
+eval $command > {{cur.cur_flow_rpt_dir}}/${SESSION}/wo_io.rpt
 exec perl {{env.PROJ_UTILS}}/pt_utils/check_violation_summary.pl \
-     {{cur.cur_flow_rpt_dir}}/${SESSION}/${TOP}.${SESSION}.wo_io.rpt \
-   > {{cur.cur_flow_rpt_dir}}/${SESSION}/${TOP}.${SESSION}.wo_io.rpt.summary
-eval $new_command > {{cur.cur_flow_rpt_dir}}/${SESSION}/${TOP}.${SESSION}.wo_io.rpt.more
+     {{cur.cur_flow_rpt_dir}}/${SESSION}/wo_io.rpt \
+   > {{cur.cur_flow_rpt_dir}}/${SESSION}/wo_io.rpt.summary
+eval $new_command > {{cur.cur_flow_rpt_dir}}/${SESSION}/wo_io.rpt.more
 
 {% if local.GEN_SDF == "true" %} 
 exit
@@ -312,8 +377,10 @@ report_si_double_switching -nosplit -rise -fall > {{cur.cur_flow_rpt_dir}}/${SES
 ########################################################################
 # REPORT NOISE
 #
+{%- if local.UseHyperScaleMode == "none" %}
 set_noise_parameters -enable_propagation -analysis_mode report_at_endpoint
 check_noise > {{cur.cur_flow_rpt_dir}}/${SESSION}/check_noise.report
+{%- endif %}
 update_noise
 report_noise -nosplit -all_violators -above -low > {{cur.cur_flow_rpt_dir}}/${SESSION}/report_noise_all_viol_abv_low.rpt
 report_noise -all_violators -verbose > {{cur.cur_flow_rpt_dir}}/${SESSION}/report_noise.rpt
@@ -326,24 +393,24 @@ report_noise_violation_sources -max_sources_per_endpoint 1000 -nworst_endpoints 
 # REPORT CLOCKS
 #
 # ====== Clock Skew ========
-report_clock_timing -nosplit -significant_digits 3 -type skew > {{cur.cur_flow_rpt_dir}}/${SESSION}/clock_timing.${SESSION}.skew.rpt
-report_clock_timing -nosplit -significant_digits 3 -type skew -verbose > {{cur.cur_flow_rpt_dir}}/${SESSION}/clock_timing.${SESSION}.skew.detail.rpt
+report_clock_timing -nosplit -significant_digits 3 -type skew > {{cur.cur_flow_rpt_dir}}/${SESSION}/clock_timing.skew.rpt
+report_clock_timing -nosplit -significant_digits 3 -type skew -verbose > {{cur.cur_flow_rpt_dir}}/${SESSION}/clock_timing.skew.detail.rpt
 
 # ==== Clock Latency =======
-file delete -force {{cur.cur_flow_rpt_dir}}/${SESSION}/report_clock_timing.${SESSION}.latency.rpt
+file delete -force {{cur.cur_flow_rpt_dir}}/${SESSION}/report_clock_timing.latency.rpt
 foreach_in_collection clock [ get_clocks * ] {
     set clock_name [ get_attribute $clock full_name ]
     foreach_in_collection source [ get_attribute $clock sources ] {
         set source_name [ get_attribute $source full_name ]
         echo [ format "# report_clock_timing -nosplit -significant_digits 3 -type latency -nworst 9999999 -clock %s -from %s" $clock_name $source_name ] \
-        >> {{cur.cur_flow_rpt_dir}}/${SESSION}/report_clock_timing.${SESSION}.latency.rpt
+        >> {{cur.cur_flow_rpt_dir}}/${SESSION}/report_clock_timing.latency.rpt
         report_clock_timing -nosplit -significant_digits 3 -type latency -nworst 9999999 -clock $clock_name -from $source_name \
-        >> {{cur.cur_flow_rpt_dir}}/${SESSION}/report_clock_timing.${SESSION}.latency.rpt
+        >> {{cur.cur_flow_rpt_dir}}/${SESSION}/report_clock_timing.latency.rpt
     }
 }
 exec perl {{env.PROJ_UTILS}}/pt_utils/check_report_clock_timing_latency.pl \
-     {{cur.cur_flow_rpt_dir}}/${SESSION}/report_clock_timing.${SESSION}.latency.rpt \
-   > {{cur.cur_flow_rpt_dir}}/${SESSION}/report_clock_timing.${SESSION}.latency.rpt.summary
+     {{cur.cur_flow_rpt_dir}}/${SESSION}/report_clock_timing.latency.rpt \
+   > {{cur.cur_flow_rpt_dir}}/${SESSION}/report_clock_timing.latency.rpt.summary
 
 # ==== Clock Cell Type =======
 source {{env.PROJ_UTILS}}/pt_utils/check_clock_cell_type.tcl
@@ -352,3 +419,18 @@ report_constraint -all_violators -nosplit >> {{cur.cur_flow_rpt_dir}}/${SESSION}
 check_timing -verbose >> {{cur.cur_flow_rpt_dir}}/${SESSION}/check_timing.rpt
 puts "INFO: PT finished."
 ########################################################################
+
+#####################  write timing file for power  #####################################
+{%- if local.write_timing_file_scenarios is string %}
+set write_timing_file_scenarios "{{local.write_timing_file_scenarios}}"
+{%- elif local.write_timing_file_scenarios is sequence %}
+set write_timing_file_scenarios "{{local.write_timing_file_scenarios|join(' ')}}"
+{%- endif %}
+
+foreach sc $write_timing_file_scenarios {
+  if {$sc == $SESSION} {
+    source /alchip/home/juliaz/scr/Usage/OP4_flow/pt2timing.tcl
+    exec mv  ${TOP}.timing {{cur.cur_flow_data_dir}}/$SESSION/
+    exec touch {{cur.cur_flow_data_dir}}/$SESSION/pt2timing.ready
+  }
+}

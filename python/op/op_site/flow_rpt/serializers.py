@@ -24,10 +24,16 @@ class BlockSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "proj", "owner", "milestone", "data")
         depth = 1
 
+class StageDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Stage
+        fields = ("id", "name", "data")
+
 class FlowSerializer(serializers.ModelSerializer):
+    stage_flow = StageDetailSerializer(many=True, read_only=True)
     class Meta:
         model = Flow
-        fields = ("id", "name", "block", "owner", "created_time", "status", "comment", "data")
+        fields = ("id", "name", "block", "owner", "created_time", "status", "comment", "data", "stage_flow")
         depth = 1
 
 class StageSerializer(serializers.ModelSerializer):
@@ -94,11 +100,6 @@ class FlowRelatedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Flow
         fields = ("id", "name", "stage_flow")
-
-class StageDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Stage
-        fields = ("id", "name", "data")
 
 class FlowStatusSerializer(serializers.ModelSerializer):
     cur_stage = serializers.SerializerMethodField()

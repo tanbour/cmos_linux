@@ -51,16 +51,19 @@ foreach scenario $scenario_list {
  ## set scenario status 
   echo "INFO: Setting scenario $scenario anaysis status"
   echo "$i_mcmm"
-  
+ 
+ ## set scenario all status to false, except "active" status
+  set_scenario_status $scenario -none
   set set_scenario_status_command "set_scenario_status $scenario"
-  if {$analysis_type == "setup"        } {append set_scenario_status_command "-setup true"} 
-  if {$analysis_type == "hold"         } {append set_scenario_status_command "-hold true" } 
-  if {$status_leakage_power == "true"  } {append set_scenario_status_command "-leakage_power true"}
-  if {$status_dynamic_power == "true"  } {append set_scenario_status_command "-dynamic_power true"}
-  if {$status_max_transition == "true" } {append set_scenario_status_command "-max_transition true"}
-  if {$status_max_capacitance == "true"} {append set_scenario_status_command "-max_capacitance true"}
+  if {$analysis_type == "setup"        } {append set_scenario_status_command " -setup true "} 
+  if {$analysis_type == "hold"         } {append set_scenario_status_command " -hold true " } 
+  if {$status_leakage_power == "true"  } {append set_scenario_status_command " -leakage_power true "}
+  if {$status_dynamic_power == "true"  } {append set_scenario_status_command " -dynamic_power true "}
+  if {$status_max_transition == "true" } {append set_scenario_status_command " -max_transition true "}
+  if {$status_max_capacitance == "true"} {append set_scenario_status_command " -max_capacitance true "}
   
   puts "scenario status: $set_scenario_status_command"
+  eval $set_scenario_status_command
 
   ## set parasitics
   echo "INFO: set additional MCMM constraint in ICCII"
@@ -237,28 +240,28 @@ set mem  ""
 }
 
 if {$data_net_early_derate != ""} {
-set_timing_derate -data -net_delay -early $data_net_early_derate -corners $corner
+set_timing_derate -increment -data -net_delay -early $data_net_early_derate -corners $corner
 }
 if {$data_net_late_derate != ""} {
-set_timing_derate -data -net_delay -late $data_net_late_derate -corners $corner
+set_timing_derate -increment -data -net_delay -late $data_net_late_derate -corners $corner
 }
 if {$clock_net_early_derate != ""} {
-set_timing_derate -clock -net_delay -early $clock_net_early_derate -corners $corner
+set_timing_derate -increment -clock -net_delay -early $clock_net_early_derate -corners $corner
 }
 if {$clock_net_late_derate != ""} {
-set_timing_derate -clock -net_delay -late $clock_net_late_derate -corners $corner
+set_timing_derate -increment -clock -net_delay -late $clock_net_late_derate -corners $corner
 }
 if {$data_cell_early_derate != ""} {
-set_timing_derate -data -cell_delay -early $data_cell_early_derate -corners $corner
+set_timing_derate -increment -data -cell_delay -early $data_cell_early_derate -corners $corner
 }
 if {$data_cell_late_derate != ""} {
-set_timing_derate -data -cell_delay -late $data_cell_late_derate -corners $corner
+set_timing_derate -increment -data -cell_delay -late $data_cell_late_derate -corners $corner
 }
 if {$clock_cell_early_derate != ""} {
-set_timing_derate -clock -cell_delay -early $clock_cell_early_derate -corners $corner
+set_timing_derate -increment -clock -cell_delay -early $clock_cell_early_derate -corners $corner
 }
 if {$clock_cell_late_derate != ""} {
-set_timing_derate -clock -cell_delay -late $clock_cell_late_derate -corners $corner
+set_timing_derate -increment -clock -cell_delay -late $clock_cell_late_derate -corners $corner
 }
 
 if {$mem != ""} {

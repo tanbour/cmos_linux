@@ -1,0 +1,13 @@
+//#-- input check only rule(this ia a template,if you want to use it,please delete // at the head of sentense)
+//GROUP check_rule ""  
+//DRC SELECT CHECK check_rule
+
+//#-- input not check rule ---------------
+//GROUP uncheck_rule "" 
+//DRC UNSELECT CHECK uncheck_rule 
+
+//#-- input text file --------------------
+//include "" 
+
+//#-- input polygon adv feature ----------
+//include "" 

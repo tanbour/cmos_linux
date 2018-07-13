@@ -8,10 +8,10 @@ set_lib_cell_purpose -exclude all  [get_lib_cells */*D28*]  ;  # big cell
 set_lib_cell_purpose -exclude all  [get_lib_cells */*D32*]  ;  # big cell
 set_lib_cell_purpose -exclude all  [get_lib_cells */*D36*]  ;  # big cell
 set_lib_cell_purpose -exclude all  [get_lib_cells */*DEL*]  ;  # delay cell
-set_lib_cell_purpose -exclude all  [get_lib_cells */*TIE*]  ;  # tie cell
+#set_lib_cell_purpose -exclude all  [get_lib_cells */*TIE*]  ;  # tie cell
 set_lib_cell_purpose -exclude all  [get_lib_cells */BHD*]   ;  # bhd cell
 set_lib_cell_purpose -exclude all  [get_lib_cells */BUFT*]  ;  # tri buffer
-set_lib_cell_purpose -exclude all  [get_lib_cells */CKL*]  ;  # Latch
+set_lib_cell_purpose -exclude all  [get_lib_cells */*LHQ*]  ;  # Latch
 set_lib_cell_purpose -exclude all  [get_lib_cells */*ANT*]  ;  # antenna cell
 set_lib_cell_purpose -exclude all  [get_lib_cells */*DCAP*] ;  # decap cell
 set_lib_cell_purpose -exclude all  [get_lib_cells */G*]     ;  # ECO cell
@@ -34,16 +34,6 @@ set_lib_cell_purpose -exclude all  [get_lib_cells */CKND1BWP*]
 set_lib_cell_purpose -exclude all  [get_lib_cells */*OPT*]
 #set_lib_cell_purpose -exclude all  [get_lib_cells */MB4*]
 #set_lib_cell_purpose -exclude all  [get_lib_cells */MB8*]
-set_lib_cell_purpose -exclude all [get_lib_cells */IND4D*BWP240H11P57PDULVT ]
-set_lib_cell_purpose -exclude all [get_lib_cells */INR4D*BWP240H11P57PDULVT ]
-set_lib_cell_purpose -exclude all [get_lib_cells */IND4D*BWP240H11P57PDULVT ]
-set_lib_cell_purpose -exclude all [get_lib_cells */INR4D*BWP240H11P57PDULVT ]
-set_lib_cell_purpose -exclude all [get_lib_cells */MUX4D*BWP240H11P57PDULVT ]
-set_lib_cell_purpose -exclude all [get_lib_cells */ND4D*BWP240H11P57PDULVT ]
-set_lib_cell_purpose -exclude all [get_lib_cells */NR4D*BWP240H11P57PDULVT ]
-set_lib_cell_purpose -exclude all [get_lib_cells */OR4D*BWP240H11P57PDULVT ]
-set_lib_cell_purpose -exclude all [get_lib_cells */XNR4D*BWP240H11P57PDULVT ]
-set_lib_cell_purpose -exclude all [get_lib_cells */XOR4D*BWP240H11P57PDULVT ]
 
 set high_pin_cells [list AOI222 AOI33 MUX4 MUX4N OAI222 OAI33 ]
 foreach c $high_pin_cells {

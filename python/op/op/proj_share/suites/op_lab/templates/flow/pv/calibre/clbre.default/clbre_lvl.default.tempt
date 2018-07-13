@@ -1,0 +1,124 @@
+#!/bin/csh -f
+
+%REPL_OP4
+source "$RUN_DIR/scr/flow/clbre.$OP4_dst_branch.$OP4_dst_eco/$BLOCK_NAME.dir.$OP4_dst_branch.csh"
+#======================================================================
+#===================    set input files,user need to fill the   =======
+#=================== design_gds and refdesign_gds like example  =======
+#======================================================================
+set design_primary_cell    = ""
+set design_gds             = "" ;#specifies the Layout Path statement in the output rule file,For example:./data/icc2.0606_M6/huc_core_sys.icc2_finish.default.0606_M6.gds.gz
+set refdesign_primary_cell = ""
+set refdesign_gds          = "" ;#specifies the Layout Path2 statement in the output rule file,For example:./data/clbre.0725/huc_core_sys.clbre_dummy.default.0725.dummy_merge.gds.gz
+set layer_map              = "$OPUS_MAPPING_FILE" 
+set lvl_run                = "$FLOW_BRANCH_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.rule" ;#main command file to run lvl
+set lvl_plugin_file        = "$FLOW_BRANCH_DIR/plugin/clbre_lvl_plugin.rule"
+set run_time               = "../../.\$RPT_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_eco.run_time"
+set run_dir                = "$BLOCK_NAME.$OP4_dst.$OP4_dst_eco"
+set BUMP                   = 1000
+REPL_OP4%
+
+#======================================================================
+#=============  generate lvl rules ====================================
+#======================================================================
+#************************* main command *******************************
+%REPL_OP4
+cat << lvl_setting >! \${lvl_run}
+LAYOUT PRIMARY "\$design_primary_cell" 
+LAYOUT PATH "\$design_gds"  
+LAYOUT SYSTEM GDS
+
+LAYOUT PRIMARY2 "\$refdesign_primary_cell" 
+LAYOUT SYSTEM2 GDS
+LAYOUT PATH2 "\$refdesign_gds"  
+
+LAYOUT ERROR ON INPUT NO
+DRC RESULTS DATABASE "../../.\$RPT_DIR/\${run_dir}/$BLOCK_NAME.$OP4_dst.$OP4_dst_eco.db"
+DRC SUMMARY REPORT "../../.\$RPT_DIR/\${run_dir}/$BLOCK_NAME.$OP4_dst.$OP4_dst_eco.rep"
+LAYOUT BUMP2 \$BUMP 
+
+lvl_setting
+REPL_OP4%
+#********************** comapre layer **********************************
+sed -i -e '/^$/d' -e '/^#.*$/d' $lvl_plugin_file
+set fileIn = $lvl_plugin_file
+set i = 1
+set n = 0
+set l = `wc -l < $fileIn`
+while ($i <= $l)
+set line = "`awk '{if (NR == $i)print}' $fileIn`"
+set name = `echo $line | awk '{print $1"_"$2}'`
+set layer = `echo $line | awk '{print $3}'`
+set type = `echo $line | awk '{print $4}'`
+@ maplayer = $layer + $BUMP
+@ mapn = $n + $BUMP
+echo  "LAYER MAP $layer DATATYPE $type $n" >> ${lvl_run}
+echo  "LAYER MAP $maplayer DATATYPE $type $mapn" >> ${lvl_run}
+echo  "$name { XOR $n $mapn } \n" >> ${lvl_run}
+@ i++
+@ n++
+end
+
+#==========================================================================
+#========= run lvl check ==================================================
+#==========================================================================
+cd $RPT_DIR
+mkdir -p ${run_dir}
+cd ${run_dir}
+
+echo "clbre_lvl" >! $run_time
+echo "start " `date "+%F %T %a"` >> $run_time
+mkdir  -p ../../../openlava
+#-- if $CALIBRE_HOME contain "ixl",use the centos5 to run drc-----------
+set clbre_version = `basename $CALIBRE_HOME | awk 'BEGIN{FS="_"} {print $1}'`
+if ( $clbre_version == ixl ) then
+set host_version = centos5
+endif
+#-- if $CALIBRE_HOME contain "aoi",use the centos6 to run drc------------
+if ( $clbre_version == aoi ) then
+set host_version = centos6
+endif
+#-----------------------  run lvl check -----------------------------------
+%REPL_OP4
+set clbre_drc_HOST_NAME = "$clbre_drc_HOST_NAME"
+if (\$clbre_drc_HOST_NAME == "all" ) then
+ set calibre_drc_user_run_cmd = "$CALIBRE_DRC_USER_RUN_CMD"
+ if ( "\$calibre_drc_user_run_cmd" != "" ) then
+ #-- if "\$calibre_drc_user_run_cmd" is not empty run user defined command-
+ echo "\$calibre_drc_user_run_cmd  ../../.\${lvl_run}"
+ bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${clbre_drc_CPU_NUMBER} \
+      -R "\$host_version span[hosts=1] rusage[mem=${clbre_drc_MEM_REQUIREMENT}]" \
+ "eval "\$calibre_drc_user_run_cmd  ../../.\${lvl_run}""
+ else
+  bsub  -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${clbre_drc_CPU_NUMBER} \
+      -R "\$host_version rusage[mem=${clbre_drc_MEM_REQUIREMENT}]" \ 
+ calibre  -drc -hier  -turbo -32 ${clbre_drc_CPU_NUMBER} -hyper  ../../.\${lvl_run}
+ endif
+else
+ if ( "\$calibre_drc_user_run_cmd" != "" ) then
+ #-- if "\$calibre_drc_user_run_cmd" is not empty run user defined command-
+ echo "\$calibre_drc_user_run_cmd  ../../.\${lvl_run}"
+ bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${clbre_drc_CPU_NUMBER} \
+      -R "\$host_version span[hosts=1] rusage[mem=${clbre_drc_MEM_REQUIREMENT}]" \
+ "eval "\$calibre_drc_user_run_cmd  ../../.\${lvl_run}""
+ else
+ bsub  -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${clbre_drc_CPU_NUMBER} -m \${clbre_drc_HOST_NAME}\
+      -R "\$host_version rusage[mem=${clbre_drc_MEM_REQUIREMENT}]" \ 
+ calibre  -drc -hier  -turbo -32 ${clbre_drc_CPU_NUMBER} -hyper  ../../.\${lvl_run}
+ endif
+endif
+echo "finish" `date "+%F %T %a"` >> \$run_time
+REPL_OP4%
+cd ../../..
+#==========================================================================
+#========= grep the report ================================================
+#==========================================================================
+%REPL_OP4
+grep -v "NOT EXECUTED" \$RPT_DIR/\${run_dir}/$BLOCK_NAME.$OP4_dst.$OP4_dst_eco.rep | grep -v "TOTAL Result Count = 0">! \$RPT_DIR/\${run_dir}/$BLOCK_NAME.$OP4_dst.$OP4_dst_eco.rep.sum
+grep -v "\.DN\." \$RPT_DIR/\${run_dir}/$BLOCK_NAME.$OP4_dst.$OP4_dst_eco.rep.sum >! \$RPT_DIR/\${run_dir}/$BLOCK_NAME.$OP4_dst.$OP4_dst_eco.rep.sum2
+REPL_OP4%
+
+
+
+
+

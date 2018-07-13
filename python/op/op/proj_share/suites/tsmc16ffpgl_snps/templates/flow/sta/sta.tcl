@@ -1,3 +1,8 @@
+{%- if cur.op_restore == "true" %}
+{%- include 'pt/pt_restore.tcl' %}
+puts "{{env.FIN_STR}}"
+{%- else %}
+{%- include 'stage_ctrl/stage_ctrl.tcl' %}
 ###===================================================================###
 ###   pt setup                                                        ###
 ###===================================================================###
@@ -23,8 +28,8 @@ set MV_INSTANCES                    "{{local.MV_INSTANCES}}"
 set MV_INSTANCES_FILE               "{{local.MV_INSTANCES_FILE}}"
 set SUB_BLOCKS_LOCATIONS_FILE       "{{local.SUB_BLOCKS_LOCATIONS_FILE}}"
 
-if {[file exist {{pre.flow_data_dir}}/{{pre.stage}}/$pre_stage.{{env.BLK_NAME}}.v.gz]} {
-set VNET                           " {{pre.flow_data_dir}}/{{pre.stage}}/$pre_stage.{{env.BLK_NAME}}.v.gz "
+if {[file exist {{pre.flow_data_dir}}/{{pre.stage}}/$pre_stage.{{env.BLK_NAME}}.pt.v.gz]} {
+set VNET                            "{{pre.flow_data_dir}}/{{pre.stage}}/$pre_stage.{{env.BLK_NAME}}.pt.v.gz"
 } else {
 set VNET                            "{{env.BLK_NETLIST}}/{{ver.netlist}}/{{env.BLK_NAME}}.v"
 }
@@ -51,6 +56,11 @@ set ENABLE_POCV                     "{{local.ENABLE_POCV}}"
 ###  source liblist                                                   ###
 ###===================================================================###
 source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+sh mkdir -p {{cur.cur_flow_data_dir}}/{{local._multi_inst}}
+sh ln -sf $VNET {{cur.cur_flow_data_dir}}/{{local._multi_inst}}/${cur_stage}.{{env.BLK_NAME}}.pt.v.gz
+sh ln -sf $SPEF {{cur.cur_flow_data_dir}}/{{local._multi_inst}}/${cur_stage}.{{env.BLK_NAME}}.${RC_CORNER}.spef.gz
+sh ln -sf {{pre.flow_data_dir}}/{{pre.stage}}/${pre_stage}.{{env.BLK_NAME}}.def.gz {{cur.cur_flow_data_dir}}/{{local._multi_inst}}/${cur_stage}.{{env.BLK_NAME}}.def.gz
+
 
 ###===================================================================###
 ###  run PT flow                                                      ###
@@ -59,3 +69,4 @@ source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
 
 puts "Alchip_info: op stage finished."
 exit
+{%- endif %}

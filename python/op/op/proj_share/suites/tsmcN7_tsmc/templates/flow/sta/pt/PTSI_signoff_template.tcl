@@ -100,6 +100,7 @@ redirect -append {{cur.cur_flow_rpt_dir}}/${SESSION}/output_port_loading.rpt   {
     redirect -tee {{cur.cur_flow_log_dir}}/${SESSION}/report_annotated_delay.rpt { report_annotated_delay }
 {% else %}
     if {[info exists GEN_SDF] && $GEN_SDF == "true"} {set_si_delay_analysis -ignore_arrival [ get_nets * -hierarchical ]}
+    file delete -force {{cur.cur_flow_log_dir}}/${SESSION}/read_parasitics.log
     echo "Reading ${SPEF} ..."                                                                    >> {{cur.cur_flow_log_dir}}/${SESSION}/read_parasitics.log
     echo "read_parasitics -format ${ANNOTATED_FILE_FORMAT} -keep_capacitive_coupling ${SPEF} ..." >> {{cur.cur_flow_log_dir}}/${SESSION}/read_parasitics.log
     read_parasitics -format ${ANNOTATED_FILE_FORMAT} -keep_capacitive_coupling ${SPEF}            >> {{cur.cur_flow_log_dir}}/${SESSION}/read_parasitics.log
@@ -169,7 +170,7 @@ redirect -append {{cur.cur_flow_rpt_dir}}/${SESSION}/output_port_loading.rpt   {
 ########################################################################
 # UPDATE TIMING & SAVE SESSION
 sh mkdir -p {{cur.cur_flow_data_dir}}/${SESSION}
-redirect -tee {{cur.cur_flow_log_dir}}/${SESSION}/update_timing.log { update_timing }
+redirect -tee {{cur.cur_flow_log_dir}}/${SESSION}/update_timing.log { update_timing -full}
 {%- if local.SAVE_SESSION_LIST is string %}
 {%- if local.SAVE_SESSION_LIST == "all" %}
 save_session {{cur.cur_flow_data_dir}}/${SESSION}/${TOP}.${SESSION}.session	;# -only_used_libraries
@@ -260,8 +261,13 @@ eval $new_command > {{cur.cur_flow_rpt_dir}}/${SESSION}/w_io.rpt.more
 ########################################################################
 # EXPORT (REDHAWK)
 #
-{% if local.GEN_RH == "true" %} {
-}
+{% if local.GEN_RH == "true" %}  
+  source {{local.REDHAWK_FILE}}
+  set_propagated_clock [ all_clocks ]
+  set ADS_ALLOW_IDEAL_CLOCKS 1
+  set ADS_ALLOWED_PCT_OF_NON_CLOCKED_REGISTERS 50
+  getSTA * -noexit  -nocompact
+  exec mv ${TOP}.timing {{cur.cur_flow_data_dir}}/${SESSION}/${TOP}.${SESSION}.timing
 {%- endif %}
 
 ########################################################################

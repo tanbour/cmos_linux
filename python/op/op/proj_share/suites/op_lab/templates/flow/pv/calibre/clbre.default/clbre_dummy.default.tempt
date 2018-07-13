@@ -1,0 +1,339 @@
+#!/bin/csh -f
+####################################################################
+# this script is used for insert dummy metal/odpo/cod,and merge the 
+# design gds with dummy-only gds used calibre or opus.you can 
+# choose which dummy insert and which tool used in 200_user_setup.conf
+#####################################################################
+%REPL_OP4
+source "$RUN_DIR/scr/flow/clbre.$OP4_dst_branch.$OP4_dst_eco/$BLOCK_NAME.dir.$OP4_dst_branch.csh"
+#===================================================================
+#====  delete existing tmp file and backup the gds file ============
+#===================================================================
+
+#------------------ set the prefix name of dummys -------------------
+set pre_metal = "DVIA";
+set pre_odpo  = "DODPO";
+set pre_cod   = "DCOD";
+#------------------ delete exist rule cmd file -----------------------
+\rm $FLOW_BRANCH_DIR/\${pre_metal}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.rule -rf
+\rm $FLOW_BRANCH_DIR/\${pre_odpo}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.rule -rf
+\rm $FLOW_BRANCH_DIR/\${pre_cod}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.rule  -rf
+\rm $FLOW_BRANCH_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.\${pre_metal}_strmin.run -rf
+\rm $FLOW_BRANCH_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.\${pre_odpo}_strmin.run  -rf
+\rm $FLOW_BRANCH_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.\${pre_cod}_strmin.run  -rf
+\rm $FLOW_BRANCH_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.dummy_strmout.run -rf
+
+#===================================================================
+#===================  set input files          =====================
+#===================================================================
+
+set top_name              = "$BLOCK_NAME"
+set design_gds_file       = "\$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.merge.gds.gz"
+set run_time              = "\$RPT_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.run_time"
+touch \$run_time
+#------------------ dummy create option -----------------------
+set dummy_metal_creat     = "$DUMMY_METAL_CREAT"; # 1 mean creat dummy_metal 0 not.
+set dummy_odpo_creat      = "$DUMMY_ODPO_CREAT";  # 1 mean creat dummy_odpo 0 not.
+set dummy_cod_creat       = "$DUMMY_COD_CREAT";   # 1 mean creat dummy_cod 0 not.
+REPL_OP4%
+
+#===================================================================
+#======================= insert dummy metal ========================
+#===================================================================
+set dummy_names = "";
+if ( "$dummy_metal_creat" == "1" ) then
+set dummy_names            = "$dummy_names DVIA"
+endif  
+if ( "$dummy_odpo_creat" == "1" ) then
+set dummy_names            = "$dummy_names DODPO"
+endif 
+if ( "$dummy_cod_creat" == "1" ) then
+set dummy_names            = "$dummy_names DCOD"
+endif 
+
+foreach dummy_name ( $dummy_names )
+echo "Alchip-Info:create the dummy of ${dummy_name}!" 
+%REPL_OP4
+if ( \$dummy_name == DVIA ) then
+set rule_deck             = "$CAL_DECKS_METAL"
+set sourceme_file          = "$SOURCEME_14LPP_METAL_FILE"
+else if ( \$dummy_name == DODPO ) then
+set rule_deck             = "$CAL_DECKS_ODPO"
+set sourceme_file          = "$SOURCEME_14LPP_DODPO_FILE"
+else if ( \$dummy_name == DCOD ) then
+set rule_deck             = "$CAL_DECKS_COD"
+set sourceme_file          = "$SOURCEME_14LPP_DCOD_FILE"
+endif 
+set sum_file              = "\$RPT_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.\${dummy_name}.list"
+set run_file              = "$FLOW_BRANCH_DIR/\${dummy_name}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.rule"
+set dummy_gds_file        = "\$DST_DATA_DIR/\${dummy_name}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.gds"
+set dummy_db_file         = "\$DST_DATA_DIR/\${dummy_name}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.db"
+if ( \${sourceme_file} != "" ) then
+source \${sourceme_file}
+endif
+cat <<dummy_setting >! \${run_file}
+LAYOUT ERROR ON INPUT NO
+
+LAYOUT PRIMARY "\${top_name}"
+LAYOUT PATH    "\${design_gds_file}"
+LAYOUT SYSTEM GDSII
+
+DRC SUMMARY REPORT "\${sum_file}"
+dummy_setting
+REPL_OP4%
+#----------defined the dummy metal gds output format-------------------
+set metal_results_db_key_word = `grep 'DFM DEFAULTS RDB GDS FILE' ${rule_deck}`
+if ( "${metal_results_db_key_word}" != "" ) then
+cat << metal_dfm_defaults_rdb >> ${run_file}
+DFM DEFAULTS RDB GDS FILE "${dummy_gds_file}" PREFIX ${dummy_name}_
+DRC RESULTS DATABASE "${dummy_db_file}"
+DRC ICSTATION YES
+metal_dfm_defaults_rdb
+else 
+cat << metal_drc_results_db >> ${run_file}
+//DRC RESULTS DATABASE "ADD_DUMAAGTMnVn.gds" GDSII _dummy
+//DRC RESULTS DATABASE "DUM.OUT" ASCII
+DRC RESULTS DATABASE "${dummy_gds_file}"   GDSII  PREFIX ${dummy_name}_
+DRC ICSTATION YES
+metal_drc_results_db
+endif
+%REPL_OP4
+echo INCLUDE  $FLOW_BRANCH_DIR/plugin/clbre_dummy_\${dummy_name}_plugin.rule >> \${run_file}
+REPL_OP4%
+echo INCLUDE "${rule_deck}" >> ${run_file}
+
+#=================== run metal insertion ===============================
+echo "$dummy_name " >> $run_time
+echo "start " `date "+%F %T %a"` >> $run_time
+%REPL_OP4 
+mkdir -p ./openlava
+#-- if \$CALIBRE_HOME contain "ixl",use the centos5 to run drc-----------
+set clbre_version = `basename \$CALIBRE_HOME | awk 'BEGIN{FS="_"} {print $1}'`
+if ( \$clbre_version == ixl ) then
+set host_version = centos5
+endif
+#-- if \$CALIBRE_HOME contain "aoi",use the centos6 to run drc------------
+if ( \$clbre_version == aoi ) then
+set host_version = centos6
+endif
+#----grep the recommend tool version from deck rule and reload the tool---
+set tool_version_from_rule = `grep 'version' \${rule_deck} | grep -o '[0-9]*\.[0-9]*_[0-9]*\.[0-9]*' | uniq `
+if ( \$tool_version_from_rule != "" ) then 
+set origin_version = `basename \$MGC_HOME | grep -o '[0-9]*\.[0-9]*_[0-9]*\.[0-9]*'`
+set tool_version = `echo "\$origin_version\n \$tool_version_from_rule" | sort -r | awk 'NR==1 {print}'`
+module load mgc/\${clbre_version}_cal_\${tool_version}
+endif
+
+#---------- use the user defined cmd to insert dummy metal --------------
+set calibre_insert_dummy_user_run_cmd = "$CALIBRE_INSERT_DUMMY_USER_RUN_CMD"
+if ("\$calibre_insert_dummy_user_run_cmd" != "") then 
+echo "\$calibre_insert_dummy_user_run_cmd \${run_file}"
+bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${clbre_drc_CPU_NUMBER} -R "\$host_version span[hosts=1] rusage[mem=${clbre_drc_MEM_REQUIREMENT}]" \
+"eval \$calibre_insert_dummy_user_run_cmd  \${run_file} "
+else
+#---------- use the default cmd to insert dummy metal --------------------
+bsub -Is  -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${clbre_drc_CPU_NUMBER} -R "\$host_version span[hosts=1] rusage[mem=${clbre_drc_MEM_REQUIREMENT}]" \       
+"calibre  -drc -hier -hyper -turbo ${clbre_drc_CPU_NUMBER} -64  \${run_file} "    
+endif
+REPL_OP4%
+echo "finish" `date "+%F %T %a"` >> $run_time
+
+%REPL_OP4
+gzip -f \$DST_DATA_DIR/\${dummy_name}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.gds
+REPL_OP4%
+end
+
+#===================================================================
+#=================== merge final gds by calibre ====================
+#===================================================================
+
+%REPL_OP4
+if ( $TOOL_USE_TO_MERGE_DUMMY_GDS == calibre ) then
+echo "Alchip-Info:Use calibre to merge dummy gds!"
+echo "merge gds by calibre " >> \$run_time
+echo "start " `date "+%F %T %a"` >> \$run_time
+mkdir -p \$RPT_DIR/clbre_dummy_merge_work
+set cmd = "calibredrv -a layout filemerge -in  \${design_gds_file}  "
+#--------- input only dummy metal gds file to merge if exist --------
+if ( "\$dummy_metal_creat" == "1" ) then
+ if  (-e \$DST_DATA_DIR/\${pre_metal}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.gds.gz ) then
+  set cmd = "\$cmd -in  \$DST_DATA_DIR/\${pre_metal}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.gds.gz"
+ else
+ echo "Alchip-Info:there is no \$DST_DATA_DIR/\${pre_metal}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.gds.gz,please to check you already insert dummy metal! "
+ endif
+endif
+#--------- input only dummy odpo gds file to merge if exist ---------
+if ( "\$dummy_odpo_creat" == "1" ) then
+ if ( -e \$DST_DATA_DIR/\${pre_odpo}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.gds.gz ) then
+  set cmd = "\$cmd -in  \$DST_DATA_DIR/\${pre_odpo}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.gds.gz"
+ else
+ echo "Alchip-Info:there is no \$DST_DATA_DIR/\${pre_odpo}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.gds.gz,please to check you already insert dummy odpo! "
+ endif 
+endif
+#--------- input only dummy cod gds file to merge if exist -----------
+if ("\$dummy_cod_creat" == "1" ) then
+  if (-e \$DST_DATA_DIR/\${pre_cod}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.gds.gz ) then
+   set cmd = "\$cmd -in  \$DST_DATA_DIR/\${pre_cod}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.gds.gz "
+  else 
+  echo "Alchip-Info:there is no \$DST_DATA_DIR/\${pre_cod}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.gds.gz,please to check you already insert dummy cod! "
+  endif 
+endif
+set cmd = "\$cmd -out  \$DST_DATA_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.dummy_merge.gds.gz -map_cell \${top_name} \${top_name}_top -createtop \${top_name} -mode append -tmp \$RPT_DIR/clbre_dummy_merge_work"
+echo \$cmd
+#========= submit openlava job for calibre GDS merge ================
+bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${clbre_drc_CPU_NUMBER} -R "\$host_version span[hosts=1] rusage[mem=${clbre_drc_MEM_REQUIREMENT}]" \
+"eval \$cmd"
+echo "finish" `date "+%F %T %a"` >> \$run_time
+\rm -rf \$RPT_DIR/clbre_dummy_merge_work
+endif
+REPL_OP4%
+
+#===================================================================
+#=================== merge final gds by opus =======================
+#===================================================================
+
+%REPL_OP4
+if ( $TOOL_USE_TO_MERGE_DUMMY_GDS == opus ) then
+echo "Alchip-Info:Use opus to merge dummy gds!"
+echo "merge gds by opus " >> \$run_time
+echo "start " `date "+%F %T %a"` >> \$run_time
+#=================== opus input files setting   =====================
+set run_dir               = "\$RPT_DIR"
+if (-e \${run_dir}/cds.lib ) then
+\rm  -rf \${run_dir}/cds.lib
+endif
+set map_file              = "$OPUS_MAPPING_FILE" 
+set tech_file             = "$OPUS_TECH_FILE"
+set cds_lib               = "./rpt/$OP4_src_subdir/cds.lib"
+set display_drf           = "$OPUS_DISPLAY_DRF"
+\cp -f \${cds_lib} \${run_dir}
+\cp -f \${display_drf} \${run_dir}
+
+#*************  use opus to transfer dummy gds to OA *****************
+foreach dummy_name ( \$dummy_names ) 
+#===================  dummy metal strmin setting  ====================
+if ( -d  \${run_dir}/\${dummy_name}_${BLOCK_NAME} ) then
+\rm  -rf \${run_dir}/\${dummy_name}_${BLOCK_NAME}
+endif
+set dummy_gds_file        = "../.\$DST_DATA_DIR/\${dummy_name}_$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.gds.gz"
+set dummy_topCell_name    = "\${dummy_name}_${BLOCK_NAME}"
+set log_strmin_file       = "../.\$LOG_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.\${dummy_name}_strmin.log"
+set sum_strmin_file       = "../.\$RPT_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.\${dummy_name}_strmin.rep"
+set scr_strmin_file       = "$FLOW_BRANCH_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.\${dummy_name}_strmin.run"
+REPL_OP4%
+echo "Alchip-Info:strmin the ${dummy_name} gds file to OA!"
+#================== generate dummy metal stream-in script ============
+cat <<strmin_setting >! ${scr_strmin_file}
+#-- database setting -------------------
+runDir                             "."                 # - Run Directory
+topCell                            "${dummy_topCell_name}"     # - Top Cell(s) to Translate
+strmFile                           "${dummy_gds_file}" # - Stream File Name
+layerMap                           "${map_file}"       # - Layer Map File Name
+loadTechFile                       "${tech_file}"      # - ASCII Technology File Name
+refLibList                         "XST_CDS_LIB"        # - Rerferrence Library List File
+view                               "layout"            # - View Name(s) to Translate
+library                            "${dummy_topCell_name}"       # - Library Name
+logFile                            "${log_strmin_file}"       # - Log File Name
+summaryFile                        "${sum_strmin_file}"       # - Summary File Name
+
+#-- common setting ---------------------
+pinAttNum                           0                  # - (0-127) - Stream Attribute Number To Preserve Pin
+dbuPerUU                            0                  # - DB Units Per User Units
+hierDepth                           32                 # - (0-32767) - Hierarchy Depth Limit
+case                               "preserve"          # - preserve | upper | lower - Case Sensitivity
+labelCase                          "preserve"          # - preserve | upper | lower - Label Case Sensitivity
+strmTextNS                         "cdba"              # - Text NameSpace
+maxCellsInTargetLib                 20000              # - Maximum Cells in Target Library
+numThreads                          1                  # - Number of threads to execute simultaneously
+propSeparator                      ","                 # - Property Separator Character
+strmin_setting
+
+cd ${run_dir}
+#====================== run dummy  strmin =============================
+%REPL_OP4 
+bsub -Is  -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -R "rusage[mem=${strmout_MEM_REQUIREMENT}]" \
+"strmin -templateFile ../.\${scr_strmin_file} "
+REPL_OP4%
+\rm $log_strmin_file -rf
+cd ../../
+#******************* merge dummy  *************************************
+
+#=================== dummy merge setting  ==============================
+%REPL_OP4 
+set log_merge_file        = "../.\$LOG_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.\${dummy_name}_merge.log"
+set scr_merge_file        = "$FLOW_BRANCH_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.\${dummy_name}.il"
+REPL_OP4%
+if (-e ${scr_merge_file} ) then
+\rm -rf ${scr_merge_file}
+endif
+#================== generate dummy metal merge script ===================
+cat <<gds_merge >! ${scr_merge_file}
+cv = dbOpenCellViewByType("${top_name}" "${top_name}" "layout" "" "a")
+unless(cv return())
+dpo = dbOpenCellView("${dummy_topCell_name}" "${dummy_topCell_name}" "layout")
+dbCreateInst(cv dpo nil list(0.0 0.0) "R0")
+dbSave(cv)
+dbClose(cv)
+dbClose(dpo)
+exit
+gds_merge
+#==================== run dummy metal merge =============================
+cd ${run_dir}
+%REPL_OP4 
+bsub -Is  -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -R "rusage[mem=${strmout_MEM_REQUIREMENT}]" \
+"layout -64  -nograph -log \${log_merge_file} -replay ../.\${scr_merge_file} "
+REPL_OP4%
+endif
+cd ../../
+end
+#******************** use opus to transfer OA to dummy_merge gds **********
+echo "Alchip-Info:strmout the OA to final dummy_merge gds!"
+#========================= strmout setting  ==========================================
+%REPL_OP4
+set scr_strmout_file   = "$FLOW_BRANCH_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.dummy_strmout.run"
+set gds_strmout_file   = "../.\$DST_DATA_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.dummy_merge.gds.gz"
+set log_strmout_file   = "../.\$LOG_DIR/$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.dummy_strmout.log"
+set sum_strmout_file   = "../.\$RPT_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.dummy_strmout.rep"
+REPL_OP4%
+#===================== generate  streamout script =====================================
+cat <<strmout_setting > ${scr_strmout_file}
+#-- database setting -------------------
+runDir                             "."                 #- Run Directory
+topCell                            "${top_name}"       #- Top Cell(s) to Translate
+strmFile                           "${gds_strmout_file}"       #- Stream File Name
+layerMap                           "${map_file}"       #- Layer Map File Name
+outputDir                          ""                  #- The Output Directory for Stream File
+refLibList                         ""                  #- Referrence Library List File Name
+view                               "layout"            #- View Name(s) to Translate
+library                            "${top_name}"       #- Library Name
+logFile                            "${log_strmout_file}" #- Log File Name
+summaryFile                        "${sum_strmout_file}" #- Summary File Name
+#-- common setting ---------------------
+pinAttNum                           0                  #- (0-127) - Stream Attribute Number for Preserving Pins
+dbuPerUU                            0                  #- DB Units Per User Units
+hierDepth                           32                 #- (0-32767) - Hierarchy Depth Limit
+case                               "preserve"          #- preserve | upper | lower - Case Sensitivity
+labelCase                          "preserve"          #- preserve | upper | lower - Label Case Sensitivity
+strmTextNS                         "cdba"              #- Text NameSpace
+convertDot                         "ignore"            #- polygon | node | ignore - Convert Dots to
+viaCutArefThreshold                 0                  #- Write a STRUCT if the number of cuts are more the specified
+convertPin                         "geometry"          #- geometry | text | geometryAndText | ignore - Convert Pin to
+labelDepth                          1                  #- Hierarchical depth to add labels to
+strmout_setting
+%REPL_OP4
+if ($OPUS_IGNORE_MISSING_CELLS == "True") then
+echo "ignoreMissingCells                 t                   #- Ignore Missing cellViews During Translation and Continue Translation" >> \${scr_strmout_file}
+endif
+REPL_OP4%
+#================================ run strmout ==============================================
+%REPL_OP4
+cd \${run_dir}
+bsub -Is  -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -R "rusage[mem=${strmout_MEM_REQUIREMENT}]"    \
+"strmout -templateFile ../.\${scr_strmout_file}"
+REPL_OP4%
+\rm $log_strmout_file -rf
+cd ../../
+echo "finish" `date "+%F %T %a"` >> $run_time
+endif
+
+

@@ -7,7 +7,9 @@ set TOP "{{env.BLK_NAME}}"
 set RC_CORNER     "{{local.rc_corner}}"
 set TECH_FILE   "{{liblist.ICC2_TECH_FILE}}"
 set MAP_FILE      "{{liblist.TLUPLUS_MAPPING_FILE}}"
-set DEF_FILE      "{{env.BLK_RTL}}/{{ver.fp}}/{{env.BLK_NAME}}.def.gz"
+{%- if local.syn_mode == "dcg" %}
+set DEF_FILE      "{{env.BLK_FP}}/{{ver.fp}}/{{env.BLK_NAME}}.def.gz"
+{%- endif %}
 set MODE          "{{local.mode}}"
 set LIB_CORNER    "{{local.lib_corner}}"
 set RC_CORNER     "{{local.rc_corner}}"

@@ -65,3 +65,7 @@ class Stage(models.Model):
         return f"{self.name}__{self.flow}"
     class Meta:
         ordering = ["-created_time"]
+
+class Signoff(models.Model):
+    """signoff static info models"""
+    pass

@@ -2,6 +2,7 @@
 # Tool: IC Compiler II
 ######################################################################
 puts "Alchip-info : Running script [info script]\n"
+set sh_continue_on_error true
 
 ##===================================================================##
 ## SETUP                                                             ##
@@ -14,31 +15,19 @@ set cur_stage [lindex [split $cur_stage .] 0]
 set pre_flow_data_dir "{{pre.flow_data_dir}}/{{pre.stage}}"
 
 source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+source {{cur.cur_flow_sum_dir}}/{{cur.sub_stage}}.op._job.tcl
 
 set blk_name          "{{env.BLK_NAME}}"
 set blk_sdc_dir       "{{env.BLK_SDC}}/{{ver.sdc}}"
 set blk_rpt_dir       "{{cur.cur_flow_rpt_dir}}"
 set blk_utils_dir     "{{env.PROJ_UTILS}}"
 set cur_design_library "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
-set icc2_cpu_number   "[lindex "{{local._job_cpu_number}}" end]"
+set icc2_cpu_number   "[lindex "${_job_cpu_number}" end]"
 set ocv_mode          "{{local.ocv_mode}}" 
 
 set def_convert_site_list "{{local.def_convert_site_list}}"
-set pre_place_opt_active_scenario_list "{{local.pre_place_opt_active_scenario_list}}"
 set enable_fp_reporting "{{local.enable_fp_reporting}}"
 set use_usr_common_scripts_connect_pg_net_tcl "{{local.use_usr_common_scripts_connect_pg_net_tcl}}"
-set write_def_convert_icc2_site_to_lef_site_name_list "{{local.write_def_convert_icc2_site_to_lef_site_name_list}}"
-set icc_icc2_gds_layer_mapping_file "{{local.icc_icc2_gds_layer_mapping_file}}"
-{%- if local.tcl_placement_spacing_label_rule_file %}
-set TCL_PLACEMENT_SPACING_LABEL_RULE_FILE "{{local.tcl_placement_spacing_label_rule_file}}"
-{%- else %}
-set TCL_PLACEMENT_SPACING_LABEL_RULE_FILE "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/placement_spacing_rule.tcl"
-{%- endif %}
-{%- if local.tcl_icc2_cts_ndr_rule_file %}
-set TCL_ICC2_CTS_NDR_RULE_FILE  "{{local.tcl_icc2_cts_ndr_rule_file}}"
-{%- else %}
-set TCL_ICC2_CTS_NDR_RULE_FILE  "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/icc2_cts_ndr_rule.tcl"
-{%- endif %}
 {%- if local.tcl_mv_setup_file %}
 set tcl_mv_setup_file  "{{local.tcl_mv_setup_file}}"
 {%- else %}
@@ -62,18 +51,20 @@ set scandef_file "{{env.BLK_SCANDEF}}/{{ver.scandef}}/{{env.BLK_NAME}}.scandef"
 {%- else %}
 set scandef_file ""
 {%- endif %}
-set ndm_tech          "{{liblist.NDM_TECH}}" 
-set ndm_std           "{{liblist.NDM_STD}}"
-set ndm_mem           "{{liblist.NDM_MEM}}"
-set ndm_ip            "{{liblist.NDM_IP}}"
+set ndm_tech          "[glob {{liblist.NDM_TECH}}]" 
+set ndm_std           "[glob {{liblist.NDM_STD}}]"
 {%- if liblist.NDM_MEM %} 
-set reference_library "{{liblist.NDM_STD}} {{liblist.NDM_TECH}} {{liblist.NDM_MEM}}"
+set ndm_mem           "[glob {{liblist.NDM_MEM}}]"
+set reference_library "$ndm_tech $ndm_std $ndm_mem"
 {%- elif liblist.NDM_IP %}
-set reference_library "{{liblist.NDM_STD}} {{liblist.NDM_TECH}} {{liblist.NDM_IP}}"
+set ndm_ip            "[glob {{liblist.NDM_IP}}]"
+set reference_library "$ndm_tech $ndm_std $ndm_ip"
 {%- elif liblist.NDM_IP and liblist.NDM_MEM %}
-set reference_library "{{liblist.NDM_STD}} {{liblist.NDM_TECH}} {{liblist.NDM_MEM}} {{liblist.NDM_IP}}"
+set ndm_mem           "[glob {{liblist.NDM_MEM}}]"
+set ndm_ip            "[glob {{liblist.NDM_IP}}]"
+set reference_library "$ndm_tech $ndm_std $ndm_mem $ndm_ip"
 {%- else %}
-set reference_library "{{liblist.NDM_STD}} {{liblist.NDM_TECH}}"
+set reference_library "$ndm_tech $ndm_std"
 {%- endif %}
 
 {% include 'icc2/00_icc2_setup.tcl' %}
@@ -111,6 +102,11 @@ puts "Alchip-info: reading verilog ...... "
 read_verilog -top {{env.BLK_NAME}}  $blk_netlist_list
 current_block {{env.BLK_NAME}}
 link_block
+
+{%- if local.uniquify_netlist == "true" %} 
+  uniquify > {{cur.cur_flow_log_dir}}/${cur_stage}.uniquify.log
+{%- endif %}
+
 save_lib
 {%- elif  local.use_spg_flow == "true" %}
 puts "Alchip-info: reading $dc_output_icc2_script for spg_flow ...... "
@@ -133,48 +129,33 @@ puts "Alchip-info: use_upf is false, block upf will not been load"
 {% include  'icc2/mcmm.tcl' %}
 
 ## set io false path---------------------------------------------------
-{% if local.fix_io_hold == "true" %}
+{% if local.fix_io_hold == "false" %}
 foreach scenario [get_object_name [get_scenarios -filter "active == true"]] {
 puts "Alchip-info : set IO hold false path to scenario $scenario "
 
 current_scenario $scenario
-set_false_path -hold -from [all_inputs] -to [all_outputs]
+set_false_path -hold -from [all_inputs] 
+set_false_path -hold -to [all_outputs]
+}
 {% else %}
 puts "Alchip-info : IO hold is not set be false path to scenario  "
 {% endif %}
 
 ## Additional timer related setups : create path groups-----------------
 set_app_options -name time.enable_io_path_groups -value true  
-}
+
 ## Connect pg net------------------------------------------------------
 {%- if local.use_usr_common_scripts_connect_pg_net_tcl == "true" %}
 source {{env.PROJ_SHARE_CMN}}/icc2_common_scripts/connect_pg_net.tcl
 {%- else %}
 puts "Alchip-info: Running connect_pg_net command"
-connect_pg_net
+connect_pg_net -automatic
 {%- endif %}
 
 ## save design and lib before floorplan 
 save_block 
 save_block -as {{env.BLK_NAME}}/${cur_stage}
 save_lib 
-###==================================================================##
-## floorplan stage                                                   ##
-##===================================================================##
-## Reset all app options in current block
-reset_app_options -block [current_block] *
-
-puts "Alchip-info: settings icc2_settings/icc2_common.tcl"
-{% include  'icc2/icc2_settings/icc2_common.tcl' %} 
-
-puts "Alchip-info: settings icc2_settings/icc2_place.tcl "
-{% include  'icc2/icc2_settings/icc2_place.tcl' %} 
-
-puts "Alchip-info: Sourcing  tsmc16ffc settings"
-{% include 'icc2/tsmc16ffc_settings/tsmc16ffc_settings.tcl'%} 
-
-puts "Alchip-info: Sourcing  set_lib_cell_purpose.tcl"
-source -e -v "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/set_lib_cell_purpose.tcl"
 
 ## Pre-Floorplan customizations------------------------------------------
 source -e -v  "{{cur.config_plugins_dir}}/icc2_scripts/01_fp/01_usr_pre_fp.tcl"
@@ -218,13 +199,23 @@ connect_pg_net
 ##===================================================================##
 ## output netlist/def                                                ##
 ##===================================================================##
+## save_database--------------------------------------------------------
+save_block -as {{env.BLK_NAME}}
+save_block -as {{env.BLK_NAME}}/${cur_stage}
+save_lib
+
 {%- if local.use_usr_fp_write_data == "true" %}
 source {{cur.config_plugins_dir}}/icc2_scripts/01_fp/08_usr_write_data.tcl 
 {%- else %}
 {%- if local.fp_write_data == "true" %}
-write_verilog -compress gzip -exclude {leaf_module_declarations pg_objects} -hierarchy all {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.v
-
-write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.pg.v
+# write_verilog (no pg, and no physical only cells)
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations pg_objects end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells} -hierarchy all {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.ori.v
+## write_verilog for LVS (with pg, and with physical only cells)
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.lvs.v
+## write_verilog for Formality (with pg, no physical only cells, and no supply statements)
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells supply_statements} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.fm.v
+## write_verilog for PT (no pg, no physical only cells but with diodes and DCAP for leakage power analysis)
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations pg_objects end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.pt.v
 
 write_def -include_tech_via_definitions -compress gzip {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.def
 {% if local.write_def_convert_icc2_site_to_lef_site_name_list != "" %} 
@@ -235,10 +226,6 @@ write_def -include_tech_via_definitions -compress gzip {{cur.cur_flow_data_dir}}
 {%- endif %}
 {%- endif %}
 
-## save_database--------------------------------------------------------
-save_block -as {{env.BLK_NAME}}
-save_block -as {{env.BLK_NAME}}/${cur_stage}
-save_lib
 ## generate early touch file---------------------------------------------
 exec touch {{cur.cur_flow_sum_dir}}/${cur_stage}.{{env.BLK_NAME}}.early_complete
 

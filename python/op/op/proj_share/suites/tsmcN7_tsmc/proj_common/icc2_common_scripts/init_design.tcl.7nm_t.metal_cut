@@ -1,0 +1,17 @@
+puts "RM-info: Running script [info script]\n"
+
+##########################################################################################
+# Tool: IC Compiler II
+# Script: init_design.tcl.7nm_t.metal_cut
+# Version: N-2017.09-SP2 (February 20, 2018)
+# Copyright (C) 2014-2018 Synopsys, Inc. All rights reserved.
+##########################################################################################
+
+## Metal-cut allowed route-guide (MCARG)
+#  MCARG will be shrunk by half row height at the top/bottom boundary.
+#  MCARG at left/right (including inner corner cells) will exactly match the left/right boundary. 
+#  The values below are in the unit of site-def size.
+set_app_options -name chipfinishing.metal_cut_allowed_vertical_shrink_factor -value 0.5
+set_app_options -name chipfinishing.metal_cut_allowed_horizontal_shrink_factor -value 0
+
+puts "RM-info: Completed script [info script]\n"

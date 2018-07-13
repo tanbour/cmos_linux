@@ -27,7 +27,7 @@ Welcome to try our OP platform LAB, and any questions or suggestions about platf
 
 please contact **guanyu_yi@alchip.com** , **simonz@alchip.com**
 
-You can also download OP lab guide here :download:`op_lab_guide_v2.9.8.pdf <_static/op_lab_guide_v2.9.8.pdf>`
+You can also download OP lab guide here :download:`op_lab_guide_v3.0.2.pdf <_static/op_lab_guide_v3.0.2.pdf>`
 
 .. _ref_op_lab_overview:
 
@@ -54,7 +54,7 @@ Matters need attention for LAB
 ----------------------------------------
     .. figure:: images/6.PNG
 
-    .. figure:: images/7_1.PNG
+    .. figure:: images/7.PNG
     
     .. figure:: images/8.PNG
 
@@ -88,41 +88,45 @@ Block run (block owner)
 
     .. figure:: images/15.PNG
 
+    .. figure:: images/16.PNG
+
 .. _ref_check_output:
 
 Check output data
 ----------------------------------------
-    .. figure:: images/16.PNG
+    .. figure:: images/17.PNG
 
 .. _ref_error_filter:
 
 Error Filter
 ----------------------------------------
-    .. figure:: images/17.PNG
+    .. figure:: images/18.PNG
 
 .. _ref_op_web:
 
 OP web interface
 ----------------------------------------
-    .. figure:: images/18.PNG
+    .. figure:: images/19.PNG
 
 .. _ref_appendix_A_1:
 
 Appendix A-1 (flow config introduction)
 ----------------------------------------
-    .. figure:: images/19.PNG
+    .. figure:: images/21.PNG
+
+    .. figure:: images/22.PNG
 
 .. _ref_appendix_A_2:
 
 Appendix A-2 (share and block config work mechanism)
 -----------------------------------------------------
-    .. figure:: images/20.PNG
+    .. figure:: images/23.PNG
 
 .. _ref_appendix_B:
 
 Appendix B (lib config work mechanism)
 ----------------------------------------
-    .. figure:: images/21.PNG
+    .. figure:: images/24.PNG
 
 
 

@@ -48,6 +48,7 @@
 <li><a class="reference internal" href="#sub-cmd-admin">Sub cmd admin</a></li>
 <li><a class="reference internal" href="#sub-cmd-init">Sub cmd init</a></li>
 <li><a class="reference internal" href="#sub-cmd-flow">Sub cmd flow</a></li>
+<li><a class="reference internal" href="#sub-cmd-clean">Sub cmd clean</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#platform-directory-hierarchy">Platform directory hierarchy</a><ul>
@@ -230,8 +231,27 @@
 </div>
 <div class="section" id="op-sub-cmds-parameters-manual">
 <h2>OP sub cmds parameters manual<a class="headerlink" href="#op-sub-cmds-parameters-manual" title="Permalink to this headline">¶</a></h2>
+<p>OP sub cmds list:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="26%" />
+<col width="24%" />
+<col width="24%" />
+<col width="26%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">op</span> <span class="pre">admin</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">op</span> <span class="pre">init</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">op</span> <span class="pre">flow</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">op</span> <span class="pre">clean</span></code></td>
+</tr>
+</tbody>
+</table>
+<p>See bellow detail information about op sub commands.</p>
 <div class="section" id="sub-cmd-admin">
 <h3>Sub cmd admin<a class="headerlink" href="#sub-cmd-admin" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>Sub command op <code class="docutils literal notranslate"><span class="pre">admin</span></code> is used for PL initialize project.</div></blockquote>
 <ul class="simple">
 <li>To check all parameters:<ul>
 <li><code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">op</span> <span class="pre">admin</span> <span class="pre">-h</span></code></li>
@@ -270,6 +290,8 @@
 </div>
 <div class="section" id="sub-cmd-init">
 <h3>Sub cmd init<a class="headerlink" href="#sub-cmd-init" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>Sub command op <code class="docutils literal notranslate"><span class="pre">init</span></code> is used for Block Owner to initialize block.</div></blockquote>
 <ul class="simple">
 <li>To check all parameters:<ul>
 <li><code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">op</span> <span class="pre">init</span> <span class="pre">-h</span></code></li>
@@ -291,6 +313,8 @@
 </div>
 <div class="section" id="sub-cmd-flow">
 <h3>Sub cmd flow<a class="headerlink" href="#sub-cmd-flow" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>Sub command op <code class="docutils literal notranslate"><span class="pre">flow</span></code> is used for flow run, flow initialization and flow restore.</div></blockquote>
 <ul class="simple">
 <li>To check all parameters:<ul>
 <li><code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">op</span> <span class="pre">flow</span> <span class="pre">-h</span></code></li>
@@ -371,6 +395,28 @@
 </li>
 </ul>
 </div>
+<div class="section" id="sub-cmd-clean">
+<h3>Sub cmd clean<a class="headerlink" href="#sub-cmd-clean" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>Sub command op <code class="docutils literal notranslate"><span class="pre">clean</span></code> is used for op flow data removal.</div></blockquote>
+<ul class="simple">
+<li>To check all parameters:<ul>
+<li><code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">op</span> <span class="pre">clean</span> <span class="pre">-h</span></code></li>
+</ul>
+</li>
+<li>To remove specific flow:<ul>
+<li><code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">op</span> <span class="pre">clean</span> <span class="pre">-flow</span>&#160; <span class="pre">&lt;flow&gt;::&lt;stage&gt;:&lt;sub_stage&gt;:&lt;multi_inst&gt;</span></code></li>
+<li>run in block directory only</li>
+</ul>
+</li>
+<li>To prevent specific files been removed from clean flow :<ul>
+<li><code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">op</span> <span class="pre">clean</span> <span class="pre">-excludes</span> <span class="pre">&lt;file_pattern&gt;</span></code></li>
+<li>&lt;file_pattern&gt; can be key words in files</li>
+<li>run in block directory only</li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 <div class="section" id="platform-directory-hierarchy">
 <h2>Platform directory hierarchy<a class="headerlink" href="#platform-directory-hierarchy" title="Permalink to this headline">¶</a></h2>
@@ -385,10 +431,12 @@
 ├── filter.cfg
 ├── flow
 │   ├── eco.cfg
+│   ├── ele.cfg
 │   ├── ext.cfg
 │   ├── fm.cfg
-│   ├── plugins/
-│   ├── pr.cfg
+│   ├── plugins
+│   ├── pricc2.cfg
+│   ├── prinvs.cfg
 │   ├── pv.cfg
 │   ├── signoff.cfg
 │   ├── spg.cfg
@@ -403,6 +451,7 @@
 │   ├── std.cfg
 │   └── tech.cfg
 ├── lib.cfg
+├── pr.cfg
 └── proj.cfg
 </pre></div>
 </div>
@@ -410,7 +459,15 @@
 <div class="section" id="proj-root-blk-root">
 <h3>PROJ_ROOT/BLK_ROOT<a class="headerlink" href="#proj-root-blk-root" title="Permalink to this headline">¶</a></h3>
 <p>The main directory of BLK_ROOT</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BLK_ROOT</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>BLK_ROOT
+ ├── block_common
+ ├── config
+ ├── fp
+ ├── inter_release
+ ├── netlist
+ ├── rtl
+ ├── run
+ └── sdc
 </pre></div>
 </div>
 <p>If no specified file configured, the generated execution files will follow the default value in share/config to be rendered.</p>

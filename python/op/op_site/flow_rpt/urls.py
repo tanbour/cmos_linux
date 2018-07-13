@@ -5,6 +5,7 @@ from . import views
 
 app_name = "flow_rpt"
 urlpatterns = [
+    path("user_check/", views.UserCheck.as_view(), name="user_check"),
     path("projs/", views.ProjList.as_view(), name="proj_list"),
     path("projs/<pk>", views.ProjDetail.as_view(), name="proj_detail"),
     path("blocks/", views.BlockList.as_view(), name="block_list"),

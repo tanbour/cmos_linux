@@ -53,25 +53,27 @@ foreach voltage $VOLTAGE {
         "tt0p75v" {
             if {[regexp {max|setup} $CHECK_TYPE]} {
                 switch $LIB_CORNER {
-                    "tt85"  {set derate_value [list 1.045 0.889 1.100 0.900 1.152 0.889 1.100 1.000]}
+                    "wc"   {set derate_value [list 1.013 0.987 1.000 1.000 1.086 1.000 1.000 1.000]}
+                    "wcz"  {set derate_value [list 1.013 0.987 1.000 1.000 1.086 1.000 1.000 1.000]}
+                    "wcl"  {set derate_value [list 1.013 0.987 1.000 1.000 1.086 1.000 1.000 1.000]}
+                    "tt85" {set derate_value [list 1.013 0.987 1.000 1.000 1.086 1.000 1.000 1.000]}
+                    "lt"   {set derate_value [list 1.084 0.916 1.000 1.000 1.000 0.912 1.000 1.000]}
+                    "ltz"  {set derate_value [list 1.084 0.916 1.000 1.000 1.000 0.912 1.000 1.000]}
+                    "ml"   {set derate_value [list 1.084 0.916 1.000 1.000 1.000 0.912 1.000 1.000]}
                 }
             } elseif {[regexp {min|hold} $CHECK_TYPE]} {
-		if {[regexp {cworst} $RC_CORNER]} {
                     switch $LIB_CORNER {
-                        "wc"  {set derate_value [list 1.153 1.000 1.153 1.000 1.153 1.000 1.153 1.000]}
-                        "wcz" {set derate_value [list 1.153 1.000 1.153 1.000 1.153 1.000 1.153 1.000]}
-                        "ml"  {set derate_value [list 1.153 1.000 1.153 1.000 1.153 1.000 1.153 1.000]}
-                        "ltz" {set derate_value [list 1.153 1.000 1.153 1.000 1.153 1.000 1.153 1.000]}
-                    }
-                } else {
-                    switch $LIB_CORNER {
-                        "ml"  {set derate_value [list 1.153 1.000 1.153 1.000 1.153 1.000 1.153 1.000]}
-                        "ltz" {set derate_value [list 1.153 1.000 1.153 1.000 1.153 1.000 1.153 1.000]}
-                    }
-                }
+                    "wc"   {set derate_value [list 1.044 0.956 1.000 1.000 1.000 0.942 1.000 1.000]}
+                    "wcz"  {set derate_value [list 1.044 0.956 1.000 1.000 1.000 0.942 1.000 1.000]}
+                    "wcl"  {set derate_value [list 1.044 0.956 1.000 1.000 1.000 0.942 1.000 1.000]}
+                    "tt85" {set derate_value [list 1.044 0.956 1.000 1.000 1.000 0.942 1.000 1.000]}
+                    "lt"   {set derate_value [list 1.084 0.916 1.000 1.000 1.000 0.912 1.000 1.000]}
+                    "ltz"  {set derate_value [list 1.084 0.916 1.000 1.000 1.000 0.912 1.000 1.000]}
+                    "ml"   {set derate_value [list 1.084 0.916 1.000 1.000 1.000 0.912 1.000 1.000]}
             }
         }
     }
+ }
     set cmd "set_timing_derate -clock -late  -cell_delay [lindex $derate_value 0]  $flatocv_instances"; eval $cmd; 
     set cmd "set_timing_derate -clock -early -cell_delay [lindex $derate_value 1]  $flatocv_instances"; eval $cmd;
     set cmd "set_timing_derate -clock -late  -net_delay  [lindex $derate_value 2]  $flatocv_instances"; eval $cmd;
@@ -182,18 +184,71 @@ foreach voltage $VOLTAGE {
         }
         "tt0p75v" {
             if {[regexp {max|setup} $CHECK_TYPE]} {
-                   set_timing_derate -increment -cell_delay -clock -early [expr 0 - 0.033 - 0.016] [get_lib_cells *0p75*/*BWP*PDULVT]
+          # Modified by simonz on: Thu May 10 14:01:44 CST 2018 END
+          #         set_timing_derate -increment -cell_delay -clock -early [expr 0 - 0.033 - 0.016] [get_lib_cells *0p75*/*BWP*PDULVT]
+                 switch $LIB_CORNER {
+                    "wc"   {set_timing_derate -increment -cell_delay -clock -early [expr 0 - 0.032 - 0.002] [get_lib_cells */*BWP*PDULVT] }
+                    "wcz"  {set_timing_derate -increment -cell_delay -clock -early [expr 0 - 0.032 - 0.002] [get_lib_cells */*BWP*PDULVT] }
+                    "wcl"  {set_timing_derate -increment -cell_delay -clock -early [expr 0 - 0.032 - 0.002] [get_lib_cells */*BWP*PDULVT] }
+                    "tt85" {set_timing_derate -increment -cell_delay -clock -early [expr 0 - 0.032 - 0.002] [get_lib_cells */*BWP*PDULVT] }
+                    "lt"   {set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.024 - 0.006] [get_lib_cells */*BWP*PDULVT] 
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.032 - 0.005] [get_lib_cells */*BWP*PDLVT]  
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.044 - 0.003] [get_lib_cells */*BWP*PDSVT]  
+                            set_timing_derate -increment -cell_delay -clock -late  [expr 0 + 0.024 + 0.006] [get_lib_cells */*BWP*PDULVT] 
+                           }
+                    "ltz"  {set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.024 - 0.006] [get_lib_cells */*BWP*PDULVT] 
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.032 - 0.005] [get_lib_cells */*BWP*PDLVT]  
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.044 - 0.003] [get_lib_cells */*BWP*PDSVT]  
+                            set_timing_derate -increment -cell_delay -clock -late  [expr 0 + 0.024 + 0.006] [get_lib_cells */*BWP*PDULVT] 
+                           }
+                    "ml"   {set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.019 - 0.008] [get_lib_cells */*BWP*PDULVT] 
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.026 - 0.006] [get_lib_cells */*BWP*PDLVT]  
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.036 - 0.004] [get_lib_cells */*BWP*PDSVT]  
+                            set_timing_derate -increment -cell_delay -clock -late  [expr 0 + 0.019 + 0.008] [get_lib_cells */*BWP*PDULVT] 
+                           }
+                      }
             } elseif {[regexp {min|hold} $CHECK_TYPE]} {
-                switch $LIB_CORNER {
-                    "wcz" { set_timing_derate -increment -cell_delay        -early [expr 0 - 0.037 - 0.000] [get_lib_cells *0p675*/*BWP*PDULVT]}
-                    "wc"  { set_timing_derate -increment -cell_delay        -early [expr 0 - 0.028 - 0.002] [get_lib_cells *0p675*/*BWP*PDULVT]}
-                    "ltz" { set_timing_derate -increment -cell_delay -clock -late  [expr 0 + 0.024 + 0.005] [get_lib_cells *0p825*/*BWP*PDULVT]}
-                    "ml"  { set_timing_derate -increment -cell_delay -clock -late  [expr 0 + 0.019 + 0.008] [get_lib_cells *0p825*/*BWP*PDULVT]}
-                }
-            }
-        }
+                 switch $LIB_CORNER {
+                    "wc"   {set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.032 - 0.002] [get_lib_cells */*BWP*PDULVT] 
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.042 - 0.001] [get_lib_cells */*BWP*PDLVT]  
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.065 - 0.005] [get_lib_cells */*BWP*PDSVT]  
+                            set_timing_derate -increment -cell_delay -clock -early [expr 0 - 0.032 - 0.002] [get_lib_cells */*BWP*PDULVT] 
+                           }
+                    "wcz"  {set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.042 - 0.001] [get_lib_cells */*BWP*PDULVT] 
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.060 - 0.002] [get_lib_cells */*BWP*PDLVT]  
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.091 - 0.008] [get_lib_cells */*BWP*PDSVT]  
+                            set_timing_derate -increment -cell_delay -clock -early [expr 0 - 0.032 - 0.002] [get_lib_cells */*BWP*PDULVT] 
+                           }
+                    "wcl"  {set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.042 - 0.001] [get_lib_cells */*BWP*PDULVT] 
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.060 - 0.002] [get_lib_cells */*BWP*PDLVT]  
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.091 - 0.008] [get_lib_cells */*BWP*PDSVT]  
+                            set_timing_derate -increment -cell_delay -clock -early [expr 0 - 0.032 - 0.002] [get_lib_cells */*BWP*PDULVT] 
+                           }
+                    "tt85" {set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.032 - 0.002] [get_lib_cells */*BWP*PDULVT] 
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.042 - 0.001] [get_lib_cells */*BWP*PDLVT]  
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.065 - 0.005] [get_lib_cells */*BWP*PDSVT]  
+                            set_timing_derate -increment -cell_delay -clock -early [expr 0 - 0.032 - 0.002] [get_lib_cells */*BWP*PDULVT] 
+                           }
+                    "lt"   {set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.024 - 0.006] [get_lib_cells */*BWP*PDULVT] 
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.032 - 0.005] [get_lib_cells */*BWP*PDLVT]  
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.044 - 0.003] [get_lib_cells */*BWP*PDSVT]  
+                            set_timing_derate -increment -cell_delay -clock -late  [expr 0 + 0.024 + 0.006] [get_lib_cells */*BWP*PDULVT] 
+                           }
+                    "ltz"  {set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.024 - 0.006] [get_lib_cells */*BWP*PDULVT] 
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.032 - 0.005] [get_lib_cells */*BWP*PDLVT]  
+                            set_timing_derate -increment -cell_delay -data  -early [expr 0 - 0.044 - 0.003] [get_lib_cells */*BWP*PDSVT]  
+                            set_timing_derate -increment -cell_delay -clock -late  [expr 0 + 0.024 + 0.006] [get_lib_cells */*BWP*PDULVT] 
+                           }
+                    "ml"   {set_timing_derate -increment -cell_delay -data -early  [expr 0 - 0.019 - 0.008] [get_lib_cells */*BWP*PDULVT] 
+                            set_timing_derate -increment -cell_delay -data -early  [expr 0 - 0.026 - 0.006] [get_lib_cells */*BWP*PDLVT]  
+                            set_timing_derate -increment -cell_delay -data -early  [expr 0 - 0.036 - 0.004] [get_lib_cells */*BWP*PDSVT]  
+                            set_timing_derate -increment -cell_delay -clock -late  [expr 0 + 0.019 + 0.008] [get_lib_cells */*BWP*PDULVT] 
+                           }
+                   }
+               }
+           }       
+       }
     }
-}
 
 report_timing_derate -increment > {{cur.cur_flow_rpt_dir}}/${SESSION}/timing_derate_incr.rpt
 
@@ -453,6 +508,9 @@ foreach voltage [lrange $VOLTAGE 0 0] {
             }
             # for MB-inhouse without POCV
             #set_clock_uncertainty -hold 0.050 [get_pins -of_objects [get_cells [all_registers] -filter "ref_name =~ MB*"] -filter "defined(clocks)"]
+           if {[regexp {max|setup} $CHECK_TYPE]} {
+            set_clock_uncertainty -setup 0.040 [all_clocks]	;# with Andrew's PT enviroment, add 40ps setup uncertainty. 
+          }
         }
     }
 }
@@ -461,3 +519,32 @@ foreach voltage [lrange $VOLTAGE 0 0] {
 
 #source /proj/Pelican/WORK/carsonl/scripts/alcp_set_multi_drv_stop_propagate_nocheck.tcl
 #alcp_set_multi_drv_stop_propagate_nocheck
+
+# set pin load
+# set_units -time ns  -capacitance pF
+if { ${TOP} == "mars" } {
+# top
+  if {$OP_MODE == "normal"} {
+    set_load -max -pin_load 15    [all_outputs]
+    set_load -min -pin_load  2    [all_outputs]
+    set_input_transition -max 1   [all_inputs]
+    set_input_transition -min 0.6 [all_inputs]
+  } else {
+    set_load -max -pin_load 70    [all_outputs]
+    set_load -min -pin_load  1    [all_outputs]
+    set_input_transition -max 3   [all_inputs]
+    set_input_transition -min 0.5 [all_inputs]
+  }
+} else {
+# block
+{%- if local.lib_cell_height == "240" %}
+    set_driving_cell -lib_cell BUFFD8BWP240H11P57PDULVT [all_inputs ]
+    set_load [get_attribute [index_collection [get_lib_pins */BUFFD8BWP240H11P57PDULVT/I] 0] pin_capacitance] [all_outputs ]
+{%- endif %} 
+{%- if local.lib_cell_height == "300" %}
+    set_driving_cell -lib_cell BUFFD8BWP300H11P64PDULVT [all_inputs ]
+    set_load [get_attribute [index_collection [get_lib_pins */BUFFD8BWP300H11P64PDULVT/I] 0] pin_capacitance] [all_outputs ]
+{%- endif %}
+
+} 
+

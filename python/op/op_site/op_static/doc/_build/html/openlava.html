@@ -1,0 +1,203 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Openlava User Reference &#8212; OP Platform 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="OP Template User Manual" href="template.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="template.html" title="OP Template User Manual"
+             accesskey="P">previous</a> |</li>
+<li><a href="http://op.alchip.com.cn:8000">HOME</a> &raquo;</li>
+
+        <li class="nav-item nav-item-0"><a href="index.html">OP Platform 1.0 documentation</a> &#187;</li>
+ 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Openlava User Reference</a><ul>
+<li><a class="reference internal" href="#queue-job-commands">Queue/Job commands</a></li>
+<li><a class="reference internal" href="#possible-pending-reasons">Possible pending reasons</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="template.html"
+                        title="previous chapter">OP Template User Manual</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/openlava.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="openlava-user-reference">
+<span id="openlava"></span><h1>Openlava User Reference<a class="headerlink" href="#openlava-user-reference" title="Permalink to this headline">¶</a></h1>
+<p>Openlava is an open source workload job scheduling software for a cluster of computers.</p>
+<div class="section" id="queue-job-commands">
+<h2>Queue/Job commands<a class="headerlink" href="#queue-job-commands" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="36%" />
+<col width="41%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Command</th>
+<th class="head">Discription</th>
+<th class="head">Commment</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>bqueues &lt;queue&gt;</td>
+<td>Get queue quick information</td>
+<td>Very brief information, all queues will
+be reported if no queue specified.</td>
+</tr>
+<tr class="row-odd"><td>bqueues -l &lt;queue&gt;</td>
+<td>Get queue detail information</td>
+<td>“-l” means long</td>
+</tr>
+<tr class="row-even"><td>busers &lt;user/group&gt;</td>
+<td>Get user/group information</td>
+<td>Used to check job status for a
+user/group</td>
+</tr>
+<tr class="row-odd"><td>bugroup &lt;group&gt;</td>
+<td>Get users in a queue group</td>
+<td>All groups will be reported if no group
+specified.</td>
+</tr>
+<tr class="row-even"><td>report_queues &lt;queue&gt;</td>
+<td>Generate queue summary, including
+hosts/slots</td>
+<td>QSLOT 32/22 means total 32 cores and 22
+cores are being used.</td>
+</tr>
+<tr class="row-odd"><td>bjobs -u all -q &lt;queue&gt;</td>
+<td>Get all jobs in the queue</td>
+<td>The project lead should pay attention to
+the long running jobs.</td>
+</tr>
+<tr class="row-even"><td>lshostsq &lt;queue&gt;</td>
+<td>List all the host in the queue</td>
+<td>Static resource summary.</td>
+</tr>
+<tr class="row-odd"><td>lsloadq &lt;queue&gt;</td>
+<td>List all the host load in the queue</td>
+<td>Dynamic resource, core, RAM, etc.</td>
+</tr>
+<tr class="row-even"><td>otop &lt;server&gt;</td>
+<td>Get server core/memory summary</td>
+<td>Similar as “top”, means “openlava top”.</td>
+</tr>
+<tr class="row-odd"><td>lsutq -q &lt;queue&gt;</td>
+<td>Report core/RAM/slot usage</td>
+<td>Default is 7 days report.</td>
+</tr>
+<tr class="row-even"><td>bjobs -p &lt;ID&gt;</td>
+<td>Get pending reasons</td>
+<td>Reasons maybe user or queue limits</td>
+</tr>
+<tr class="row-odd"><td>bkill -r &lt;ID&gt;</td>
+<td>Force to kill a job in queue</td>
+<td>For jobs could not be killed by bkill
+Queue admin could kill jobs in the queue</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="possible-pending-reasons">
+<h2>Possible pending reasons<a class="headerlink" href="#possible-pending-reasons" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Has the user requested unrealistic resources?<ul>
+<li>Use “bjobs -l” to see detail</li>
+</ul>
+</li>
+<li>Has the user already run above job limit(60 slots by default)?<ul>
+<li>Use “busers” to check user’s jobs</li>
+</ul>
+</li>
+<li>More memory than any host has?<ul>
+<li>Use “bhosts” to check host information</li>
+</ul>
+</li>
+<li>All the slots are being used in the queue?<ul>
+<li>Use “bqueues” or “report_queues” to check queue status</li>
+</ul>
+</li>
+<li>Resource requirements may be too stringent?</li>
+<li>The user may have requested exclusive execution?</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="template.html" title="OP Template User Manual"
+             >previous</a> |</li>
+<li><a href="http://op.alchip.com.cn:8000">HOME</a> &raquo;</li>
+
+        <li class="nav-item nav-item-0"><a href="index.html">OP Platform 1.0 documentation</a> &#187;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Guanyu Yi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+    </div>
+  </body>
+</html>

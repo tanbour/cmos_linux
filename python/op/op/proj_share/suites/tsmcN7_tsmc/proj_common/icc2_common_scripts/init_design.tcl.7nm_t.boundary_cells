@@ -1,0 +1,37 @@
+puts "RM-info: Running script [info script]\n"
+
+##########################################################################################
+# Tool: IC Compiler II
+# Script: init_design.tcl.7nm_t.boundary_cells
+# Version: N-2017.09-SP2 (February 20, 2018)
+# Copyright (C) 2014-2018 Synopsys, Inc. All rights reserved.
+##########################################################################################
+
+## Boundary cells: to be added around the boundaries of objects, such as voltage areas, macros, blockages, and the core area
+#  Add more rules as needed
+#  set_boundary_cell_rules \
+#  -min_horizontal_jog your_jog_value \
+#  -min_vertical_jog your_jog_value \
+#  -min_horizontal_separation your_separation_value \
+#  -min_vertical_separation your_separation_value 
+#
+#  report_boundary_cell_rules
+#
+#  compile_boundary_cells
+#
+#  If horizontal_even/horizontal_odd and/or vertical_even specified in plan.flow.segment_rule, 
+#  this command will find the rows with the specific site_def and check their segment parity.
+remove_boundary_cells
+gen_boundary_cells
+gen_tap_cells
+
+#set_message_info -id ZRT-030 -limit 10
+#set_message_info -id ATTR-12 -limit 10
+#set_message_info -id ZRT-105 -limit 10
+
+if {[get_app_option_value -name plan.flow.segment_rule] != ""} {
+	redirect -tee -file ${REPORTS_DIR}/${INIT_DESIGN_BLOCK_NAME}.check_boundary_cells.rpt {check_boundary_cells -precheck_segment_parity}
+}
+
+puts "RM-info: Completed script [info script]\n"
+

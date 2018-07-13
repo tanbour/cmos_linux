@@ -1,0 +1,21 @@
+puts "RM-info: Running script [info script]\n"
+
+##########################################################################################
+# Tool: IC Compiler II
+# Script: init_design.tcl.7nm_t.tracks
+# Version: N-2017.09-SP2 (February 20, 2018)
+# Copyright (C) 2014-2018 Synopsys, Inc. All rights reserved.
+##########################################################################################
+
+## Please use the remove_track and create_track command after initialize_floorplan to create colored tracks 
+#  with cut locations for M1. Consult with your library vendor for the required values. Here is an example for 7nm:
+#	remove_track -layer M1
+#	create_track -layer M1 -dir X -mask_pattern mask_one -space $space -coord $coord -end_grid_high_steps {0.13 0.11} \ 
+#	-end_grid_low_steps {0.13 0.11} -end_grid_high_offset 0.0 -end_grid_low_offset 0.03
+#	create_track -layer M1 -dir X -mask_pattern mask_two -space $space -coord $coord -end_grid_high_steps {0.13 0.11} \
+#	-end_grid_low_steps {0.13 0.11} -end_grid_high_offset 0.08 -end_grid_low_offset 0.11
+gen_tracks
+
+
+puts "RM-info: Completed script [info script]\n"
+

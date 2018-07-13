@@ -24,11 +24,15 @@ Unix config directory is often used for more complex configuration, which is com
 +---------------+-------------------+-------------------------------------------------------------+
 |               | syn.cfg           | Synthesis config file, support DC/DCG..                     |
 |               +-------------------+-------------------------------------------------------------+
-|               | pr.cfg            | Place & Route config file, support ICC/ICC2/Innovus         |                                                         
-| EDA tool      +-------------------+-------------------------------------------------------------+
+|               | pricc2.cfg        | Place & Route config file, support ICC2                     |                                                         
+| EDA tool      +---------------------------------------------------------------------------------+
+|               | prinvs.cfg        | Place & Route config file, support INNOVUS                  |
+|               +-------------------+-------------------------------------------------------------+
 |               | ext.cfg           | RC extraction config file, support StarRC/QRC               |
 |               +-------------------+-------------------------------------------------------------+
 |               | sta.cfg           | STA config file, support PT                                 |
+|               +-------------------+-------------------------------------------------------------+
+|               | ele.cfg           | Electrical config file, support PTPX/Redhawk                |
 |               +-------------------+-------------------------------------------------------------+
 |               | fm.cfg            | Formal config file, support Formality/Conformal             |
 |               +-------------------+-------------------------------------------------------------+
@@ -224,6 +228,12 @@ Config file flow.cfg
 This config file is used for flow run configuration. All flow run will been record in this file, user can remove some unused flow sections as project goes on.
 :ref:`ref_appendix_A_1`
 
+OP flow overview:
+
+.. figure:: images/op_flow_new.PNG
+
+flow config example:
+
 .. figure:: images/flow_config.PNG
 
 - flow section 
@@ -293,7 +303,8 @@ All EDA tool's config files and plugin files are contain in this directory.
 ::
 
   + $PROJ_ROOT/share/config/flow/syn.cfg
-  + $PROJ_ROOT/share/config/flow/pr.cfg
+  + $PROJ_ROOT/share/config/flow/pricc2.cfg
+  + $PROJ_ROOT/share/config/flow/prinvs.cfg
   + $PROJ_ROOT/share/config/flow/ext.cfg
   + $PROJ_ROOT/share/config/flow/sta.cfg
   + $PROJ_ROOT/share/config/flow/fm.cfg

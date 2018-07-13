@@ -1,0 +1,18 @@
+version:      4.0
+ocvm_type:    pocvm
+object_type:  design
+rf_type:      rise fall
+delay_type:   net
+derate_type:  early
+path_type:    clock data
+object_spec:  
+coefficient:  0.1
+
+ocvm_type:    pocvm
+object_type:  design
+rf_type:      rise fall
+delay_type:   net
+derate_type:  late
+path_type:    clock data
+object_spec:  
+coefficient:  0.1

@@ -1,0 +1,5 @@
+HOST:modesta; PID:629; UID:2035; User:guanyu_yi; Elapsed time:15-19:53:12; CPUload_CUR:99.9; CPUload_AVG:99.7; RAM:0.00GB; CMD:/usr/libexec/gam_server
+HOST:oregon; PID:73970; UID:1941; User:guanyu_yi; Elapsed time:15-19:53:18; CPUload_CUR:99.9; CPUload_AVG:98.6; RAM:0.00GB; CMD:/usr/libexec/gam_server
+HOST:richmond; PID:18113; UID:836; User:guanyu_yi; Elapsed time:21-19:51:12; CPUload_CUR:10.0; CPUload_AVG:9.5; RAM:0.20GB; CMD:/apps/synopsys/verdi_vVerdi3_L-2016.06-SP2-2/platform/LINUXAMD64/bin/Novas -f compile_synenc.file
+HOST:oregon; PID:73980; UID:1945; User:guanyu_yi; Elapsed time:15-19:55:28; CPUload_CUR:94.9; CPUload_AVG:93.6; RAM:0.30GB; CMD:/usr/libexec/gam_server_server
+HOST:richmond; PID:18133; UID:857; User:guanyu_yi; Elapsed time:21-22:53:13; CPUload_CUR:9.0; CPUload_AVG:9.6; RAM:0.23GB; CMD:/apps/synopsys/verdi_vVerdi3_L-2016.06-SP2-2/platform/LINUXAMD64/bin/Novas -f compile_synenc.file.file\

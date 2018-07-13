@@ -1,0 +1,332 @@
+puts "RM-info: Running script [info script]\n"
+
+##########################################################################################
+# Tool: IC Compiler II
+# Script: init_design.tcl.7nm_t.create_pg_example.h300 
+# Purpose: PG creation example for 7nm H300 library
+# Version: N-2017.09-SP2 (February 20, 2018)
+# Copyright (C) 2014-2018 Synopsys, Inc. All rights reserved.
+##########################################################################################
+
+set_app_options -name plan.pgroute.overlap_route_boundary -value true
+
+##################################### 
+##      Power plan structure      ###
+#####################################
+set layout_grid 0.0005
+set cell_height 0.300
+set cell_height_half [expr $cell_height/2]
+set cell_height2 [expr 2*$cell_height]
+set poly_pitch 0.064
+set round_fix 0.001
+set float_fix 1e-9
+set boundary_offset [expr $cell_height]
+
+## Define chip area
+set chip_llx [lindex [lindex [get_attribute [get_designs] boundary_bbox] 0] 0]
+set chip_lly [lindex [lindex [get_attribute [get_designs] boundary_bbox] 0] 1]
+set chip_urx [lindex [lindex [get_attribute [get_designs] boundary_bbox] 1] 0]
+set chip_ury [lindex [lindex [get_attribute [get_designs] boundary_bbox] 1] 1]
+
+## Define core area
+set core_llx [lindex [lindex [get_attribute [get_core_area] bbox] 0] 0]
+set core_lly [lindex [lindex [get_attribute [get_core_area] bbox] 0] 1]
+set core_urx [lindex [lindex [get_attribute [get_core_area] bbox] 1] 0]
+set core_ury [lindex [lindex [get_attribute [get_core_area] bbox] 1] 1]
+
+# set core_urx 100
+# set core_ury 60
+
+set M0_pitch [get_attribute [get_layers M0] pitch]
+set M1_pitch [get_attribute [get_layers M1] pitch]
+set M2_pitch [get_attribute [get_layers M2] pitch]
+set M3_pitch [get_attribute [get_layers M3] pitch]
+set M4_pitch [get_attribute [get_layers M4] pitch]
+set M5_pitch [get_attribute [get_layers M5] pitch]
+set M6_pitch [get_attribute [get_layers M6] pitch]
+set M7_pitch [get_attribute [get_layers M7] pitch]
+set M8_pitch [get_attribute [get_layers M8] pitch]
+set M9_pitch [get_attribute [get_layers M9] pitch]
+set M10_pitch [get_attribute [get_layers M10] pitch]
+set M11_pitch [get_attribute [get_layers M11] pitch]
+set M12_pitch [get_attribute [get_layers M12] pitch]
+set M13_pitch [get_attribute [get_layers M13] pitch]
+
+set M0_width 0.080 ; set M0_step 0.600 ; set M0_offset 0 ;
+set M1_width 0.040 ; set M1_step 0.512 ; set M1_offset 0 ;
+set M2_width 0.020 ; set M2_step 0.600 ; set M2_offset 0 ; set M2_track_off [expr -0.02] ;
+set M3_width 0.024 ; set M3_step 1.024 ; set M3_offset 0 ;
+set M4_width 0.038 ; set M4_step 1.200 ; set M4_offset 0 ; set M4_track_off [expr -0.02] ;
+set M5_width 0.038 ; set M5_step 1.024 ; set M5_offset 0 ;
+set M6_width 0.038 ; set M6_step 1.200 ; set M6_offset 0 ; set M6_track_off [expr -0.02] ;
+set M7_width 0.038 ; set M7_step 1.024 ; set M7_offset 0 ;
+set M8_width 0.038 ; set M8_step 1.200 ; set M8_offset 0 ; set M8_track_off [expr -0.02] ;
+set M9_width 0.076 ; set M9_step 1.024 ; set M9_offset 0 ;
+set M10_width 0.062 ; set M10_step 1.200 ;set M10_offset 0 ; set M10_track_off [expr -0.02] ;
+set M11_width 0.550 ; set M11_step 4.096 ;set M11_offset 0.504 ;
+set M12_width 1.350 ; set M12_step 9.000 ;set M12_offset 1.8 ; set M12_track_off [expr -0.02] ;
+set M13_width 3.780 ; set M13_step 10.800 ;set M13_offset 3.6 ;
+set M4_step_sram 0.456
+# Minimum area for each metal
+set M0_area 0.00368
+set M1_area 0.00408
+set M2_area 0.00416
+set M3_area 0.00416
+set M4_area 0.022
+set M5_area 0.022
+set M6_area 0.022
+set M7_area 0.022
+set M8_area 0.022
+set M9_area 0.022
+set M10_area 0.0285
+set M11_area 0.0285
+set M12_area 0.81
+set M13_area 0.81
+
+## Minimum line length for each metal
+set M0_min_length [expr (round($round_fix+(double(int(($M0_area/$M0_width)/$layout_grid)+1)/2)))*2*$layout_grid]
+set M1_min_length [expr (round($round_fix+(double(int(($M1_area/$M1_width)/$layout_grid)+1)/2)))*2*$layout_grid]
+set M2_min_length [expr (round($round_fix+(double(int(($M2_area/$M2_width)/$layout_grid)+1)/2)))*2*$layout_grid]
+set M3_min_length [expr (round($round_fix+(double(int(($M3_area/$M3_width)/$layout_grid)+1)/2)))*2*$layout_grid]
+set M4_min_length [expr (round($round_fix+(double(int(($M4_area/$M4_width)/$layout_grid)+1)/2)))*2*$layout_grid]
+set M5_min_length [expr (round($round_fix+(double(int(($M5_area/$M5_width)/$layout_grid)+1)/2)))*2*$layout_grid]
+set M6_min_length [expr (round($round_fix+(double(int(($M6_area/$M6_width)/$layout_grid)+1)/2)))*2*$layout_grid]
+set M7_min_length [expr (round($round_fix+(double(int(($M7_area/$M7_width)/$layout_grid)+1)/2)))*2*$layout_grid]
+set M8_min_length [expr (round($round_fix+(double(int(($M8_area/$M8_width)/$layout_grid)+1)/2)))*2*$layout_grid]
+set M9_min_length [expr (round($round_fix+(double(int(($M9_area/$M9_width)/$layout_grid)+1)/2)))*2*$layout_grid]
+set M10_min_length [expr (round($round_fix+(double(int(($M10_area/$M10_width)/$layout_grid)+1)/2)))*2*$layout_grid]
+set M11_min_length [expr (round($round_fix+(double(int(($M11_area/$M11_width)/$layout_grid)+1)/2)))*2*$layout_grid]
+set M12_min_length [expr (round($round_fix+(double(int(($M12_area/$M12_width)/$layout_grid)+1)/2)))*2*$layout_grid]
+set M13_min_length [expr (round($round_fix+(double(int(($M13_area/$M11_width)/$layout_grid)+1)/2)))*2*$layout_grid]
+
+set VIA0_master VIA01_1cut_BW80_UW40
+set VIA1_master VIA12_1cut_BW40_UW20
+set VIA2_master VIA23_1cut_BW20_UW24
+set VIA3_master VIA34_1cut_BW24_UW38
+set VIA4_master VIA45_1cut_BW38_UW38
+set VIA5_master VIA56_1cut_BW38_UW38
+set VIA6_master VIA67_1cut_BW38_UW38
+set VIA7_master VIA78_1cut_BW38_UW38
+set VIA8_master VIA89_1cut
+set VIA9_master VIA910_PG_SQ
+set VIA10_master VIA1011_1cut
+set VIA11_master VIA1112_PG_SQ
+#set VIA12_master VIA1213_PG_SQ
+
+## VIA strategy
+set_pg_via_master_rule rule_via01_core -contact_code $VIA0_master -via_array_dimension {1 1}
+set_pg_strategy_via_rule strategy_via01_core_PG -via_rule {{intersection: adjacent}{via_master: rule_via01_core}}
+
+set_pg_via_master_rule rule_via12_core -contact_code $VIA1_master -via_array_dimension {1 1}
+set_pg_strategy_via_rule strategy_via12_core_PG -via_rule {{intersection: adjacent}{via_master: rule_via12_core}}
+
+set_pg_via_master_rule rule_via23_core -contact_code $VIA2_master -via_array_dimension {1 1}
+set_pg_strategy_via_rule strategy_via23_core_PG -via_rule {{intersection: adjacent} {via_master: rule_via23_core}}
+
+set_pg_via_master_rule rule_via34_core -contact_code $VIA3_master  -via_array_dimension {1 1}
+set_pg_strategy_via_rule strategy_via34_core_PG -via_rule {{intersection: adjacent}{via_master: rule_via34_core}}
+
+set_pg_via_master_rule rule_via45_core -contact_code $VIA4_master -via_array_dimension {1 1}
+set_pg_strategy_via_rule strategy_via45_core_PG -via_rule {{intersection: adjacent}{via_master: rule_via45_core}}
+
+set_pg_via_master_rule rule_via56_core -contact_code $VIA5_master -via_array_dimension {1 1}
+set_pg_strategy_via_rule strategy_via56_core_PG -via_rule {{intersection: adjacent}{via_master: rule_via56_core}}
+
+set_pg_via_master_rule rule_via67_core -contact_code $VIA6_master -via_array_dimension {1 1}
+set_pg_strategy_via_rule strategy_via67_core_PG -via_rule {{intersection: adjacent}{via_master: rule_via67_core}}
+
+set_pg_via_master_rule rule_via78_core -contact_code $VIA7_master -via_array_dimension {1 1}
+set_pg_strategy_via_rule strategy_via78_core_PG -via_rule {{intersection: adjacent}{via_master: rule_via78_core}}
+
+set_pg_via_master_rule rule_via89_core -contact_code $VIA8_master -via_array_dimension {1 1}
+set_pg_strategy_via_rule strategy_via89_core_PG -via_rule {{intersection: adjacent}{via_master: rule_via89_core}}
+
+set_pg_via_master_rule rule_via910_core -contact_code $VIA9_master -via_array_dimension {1 1}
+set_pg_strategy_via_rule strategy_via910_core_PG -via_rule {{intersection: adjacent}{via_master: rule_via910_core}}
+
+set_pg_via_master_rule rule_via1011_core -contact_code $VIA10_master -via_array_dimension {1 1}
+set_pg_strategy_via_rule strategy_via1011_core_PG -via_rule {{intersection: adjacent}{via_master: rule_via1011_core}}
+
+set_pg_via_master_rule rule_via1112_core -contact_code $VIA11_master -via_array_dimension {1 1}
+set_pg_strategy_via_rule strategy_via1112_core_PG -via_rule {{intersection: adjacent}{via_master: rule_via1112_core}}
+
+#set_pg_via_master_rule rule_via1213_core -contact_code $VIA12_master -via_array_dimension {1 1}
+#set_pg_strategy_via_rule strategy_via1213_core_PG -via_rule {{intersection: adjacent}{via_master: rule_via1213_core}}
+
+## Define PG region
+set pg_llx [expr $core_llx + $boundary_offset]
+set pg_lly [expr $core_lly - $boundary_offset]
+set pg_urx [expr $core_urx - $boundary_offset]
+set pg_ury [expr $core_ury + $boundary_offset]
+
+remove_pg_regions -all
+
+create_pg_region PG_core -core
+
+create_pg_mesh_pattern  V_mesh_pattern \
+ -layers { { {vertical_layer: @layer_V} {width: @width_V} {spacing: @spacing_V} {offset: @offset_V} {pitch: @pitch_V} {trim: @trim_V} {track_alignment: @track_alignment_V} }} \
+ -parameters {layer_V width_V spacing_V offset_V pitch_V trim_V track_alignment_V } \
+create_pg_mesh_pattern  H_mesh_pattern \
+ -layers { { {horizontal_layer: @layer_H} {width: @width_H} {spacing: @spacing_H} {offset: @offset_H} {pitch: @pitch_H} {trim: @trim_H} {track_alignment: @track_alignment_H} }} \
+ -parameters {layer_H width_H spacing_H offset_H pitch_H trim_H track_alignment_H } \
+create_pg_wire_pattern seg_base -direction @dir -layer @layer -width @width -spacing @spacing -pitch @pitch -track_alignment @track -low_end_reference_point @low -high_end_reference_point @high \
+ -parameters {dir layer width spacing pitch track low high}
+create_pg_wire_pattern wire_base -direction @dir -layer @layer -width @width -spacing @spacing -pitch @pitch -track_alignment @track \
+ -parameters {dir layer width spacing pitch track}
+
+## M0 PG
+create_pg_std_cell_conn_pattern rail_pattern -layers @layer -rail_width @width -parameters {layer width}
+
+set_pg_strategy M0 \
+ -pattern { {pattern: rail_pattern} {nets: {VDD VSS}} {parameters: M0 0.08}} \
+ -pg_regions PG_core 
+
+## M1 PG
+set M1_VDD_pattern "create_pg_composite_pattern M1_VDD_pattern -nets {VDD } -add_patterns { \
+        { {pattern: seg_base} {nets: {VDD }} {parameters: vertical M1 $M1_width 0.064 {$M1_step  0.6} track -0.05 0.05} {offset: {0.256 0}} } } "
+eval $M1_VDD_pattern
+set_pg_strategy M1_VDD -pattern { {name: M1_VDD_pattern} {nets:VDD } } -pg_regions PG_core 
+
+set M1_VSS_pattern "create_pg_composite_pattern M1_VSS_pattern -nets {VSS } -add_patterns { \
+        { {pattern: seg_base} {nets: {VSS }} {parameters: vertical M1 $M1_width 0.064 {$M1_step  0.6} track -0.05 0.05} {offset: {0.768 0.3}} } } "
+eval $M1_VSS_pattern
+set_pg_strategy M1_VSS -pattern { {name: M1_VSS_pattern} {nets: VSS } } -pg_regions PG_core 
+
+## M2 PG
+set M2_VDD_pattern "create_pg_composite_pattern M2_VDD_pattern -nets {VDD} -add_patterns { \
+        { {pattern: seg_base} {nets: {VDD}} {parameters: horizontal M2 $M2_width 0.6 {$M3_step $M2_step} track -0.381 0.381} {offset: {0.484 0}} } } "
+eval $M2_VDD_pattern
+set_pg_strategy M2_VDD -pattern { {name: M2_VDD_pattern} {nets: VDD } } -pg_regions PG_core 
+
+
+set M2_VSS_pattern "create_pg_composite_pattern M2_VSS_pattern -nets {VSS } -add_patterns { \
+        { {pattern: seg_base} {nets: {VSS}} {parameters: horizontal M2 $M2_width 0.064 {$M3_step $M2_step} track -0.381 0.381} {offset: {0.968 0.3}} } } "
+eval $M2_VSS_pattern
+set_pg_strategy M2_VSS -pattern { {name: M2_VSS_pattern} {nets: VSS} } -pg_regions PG_core 
+ 
+## M3 PG
+set M3_VDD_pattern "create_pg_composite_pattern M3_VDD_pattern -nets {VDD VDD} -add_patterns { \
+        { {pattern: seg_base} {nets: {VDD VDD}} {parameters: vertical M3 $M3_width 0.064 {$M3_step  2.4} track -1.025 1.025} {offset: {0.484 0.9}} } } "
+eval $M3_VDD_pattern
+set_pg_strategy M3_VDD -pattern { {name: M3_VDD_pattern} {nets: VDD VDD} } -pg_regions PG_core 
+
+
+set M3_VSS_pattern "create_pg_composite_pattern M3_VSS_pattern -nets {VSS VSS} -add_patterns { \
+        { {pattern: seg_base} {nets: {VSS VSS}} {parameters: vertical M3 $M3_width 0.064 {$M3_step  2.4} track -1.025 1.025} {offset: {0.968 1.2}} } } "
+eval $M3_VSS_pattern
+set_pg_strategy M3_VSS -pattern { {name: M3_VSS_pattern} {nets: VSS VSS} } -pg_regions PG_core 
+
+## M4 PG
+set M4_VDD_pattern "create_pg_composite_pattern M4_VDD_pattern -nets {VDD } -add_patterns { \
+        { {pattern: seg_base} {nets: {VDD }} {parameters: horizontal M4 $M4_width 0.6 {$M3_step $M4_step} track -0.29 0.29} {offset: {0.484 0.3}} } } "
+eval $M4_VDD_pattern
+set_pg_strategy M4_VDD -pattern { {name: M4_VDD_pattern} {nets: VDD } } -pg_regions PG_core 
+
+
+set M4_VSS_pattern "create_pg_composite_pattern M4_VSS_pattern  -add_patterns { \
+        { {pattern: seg_base} {parameters: horizontal M4 $M4_width 1.152 {$M3_step $M4_step} track -0.29 0.29} {offset: {0.968 0.6}} } }"
+eval $M4_VSS_pattern
+set_pg_strategy M4_VSS -pattern { {name: M4_VSS_pattern } {nets: VSS  } } -pg_regions PG_core 
+
+## M5 PG
+set M5_VDD_pattern "create_pg_composite_pattern M5_VDD_pattern -nets {VDD } -add_patterns { \
+        { {pattern: seg_base} {nets: {VDD }} {parameters: vertical M5 $M5_width 0.95 {$M5_step  1.2} track -0.3 0.3} {offset: {0.532 0.3}} } } "
+eval $M5_VDD_pattern
+set_pg_strategy M5_VDD -pattern { {name: M5_VDD_pattern} {nets: VDD } } -pg_regions PG_core 
+
+## M5 VSS
+set M5_VSS_pattern "create_pg_composite_pattern M5_VSS_pattern -nets {VSS } -add_patterns { \
+        { {pattern: seg_base} {nets: {VSS }} {parameters: vertical M5 $M5_width 0.95 {$M5_step  1.2} track -0.3 0.3} {offset: {0.988 0.6}} } } "
+eval $M5_VSS_pattern
+set_pg_strategy M5_VSS -pattern { {name: M5_VSS_pattern} {nets: VSS } } -pg_regions PG_core 
+
+## M6 PG
+set M6_VDD_pattern "create_pg_composite_pattern M6_VDD_pattern -nets {VDD } -add_patterns { \
+        { {pattern: seg_base} {nets: {VDD }} {parameters: horizontal M6 $M6_width 0.6 {$M5_step $M6_step} track -0.29 0.29} {offset: {0.484 0.3}} } } "
+eval $M6_VDD_pattern
+set_pg_strategy M6_VDD -pattern { {name: M6_VDD_pattern} {nets: VDD } } -pg_regions PG_core 
+
+set M6_VSS_pattern "create_pg_composite_pattern M6_VSS_pattern  -add_patterns { \
+        { {pattern: seg_base} {parameters: horizontal M6 $M6_width 1.152 {$M5_step $M6_step} track -0.29 0.29} {offset: {0.968 0.6}} } }"
+eval $M6_VSS_pattern
+set_pg_strategy M6_VSS -pattern { {name: M6_VSS_pattern } {nets: VSS  } } -pg_regions PG_core 
+
+## M7 PG
+set M7_VDD_pattern "create_pg_composite_pattern M7_VDD_pattern -nets {VDD } -add_patterns { \
+        { {pattern: seg_base} {nets: {VDD }} {parameters: vertical M7 $M7_width 0.95 {$M7_step  1.2} track -0.3 0.3} {offset: {0.532 0.3}} } } "
+eval $M7_VDD_pattern
+set_pg_strategy M7_VDD -pattern { {name: M7_VDD_pattern} {nets: VDD } } -pg_regions PG_core 
+
+## M7 VSS
+set M7_VSS_pattern "create_pg_composite_pattern M7_VSS_pattern -nets {VSS } -add_patterns { \
+        { {pattern: seg_base} {nets: {VSS }} {parameters: vertical M7 $M7_width 0.95 {$M7_step  1.2} track -0.3 0.3} {offset: {0.988 0.6}} } } "
+eval $M7_VSS_pattern
+set_pg_strategy M7_VSS -pattern { {name: M7_VSS_pattern} {nets: VSS } } -pg_regions PG_core 
+
+## M8 PG
+set M8_VDD_pattern "create_pg_composite_pattern M8_VDD_pattern -nets {VDD } -add_patterns { \
+        { {pattern: seg_base} {nets: {VDD }} {parameters: horizontal M8 $M8_width 0.6 {$M7_step $M8_step} track -0.29 0.29} {offset: {0.484 0.3}} } } "
+eval $M8_VDD_pattern
+set_pg_strategy M8_VDD -pattern { {name: M8_VDD_pattern} {nets: VDD } } -pg_regions PG_core 
+
+
+set M8_VSS_pattern "create_pg_composite_pattern M8_VSS_pattern  -add_patterns { \
+        { {pattern: seg_base} {parameters: horizontal M8 $M8_width 1.152 {$M7_step $M8_step} track -0.29 0.29} {offset: {0.968 0.6}} } }"
+eval $M8_VSS_pattern
+set_pg_strategy M8_VSS -pattern { {name: M8_VSS_pattern } {nets: VSS  } } -pg_regions PG_core 
+
+## M9 PG
+set M9_VDD_pattern "create_pg_composite_pattern M9_VDD_pattern -nets {VDD } -add_patterns { \
+        { {pattern: seg_base} {nets: {VDD }} {parameters: vertical M9 $M9_width 0.95 {$M9_step  1.2} track -0.15 0.15} {offset: {0.567 0.3}} } } "
+eval $M9_VDD_pattern
+set_pg_strategy M9_VDD -pattern { {name: M9_VDD_pattern} {nets: VDD} } -pg_regions PG_core 
+
+
+set M9_VSS_pattern "create_pg_composite_pattern M9_VSS_pattern -nets {VSS } -add_patterns { \
+        { {pattern: seg_base} {nets: {VSS }} {parameters: vertical M9 $M9_width 0.95 {$M9_step  1.2} track -0.15 0.15} {offset: {1.071 0.6}} } } "
+eval $M9_VSS_pattern
+set_pg_strategy M9_VSS -pattern { {name: M9_VSS_pattern} {nets: VSS } } -pg_regions PG_core 
+
+## M10 PG
+echo "Creating M10 PG..."
+set_pg_strategy M10_VSS \
+ -pattern { {pattern: H_mesh_pattern} {nets: {VSS}} {parameters: M10 $M10_width interleaving 0.61 $M10_step false track}} \
+ -pg_regions PG_core   
+
+
+set_pg_strategy M10_VDD \
+ -pattern { {pattern: H_mesh_pattern} {nets: {VDD}} {parameters: M10 $M10_width interleaving 0.232 $M10_step false track}} \
+ -pg_regions PG_core  
+
+## M11
+set_pg_strategy M11_VDD \
+ -pattern { {pattern: V_mesh_pattern} {nets: {VDD}} {parameters: M11 $M11_width interleaving 0.504 $M11_step false track }} \
+ -pg_regions PG_core 
+
+set_pg_strategy M11_VSS \
+ -pattern { {pattern: V_mesh_pattern} {nets: {VSS}} {parameters: M11 $M11_width interleaving 2.664 $M11_step false track }} \
+ -pg_regions PG_core 
+
+## M12 PG
+set_pg_strategy M12_VSS \
+ -pattern { {pattern: H_mesh_pattern} {nets: {VSS}} {parameters: M12 $M12_width interleaving 7.5 $M12_step false track}} \
+ -pg_regions PG_core   
+
+set_pg_strategy M12_VDD \
+ -pattern { {pattern: H_mesh_pattern} {nets: {VDD}} {parameters: M12 $M12_width interleaving 4 $M12_step false track}} \
+ -pg_regions PG_core  
+
+## M13
+set_pg_strategy M13_VDD \
+ -pattern { {pattern: V_mesh_pattern} {nets: {VDD}} {parameters: M13 $M13_width interleaving 0.504 $M13_step false track }} \
+ -pg_regions PG_core  
+
+set_pg_strategy M13 VSS \
+ -pattern { {pattern: V_mesh_pattern} {nets: {VSS}} {parameters: M13 $M13_width interleaving 2.664 $M13_step false track }} \
+ -pg_regions PG_core  
+
+## PG color assignment 
+set_app_option -name plan.pgroute.set_mask_fixed -value true
+derive_pg_mask_constraint  -overwrite -derive_cut_mask -always_align_color_layers M0
+
+puts "RM-info: Completed script [info script]\n"

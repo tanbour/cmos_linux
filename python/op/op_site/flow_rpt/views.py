@@ -14,6 +14,18 @@ import dateutil.parser
 import pytz
 import os
 import shutil
+import pam
+
+class UserCheck(views.APIView):
+    """ldap user auth check"""
+    def post(self, request):
+        user = request.data.get("user")
+        password = request.data.get("password")
+        pam_p = pam.pam()
+        if not pam_p.authenticate(user, password):
+            return Response({"message": f"user {user} is unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+        User.objects.get_or_create({"name": user}, name=user)
+        return Response({"check_flg": True})
 
 class TitleList(generics.ListAPIView):
     """flow report title list"""
@@ -215,6 +227,44 @@ class RunnerFlow(views.APIView):
              "data": request.data.get("data", {})},
             name=flow_name, block=block_obj, owner=owner_obj, created_time=created_time)
         return Response({"flow_name": flow_obj.name, "created_flg": created_flg})
+    def delete(self, request, format=None):
+        flow_name = request.data.get("flow")
+        block_name = request.data.get("block")
+        proj_name = request.data.get("proj")
+        owner_name = request.data.get("owner")
+        created_time = request.data.get("created_time", "")
+        if not flow_name:
+            return Response({"message": "flow name is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        if not block_name:
+            return Response({"message": "block name is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        if not proj_name:
+            return Response({"message": "proj name is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        if not owner_name:
+            return Response({"message": "owner name is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        if not created_time:
+            return Response({"message": "created time is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        created_time = pytz.timezone(settings.TIME_ZONE).localize(dateutil.parser.parse(created_time))
+        owner_obj = User.objects.filter(name=owner_name).first()
+        proj_obj = Proj.objects.filter(name=proj_name).first()
+        block_obj = Block.objects.filter(name=block_name, proj=proj_obj).first()
+        flow_obj = Flow.objects.filter(name=flow_name, block=block_obj, owner=owner_obj, created_time=created_time).first()
+        if not flow_obj:
+            return Response({"message": "flow is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        if not block_obj:
+            return Response({"message": "block is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        if not proj_obj:
+            return Response({"message": "proj is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        if not owner_obj:
+            return Response({"message": "owner is NA"}, status=status.HTTP_400_BAD_REQUEST)
+        stage_obj = flow_obj.stage_flow.last()
+        if stage_obj and stage_obj.data:
+            flow_id = ""
+            for stage_obj in flow_obj.stage_flow.filter(status="running"):
+                stage_obj.status = "failed"
+                stage_obj.save()
+        else:
+            flow_id, _ = flow_obj.delete()
+        return Response({"flow_id": flow_id})
 
 class RunnerStage(views.APIView):
     """runner platform post stage info"""

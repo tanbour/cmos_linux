@@ -1,0 +1,10 @@
+#!/bin/csh -f
+
+
+%REPL_OP4
+source "$RUN_DIR/scr/flow/clbre.$OP4_dst_branch.$OP4_dst_eco/$BLOCK_NAME.dir.$OP4_dst_branch.csh"
+set drv_gds_file = "\$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.merge.gds.gz" 
+bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE}  \
+calibredrv  -m \${drv_gds_file}
+REPL_OP4%
+

@@ -1,0 +1,47 @@
+proc onlyshowFP_JZ {} {
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showPin -value true
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showPASiteArray -value true
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showPACore -value true
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showVoltageArea -value true
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showWiringGrid -value true
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showRPGroup -value true
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showRPKeepout -value true
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showRouteCorridorShape -value true
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showContactRegion -value true
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showTextObject -value true
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showRailAnalysisTap -value true
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showCoreArea -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showPort -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showPortShape -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showCell -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showFillInst -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showPin -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showPASiteArray -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showPACore -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showMovebound -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showVoltageArea -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showRoute -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showRouted -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showContact -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showTopology -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showWiringGrid -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showBlockage -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showPowerplanRegion -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showRPGroup -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showRPKeepout -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showGuide -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showRouteCorridorShape -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showContactRegion -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showEditGroup -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showTextObject -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showText -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showRailAnalysisTap -value false
+  
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showCell -value true
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showPort -value true
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showPin -value true
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showPinBlackBox -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showPinSoftMacro -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showPinOthers -value false
+  gui_set_setting -window [gui_get_current_window -types Layout -mru] -setting showPinCore -value false
+}

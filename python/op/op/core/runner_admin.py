@@ -5,7 +5,11 @@ Description: projects initialization and related features
 """
 
 import os
+import re
 import shutil
+import json
+import fnmatch
+import texttable
 from utils import pcom
 from utils import settings
 from utils import env_boot
@@ -89,11 +93,8 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                 LOG.info(f"generating block config {blk_cfg}")
                 pcom.mkdir(LOG, os.path.dirname(blk_cfg))
                 with open(proj_cfg) as pcf, open(blk_cfg, "w") as bcf:
-                    for line in pcf:
-                        if line.startswith("["):
-                            bcf.write(line)
-                        else:
-                            bcf.write(f"# {line}")
+                    for line in pcom.gen_pcf_lst(pcf):
+                        bcf.write(line)
             for dir_cfg_kw in self.dir_cfg_dic:
                 if dir_cfg_kw == "lib":
                     continue
@@ -109,13 +110,10 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                 shutil.copytree(proj_dir_cfg, blk_dir_cfg)
                 for blk_cfg in pcom.find_iter(blk_dir_cfg, "*.cfg", cur_flg=True):
                     with open(blk_cfg) as ocf:
-                        blk_lines = ocf.readlines()
+                        blk_lines = pcom.gen_pcf_lst(ocf)
                     with open(blk_cfg, "w") as ncf:
                         for line in blk_lines:
-                            if line.strip().startswith("["):
-                                ncf.write(line)
-                            else:
-                                ncf.write(f"# {line}")
+                            ncf.write(line)
             proj_share_dir = os.path.expandvars(settings.PROJ_SHARE).rstrip(os.sep)
             proj_blk_cmn_dir = f"{proj_share_dir}{os.sep}block_common"
             blk_cmn_dir = f"{blk_root_dir}{os.sep}block_common"
@@ -133,18 +131,24 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         env_boot.EnvBoot.__init__(self)
         self.boot_env()
         LOG.info(":: updating blocks ...")
-        for data_file in pcom.find_iter(self.ced["PROJ_RELEASE"], "*"):
-            blk_name = os.path.basename(data_file).split(os.extsep)[0]
+        for data_src in list(
+                pcom.find_iter(self.ced["PROJ_RELEASE_TO_BLK"], "*", True))+list(
+                    pcom.find_iter(self.ced["PROJ_RELEASE_TO_BLK"], "*")):
+            blk_name = os.path.basename(data_src).split(os.extsep)[0]
             if not blk_name:
                 continue
             if blk_lst:
                 if blk_name not in blk_lst:
                     continue
-            blk_file = data_file.replace(
-                self.ced["PROJ_RELEASE"], f"{self.ced['PROJ_ROOT']}{os.sep}{blk_name}")
-            LOG.info(f"copying block files {blk_file} from {data_file}")
-            pcom.mkdir(LOG, os.path.dirname(blk_file))
-            shutil.copyfile(data_file, blk_file)
+            blk_tar = data_src.replace(
+                self.ced["PROJ_RELEASE_TO_BLK"], f"{self.ced['PROJ_ROOT']}{os.sep}{blk_name}")
+            LOG.info(f"linking block files {blk_tar} from {data_src}")
+            pcom.mkdir(LOG, os.path.dirname(blk_tar))
+            if not os.path.exists(blk_tar):
+                os.symlink(data_src, blk_tar)
+            elif os.path.islink(blk_tar):
+                os.remove(blk_tar)
+                os.symlink(data_src, blk_tar)
     def fill_lib(self):
         """a function wrapper for inherited LibProc function"""
         env_boot.EnvBoot.__init__(self)
@@ -156,6 +160,75 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         self.gen_liblist(
             self.ced["PROJ_LIB"], self.ced["PROJ_LIB"],
             self.dir_cfg_dic["lib"]["DEFAULT"]["liblist"], self.cfg_dic["lib"]["DEFAULT"])
+    def check_release(self):
+        """to check all released information"""
+        env_boot.EnvBoot.__init__(self)
+        self.boot_env()
+        LOG.info(":: release info checking ...")
+        relz_lst = []
+        for relz_file in pcom.find_iter(
+                f"{self.ced['PROJ_RELEASE_TO_TOP']}{os.sep}.json", "*.json"):
+            with open(relz_file) as r_f:
+                relz_dic = json.load(r_f)
+            relz_lst.append(relz_dic)
+        LOG.info("all released block info")
+        pcom.pp_list(relz_lst)
+        relz_blk_lst = [c_c.get("block", "") for c_c in relz_lst]
+        table_rows = [["Block", "Release Status", "Owner", "Time"]]
+        for blk_dir in pcom.find_iter(self.ced["PROJ_ROOT"], "*", True, True, [".git", "share"]):
+            blk_name = os.path.basename(blk_dir)
+            owner_set = set()
+            time_set = set()
+            for relz_dic in relz_lst:
+                if relz_dic.get("block", "") == blk_name:
+                    owner_set.add(relz_dic.get("user", ""))
+                    time_set.add(relz_dic.get("time", ""))
+            table_rows.append(
+                [blk_name, "Ready", owner_set, time_set] if blk_name in relz_blk_lst else [
+                    blk_name, "N/A", "N/A", "N/A"])
+        table = texttable.Texttable()
+        table.set_cols_width([30, 15, 15, 30])
+        table.add_rows(table_rows)
+        relz_table = table.draw()
+        LOG.info(f"release status table:{os.linesep}{relz_table}")
+    def release(self):
+        """to generate release directory"""
+        env_boot.EnvBoot.__init__(self)
+        self.boot_env()
+        LOG.info(":: release content generating ...")
+        for relz_json_file in pcom.find_iter(
+                f"{self.ced['PROJ_RELEASE_TO_TOP']}{os.sep}.json", "*.json"):
+            LOG.info(f"generating release of {relz_json_file}")
+            with open(relz_json_file) as rjf:
+                relz_dic = json.load(rjf)
+            relz_path = os.sep.join(
+                [relz_dic["proj_root"], relz_dic["block"], "run",
+                 relz_dic["rtl_netlist"], relz_dic["flow"]])
+            relz_file_lst = list(pcom.find_iter(relz_path, "*"))
+            for relz_k in self.cfg_dic["proj"]["release"]:
+                for relz_v in pcom.rd_cfg(self.cfg_dic["proj"], "release", relz_k):
+                    relz_pattern = (
+                        f"{relz_path}{os.sep}*{relz_dic['stage']}*"
+                        f"{os.path.splitext(relz_dic['sub_stage'])[0]}*{relz_v}")
+                    match_relz_lst = fnmatch.filter(relz_file_lst, relz_pattern)
+                    if not match_relz_lst:
+                        LOG.warning(f"no {relz_k} {relz_v} files found")
+                    else:
+                        LOG.info(f"copying {relz_k} {relz_v} files")
+                    for relz_file in match_relz_lst:
+                        dst_dir = os.sep.join(
+                            [self.ced["PROJ_RELEASE_TO_TOP"], relz_dic["block"],
+                             self.ced["DATE"], relz_k])
+                        pcom.mkdir(LOG, dst_dir)
+                        if relz_v.endswith("/*"):
+                            dst_file = re.sub(
+                                rf".*?(?={relz_v[:-2]})", f"{dst_dir}{os.sep}{relz_dic['block']}",
+                                relz_file)
+                        else:
+                            dst_file = f"{dst_dir}{os.sep}{relz_dic['block']}{relz_v}"
+                        pcom.mkdir(LOG, os.path.dirname(dst_file))
+                        shutil.copyfile(relz_file, dst_file)
+            os.remove(relz_json_file)
 
 def run_admin(args):
     """to run admin sub cmd"""
@@ -189,6 +262,10 @@ def run_admin(args):
             "which will overwrite all the existed library mapping links and files ...")
         pcom.cfm()
         admin_proc.fill_lib()
+    elif args.admin_release_check:
+        admin_proc.check_release()
+    elif args.admin_release:
+        admin_proc.release()
     else:
         LOG.critical("no actions specified in op admin sub cmd")
         raise SystemExit()

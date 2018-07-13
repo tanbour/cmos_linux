@@ -1,12 +1,19 @@
 #===================================================================
 #=================== common setting ================================
 #===================================================================
-#
+
+{%- if local.lib_cell_height == "240" %}
+source {{env.PROJ_SHARE_CMN}}/process_strategy/liblist/liblist_6T.tcl
+{%- elif local.lib_cell_height == "300" %}
+source {{env.PROJ_SHARE_CMN}}/process_strategy/liblist/liblist_7d5T.tcl
+{%- endif %}
+
+
 set TOP "{{env.BLK_NAME}}"
 #
 set RC_CORNER     "{{local.rc_corner}}"
-set TECH_FILE   "{{liblist.ICC2_TECH_FILE}}"
-set MAP_FILE      "{{liblist.TLUPLUS_MAPPING_FILE}}"
+set TECH_FILE   "${ICC2_TECH_FILE}"
+set MAP_FILE      "${TLUPLUS_MAPPING_FILE}"
 {%- if local.syn_mode == "dcg" %}
 set DEF_FILE      "{{env.BLK_FP}}/{{ver.fp}}/{{env.BLK_NAME}}.def.gz"
 {%- endif %}
@@ -28,29 +35,29 @@ set cur_stage [lindex [split $cur_stage .] 0]
 set pre_flow_data_dir "{{pre.flow_data_dir}}/{{pre.stage}}"
 
 {% if local.rc_corner == "cworst" %}
-set TLUP_{{local.rc_corner}}  "{{liblist.CWORST_TLUPLUS_FILE}}"
+set TLUP_{{local.rc_corner}}  "${CWORST_TLUPLUS_FILE}"
 {% elif local.rc_corner == "rcworst" %}
-set TLUP_{{local.rc_corner}}           "{{liblist.RCWORST_TLUPLUS_FILE}}"
+set TLUP_{{local.rc_corner}}           "${RCWORST_TLUPLUS_FILE}"
 {% elif local.rc_corner == "cworst_ccworst" %}
-set TLUP_{{local.rc_corner}}    "{{liblist.CWORST_CCWORST_TLUPLUS_FILE}}"
+set TLUP_{{local.rc_corner}}    "${CWORST_CCWORST_TLUPLUS_FILE}"
 {% elif local.rc_corner == "cworst_ccworst_T" %}
-set TLUP_{{local.rc_corner}}    "{{liblist.CWORST_CCWORST_T_TLUPLUS_FILE}}"
+set TLUP_{{local.rc_corner}}    "${CWORST_CCWORST_T_TLUPLUS_FILE}"
 {% elif local.rc_corner == "rcworst_ccworst" %}
-set TLUP_{{local.rc_corner}}    "{{liblist.RCWORST_CCWORST_TLUPLUS_FILE}}}"
+set TLUP_{{local.rc_corner}}    "${RCWORST_CCWORST_TLUPLUS_FILE}"
 {% elif local.rc_corner == "rcworst_ccworst_T" %}
-set TLUP_{{local.rc_corner}}    "{{liblist.RCWORST_CCWORST_T_TLUPLUS_FILE}}"
+set TLUP_{{local.rc_corner}}    "${RCWORST_CCWORST_T_TLUPLUS_FILE}"
 {% elif local.rc_corner == "cbest" %}
-set TLUP_{{local.rc_corner}}  "{{liblist.CBEST_TLUPLUS_FILE}}"
+set TLUP_{{local.rc_corner}}  "${CBEST_TLUPLUS_FILE}"
 {% elif local.rc_corner == "rcbest" %}
-set TLUP_{{local.rc_corner}}   "{{liblist.RCBEST_TLUPLUS_FILE}}"
+set TLUP_{{local.rc_corner}}   "${RCBEST_TLUPLUS_FILE}"
 {% elif local.rc_corner == "cbest_ccbest" %}
-set TLUP_{{local.rc_corner}}    "{{liblist.CBEST_CCBEST_TLUPLUS_FILE}}"
+set TLUP_{{local.rc_corner}}    "${CBEST_CCBEST_TLUPLUS_FILE}"
 {% elif local.rc_corner == "cbest_ccbest_T" %}
-set TLUP_{{local.rc_corner}}    "{{liblist.CBEST_CCBEST_T_TLUPLUS_FILE}}"
+set TLUP_{{local.rc_corner}}    "${CBEST_CCBEST_T_TLUPLUS_FILE}"
 {% elif local.rc_corner == "rcbest_ccbest" %}
-set TLUP_{{local.rc_corner}}    "{{liblist.RCBEST_CCBEST_TLUPLUS_FILE}}"
+set TLUP_{{local.rc_corner}}    "${RCBEST_CCBEST_TLUPLUS_FILE}"
 {% elif local.rc_corner == "rcbest_ccbest_T" %}
-set TLUP_{{local.rc_corner}}    "{{liblist.RCBEST_CCBEST_T_TLUPLUS_FILE}}"
+set TLUP_{{local.rc_corner}}    "${RCBEST_CCBEST_T_TLUPLUS_FILE}"
 {% endif %}
 
 #===================================================================

@@ -2,7 +2,8 @@
 #=================== DCG common setting =============================
 #===================================================================
 set sh_enable_page_mode false
-set_host_options -max_cores {{local.dc_cpu_number}}
+set dc_cpu_number   "[lindex "{{local._job_cpu_number}}" end]"
+set_host_options -max_cores $dc_cpu_number
 #
 # constant
 # set compile_seqmap_propagate_constants true

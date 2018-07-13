@@ -91,6 +91,10 @@ set pba_recalculate_full_path false ;# default is false
 set timing_update_status_level high
 set write_script_output_lumped_net_annotation true
 
+# Modified by simonz on: Tue May 15 17:09:09 CST 2018 END
+set extract_model_with_ccs_timing true
+set link_create_black_boxes true
+
 #
 #$#  set si_analysis_logical_correlation_mode  false
 #$#  set si_filter_accum_aggr_noise_peak_ratio 0.03

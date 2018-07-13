@@ -1,0 +1,49 @@
+%REPL_OP4
+set dst_tmp $OP4_dst
+set src_tmp $OP4_src
+set dst_eco $OP4_dst_eco
+set src_eco $OP4_src_eco
+REPL_OP4%
+set dst_tool_name [lindex [split $dst_tmp _ ] 0]
+set src_tool_name [lindex [split $src_tmp _ ] 0]
+
+set OP4_dst_subdir  ${dst_tool_name}.${dst_eco}
+set OP4_src_subdir  ${src_tool_name}.${src_eco}
+%REPL_OP4
+
+set RPT_DIR      $RPT_DIR/\$OP4_dst_subdir
+set SRC_DATA_DIR $DATA_DIR/\$OP4_src_subdir
+set DST_DATA_DIR $DATA_DIR/\$OP4_dst_subdir
+set LOG_DIR      $LOG_DIR/\$OP4_dst_subdir
+set SUM_DIR      $SUM_DIR/\$OP4_dst_subdir
+REPL_OP4%
+
+%REPL_OP4
+set SRC_DATA_DIR $DATA_DIR/$OP4_src_subdir
+set DST_DATA_DIR $DATA_DIR/$OP4_dst_subdir
+if {[file exist \$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.gds.gz]} {
+sh ln -sf ../.\$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.gds.gz  \$DST_DATA_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.gds.gz
+}
+if {[file exist \$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.nlib]} { 
+sh ln -sf ../.\$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.nlib \$DST_DATA_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.nlib
+}
+if {[file exist \$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.def.gz]} {
+sh ln -sf ../.\$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.def.gz \$DST_DATA_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.def.gz
+}
+if {[file exist \$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.pt.v]} {
+sh ln -sf ../.\$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.pt.v \$DST_DATA_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.pt.v
+}
+if {[file exist \$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.fm.v]} {
+sh ln -sf ../.\$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.fm.v \$DST_DATA_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.fm.v
+}
+if {[file exist \$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.lvs.v]} {
+sh ln -sf ../.\$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.lvs.v \$DST_DATA_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.lvs.v
+}
+if {[file exist \$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.vclp.v]} {
+sh ln -sf ../.\$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.vclp.v \$DST_DATA_DIR/$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.vclp.v
+}
+
+REPL_OP4%
+
+
+

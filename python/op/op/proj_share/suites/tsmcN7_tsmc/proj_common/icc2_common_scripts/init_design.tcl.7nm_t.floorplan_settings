@@ -1,0 +1,40 @@
+puts "RM-info: Running script [info script]\n"
+
+##########################################################################################
+# Tool: IC Compiler II
+# Script: init_design.tcl.7nm_t.floorplan_settings
+# Version: N-2017.09-SP2 (February 20, 2018)
+# Copyright (C) 2014-2018 Synopsys, Inc. All rights reserved.
+##########################################################################################
+
+## Specify the site def that will be used by initialize_floorplan,
+#  and be used to find the site rows by other commands, such as shape_blocks,
+#  for the even site/row rule 
+set_app_options -name plan.flow.target_site_def -value $SITE_DEFAULT
+
+## Create a floorplan with even site even row OR odd site even row
+#  To create a floorplan with even number site (width) and even number row (height) :
+	set_app_options -name plan.flow.segment_rule -value "horizontal_even vertical_even"
+#  To create a floorplan with odd number site (width) and even number row (height) :
+#	set_app_options -name plan.flow.segment_rule -value "horizontal_odd vertical_even"
+
+## set_wire_track_pattern: use the command to set up tracks which require mask constraints 
+#  prior to the initialize_floorplan command. Consult with your library vendor for the required values. 
+#  Below is the UI.
+#  set_wire_track_pattern
+#         -layer               layer_name
+#         -mode                non_uniform | uniform  	## Default is uniform.
+#         -site_def            tile_name]              	## Default is unit.
+#         -direction           horizontal | vertical  	## Default is layer preferred direction.
+#         -coord               offset_list         	## Mandatory for non-uniform mode. Default in uniform mode is layer half pitch.
+#         -space               track_pitch           	## Uniform mode only. Default is layer pitch from tech file.
+#         -mask_constraint     color_list   		## Support {mask_one, mask_two, mask_three}.
+#         -width               width_list          	## Width is float value. 
+#         -reserved_for_width  flag_list           	## Must use together with -width.
+#
+#  Here is an example for 7nm: 
+#	set_wire_track_pattern -layer M2 -mode non_uniform -coord {0 0.1 0.3 0.5 0.6} -direction vertical -mask {mask_one mask_two mask_one mask_two mask_one}
+#	set_wire_track_pattern -layer M3 -mode non_uniform -coord {0 0.1 0.3 0.5 0.6} -direction horizontal -mask {mask_one mask_two mask_one mask_two mask_one}
+
+puts "RM-info: Completed script [info script]\n"
+

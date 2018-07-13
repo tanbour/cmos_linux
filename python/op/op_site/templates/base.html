@@ -27,9 +27,21 @@
                 <Icon type="document-text" :size="iconSize"></Icon>
                 <span class="layout-text">Flow Reports</span>
               </menu-item>
-              <menu-item name="proj_checker">
+              <menu-item name="proj_signoff" v-if="user === 'guanyu_yi'">
+                <Icon type="android-done-all" :size="iconSize"></Icon>
+                <span class="layout-text">Proj Signoff</span>
+              </menu-item>
+              <menu-item name="proj_checker" v-if="user === 'guanyu_yi'">
                 <Icon type="android-checkmark-circle" :size="iconSize"></Icon>
                 <span class="layout-text">Proj Checker</span>
+              </menu-item>
+              <menu-item name="job_sum" v-if="user === 'guanyu_yi' || user === 'danielw'">
+                <Icon type="ios-analytics" :size="iconSize"></Icon>
+                <span class="layout-text">Job Summary</span>
+              </menu-item>
+              <menu-item name="server_sum" v-if="user === 'guanyu_yi' || user === 'danielw'">
+                <Icon type="ios-analytics" :size="iconSize"></Icon>
+                <span class="layout-text">Server Summary</span>
               </menu-item>
             </i-menu>
           </i-col>
@@ -41,6 +53,7 @@
               <div class="layout-ceiling-main">
                 <a @click="changeContent('home')" href="/">Home</a> |
                 <a v-if="ss_flg" href="/static/doc/_build/html/index.html">Documents</a><span v-if="ss_flg"> |</span>
+                <a v-if="ss_flg" href="/static/service/_build/html/index.html">Services</a><span v-if="ss_flg"> |</span>
                 <a v-if="ss_flg" href="/static/cu/_build/html/index.html">Contact Us</a><span v-if="ss_flg"> |</span>
                 <a v-if="ss_flg" @click="confirmLogout" href="#">Sign Out</a>
                 <a v-else @click="confirmLogin" href="#">Sign In</a>
@@ -49,8 +62,7 @@
                 {% endverbatim %}
               </div>
             </div>
-            {% block content %}
-            {% endblock %}
+            <router-view></router-view>
             <div class="layout-copy">
               2017 &copy; Alchip. Trusted Silicon Partner Realizing Innovations
             </div>
@@ -83,12 +95,24 @@
     {% endblock %}
 
     <script>
+     const routes = [
+       {path: "/", name: "home", component: Home},
+       {path: "/v_flow_status/:f_id", name: "flow_status", component: FlowStatus},
+       {path: "/v_flow_rpt/:p_id/:b_id/:f_id/:s_id", name: "flow_rpt", component: FlowRpt},
+       {path: "/v_proj_signoff/:p_id", name: "proj_signoff", component: ProjSignoff},
+       {path: "/v_proj_checker/:p_id", name: "proj_checker", component: ProjChecker},
+       {path: "/v_job_sum", name: "job_sum", component: JobSum},
+       {path: "/v_server_sum", name: "server_sum", component: ServerSum}
+     ]
+     const router = new VueRouter({
+       routes: routes
+     })
      var Main = {
+       router,
        data: function () {
          return {
            spanLeft: 2,
            spanRight: 22,
-           content_id: "home",
            ss_flg: false,
            user: "",
            password: ""
@@ -101,10 +125,18 @@
        },
        methods: {
          changeContent: function (con) {
-           if (this.ss_flg)
-             this.content_id = con
-           else
+           if (this.ss_flg) {
+             if (con === "flow_status") {
+               var params_obj = {f_id: "null"}
+             } else if (con === "flow_rpt") {
+               var params_obj = {p_id: "null", b_id: "null", f_id: "null", s_id: "null"}
+             } else if (con === "proj_checker" || con === "proj_signoff") {
+               var params_obj = {p_id: "null"}
+             }
+             this.$router.push({name: con, params: params_obj})
+           } else {
              this.$Message.warning("Please log in first!")
+           }
          },
          toggleClick: function () {
            if (this.spanLeft === 2) {
@@ -119,7 +151,7 @@
            var csrftoken = Cookies.get("csrftoken")
            axios({
              method: "post",
-             url: "{% url 'user_auth:check' %}",
+             url: "{% url 'flow_rpt:user_check' %}",
              headers: {"X-CSRFToken": csrftoken},
              data: {
                "user": this.user,
@@ -160,7 +192,7 @@
              onOk: () => {
                this.$Modal.remove()
                this.removeCookie()
-               this.content_id = "home"
+               this.$router.push({name: "home"})
              }
            })
          },

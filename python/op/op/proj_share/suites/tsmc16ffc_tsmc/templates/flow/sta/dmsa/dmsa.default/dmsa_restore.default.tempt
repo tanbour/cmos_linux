@@ -1,0 +1,43 @@
+%REPL_OP4
+source  "$FLOW_BRANCH_DIR/$BLOCK_NAME.sys_setting.tcl"
+source  "$FLOW_BRANCH_DIR/$BLOCK_NAME.dir.dmsa"
+source  "$FLOW_BRANCH_DIR/$BLOCK_NAME.400_liblist_setup.tcl"
+source  "$FLOW_BRANCH_DIR/$BLOCK_NAME.100_common_setup.tcl"
+source  "$FLOW_BRANCH_DIR/$BLOCK_NAME.200_user_setup.tcl"
+REPL_OP4%
+#####################################
+## DMSA Scenario list               #
+#####################################
+set dmsa_restore_scenario_list $DMSA_RESTORE_SCENARIO_LIST
+puts "dmsa use scenario $DMSA_RESTORE_SCENARIO_LIST to restore"
+
+set PROCESS_NUM [llength $dmsa_restore_scenario_list]
+set MAX_CORE 16 
+puts "dmsa use $PROCESS_NUM process and max core $MAX_CORE, each process use 8 core."
+
+foreach dmsa_restore_scenario $dmsa_restore_scenario_list {
+
+set SCENARIO($dmsa_restore_scenario) $SRC_DATA_DIR/${dmsa_restore_scenario}.w_io_session
+ 
+}
+
+remove_host_options
+set_host_options -num_processes $PROCESS_NUM -max_cores $MAX_CORE -name run1
+report_host_usage -verbose
+
+set multi_scenario_working_directory ./work
+set multi_scenario_merged_error_log ./work/error_log.txt
+
+start_hosts
+report_host_usage -verbose
+
+foreach scenario_name [array name SCENARIO ] {
+	create_scenario -name $scenario_name -image $SCENARIO($scenario_name)
+	echo "$scenario_name  $SCENARIO($scenario_name) "
+}
+
+current_session -all
+current_scenario -all
+report_multi_scenario_design
+
+

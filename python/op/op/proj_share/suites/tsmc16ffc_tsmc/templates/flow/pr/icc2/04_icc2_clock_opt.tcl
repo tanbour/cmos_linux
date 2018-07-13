@@ -2,13 +2,13 @@
 # Tool: IC Compiler II
 ##########################################################################################
 puts "Alchip-info : Running script [info script]\n"
+set sh_continue_on_error true
 
 ##===================================================================##
 ## SETUP                                                             ##
 ##===================================================================##
-
-source {{cur.flow_scripts_dir}}/pr/00_setup.tcl
 source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+source {{cur.cur_flow_sum_dir}}/{{cur.sub_stage}}.op._job.tcl
 
 set pre_stage "{{pre.sub_stage}}"
 set cur_stage "{{cur.sub_stage}}"
@@ -16,40 +16,47 @@ set cur_stage "{{cur.sub_stage}}"
 set pre_stage [lindex [split $pre_stage .] 0]
 set cur_stage [lindex [split $cur_stage .] 0]
 
-set blk_name          "{{env.BLK_NAME}}"
-set blk_rpt_dir       "{{cur.cur_flow_rpt_dir}}"
-set blk_utils_dir     "{{env.PROJ_UTILS}}"
-set pre_flow_data_dir "{{pre.flow_data_dir}}/{{pre.stage}}"
-set cur_design_library "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
-set icc2_cpu_number   "[lindex "{{local._job_cpu_number}}" end]"
+set blk_name                                          "{{env.BLK_NAME}}"
+set blk_rpt_dir                                       "{{cur.cur_flow_rpt_dir}}"
+set blk_utils_dir                                     "{{env.PROJ_UTILS}}"
+set pre_flow_data_dir                                 "{{pre.flow_data_dir}}/{{pre.stage}}"
+set cur_design_library                                "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
+
+set icc2_cpu_number                                   "[lindex "${_job_cpu_number}" end]"
 set_host_option -max_cores $icc2_cpu_number
 
-set pre_design_library  "$pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.nlib"
-set cur_design_library "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
+set pre_design_library                                "$pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.nlib"
+set cur_design_library                                "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
 
-set ocv_mode          "{{local.ocv_mode}}" 
-set optimization_flow "{{local.optimization_flow}}"
-set clock_opt_active_scenario_list "{{local.clock_opt_active_scenario_list}}"
-set CLOCK_OPT_ENABLE_CCD "{{local.clock_enable_ccd}}"
-set CLOCK_OPT_OPTO_NAME_PREFIX "{{local.clock_opt_opto_name_prefix}}"
-set CLOCK_OPT_OPTO_CTO  "{{local.clock_opt_opto_cto}}"
-set CLOCK_OPT_OPTO_CTO_NAME_PREFIX "{{local.clock_opt_opto_cto_name_prefix}}"
-set clock_opt_use_usr_write_data_tcl "{{local.clock_opt_use_usr_write_data_tcl}}"
-set clock_opt_create_abstract "{{local.clock_opt_create_abstract}}"
-set clock_opt_write_data "{{local.clock_opt_write_data}}"
-set enable_clock_opt_reporting "{{local.enable_clock_opt_reporting}}"
-set use_usr_common_scripts_connect_pg_net_tcl "{{local.use_usr_common_scripts_connect_pg_net_tcl}}"
+set ocv_mode                                          "{{local.ocv_mode}}" 
+set optimization_flow                                 "{{local.optimization_flow}}"
+{%- if local.clock_opt_active_scenario_list is string %}
+set clock_opt_active_scenario_list                    "{{local.clock_opt_active_scenario_list}}"
+{%- elif local.clock_opt_active_scenario_list is sequence %}
+set clock_opt_active_scenario_list                    "{{local.clock_opt_active_scenario_list|join (' ')}}"
+{%- endif %}
+
+set clock_opt_enable_ccd                              "{{local.clock_opt_enable_ccd}}"
+set clock_opt_opto_name_prefix                        "{{local.clock_opt_opto_name_prefix}}"
+set clock_opt_opto_cto                                "{{local.clock_opt_opto_cto}}"
+set clock_opt_opto_cto_name_prefix                    "{{local.clock_opt_opto_cto_name_prefix}}"
+set clock_opt_use_usr_write_data_tcl                  "{{local.clock_opt_use_usr_write_data_tcl}}"
+set clock_opt_create_abstract                         "{{local.clock_opt_create_abstract}}"
+set clock_opt_write_data                              "{{local.clock_opt_write_data}}"
+set enable_clock_opt_reporting                        "{{local.enable_clock_opt_reporting}}"
+set use_usr_common_scripts_connect_pg_net_tcl         "{{local.use_usr_common_scripts_connect_pg_net_tcl}}"
 set write_def_convert_icc2_site_to_lef_site_name_list "{{local.write_def_convert_icc2_site_to_lef_site_name_list}}"
-set icc_icc2_gds_layer_mapping_file "{{local.icc_icc2_gds_layer_mapping_file}}"
+set icc_icc2_gds_layer_mapping_file                   "{{local.icc_icc2_gds_layer_mapping_file}}"
+
 {%- if local.tcl_placement_spacing_label_rule_file %}
-set TCL_PLACEMENT_SPACING_LABEL_RULE_FILE "{{local.tcl_placement_spacing_label_rule_file}}"
+set TCL_PLACEMENT_SPACING_LABEL_RULE_FILE             "{{local.tcl_placement_spacing_label_rule_file}}"
 {%- else %}
-set TCL_PLACEMENT_SPACING_LABEL_RULE_FILE "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/placement_spacing_rule.tcl"
+set TCL_PLACEMENT_SPACING_LABEL_RULE_FILE             "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/placement_spacing_rule.tcl"
 {%- endif %}
 {%- if local.tcl_icc2_cts_ndr_rule_file %}
-set TCL_ICC2_CTS_NDR_RULE_FILE  "{{local.tcl_icc2_cts_ndr_rule_file}}"
+set TCL_ICC2_CTS_NDR_RULE_FILE                        "{{local.tcl_icc2_cts_ndr_rule_file}}"
 {%- else %}
-set TCL_ICC2_CTS_NDR_RULE_FILE  "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/icc2_cts_ndr_rule.tcl"
+set TCL_ICC2_CTS_NDR_RULE_FILE                        "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/icc2_cts_ndr_rule.tcl"
 {%- endif %}
 {% include 'icc2/00_icc2_setup.tcl' %}
 
@@ -87,6 +94,20 @@ set_scenario_status -active true [all_scenarios]
 ###==================================================================##
 ## Additional timer related setups :cts uncertainty                  ##
 ##===================================================================##
+{%- if local.setup_uncertainty %}
+set_clock_uncertainty {{local.setup_uncertainty}} -setup [all_clocks ] -scenarios [all_scenarios ]
+{%-  endif %}
+{%- if local.hold_uncertainty %}
+set_clock_uncertainty {{local.hold_uncertainty}} -hold  [all_clocks ] -scenarios [all_scenarios ]
+{%-  endif %}
+
+
+{%- if local.data_transition %}
+set_max_transition -data_path {{local.data_transition}} [all_clocks] -scenarios [all_scenarios]
+{%- endif %}
+{%- if local.clock_transition %}
+set_max_transition -clock_path {{local.clock_transition}} [all_clocks] -scenarios [all_scenarios]
+{%- endif %}
 
 ###==================================================================##
 ## clock settings                                                    ##
@@ -106,14 +127,14 @@ puts "Alchip-info: Sourcing  tsmc16ffc settings"
 puts "Alchip-info: Sourcing  set_lib_cell_purpose.tcl"
 source -e -v "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/set_lib_cell_purpose.tcl"
 
+{%- if local.clock_opt_opto_name_prefix %}
 ## clock opt cts name prefix---------------------------------------------
-if {$CLOCK_OPT_OPTO_NAME_PREFIX != ""} {
-	set_app_options -name opt.common.user_instance_name_prefix -value $CLOCK_OPT_OPTO_NAME_PREFIX
-	if {[get_app_option_value -name clock_opt.flow.enable_ccd]} {
-		# If CCD is enabled, set both opt and cts user prefix as CCD can work on both clock and data paths
-		set_app_options -name cts.common.user_instance_name_prefix -value ${CLOCK_OPT_OPTO_NAME_PREFIX}cts
-	}
+set_app_options -name opt.common.user_instance_name_prefix -value "{{local.clock_opt_opto_name_prefix}}"
+if {[get_app_option_value -name clock_opt.flow.enable_ccd]} {
+	# If CCD is enabled, set both opt and cts user prefix as CCD can work on both clock and data paths
+	set_app_options -name cts.common.user_instance_name_prefix -value "{{local.clock_opt_opto_name_prefix}}_ccd"
 }
+{%- endif %}
 
 ###==================================================================##
 ##  Enable AOCV or POCV                                              ##
@@ -160,20 +181,22 @@ route_group -all_clock_nets
 ###==================================================================##
 ## Post-route clock tree optimization for non-CCD flow               ##
 ##===================================================================##
-if {$CLOCK_OPT_OPTO_CTO && ![get_app_option_value -name clock_opt.flow.enable_ccd]} {
-	if {$CLOCK_OPT_OPTO_CTO_NAME_PREFIX != ""} {
-		set_app_options -name cts.common.user_instance_name_prefix -value ${CLOCK_OPT_OPTO_CTO_NAME_PREFIX}
-	} 
-synthesize_clock_trees -postroute -routed_clock_stage detail
+{%- if local.clock_opt_opto_cto == "true" %} 
+# local.clock_opt_opto_cto_name_prefix
+if {![get_app_option_value -name clock_opt.flow.enable_ccd]} {
+  {%- if local.clock_opt_opto_cto_name_prefix %} 
+	set_app_options -name cts.common.user_instance_name_prefix -value {{local.clock_opt_opto_cto_name_prefix}}
+	{%- endif  %}
+  synthesize_clock_trees -postroute -routed_clock_stage detail
 }
+{%- endif  %}
 
 ## Connect pg net------------------------------------------------------
-
 {%- if local.use_usr_common_scripts_connect_pg_net_tcl == "true" %}
 source {{env.PROJ_SHARE_CMN}}/icc2_common_scripts/connect_pg_net.tcl
 {%- else %}
 puts "Alchip-info: Running connect_pg_net command"
-connect_pg_net
+connect_pg_net -automatic
 {%- endif %}
 
 ## remove_clock_gating_check after build clock tree---------------------
@@ -186,13 +209,23 @@ save_block -as {{env.BLK_NAME}}
 ###==================================================================##
 ##  output data                                                      ##
 ##===================================================================##
+## Write SPEF
+{%- if local.write_spef_by_tool  == "true" %}
+{% include 'icc2/icc2_write_spef.tcl' %}
+{%- endif %}
+
 {%- if local.clock_opt_use_usr_write_data_tcl == "true" %}
 source {{cur.config_plugins_dir}}/icc2_scripts/04_clock/08_usr_write_data.tcl
 {%- else %}
 {%- if local.clock_opt_write_data == "true" %} 
-write_verilog -compress gzip -exclude {leaf_module_declarations pg_objects} -hierarchy all {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.v
-
-write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.pg.v
+# write_verilog (no pg, and no physical only cells)
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations pg_objects end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells} -hierarchy all {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.ori.v
+## write_verilog for LVS (with pg, and with physical only cells)
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.lvs.v
+## write_verilog for Formality (with pg, no physical only cells, and no supply statements)
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells supply_statements} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.fm.v
+## write_verilog for PT (no pg, no physical only cells but with diodes and DCAP for leakage power analysis)
+write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations pg_objects end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.pt.v
 
 {% if local.write_def_convert_icc2_site_to_lef_site_name_list != "" %} 
 write_def -include_tech_via_definitions -convert_sites { $write_def_convert_icc2_site_to_lef_site_name_list } -compress gzip {{cur.cur_flow_data_dir}}/.${cur_stage}{{env.BLK_NAME}}.def

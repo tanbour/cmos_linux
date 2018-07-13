@@ -1,0 +1,10 @@
+INSTANCE_TOGGLE_RATE {
+iou/ieu/gic500_mars/u_icb_cache/icb_ram_1152x18 0.7
+iou/ieu/gic500_mars/u_ite_cache/ite_ram_128x57 0.7
+iou/ieu/gic500_mars/u_lpi_cache/lpi_ram_128x29 0.7
+iou/iou_drt/drt_read/rdata_buf/array/array 0.7
+iou/iou_drt/write_split/drtwch_dfifo/array0 0.7
+iou/iou_drt/write_split/drtwch_dfifo/array1 0.7
+iou/peu_hpb_pio_sramctrl/peu_hpb_wrapper_2p_sram_4096x72b_bios_u/u_sram_2048x72_0 0.7
+iou/peu_hpb_pio_sramctrl/peu_hpb_wrapper_2p_sram_4096x72b_bios_u/u_sram_2048x72_1 0.7
+}

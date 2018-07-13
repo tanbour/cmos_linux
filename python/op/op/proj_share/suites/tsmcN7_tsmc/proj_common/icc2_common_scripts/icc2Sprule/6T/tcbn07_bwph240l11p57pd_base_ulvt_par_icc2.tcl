@@ -1,0 +1,1 @@
+/proj_lib/tsmc/CLN7/SC/tsmc/6T/tcbn07_bwph240l11p57pd_base_ulvt/100b/TSMCHOME/digital/Back_End/ndm/tcbn07_bwph240l11p57pd_base_ulvt_100a/tcbn07_bwph240l11p57pd_base_ulvt_par_icc2.tcl

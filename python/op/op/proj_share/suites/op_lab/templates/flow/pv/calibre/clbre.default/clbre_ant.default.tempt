@@ -1,0 +1,124 @@
+#!/bin/csh -f
+
+%REPL_OP4
+source "$RUN_DIR/scr/flow/clbre.$OP4_dst_branch.$OP4_dst_eco/$BLOCK_NAME.dir.$OP4_dst_branch.csh"
+
+#======================================================================
+#=================== set input files ==================================
+#======================================================================
+#----------------------- set key word based on src ---------------------------
+if ( $OP4_src == opus ) then
+set input_file     = "$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.merge"
+set output_file    = "$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco"
+set run_dir        = "$BLOCK_NAME.$OP4_dst.$OP4_dst_eco"
+set plugin_file    = "../../.$FLOW_BRANCH_DIR/plugin/clbre_ant_plugin.rule"
+else if ( $OP4_src == opus_dummy ) then
+set input_file     = "$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.dummy_merge"
+set output_file    = "$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.dummy_merge"
+set run_dir        = "$BLOCK_NAME.$OP4_dst.$OP4_dst_eco.dummy_merge"
+set plugin_file    = "../../.$FLOW_BRANCH_DIR/plugin/clbre_ant_plugin_dummy_merge.rule"
+endif
+#----------------------- set input files ---------------------------------
+set rule_deck     = "$CAL_DECKS_ANT"
+set top_name      = "$BLOCK_NAME"
+set sourceme_file = "$SOURCEME_14LPP_ANT_FILE"
+set gds_file      = "../../.\$SRC_DATA_DIR/\${input_file}.gds.gz" 
+set ant_run      = "$FLOW_BRANCH_DIR/\${output_file}.rule"
+set run_time      = "../../.\$RPT_DIR/\${run_dir}.run_time"
+REPL_OP4%
+#----------------------- delete exist rule deck file ---------------------
+if ( -e ${ant_run} ) then
+\rm -rf ${ant_run}
+endif
+if ( -d $RPT_DIR/${run_dir} ) then 
+\rm -rf $RPT_DIR/${run_dir}*
+endif
+#======================================================================
+#================== generate antenna check script =====================
+#======================================================================
+if ( ${sourceme_file} != "" ) then
+source ${sourceme_file}
+endif
+%REPL_OP4
+cat <<ant_setting >! \${ant_run}
+LAYOUT ERROR ON INPUT NO
+
+LAYOUT PRIMARY "\${top_name}"
+LAYOUT PATH    "\${gds_file}"
+LAYOUT SYSTEM GDSII
+
+DRC RESULTS DATABASE "../../.\$RPT_DIR/\${run_dir}/\${output_file}.db"
+DRC SUMMARY REPORT   "../../.\$RPT_DIR/\${run_dir}/\${run_dir}.rep"
+
+DRC ICSTATION YES
+ant_setting
+echo include  "\${plugin_file}" >> \${ant_run}
+echo include "\${rule_deck}" >> \${ant_run}
+REPL_OP4%
+#==========================================================================
+#========= run ANT check ==================================================
+#==========================================================================
+cd $RPT_DIR
+mkdir ${run_dir}
+cd ${run_dir}
+
+echo "clbre_ant" >! $run_time
+echo "start " `date "+%F %T %a"` >> $run_time
+%REPL_OP4
+mkdir -p ../../../openlava
+#-- if \$CALIBRE_HOME contain "ixl",use the centos5 to run ant-----------
+set clbre_version = `basename \$CALIBRE_HOME | awk 'BEGIN{FS="_"} {print $1}'`
+if ( \$clbre_version == ixl ) then
+set host_version = centos5
+endif
+#-- if \$CALIBRE_HOME contain "aoi",use the centos6 to run ant------------
+if ( \$clbre_version == aoi ) then
+set host_version = centos6
+endif
+#----grep the recommend tool version from deck rule and reload the tool---
+set tool_version_from_rule = `grep 'version' \${rule_deck} | grep -o '[0-9]*\.[0-9]*_[0-9]*\.[0-9]*' | uniq `
+if ( \$tool_version_from_rule != "" ) then 
+set origin_version = `basename \$MGC_HOME | grep -o '[0-9]*\.[0-9]*_[0-9]*\.[0-9]*'`
+set tool_version = `echo "\$origin_version\n \$tool_version_from_rule" | sort -r | awk 'NR==1 {print}'`
+module load mgc/\${clbre_version}_cal_\${tool_version}
+endif
+
+set clbre_ant_HOST_NAME = "$clbre_ant_HOST_NAME"
+if (\$clbre_ant_HOST_NAME == "all" ) then
+ set calibre_ant_user_run_cmd = "$CALIBRE_ANT_USER_RUN_CMD"
+ if ( \$calibre_ant_user_run_cmd != "" ) then
+ #-- if "\$calibre_ant_user_run_cmd" is not empty run user defined  command-
+ echo "\$calibre_ant_user_run_cmd ../../.\${ant_run}"
+ bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${clbre_ant_CPU_NUMBER} \
+      -R "\$host_version span[hosts=1] rusage[mem=${clbre_ant_MEM_REQUIREMENT}]" \
+ "eval \$calibre_ant_user_run_cmd ../../.\${ant_run}"
+ else
+ #-- user command is not fill, will use default command -------------------
+ bsub  -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${clbre_ant_CPU_NUMBER} \
+       -R "\$host_version span[hosts=1] rusage[mem=${clbre_ant_MEM_REQUIREMENT}]" \
+ "calibre  -drc -hier -hyper -turbo ${clbre_ant_CPU_NUMBER} -64 ../../.\${ant_run}"        
+ endif
+else
+ set calibre_ant_user_run_cmd = "$CALIBRE_ANT_USER_RUN_CMD"
+ if ( \$calibre_ant_user_run_cmd != "" ) then
+ #-- if "\$calibre_ant_user_run_cmd" is not empty run user defined  command-
+ echo "\$calibre_ant_user_run_cmd ../../.\${ant_run}"
+ bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${clbre_ant_CPU_NUMBER} -m "${clbre_ant_HOST_NAME}" \
+      -R "\$host_version span[hosts=1] rusage[mem=${clbre_ant_MEM_REQUIREMENT}]" \
+ "eval \$calibre_ant_user_run_cmd ../../.\${ant_run}"
+ else
+ #-- user command is not fill, will use default command -------------------
+ bsub  -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${clbre_ant_CPU_NUMBER} -m "${clbre_ant_HOST_NAME}" \
+       -R "\$host_version span[hosts=1] rusage[mem=${clbre_ant_MEM_REQUIREMENT}]" \
+ "calibre  -drc -hier -hyper -turbo ${clbre_ant_CPU_NUMBER} -64 ../../.\${ant_run}"        
+ endif
+endif
+REPL_OP4%
+echo "finish" `date "+%F %T %a"` >> $run_time
+#==========================================================================
+#========= grep the report ================================================
+#==========================================================================
+cd ../../../
+grep -v "NOT EXECUTED" $RPT_DIR/${run_dir}/${run_dir}.rep | grep -v "TOTAL Result Count = 0" >! $RPT_DIR/${run_dir}/${run_dir}.rep.sum
+grep RULECHECK $RPT_DIR/${run_dir}/${run_dir}.rep.sum  >! $RPT_DIR/${run_dir}/${run_dir}.CHECKRULE.rep.sum.sort
+

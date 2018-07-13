@@ -51,7 +51,7 @@ class LogParser(object):
         ''' search pattern for file '''
         LOG.info(f"parsing log file {path}")
         ext_dic = {}
-        raw_dic = {}
+        raw_dic = {"path": path}
         with open(path, 'r') as p_f:
             multi_line = ""
             prev = None

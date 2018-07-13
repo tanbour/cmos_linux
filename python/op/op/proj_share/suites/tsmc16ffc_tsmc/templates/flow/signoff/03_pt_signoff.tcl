@@ -42,12 +42,12 @@ source {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/proc/get_drivers.tcl
 source {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/proc/global_utility.tcl
 
 ## Restore PT sesseion
-set SESSION                     "{{local._multi_inst}}"
+set session "func_wcl_cworst_0c_setup"
 
-if {[file isdirectory $pre_flow_data_dir/${SESSION}]} {
-	restore_session $pre_flow_data_dir/${SESSION}
+if {[file isdirectory $pre_flow_data_dir/${session}]} {
+	restore_session $pre_flow_data_dir/${session}
 } else {
-	puts "Alchip-error : $pre_flow_data_dir/${SESSION} no exist!\n"
+	puts "Alchip-error : {{env.RUN_DATA}}/${session} no exist!\n"
 	exit
 }
 
@@ -84,7 +84,7 @@ foreach file [ glob {{env.PROJ_SHARE_TMP}}/flow/${signoff_dir}/${signoff_scripts
         # check_signal_net_xtalk_delta_delay
         check_signal_net_xtalk_delta_delay ${signal_threshold} ${output_rpt_signal_pt} > $cur_flow_log_dir/{{env.BLK_NAME}}.pt.check_signal_net_xtalk_delta_delay.log
         # check_dont_touch_net   
-        check_dont_touch_net ${output_rpt_dont_touch_net} > $cur_flow_log_dir/{{env.BLK_NAME}}.pt.check_dont_touch_net.log
+        check_dont_touch_net > $cur_flow_log_dir/{{env.BLK_NAME}}.pt.check_dont_touch_net.log
         # check_size_only_cell  
         check_size_only_cell > $cur_flow_log_dir/{{env.BLK_NAME}}.pt.check_size_only_cell.log
         # report_clock_summary

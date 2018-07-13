@@ -1,0 +1,183 @@
+#!/bin/csh -f
+
+%REPL_OP4
+source "$RUN_DIR/scr/flow/clbre.$OP4_dst_branch.$OP4_dst_eco/$BLOCK_NAME.dir.$OP4_dst_branch.csh"
+
+#===================================================================
+#===================  delete existing run file and folder ==========
+#===================================================================
+#----------------------- set key word based on src -----------------
+if ( $LVS_CHECK_USE_DUMMY_MERGE_GDS == 0 ) then
+set input_file     = "$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.merge"
+set output_file    = "$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco"
+set run_dir        = "$BLOCK_NAME.$OP4_dst.$OP4_dst_eco"
+set plugin_file    = "../../.$FLOW_BRANCH_DIR/plugin/clbre_lvs_plugin.rule"
+else if ( $LVS_CHECK_USE_DUMMY_MERGE_GDS == 1 ) then
+set input_file     = "$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.dummy_merge"
+set output_file    = "$BLOCK_NAME.$OP4_dst.$OP4_dst_branch.$OP4_dst_eco.dummy_merge"
+set run_dir        = "$BLOCK_NAME.$OP4_dst.$OP4_dst_eco.dummy_merge"
+set plugin_file    = "../../.$FLOW_BRANCH_DIR/plugin/clbre_lvs_plugin_dummy_merge.rule"
+endif
+#-------------------   set input files    --------------------------
+set rule_deck     = "$CAL_DECKS_LVS"
+set top_name      = "$BLOCK_NAME"
+set sourceme_file = "$SOURCEME_14LPP_LVS_FILE"
+set gds_file      = "../../.\$SRC_DATA_DIR/\${input_file}.gds.gz"
+set net_file      = "../../.\$SRC_DATA_DIR/$BLOCK_NAME.$OP4_src.$OP4_src_branch.$OP4_src_eco.cdl"
+set lvs_run       = "$FLOW_BRANCH_DIR/\${output_file}.rule"
+set run_time      = "../../.\$RPT_DIR/\${run_dir}.run_time"
+set hcell_file    = "$HCELL_FILE_LVS"
+set power_name    = "$POWER_NAME_LVS"
+set ground_name   = "$GROUND_NAME_LVS"
+REPL_OP4%
+#----------------------- delete exist rule deck file ----------------
+if ( -e ${lvs_run} ) then
+\rm -rf ${lvs_run}
+endif
+if ( -d $RPT_DIR/${run_dir} ) then 
+\rm -rf $RPT_DIR/${run_dir}*
+endif
+#===================================================================
+#=========  generate LVS check  script =============================
+#===================================================================
+if (${sourceme_file} != "") then
+source ${sourceme_file}
+endif
+%REPL_OP4
+cat <<lvs_setting >! \${lvs_run}
+#!tvf
+
+tvf::VERBATIM {
+LAYOUT ERROR ON INPUT NO
+
+LVS CHECK PORT NAMES  YES
+LVS IGNORE PORTS      YES
+LVS GLOBALS ARE PORTS YES
+LVS SPICE PREFER PINS      NO
+LVS Spice Override Globals YES
+LVS RECOGNIZE GATES NONE
+LVS Expand Unbalanced Cells NO
+LVS abort on softchk no
+LVS SPICE CULL PRIMITIVE SUBCIRCUITS YES
+
+LAYOUT CASE YES
+SOURCE CASE YES
+
+LAYOUT PATH "\$gds_file"
+LAYOUT PRIMARY "\$top_name"
+LAYOUT SYSTEM GDSII
+
+SOURCE PATH "\$net_file"
+SOURCE PRIMARY "\$top_name"
+SOURCE SYSTEM SPICE
+LVS ISOLATE SHORTS YES flat //<LVS_REPORT>.shorts
+LVS REPORT OPTION  S V R F
+LVS REPORT "../../.\$RPT_DIR/\${run_dir}/\${run_dir}.rep"
+LVS EXECUTE ERC YES
+ERC SELECT CHECK ERC_WELL_TO_PG_CHECK 
+ERC SELECT CHECK ERC_DS_TO_PG_CHECK   
+ERC SELECT CHECK ERC_FLOATING_WELL_CHECK
+
+ERC RESULTS DATABASE "../../.\$RPT_DIR/\${run_dir}/\${output_file}.erc.db" ASCII
+ERC SUMMARY REPORT   "../../.\$RPT_DIR/\${run_dir}/\${run_dir}.erc.rep" HIER
+ERC MAXIMUM RESULTS ALL
+ERC MAXIMUM VERTEX ALL
+
+
+DRC ICSTATION YES
+lvs_setting
+##-- generate power name ---------------------------------------------
+#if ( `echo \${power_name}`  != "VDD" ) then
+#set power_name_cache = "" 
+#foreach buff (`echo \${power_name}`)
+#   set power_name_cache = (\$power_name_cache \"\${buff}\")
+#end
+#echo LVS POWER NAME \${power_name_cache} >> \${lvs_run}
+#else 
+#echo LVS POWER NAME \"VDD\" >> \${lvs_run}
+#endif
+##-- generate ground name ---------------------------------------------
+#if ( `echo \$ground_name`  != "VSS" ) then
+#set ground_name_cache = "" 
+#foreach buff (`echo \$ground_name`)
+#   set ground_name_cache = (\$ground_name_cache \"\${buff}\")
+#end
+#echo LVS GROUND NAME \${ground_name_cache} >> \${lvs_run}
+#else
+#echo LVS GROUND NAME \"VSS\" >> \${lvs_run}
+#endif
+echo include \${plugin_file} >> \${lvs_run}
+echo include \${rule_deck} >> \${lvs_run}
+REPL_OP4%
+echo "}" >> ${lvs_run}
+
+#==========================================================================
+#========= run LVS check ==================================================
+#==========================================================================
+
+cd $RPT_DIR
+mkdir ${run_dir}
+cd ${run_dir}
+
+echo "clbre_lvs" >! $run_time
+echo "start " `date "+%F %T %a"` >> $run_time
+%REPL_OP4 
+mkdir -p ../../../openlava
+#-- if \$CALIBRE_HOME contain "ixl",use the centos5 to run lvs-----------
+set clbre_version = `basename \$CALIBRE_HOME | awk 'BEGIN{FS="_"} {print $1}'`
+if ( \$clbre_version == ixl ) then
+set host_version = centos5
+endif
+#-- if \$CALIBRE_HOME contain "aoi",use the centos6 to run lvs------------
+if ( \$clbre_version == aoi ) then
+set host_version = centos6
+endif
+#----grep the recommend tool version from deck rule and reload the tool---
+set tool_version_from_rule = `grep 'version' \${rule_deck} | grep -o '[0-9]*\.[0-9]*_[0-9]*\.[0-9]*' | uniq `
+if ( \$tool_version_from_rule != "" ) then 
+set origin_version = `basename \$MGC_HOME | grep -o '[0-9]*\.[0-9]*_[0-9]*\.[0-9]*'`
+set tool_version = `echo "\$origin_version\n \$tool_version_from_rule" | sort -r | awk 'NR==1 {print}'`
+module load mgc/\${clbre_version}_cal_\${tool_version}
+endif
+
+set clbre_lvs_HOST_NAME = "$clbre_lvs_HOST_NAME"
+if (\$clbre_lvs_HOST_NAME == "all" ) then
+ set calibre_lvs_user_run_cmd = "$CALIBRE_LVS_USER_RUN_CMD"
+ if ( "\$calibre_lvs_user_run_cmd" != "" ) then
+ #-- if "\$calibre_lvs_user_run_cmd" is not empty run user defined command-
+ echo "\$calibre_lvs_user_run_cmd  ../../.\${lvs_run}"
+ bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${clbre_lvs_CPU_NUMBER} \
+      -R "\$host_version span[hosts=1] rusage[mem=${clbre_lvs_MEM_REQUIREMENT}]" \
+ "eval "\$calibre_lvs_user_run_cmd  ../../.\${lvs_run}""
+ else 
+ #-- user command is not fill, will use default command -------------------
+ bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${clbre_lvs_CPU_NUMBER} \
+      -R "\$host_version span[hosts=1] rusage[mem=${clbre_lvs_MEM_REQUIREMENT}]" \
+ "calibre -lvs -hier -hyper -turbo ${clbre_lvs_CPU_NUMBER} -64 -hcell \${hcell_file} ../../.\${lvs_run} " 
+ endif
+else
+ set calibre_lvs_user_run_cmd = "$CALIBRE_LVS_USER_RUN_CMD"
+ if ( "\$calibre_lvs_user_run_cmd" != "" ) then
+ #-- if "\$calibre_lvs_user_run_cmd" is not empty run user defined command-
+ echo "\$calibre_lvs_user_run_cmd  ../../.\${lvs_run}"
+ bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${clbre_lvs_CPU_NUMBER} -m "\${clbre_lvs_HOST_NAME}" \
+      -R "\$host_version span[hosts=1] rusage[mem=${clbre_lvs_MEM_REQUIREMENT}]" \
+ "eval "\$calibre_lvs_user_run_cmd  ../../.\${lvs_run}""
+ else 
+ #-- user command is not fill, will use default command -------------------
+ bsub -Is -P ${PROJECT_NAME} -q ${OPENLAVA_BATCH_QUEUE} -n ${clbre_lvs_CPU_NUMBER} -m "\${clbre_lvs_HOST_NAME}" \
+      -R "\$host_version span[hosts=1] rusage[mem=${clbre_lvs_MEM_REQUIREMENT}]" \
+ "calibre -lvs -hier -hyper -turbo ${clbre_lvs_CPU_NUMBER} -64 -hcell \${hcell_file} ../../.\${lvs_run} " 
+ endif
+endif
+REPL_OP4%
+echo "finish" `date "+%F %T %a"` >> $run_time
+#==========================================================================
+#========= grep the report ================================================
+#==========================================================================
+cd ../../../
+echo RULECHECK RESULTS STATISTICS >! $RPT_DIR/${run_dir}/${run_dir}.erc.rep.sum
+grep "^RULECHECK " $RPT_DIR/${run_dir}/${run_dir}.erc.rep   >> $RPT_DIR/${run_dir}/${run_dir}.erc.rep.sum
+echo RULECHECK RESULTS STATISTICS BY CELL                 >> $RPT_DIR/${run_dir}/${run_dir}.erc.rep.sum
+grep "TOTAL Result Count = "$RPT_DIR/${run_dir}/${run_dir}.erc.rep | sed "/RULECHECK/d" >> $RPT_DIR/${run_dir}/${run_dir}.erc.rep.sum
+

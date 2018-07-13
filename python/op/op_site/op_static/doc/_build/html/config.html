@@ -126,18 +126,22 @@
 <td>filter.cfg</td>
 <td>Filter config file, used to waive or detect Error messages</td>
 </tr>
-<tr class="row-even"><td rowspan="6">EDA tool</td>
+<tr class="row-even"><td rowspan="8">EDA tool</td>
 <td>syn.cfg</td>
 <td>Synthesis config file, support DC/DCG..</td>
 </tr>
-<tr class="row-odd"><td>pr.cfg</td>
-<td>Place &amp; Route config file, support ICC/ICC2/Innovus</td>
+<tr class="row-odd"><td colspan="2">pricc2.cfg        | Place &amp; Route config file, support ICC2</td>
 </tr>
-<tr class="row-even"><td>ext.cfg</td>
+<tr class="row-even"><td colspan="2">prinvs.cfg        | Place &amp; Route config file, support INNOVUS</td>
+</tr>
+<tr class="row-odd"><td>ext.cfg</td>
 <td>RC extraction config file, support StarRC/QRC</td>
 </tr>
-<tr class="row-odd"><td>sta.cfg</td>
+<tr class="row-even"><td>sta.cfg</td>
 <td>STA config file, support PT</td>
+</tr>
+<tr class="row-odd"><td>ele.cfg</td>
+<td>Electrical config file, support PTPX/Redhawk</td>
 </tr>
 <tr class="row-even"><td>fm.cfg</td>
 <td>Formal config file, support Formality/Conformal</td>
@@ -346,6 +350,11 @@ BLK_CMN          : block common scripts directory used for this block&#39;s all 
 <h2>Config file flow.cfg<a class="headerlink" href="#config-file-flow-cfg" title="Permalink to this headline">¶</a></h2>
 <p>This config file is used for flow run configuration. All flow run will been record in this file, user can remove some unused flow sections as project goes on.
 <a class="reference internal" href="op_lab_guide.html#ref-appendix-a-1"><span class="std std-ref">Appendix A-1 (flow config introduction)</span></a></p>
+<p>OP flow overview:</p>
+<div class="figure">
+<img alt="_images/op_flow_new.PNG" src="_images/op_flow_new.PNG" />
+</div>
+<p>flow config example:</p>
 <div class="figure">
 <img alt="_images/flow_config.PNG" src="_images/flow_config.PNG" />
 </div>
@@ -439,7 +448,8 @@ Error message can be Error/Message/Information.</p>
 <p>This config directory is used to set the EDA tool config files.
 All EDA tool’s config files and plugin files are contain in this directory.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>+ $PROJ_ROOT/share/config/flow/syn.cfg
-+ $PROJ_ROOT/share/config/flow/pr.cfg
++ $PROJ_ROOT/share/config/flow/pricc2.cfg
++ $PROJ_ROOT/share/config/flow/prinvs.cfg
 + $PROJ_ROOT/share/config/flow/ext.cfg
 + $PROJ_ROOT/share/config/flow/sta.cfg
 + $PROJ_ROOT/share/config/flow/fm.cfg

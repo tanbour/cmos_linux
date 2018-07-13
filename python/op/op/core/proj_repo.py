@@ -34,21 +34,32 @@ class ProjRepo(object):
         """to list all projects registered in op"""
         LOG.info(":: all available lab projects")
         pcom.pp_list(self.proj_lab_lst)
-    def git_proj(self):
+    def git_proj(self, block_lst):
         """to check out project by using git"""
         try:
             self.repo_dic["repo"] = repo = git.Repo.init(self.repo_dic["repo_dir"])
         except PermissionError as err:
             LOG.error(err)
             raise SystemExit()
+        repo.git.execute(["git", "config", "core.sparseCheckout", "true"])
         rmt = repo.remote() if repo.remotes else repo.create_remote(
             "origin", os.path.expandvars(self.repo_dic["repo_url"]))
         LOG.info(
             f"git pulling project {self.repo_dic['init_proj_name']} "
             f"from repository to {self.repo_dic['repo_dir']}")
         pcom.cfm()
+        rmt.fetch()
+        sc_file = os.sep.join([self.repo_dic["repo_dir"], ".git", "info", "sparse-checkout"])
+        with open(sc_file, "w") as scf:
+            if block_lst:
+                scf.write(
+                    f"{os.sep}share{os.sep}{os.linesep}{os.sep}"
+                    f"{f'{os.sep}{os.linesep}{os.sep}'.join(block_lst)}{os.sep}")
+            else:
+                scf.write("*")
         try:
-            rmt.pull("master")
+            # rmt.pull("master")
+            repo.active_branch.checkout()
         except git.GitCommandError as err:
             if any([c_c in str(err) for c_c in settings.REPO_AUTH_ERR_STR_LST]):
                 LOG.error("password (AD pwd) incorrect")
@@ -62,7 +73,7 @@ class ProjRepo(object):
     def svn_proj(self):
         """to check out project by using svn"""
         pass
-    def repo_proj(self, init_proj_name):
+    def repo_proj(self, init_proj_name, init_block_name_lst=None):
         """to operate project from code repo"""
         self.repo_dic["init_proj_name"] = init_proj_name
         LOG.info(f":: initializing project {init_proj_name} ...")
@@ -74,6 +85,6 @@ class ProjRepo(object):
             raise SystemExit()
         self.repo_dic["repo_dir"] = os.getcwd()
         if settings.PROJ_REPO == "git":
-            self.git_proj()
+            self.git_proj(init_block_name_lst)
         elif settings.PROJ_REPO == "svn":
             self.svn_proj()

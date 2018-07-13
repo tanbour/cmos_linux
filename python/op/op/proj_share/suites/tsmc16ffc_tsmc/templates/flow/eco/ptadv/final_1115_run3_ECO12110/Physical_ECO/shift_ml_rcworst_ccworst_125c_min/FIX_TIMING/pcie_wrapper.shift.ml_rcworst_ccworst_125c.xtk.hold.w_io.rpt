@@ -1,0 +1,153 @@
+Warning: The max_paths value of 9999999 passed to the report_timing command has exceeded the max_paths limit. The command will continue using the max_paths limit of 2000000. (UITE-503)
+Warning: AOCVM path-based analysis can take a long time if path-specific slew propagation is also performed. (UITE-487)
+****************************************
+Report : timing
+	-path_type full
+	-delay_type min
+	-input_pins
+	-nets
+	-slack_lesser_than 0.000
+	-max_paths 2000000
+	-crosstalk_delta
+	-derate
+	-pba_mode path
+	-sort_by slack
+Design : pcie_wrapper
+Version: M-2017.06-SP3
+Date   : Tue Dec 12 14:58:56 2017
+****************************************
+
+
+  Startpoint: pcie_extest_scan_in[8]
+               (input port clocked by test_ck)
+  Endpoint: u_pcie_top/u_dbPcie_ios_top/u_core/i_axi_arbiter/uu4
+               (rising edge-triggered flip-flop clocked by test_ck)
+  Path Group: test_ck
+  Path Type: min  (recalculated)
+
+  Point                                                                       Fanout  Derate  Delta    Incr      Path
+  ---------------------------------------------------------------------------------------------------------------------
+  clock test_ck (rise edge)                                                                          0.000     0.000
+  clock network delay (propagated)                                                                   0.000     0.000
+  input external delay                                                                               0.000     0.000 f
+  pcie_extest_scan_in[8] (in)                                                                        0.001 &   0.001 f
+  pcie_extest_scan_in[8] (net)                                                  1 
+  ALCHIP_ISO_DATA_BUF_920/I (BUFFD4BWP20P90CPD)                                      0.900  -0.000   0.000 &   0.001 f
+  ALCHIP_ISO_DATA_BUF_920/Z (BUFFD4BWP20P90CPD)                                      0.984           0.018 &   0.019 f
+  eco_net_920 (net)                                                             1 
+  ECO_INST_FIX_HOLD_20171208_184908_PTECO_HOLD_BUF56/I (DEL200D1BWP20P90CPD)         0.900  -0.000   0.002 &   0.021 f
+  ECO_INST_FIX_HOLD_20171208_184908_PTECO_HOLD_BUF56/Z (DEL200D1BWP20P90CPD)         0.977           0.251 &   0.272 f
+  ECO_NET_FIX_HOLD_20171208_184908_PTECO_HOLD_NET56 (net)                       1 
+  ECO_INST_FIX_HOLD_20171208_184908_PTECO_HOLD_BUF136/I (DEL075D1BWP20P90CPD)        0.900   0.000   0.000 &   0.273 f
+  ECO_INST_FIX_HOLD_20171208_184908_PTECO_HOLD_BUF136/Z (DEL075D1BWP20P90CPD)        0.977           0.097 &   0.370 f
+  ECO_NET_FIX_HOLD_20171208_184908_PTECO_HOLD_NET136 (net)                      1 
+  uu188/I1 (MUX2D1BWP20P90CPD)                                                       0.900   0.000   0.000 &   0.370 f
+  uu188/Z (MUX2D1BWP20P90CPD)                                                        0.977           0.019 &   0.389 f
+  net352 (net)                                                                  1 
+  u_pcie_top/u_dbPcie_ios_top/u_core/i_axi_arbiter/uu4/D (DFQD1BWP16P90CPDLVT)       0.900   0.000   0.000 &   0.389 f
+  data arrival time                                                                                            0.389
+
+  clock test_ck (rise edge)                                                                          0.000     0.000
+  clock network delay (propagated)                                                                   0.577     0.577
+  clock reconvergence pessimism                                                                      0.000     0.577
+  clock uncertainty                                                                                  0.003     0.580
+  u_pcie_top/u_dbPcie_ios_top/u_core/i_axi_arbiter/uu4/CP (DFQD1BWP16P90CPDLVT)                                0.580 r
+  library hold time                                                                  1.000           0.017     0.597
+  data required time                                                                                           0.597
+  ---------------------------------------------------------------------------------------------------------------------
+  data required time                                                                                           0.597
+  data arrival time                                                                                           -0.389
+  ---------------------------------------------------------------------------------------------------------------------
+  slack (VIOLATED)                                                                                            -0.207
+
+
+  Startpoint: pcie_extest_scan_in[3]
+               (input port clocked by test_ck)
+  Endpoint: u_pcie_top/u_dbPcie_ios_top/u_core/i_axi_wrapper/uu2
+               (rising edge-triggered flip-flop clocked by test_ck)
+  Path Group: test_ck
+  Path Type: min  (recalculated)
+
+  Point                                                                                                                    Fanout  Derate  Delta    Incr      Path
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  clock test_ck (rise edge)                                                                                                                       0.000     0.000
+  clock network delay (propagated)                                                                                                                0.000     0.000
+  input external delay                                                                                                                            0.000     0.000 f
+  pcie_extest_scan_in[3] (in)                                                                                                                     0.001 &   0.001 f
+  pcie_extest_scan_in[3] (net)                                                                                               1 
+  ALCHIP_ISO_DATA_BUF_925/I (BUFFD4BWP20P90CPD)                                                                                   0.900  -0.000   0.000 &   0.001 f
+  ALCHIP_ISO_DATA_BUF_925/Z (BUFFD4BWP20P90CPD)                                                                                   0.984           0.018 &   0.019 f
+  eco_net_925 (net)                                                                                                          1 
+  ECO_INST_FIX_HOLD_20171208_184908_PTECO_HOLD_BUF128/I (DEL150D1BWP20P90CPD)                                                     0.900   0.000   0.002 &   0.020 f
+  ECO_INST_FIX_HOLD_20171208_184908_PTECO_HOLD_BUF128/Z (DEL150D1BWP20P90CPD)                                                     0.976           0.190 &   0.210 f
+  ECO_NET_FIX_HOLD_20171208_184908_PTECO_HOLD_NET128 (net)                                                                   1 
+  ECO_INST_FIX_HOLD_20171208_184908_PTECO_HOLD_BUF52/I (DEL200D1BWP20P90CPD)                                                      0.900   0.000   0.000 &   0.210 f
+  ECO_INST_FIX_HOLD_20171208_184908_PTECO_HOLD_BUF52/Z (DEL200D1BWP20P90CPD)                                                      0.976           0.248 &   0.458 f
+  ECO_NET_FIX_HOLD_20171208_184908_PTECO_HOLD_NET52 (net)                                                                    1 
+  uu178/I1 (MUX2D1BWP20P90CPD)                                                                                                    0.900   0.000   0.000 &   0.458 f
+  uu178/Z (MUX2D1BWP20P90CPD)                                                                                                     0.976           0.021 &   0.479 f
+  net346 (net)                                                                                                               1 
+  u_pcie_top/u_dbPcie_ios_top/u_core/i_axi_wrapper/ECO_INST_FIX_HOLD_20171208_184908_PTECO_HOLD_BUF16/I (BUFFD1BWP20P90CPD)       0.900  -0.000   0.000 &   0.480 f
+  u_pcie_top/u_dbPcie_ios_top/u_core/i_axi_wrapper/ECO_INST_FIX_HOLD_20171208_184908_PTECO_HOLD_BUF16/Z (BUFFD1BWP20P90CPD)       0.976           0.012 &   0.492 f
+  u_pcie_top/u_dbPcie_ios_top/u_core/i_axi_wrapper/ECO_NET_FIX_HOLD_20171208_184908_PTECO_HOLD_NET16 (net)                   1 
+  u_pcie_top/u_dbPcie_ios_top/u_core/i_axi_wrapper/uu2/D (DFQD1BWP16P90CPDLVT)                                                    0.900   0.000   0.000 &   0.492 f
+  data arrival time                                                                                                                                         0.492
+
+  clock test_ck (rise edge)                                                                                                                       0.000     0.000
+  clock network delay (propagated)                                                                                                                0.524     0.524
+  clock reconvergence pessimism                                                                                                                   0.000     0.524
+  clock uncertainty                                                                                                                               0.003     0.527
+  u_pcie_top/u_dbPcie_ios_top/u_core/i_axi_wrapper/uu2/CP (DFQD1BWP16P90CPDLVT)                                                                             0.527 r
+  library hold time                                                                                                               1.000           0.016     0.544
+  data required time                                                                                                                                        0.544
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  data required time                                                                                                                                        0.544
+  data arrival time                                                                                                                                        -0.492
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  slack (VIOLATED)                                                                                                                                         -0.051
+
+
+  Startpoint: pcie_extest_scan_in[9]
+               (input port clocked by test_ck)
+  Endpoint: u_pcie_top/u_dbPcie_ios_top/u_core/i_pcie_dma/i_udma/i_crri_arb_sys/uu1
+               (rising edge-triggered flip-flop clocked by test_ck)
+  Path Group: test_ck
+  Path Type: min  (recalculated)
+
+  Point                                                                                          Fanout  Derate  Delta    Incr      Path
+  ----------------------------------------------------------------------------------------------------------------------------------------
+  clock test_ck (rise edge)                                                                                             0.000     0.000
+  clock network delay (propagated)                                                                                      0.000     0.000
+  input external delay                                                                                                  0.000     0.000 f
+  pcie_extest_scan_in[9] (in)                                                                                           0.001 &   0.001 f
+  pcie_extest_scan_in[9] (net)                                                                     1 
+  ALCHIP_ISO_DATA_BUF_919/I (BUFFD4BWP20P90CPD)                                                         0.900  -0.000   0.000 &   0.001 f
+  ALCHIP_ISO_DATA_BUF_919/Z (BUFFD4BWP20P90CPD)                                                         0.984           0.028 &   0.029 f
+  eco_net_919 (net)                                                                                1 
+  ECO_INST_FIX_HOLD_20171208_184908_PTECO_HOLD_BUF53/I (DEL200D1BWP20P90CPD)                            0.900   0.000   0.030 &   0.058 f
+  ECO_INST_FIX_HOLD_20171208_184908_PTECO_HOLD_BUF53/Z (DEL200D1BWP20P90CPD)                            0.976           0.264 &   0.322 f
+  ECO_NET_FIX_HOLD_20171208_184908_PTECO_HOLD_NET53 (net)                                          1 
+  ECO_INST_FIX_HOLD_20171208_184908_PTECO_HOLD_BUF133/I (DEL100D1BWP20P90CPD)                           0.900   0.000   0.000 &   0.322 f
+  ECO_INST_FIX_HOLD_20171208_184908_PTECO_HOLD_BUF133/Z (DEL100D1BWP20P90CPD)                           0.976           0.126 &   0.449 f
+  ECO_NET_FIX_HOLD_20171208_184908_PTECO_HOLD_NET133 (net)                                         1 
+  uu190/I1 (MUX2D0BWP20P90CPD)                                                                          0.900   0.000   0.000 &   0.449 f
+  uu190/Z (MUX2D0BWP20P90CPD)                                                                           0.968           0.053 &   0.502 f
+  net353 (net)                                                                                     1 
+  u_pcie_top/u_dbPcie_ios_top/u_core/i_pcie_dma/i_udma/i_crri_arb_sys/uu1/D (DFQD1BWP16P90CPDLVT)       0.900  -0.003   0.000 &   0.502 f
+  data arrival time                                                                                                               0.502
+
+  clock test_ck (rise edge)                                                                                             0.000     0.000
+  clock network delay (propagated)                                                                                      0.525     0.525
+  clock reconvergence pessimism                                                                                         0.000     0.525
+  clock uncertainty                                                                                                     0.003     0.528
+  u_pcie_top/u_dbPcie_ios_top/u_core/i_pcie_dma/i_udma/i_crri_arb_sys/uu1/CP (DFQD1BWP16P90CPDLVT)                                0.528 r
+  library hold time                                                                                     1.000           0.023     0.551
+  data required time                                                                                                              0.551
+  ----------------------------------------------------------------------------------------------------------------------------------------
+  data required time                                                                                                              0.551
+  data arrival time                                                                                                              -0.502
+  ----------------------------------------------------------------------------------------------------------------------------------------
+  slack (VIOLATED)                                                                                                               -0.049
+
+
+1

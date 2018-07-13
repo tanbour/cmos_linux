@@ -135,7 +135,7 @@ PARSER_CFG_DIC = {
             "placement_overview_img": "01_fp.placement_overview.png",
             "hier_placement_overview_img": "01_fp.hier_placement_overview.png",
             "powerplan_img": "01_fp.powerplan.png",
-            "icc2_qor_key": "01_fp.qor.rpt",
+            "icc2_qor_key": "01_fp.zero_interconnect.qor.rpt",
             "icc2_qor_key_type": "multi",
             "icc2_qor_key_exp_lst": [
                 r'^(?P<icc2_scenario>([a-zA-Z]\S+(\.|_)\S+|Design))\s+\((?P<icc2_timingtype>(Setup|Hold))\)\s+(?P<WNS>([-+]?\d+\.\d*|--))\s+(?P<TNS>[-+]?\d+\.\d*)\s+(?P<NVE>\d+)',
@@ -660,6 +660,13 @@ PARSER_CFG_DIC = {
             ],
             "icc2_utilization_key_tpl": """{
                 "utilization": {{utilization}},
+                "signoffcheck_FP-01-02_category" : "Floorplan",
+                "signoffcheck_FP-01-02_item" : "Std-Cell Utilization",
+                "signoffcheck_FP-01-02_description" : "Check Std-Cell utilization",
+                "signoffcheck_FP-01-02_report" : "{{path}}",
+                "signoffcheck_FP-01-02_result": {{utilization}},
+                "signoffcheck_FP-01-02_judge" : "N/A",
+                "signoffcheck_FP-01-02_criteria" : "reasonable value",
             }""",
 
 
@@ -700,6 +707,7 @@ PARSER_CFG_DIC = {
                 "elapsed" : float("%.1f"%({{elapsed}} / 60.0)),
             }""",
         },
+
         "06_route_opt.tcl" : {
             "placement_overview_img": "06_route_opt.placement_overview.png",
             "hier_placement_overview_img": "06_route_opt.hier_placement_overview.png",
@@ -799,6 +807,13 @@ PARSER_CFG_DIC = {
             ],
             "icc2_utilization_key_tpl": """{
                 "utilization": {{utilization}},
+                "signoffcheck_FP-01-02_category" : "Floorplan",
+                "signoffcheck_FP-01-02_item" : "Std-Cell Utilization",
+                "signoffcheck_FP-01-02_description" : "Check Std-Cell utilization",
+                "signoffcheck_FP-01-02_report" : "{{path}}",
+                "signoffcheck_FP-01-02_result": {{utilization}},
+                "signoffcheck_FP-01-02_judge" : "N/A",
+                "signoffcheck_FP-01-02_criteria" : "reasonable value",
             }""",
 
 
@@ -839,6 +854,7 @@ PARSER_CFG_DIC = {
                 "elapsed" : float("%.1f"%({{elapsed}} / 60.0)),
             }""",
         },
+
         "08_finish.tcl" : {
             "placement_overview_img": "08_finish.placement_overview.png",
             "hier_placement_overview_img": "08_finish.hier_placement_overview.png",
@@ -938,6 +954,13 @@ PARSER_CFG_DIC = {
             ],
             "icc2_utilization_key_tpl": """{
                 "utilization": {{utilization}},
+                "signoffcheck_FP-01-02_category" : "Floorplan",
+                "signoffcheck_FP-01-02_item" : "Std-Cell Utilization",
+                "signoffcheck_FP-01-02_description" : "Check Std-Cell utilization",
+                "signoffcheck_FP-01-02_report" : "{{path}}",
+                "signoffcheck_FP-01-02_result": {{utilization}},
+                "signoffcheck_FP-01-02_judge" : "N/A",
+                "signoffcheck_FP-01-02_criteria" : "reasonable value",
             }""",
 
 
@@ -977,6 +1000,7 @@ PARSER_CFG_DIC = {
             "icc2_misc_elapsed_key_tpl": """{
                 "elapsed" : float("%.1f"%({{elapsed}} / 60.0)),
             }""",
+
         },
 
     },
@@ -1059,23 +1083,72 @@ PARSER_CFG_DIC = {
                 "timing_nve" : "{{NVE}}",
             }""",
 
-            "pt_max_tran_key": "report_constraint.max_transition.rpt",
+            "pt_max_tran_key": "report_constraint.max_transition.rpt.summary",
             "pt_max_tran_key_type": "single",
             "pt_max_tran_key_exp_lst": [
-                r'\sTotal transition error\s*=\s*(?P<max_transition>\d+)\s*',
+                r'\sTotal transition error\s*=\s*(?P<violation>\d+)\s*',
             ],
             "pt_max_tran_key_tpl": """{
-                "max_transition": {{max_transition}},
+                "max_transition": {{violation}},
+
+                "signoffcheck_CK-01-06_category" : "Clock",
+                "signoffcheck_CK-01-06_item" : "Max transition",
+                "signoffcheck_CK-01-06_description" : "Check the max-transition on the clock paths",
+                "signoffcheck_CK-01-06_report" : "{{path}}",
+                "signoffcheck_CK-01-06_result" : {{violation}},
+                "signoffcheck_CK-01-06_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_CK-01-06_criteria" : 0,
+
+                "signoffcheck_GE-05-02_category" : "Logical DRC",
+                "signoffcheck_GE-05-02_item" : "Meet max transition (data)",
+                "signoffcheck_GE-05-02_description" : "Need to satisfy max_transistion requirement define in .lib & user defined max_transition constraint for data paths",
+                "signoffcheck_GE-05-02_report" : "{{path}}",
+                "signoffcheck_GE-05-02_result" : {{violation}},
+                "signoffcheck_GE-05-02_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-05-02_criteria" : 0,
+
+                "signoffcheck_GE-05-03_category" : "Logical DRC",
+                "signoffcheck_GE-05-03_item" : "Meet max transition (clock)",
+                "signoffcheck_GE-05-03_description" : "Need to satisfy max_transistion requirement define in .lib & user defined max_transition constraint for clock paths (for both system-mode & test-mode)",
+                "signoffcheck_GE-05-03_report" : "{{path}}",
+                "signoffcheck_GE-05-03_result" : {{violation}},
+                "signoffcheck_GE-05-03_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-05-03_criteria" : 0,
+
             }""",
 
 
-            "pt_max_cap_key": "report_constraint.max_capacitance.rpt",
+            "pt_max_cap_key": "report_constraint.max_capacitance.rpt.summary",
             "pt_max_cap_key_type": "single",
             "pt_max_cap_key_exp_lst": [
-                r'\sTotal capacitance error\s*=\s*(?P<max_capacitance>\d+)\s*',
+                r'\sTotal capacitance error\s*=\s*(?P<violation>\d+)\s*',
             ],
             "pt_max_cap_key_tpl": """{
-                "max_capasitance": {{max_capacitance}},
+                "max_capasitance": {{violation}},
+
+                "signoffcheck_GE-05-01_category" : "Logical DRC",
+                "signoffcheck_GE-05-01_item" : "Meet max_capacitance",
+                "signoffcheck_GE-05-01_description" : "Need to satisfy max_capacitance requirement define in .lib & user defined max_capacitance constraint",
+                "signoffcheck_GE-05-01_report" : "{{path}}",
+                "signoffcheck_GE-05-01_result" : {{violation}},
+                "signoffcheck_GE-05-01_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-05-01_criteria" : 0,
+
+            }""",
+
+            "signoffcheck_GE-05-04_key": "report_constraint.max_fanout.rpt.summary",
+            "signoffcheck_GE-05-04_key_type": "single",
+            "signoffcheck_GE-05-04_key_exp_lst": [
+                r'\sTotal fanout error\s*=\s*(?P<violation>\d+)\s*',
+            ],
+            "signoffcheck_GE-05-04_key_tpl": """{
+                "signoffcheck_GE-05-04_category" : "Logical DRC",
+                "signoffcheck_GE-05-04_item" : "Meet max fanout",
+                "signoffcheck_GE-05-04_description" : "Need to satisfy max_fanout requirement define in .lib & user defined max_fanout constraint (Except fishbone or intentional high-FO nets)",
+                "signoffcheck_GE-05-04_report" : "{{path}}",
+                "signoffcheck_GE-05-04_result" : {{violation}},
+                "signoffcheck_GE-05-04_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-05-04_criteria" : 0,
             }""",
 
 
@@ -1123,4 +1196,626 @@ PARSER_CFG_DIC = {
 
         },
     },
+
+
+    "pv": {
+        "drc.csh": {
+
+            "signoffcheck_FP-01-01_key": "DRC.log",
+            "signoffcheck_FP-01-01_key_type": "single",
+            "signoffcheck_FP-01-01_key_exp_lst": [
+                r'^--- DATABASE EXTENT = \[ (?P<x0>-?\d+(\.\d*)?) , (?P<y0>-?\d+(\.\d*)?) \] -> \[ (?P<x1>-?\d+(\.\d*)?) , (?P<y1>-?\d+(\.\d*)?) \]',
+            ],
+            "signoffcheck_FP-01-01_key_tpl": """{
+                "signoffcheck_FP-01-01_category" : "Floorplan",
+                "signoffcheck_FP-01-01_item" : "Chipsize",
+                "signoffcheck_FP-01-01_description" : "Get consensus with both engineering and business team",
+                "signoffcheck_FP-01-01_report" : "{{path}}",
+                "signoffcheck_FP-01-01_result" : [ {{x0}}, {{y0}}, {{x1}}, {{y1}} ],
+                "signoffcheck_FP-01-01_judge" : "N/A",
+                "signoffcheck_FP-01-01_criteria" : "Same as expected",
+            }""",
+
+            "signoffcheck_GE-04-09_key": "DRC.log",
+            "signoffcheck_GE-04-09_key_type": "single",
+            "signoffcheck_GE-04-09_key_exp_lst": [
+                r'^--- DATABASE EXTENT = \[ (?P<x0>-?\d+(\.\d*)?) , (?P<y0>-?\d+(\.\d*)?) \] -> \[ (?P<x1>-?\d+(\.\d*)?) , (?P<y1>-?\d+(\.\d*)?) \]',
+            ],
+            "signoffcheck_GE-04-09_key_tpl": """{
+                "signoffcheck_GE-04-09_category" : "P&R",
+                "signoffcheck_GE-04-09_item" : "No object outside of the die area",
+                "signoffcheck_GE-04-09_description" : "Do NOT allow to have any object outside of the die area.",
+                "signoffcheck_GE-04-09_report" : "{{path}}",
+                "signoffcheck_GE-04-09_result" : [ {{x0}}, {{y0}}, {{x1}}, {{y1}} ],
+                "signoffcheck_GE-04-09_judge" : "",
+                "signoffcheck_GE-04-09_criteria" : "Same as expected",
+            }""",
+
+            "signoffcheck_GE-08-01_key": "DRC.rep",
+            "signoffcheck_GE-08-01_key_type": "single",
+            "signoffcheck_GE-08-01_key_exp_lst": [
+                r'TOTAL DRC Results Generated:\s*(?P<violation>\d+)',
+            ],
+            "signoffcheck_GE-08-01_key_tpl": """{
+                "signoffcheck_GE-08-01_category" : "PV/DFM",
+                "signoffcheck_GE-08-01_item" : "DRC",
+                "signoffcheck_GE-08-01_description" : "DRC rule check",
+                "signoffcheck_GE-08-01_report" : "{{path}}",
+                "signoffcheck_GE-08-01_result" : {{violation}},
+                "signoffcheck_GE-08-01_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-08-01_criteria" : 0,
+            }""",
+
+            "signoffcheck_GE-08-03_key": "ANT.rep",
+            "signoffcheck_GE-08-03_key_type": "single",
+            "signoffcheck_GE-08-03_key_exp_lst": [
+                r'TOTAL DRC Results Generated:\s*(?P<violation>\d+)',
+            ],
+            "signoffcheck_GE-08-03_key_tpl": """{
+                "signoffcheck_GE-08-03_category" : "PV/DFM",
+                "signoffcheck_GE-08-03_item" : "ANTENNA",
+                "signoffcheck_GE-08-03_description" : "Antenna rule check",
+                "signoffcheck_GE-08-03_report" : "{{path}}",
+                "signoffcheck_GE-08-03_result" : {{violation}},
+                "signoffcheck_GE-08-03_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-08-03_criteria" : 0,
+            }""",
+
+            "signoffcheck_GE-08-04_key": "LVS.log",
+            "signoffcheck_GE-08-04_key_type": "single",
+            "signoffcheck_GE-08-04_key_exp_lst": [
+                r'LVS completed. (?P<result>[^.]+)\. See report file:',
+            ],
+            "signoffcheck_GE-08-04_key_tpl": """{
+                "signoffcheck_GE-08-04_category" : "PV/DFM",
+                "signoffcheck_GE-08-04_item" : "LVS",
+                "signoffcheck_GE-08-04_description" : "LVS rule check",
+                "signoffcheck_GE-08-04_report" : "{{path}}",
+                "signoffcheck_GE-08-04_result" : "{{result}}",
+                "signoffcheck_GE-08-04_judge" : {% if result == "CORRECT" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-08-04_criteria" : "CORRECT",
+            }""",
+
+            "signoffcheck_GE-08-05_key": "erc.sum",
+            "signoffcheck_GE-08-05_key_type": "single",
+            "signoffcheck_GE-08-05_key_exp_lst": [
+                r'TOTAL ERC RuleCheck Results Generated:\s*(?P<violation>\d+)',
+            ],
+            "signoffcheck_GE-08-05_key_tpl": """{
+                "signoffcheck_GE-08-05_category" : "PV/DFM",
+                "signoffcheck_GE-08-05_item" : "ERC",
+                "signoffcheck_GE-08-05_description" : "ERC rule check",
+                "signoffcheck_GE-08-05_report" : "{{path}}",
+                "signoffcheck_GE-08-05_result" : {{violation}},
+                "signoffcheck_GE-08-05_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-08-05_criteria" : 0,
+            }""",
+
+            "signoffcheck_GE-08-06_key": "FC.rep",
+            "signoffcheck_GE-08-06_key_type": "single",
+            "signoffcheck_GE-08-06_key_exp_lst": [
+                r'TOTAL DRC Results Generated:\s*(?P<violation>\d+)',
+            ],
+            "signoffcheck_GE-08-06_key_tpl": """{
+                "signoffcheck_GE-08-06_category" : "PV/DFM",
+                "signoffcheck_GE-08-06_item" : "Flip chip or Wirebond",
+                "signoffcheck_GE-08-06_description" : "Flip chip/wire-bond rule check",
+                "signoffcheck_GE-08-06_report" : "{{path}}",
+                "signoffcheck_GE-08-06_result" : {{violation}},
+                "signoffcheck_GE-08-06_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-08-06_criteria" : 0,
+            }""",
+
+            "signoffcheck__key": "",
+            "signoffcheck__key_type": "single",
+            "signoffcheck__key_exp_lst": [
+                r'',
+            ],
+            "signoffcheck__key_tpl": """{
+                "signoffcheck__category" : "",
+                "signoffcheck__item" : "",
+                "signoffcheck__description" : "",
+                "signoffcheck__report" : "{{path}}",
+                "signoffcheck__result" : {{violation}},
+                "signoffcheck__judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck__criteria" : {{criteria}},
+            }""",
+
+        },
+    },
+
+    "signoff": {
+        "01_icc2_signoff.tcl": {
+
+            "signoffcheck_GE-05-05-S_key": "check_signal_wire_length.rpt",
+            "signoffcheck_GE-05-05-S_key_type": "single",
+            "signoffcheck_GE-05-05-S_key_exp_lst": [
+                r'^Total Wire Length over (?P<criteria>\d+)\s*\(um\) =\s*(?P<violation>\d+)',
+            ],
+            "signoffcheck_GE-05-05-S_key_tpl": """{
+                "signoffcheck_GE-05-05-S_category" : "Logical DRC",
+                "signoffcheck_GE-05-05-S_item" : "Meet max wire length",
+                "signoffcheck_GE-05-05-S_description" : "Need to safisfy user defined max wire length constraint",
+                "signoffcheck_GE-05-05-S_report" : "{{path}}",
+                "signoffcheck_GE-05-05-S_result" : {{violation}},
+                "signoffcheck_GE-05-05-S_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-05-05-S_criteria" : {{criteria}},
+            }""",
+
+            "signoffcheck_GE-05-05-C_key": "check_clock_wire_length.rpt",
+            "signoffcheck_GE-05-05-C_key_type": "single",
+            "signoffcheck_GE-05-05-C_key_exp_lst": [
+                r'^Total Clock Wire Length over (?P<criteria>\d+)\s*\(um\) =\s*(?P<violation>\d+)',
+            ],
+            "signoffcheck_GE-05-05-C_key_tpl": """{
+                "signoffcheck_GE-05-05-C_category" : "Logical DRC",
+                "signoffcheck_GE-05-05-C_item" : "Meet max wire length",
+                "signoffcheck_GE-05-05-C_description" : "Need to safisfy user defined max wire length constraint",
+                "signoffcheck_GE-05-05-C_report" : "{{path}}",
+                "signoffcheck_GE-05-05-C_result" : {{violation}},
+                "signoffcheck_GE-05-05-C_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-05-05-C_criteria" : {{criteria}},
+            }""",
+
+            "signoffcheck_GE-02-12_key": "check_tie_connection.rpt",
+            "signoffcheck_GE-02-12_key_type": "single",
+            "signoffcheck_GE-02-12_key_exp_lst": [
+                r'Total Tie Fanout over (?P<criteria>\d+) = (?P<violation>\d+)',
+            ],
+            "signoffcheck_GE-02-12_key_tpl": """{
+                "signoffcheck_GE-02-12_category" : "Netlist",
+                "signoffcheck_GE-02-12_item" : "Tie-high/low cell max fanout",
+                "signoffcheck_GE-02-12_description" : "Each tie-high/low cell fanout needs to be less than specific number",
+                "signoffcheck_GE-02-12_report" : "{{path}}",
+                "signoffcheck_GE-02-12_result" : {{violation}},
+                "signoffcheck_GE-02-12_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-02-12_criteria" : {{criteria}},
+            }""",
+
+            "signoffcheck_GE-02-02_key": "check_open_input_pin.rpt",
+            "signoffcheck_GE-02-02_key_type": "single",
+            "signoffcheck_GE-02-02_key_exp_lst": [
+                r'Total open input pin count = (?P<violation>\d+)',
+            ],
+            "signoffcheck_GE-02-02_key_tpl": """{
+                "signoffcheck_GE-02-02_category" : "Netlist",
+                "signoffcheck_GE-02-02_item" : "No open input",
+                "signoffcheck_GE-02-02_description" : "No open gate to avoid the electric failure",
+                "signoffcheck_GE-02-02_report" : "{{path}}",
+                "signoffcheck_GE-02-02_result" : {{violation}},
+                "signoffcheck_GE-02-02_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-02-02_criteria" : 0,
+            }""",
+
+            "signoffcheck_ST-02-10_key": "check_delay_cell_chain.rpt",
+            "signoffcheck_ST-02-10_key_type": "single",
+            "signoffcheck_ST-02-10_key_exp_lst": [
+                r'JUST DUMMY NOW (never matches to reports)',
+            ],
+            "signoffcheck_ST-02-10_key_tpl": """{
+                "signoffcheck_ST-02-10_category" : "",
+                "signoffcheck_ST-02-10_item" : "",
+                "signoffcheck_ST-02-10_description" : "",
+                "signoffcheck_ST-02-10_report" : "{{path}}",
+                "signoffcheck_ST-02-10_result" : {{violation}},
+                "signoffcheck_ST-02-10_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_ST-02-10_criteria" : {{criteria}},
+            }""",
+
+            "signoffcheck_GE-04-20_key": "check_filler_area_number.rpt",
+            "signoffcheck_GE-04-20_key_type": "single",
+            "signoffcheck_GE-04-20_key_exp_lst": [
+                r'Total Areas: (?P<area>\d+(\.\d+)*);\s+Total Number: (?P<number>\d+)',
+            ],
+            "signoffcheck_GE-04-20_key_tpl": """{
+                "signoffcheck_GE-04-20_category" : "P&R",
+                "signoffcheck_GE-04-20_item" : "Filler cell",
+                "signoffcheck_GE-04-20_description" : "Add the Filler cells in core logic empty area",
+                "signoffcheck_GE-04-20_report" : "{{path}}",
+                "signoffcheck_GE-04-20_result" : {{area}},
+                "signoffcheck_GE-04-20_judge" : "N/A",
+                "signoffcheck_GE-04-20_criteria" : "N/A",
+            }""",
+
+            "signoffcheck_GE-04-02_key": "check_dcap_area_number.rpt",
+            "signoffcheck_GE-04-02_key_type": "single",
+            "signoffcheck_GE-04-02_key_exp_lst": [
+                r'Total Areas: (?P<area>\d+(\.\d+)*);\s+Total Number: (?P<number>\d+)',
+            ],
+            "signoffcheck_GE-04-02_key_tpl": """{
+                "signoffcheck_GE-04-02_category" : "P&R",
+                "signoffcheck_GE-04-02_item" : "Dcap cell",
+                "signoffcheck_GE-04-02_description" : "Add the enough number of decap cells in core logic area",
+                "signoffcheck_GE-04-02_report" : "{{path}}",
+                "signoffcheck_GE-04-02_result" : {{area}},
+                "signoffcheck_GE-04-02_judge" : "N/A",
+                "signoffcheck_GE-04-02_criteria" : "N/A",
+            }""",
+
+            "signoffcheck_GE-04-03_key": "check_eco_area_number.rpt",
+            "signoffcheck_GE-04-03_key_type": "single",
+            "signoffcheck_GE-04-03_key_exp_lst": [
+                r'Total Areas: (?P<area>\d+(\.\d+)*);\s+Total Number: (?P<number>\d+)',
+            ],
+            "signoffcheck_GE-04-03_key_tpl": """{
+                "signoffcheck_GE-04-03_category" : "P&R",
+                "signoffcheck_GE-04-03_item" : "ECO cell",
+                "signoffcheck_GE-04-03_description" : "Add the enough number of ECO cells in core logic area",
+                "signoffcheck_GE-04-03_report" : "{{path}}",
+                "signoffcheck_GE-04-03_result" : {{area}},
+                "signoffcheck_GE-04-03_judge" : "N/A",
+                "signoffcheck_GE-04-03_criteria" : "N/A",
+            }""",
+
+            "signoffcheck_GE-04-07_key": "check_ip_isolation.rpt",
+            "signoffcheck_GE-04-07_key_type": "single",
+            "signoffcheck_GE-04-07_key_exp_lst": [
+                r'No isolation buffer inserted on',
+            ],
+            "signoffcheck_GE-04-07_key_tpl": """{
+                "signoffcheck_GE-04-07_category" : "P&R",
+                "signoffcheck_GE-04-07_item" : "Add isolation buffers on physical partitioned blocks",
+                "signoffcheck_GE-04-07_description" : "Add the specified type of isolation buffers on all the boundary nets inside the physical paritioned blocks. Clock nets need the special considerations",
+                "signoffcheck_GE-04-07_report" : "{{path}}",
+                "signoffcheck_GE-04-07_result" : "no isolation buffer",
+                "signoffcheck_GE-04-07_judge" : "NG",
+                "signoffcheck_GE-04-07_criteria" : 0,
+            }""",
+
+            "signoffcheck_GE-04-19_key": "check_ip_isolation.rpt",
+            "signoffcheck_GE-04-19_key_type": "single",
+            "signoffcheck_GE-04-19_key_exp_lst": [
+                r'Total IP Wire Length over (?P<criteria>\d+(\.\d+)?)\(um\) = (?P<violation>\d+)',
+            ],
+            "signoffcheck_GE-04-19_key_tpl": """{
+                "signoffcheck_GE-04-19_category" : "P&$",
+                "signoffcheck_GE-04-19_item" : "Distance between IP digital pins and isolation buffers",
+                "signoffcheck_GE-04-19_description" : "Isolation buffers need to be placed close enough to the target",
+                "signoffcheck_GE-04-19_report" : "{{path}}",
+                "signoffcheck_GE-04-19_result" : {{violation}},
+                "signoffcheck_GE-04-19_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-04-19_criteria" : {{criteria}},
+            }""",
+
+            "signoffcheck_GE-04-18_key": "check_port_isolation.rpt",
+            "signoffcheck_GE-04-18_key_type": "single",
+            "signoffcheck_GE-04-18_key_exp_lst": [
+                r'Total Wire Length over (?P<criteria>\d+(\.\d+)?)\(um\) = (?P<violation>\d+)',
+            ],
+            "signoffcheck_GE-04-18_key_tpl": """{
+                "signoffcheck_GE-04-18_category" : "P&R",
+                "signoffcheck_GE-04-18_item" : "Distance between port and isolation buffers",
+                "signoffcheck_GE-04-18_description" : "Isolation buffers need to be placed close enough to the target",
+                "signoffcheck_GE-04-18_report" : "{{path}}",
+                "signoffcheck_GE-04-18_result" : {{violation}},
+                "signoffcheck_GE-04-18_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-04-18_criteria" : {{criteria}},
+            }""",
+
+            "signoffcheck_GE-02-03_key": "check_multi_driver.rpt",
+            "signoffcheck_GE-02-03_key_type": "single",
+            "signoffcheck_GE-02-03_key_exp_lst": [
+                r'MULTIPLE_DRIVEN_NET : (?P<multi_drive_net>\d+)',
+            ],
+            "signoffcheck_GE-02-03_key_tpl": """{
+                "signoffcheck_GE-02-03_category" : "Netlist",
+                "signoffcheck_GE-02-03_item" : "No multi-drive",
+                "signoffcheck_GE-02-03_description" : "No multi-drivers except the intentional case (Except fishbone or intentional multi-drive nets)",
+                "signoffcheck_GE-02-03_report" : "{{path}}",
+                "signoffcheck_GE-02-03_result" : {{multi_drive_net}},
+                "signoffcheck_GE-02-03_judge" : {% if multi_drive_net == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-02-03_criteria" : 0,
+            }""",
+
+            "signoffcheck_CK-01-16_key": "check_multi_drive_net.rpt",
+            "signoffcheck_CK-01-16_key_type": "single",
+            "signoffcheck_CK-01-16_key_exp_lst": [
+                r'^Error',
+            ],
+            "signoffcheck_CK-01-16_key_tpl": """{
+                "signoffcheck_CK-01-16_category" : "Clock",
+                "signoffcheck_CK-01-16_item" : "Multi-drive placement/routing",
+                "signoffcheck_CK-01-16_description" : "Multi-drive buffers/routings need to be correctly implemented and fixed. Make sure NO auto cell-move nor routing.",
+                "signoffcheck_CK-01-16_report" : "{{path}}",
+                "signoffcheck_CK-01-16_result" : "Error",
+                "signoffcheck_CK-01-16_judge" : "NG",
+                "signoffcheck_CK-01-16_criteria" : "No error",
+            }""",
+
+            "signoffcheck__key": "",
+            "signoffcheck__key_type": "single",
+            "signoffcheck__key_exp_lst": [
+                r'',
+            ],
+            "signoffcheck__key_tpl": """{
+                "signoffcheck__category" : "",
+                "signoffcheck__item" : "",
+                "signoffcheck__description" : "",
+                "signoffcheck__report" : "{{path}}",
+                "signoffcheck__result" : {{violation}},
+                "signoffcheck__judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck__criteria" : {{criteria}},
+            }""",
+
+        },
+        "03_pt_signoff.tcl": {
+
+            "signoffcheck_GE-02-03_key": "check_multi_driver.rpt",
+            "signoffcheck_GE-02-03_key_type": "single",
+            "signoffcheck_GE-02-03_key_exp_lst": [
+                r'MULTIPLE_DRIVEN_NET : (?P<multi_drive_net>\d+)',
+            ],
+            "signoffcheck_GE-02-03_key_tpl": """{
+                "signoffcheck_GE-02-03_category" : "Netlist",
+                "signoffcheck_GE-02-03_item" : "No multi-drive",
+                "signoffcheck_GE-02-03_description" : "No multi-drivers except the intentional case (Except fishbone or intentional multi-drive nets)",
+                "signoffcheck_GE-02-03_report" : "{{path}}",
+                "signoffcheck_GE-02-03_result" : {{multi_drive_net}},
+                "signoffcheck_GE-02-03_judge" : {% if multi_drive_net == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-02-03_criteria" : 0,
+            }""",
+
+            "signoffcheck_CK-01-16_key": "check_multi_drive_net.rpt",
+            "signoffcheck_CK-01-16_key_type": "single",
+            "signoffcheck_CK-01-16_key_exp_lst": [
+                r'^Error',
+            ],
+            "signoffcheck_CK-01-16_key_tpl": """{
+                "signoffcheck_CK-01-16_category" : "Clock",
+                "signoffcheck_CK-01-16_item" : "Multi-drive placement/routing",
+                "signoffcheck_CK-01-16_description" : "Multi-drive buffers/routings need to be correctly implemented and fixed. Make sure NO auto cell-move nor routing.",
+                "signoffcheck_CK-01-16_report" : "{{path}}",
+                "signoffcheck_CK-01-16_result" : "Error",
+                "signoffcheck_CK-01-16_judge" : "NG",
+                "signoffcheck_CK-01-16_criteria" : "No error",
+            }""",
+
+            "signoffcheck_GE-02-16_key": "check_dont_use_cell.rpt",
+            "signoffcheck_GE-02-16_key_type": "single",
+            "signoffcheck_GE-02-16_key_exp_lst": [
+                r'^Error',
+            ],
+            "signoffcheck_GE-02-16_key_tpl": """{
+                "signoffcheck_GE-02-16_category" : "Netlist",
+                "signoffcheck_GE-02-16_item" : "Don't use the specific type cells",
+                "signoffcheck_GE-02-16_description" : "NO allow the specific type of cells for final layout",
+                "signoffcheck_GE-02-16_report" : "{{path}}",
+                "signoffcheck_GE-02-16_result" : "Error",
+                "signoffcheck_GE-02-16_judge" : "NG",
+                "signoffcheck_GE-02-16_criteria" : "No error",
+            }""",
+
+            "signoffcheck_GE-02-02_key": "check_open_input_pin.rpt",
+            "signoffcheck_GE-02-02_key_type": "single",
+            "signoffcheck_GE-02-02_key_exp_lst": [
+                r'Total open input pin count = (?P<violation>\d+)',
+            ],
+            "signoffcheck_GE-02-02_key_tpl": """{
+                "signoffcheck_GE-02-02_category" : "Netlist",
+                "signoffcheck_GE-02-02_item" : "No open input",
+                "signoffcheck_GE-02-02_description" : "No open gate to avoid the electric failure",
+                "signoffcheck_GE-02-02_report" : "{{path}}",
+                "signoffcheck_GE-02-02_result" : {{violation}},
+                "signoffcheck_GE-02-02_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-02-02_criteria" : 0,
+            }""",
+
+            "signoffcheck_GE-06-03_key": "check_clock_net_xtalk_delta_delay.rpt",
+            "signoffcheck_GE-06-03_key_type": "single",
+            "signoffcheck_GE-06-03_key_exp_lst": [
+                r'Total (?P<violation>\d+) violation nets\.',
+            ],
+            "signoffcheck_GE-06-03_key_tpl": """{
+                "signoffcheck_GE-06-03_category" : "On-chip SI",
+                "signoffcheck_GE-06-03_item" : "Minimize the Xtalk induced delay (clock)",
+                "signoffcheck_GE-06-03_description" : "Do NOT allow the Xtalk penalty delay which is more than the certain amount, on each individual clock nets",
+                "signoffcheck_GE-06-03_report" : "{{path}}",
+                "signoffcheck_GE-06-03_result" : {{violation}},
+                "signoffcheck_GE-06-03_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-06-03_criteria" : 0,
+            }""",
+
+            "signoffcheck_GE-02-08_key": "check_dont_touch_net.rpt",
+            "signoffcheck_GE-02-08_key_type": "single",
+            "signoffcheck_GE-02-08_key_exp_lst": [
+                r'\s(?P<violation>\d+) nets have changed',
+            ],
+            "signoffcheck_GE-02-08_key_tpl": """{
+                "signoffcheck_GE-02-08_category" : "Netlist",
+                "signoffcheck_GE-02-08_item" : "Keep the specific nets",
+                "signoffcheck_GE-02-08_description" : "Keep original connection and NO buffer's allowed on specific nets",
+                "signoffcheck_GE-02-08_report" : "{{path}}",
+                "signoffcheck_GE-02-08_result" : {{violation}},
+                "signoffcheck_GE-02-08_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-02-08_criteria" : 0,
+            }""",
+
+            "signoffcheck_GE-02-07_key": "check_size_only_cell.rpt",
+            "signoffcheck_GE-02-07_key_type": "single",
+            "signoffcheck_GE-02-07_key_exp_lst": [
+                r's(?P<violation>d+) cell type are changed',
+            ],
+            "signoffcheck_GE-02-07_key_tpl": """{
+                "signoffcheck_GE-02-07_category" : "Netlist",
+                "signoffcheck_GE-02-07_item" : "Keep the specific instances cell type",
+                "signoffcheck_GE-02-07_description" : "The specific instances need to be preserved as the specific cell type",
+                "signoffcheck_GE-02-07_report" : "{{path}}",
+                "signoffcheck_GE-02-07_result" : {{violation}},
+                "signoffcheck_GE-02-07_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-02-07_criteria" : 0,
+            }""",
+
+            "signoffcheck_CK-01-03_key": "report_clock_cell_type.rpt",
+            "signoffcheck_CK-01-03_key_type": "single",
+            "signoffcheck_CK-01-03_key_exp_lst": [
+                r'Total (?P<violation>d+) non-symmetric cells used\.',
+            ],
+            "signoffcheck_CK-01-03_key_tpl": """{
+                "signoffcheck_CK-01-03_category" : "Clock",
+                "signoffcheck_CK-01-03_item" : "Balance type cells",
+                "signoffcheck_CK-01-03_description" : "If PN balanced type cell library is available, use it on clock paths",
+                "signoffcheck_CK-01-03_report" : "{{path}}",
+                "signoffcheck_CK-01-03_result" : {{violation}},
+                "signoffcheck_CK-01-03_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_CK-01-03_criteria" : 0,
+            }""",
+
+            "signoffcheck_CK-01-04_key": "report_clock_cell_type.rpt",
+            "signoffcheck_CK-01-04_key_type": "single",
+            "signoffcheck_CK-01-04_key_exp_lst": [
+                r'Total (?P<violation>d+) high-vth cells used.',
+            ],
+            "signoffcheck_CK-01-04_key_tpl": """{
+                "signoffcheck_CK-01-04_category" : "Clock",
+                "signoffcheck_CK-01-04_item" : "Single VTH type cells",
+                "signoffcheck_CK-01-04_description" : "Use single type of VTH cells on clock paths. Do NOT mix-up HVT/SVT/…, on all the clock paths. As the default, use SVT type.",
+                "signoffcheck_CK-01-04_report" : "{{path}}",
+                "signoffcheck_CK-01-04_result" : {{violation}},
+                "signoffcheck_CK-01-04_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_CK-01-04_criteria" : 0,
+            }""",
+
+            "signoffcheck_CK-01-05_key": "report_clock_cell_type.rpt",
+            "signoffcheck_CK-01-05_key_type": "single",
+            "signoffcheck_CK-01-05_key_exp_lst": [
+                r'Total (?P<violation>d+) low-drive cells used.',
+            ],
+            "signoffcheck_CK-01-05_key_tpl": """{
+                "signoffcheck_CK-01-05_category" : "Clock",
+                "signoffcheck_CK-01-05_item" : "No weak-drive cell on clock",
+                "signoffcheck_CK-01-05_description" : "Check the low-drive cell type on the clock paths",
+                "signoffcheck_CK-01-05_report" : "{{path}}",
+                "signoffcheck_CK-01-05_result" : {{violation}},
+                "signoffcheck_CK-01-05_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_CK-01-05_criteria" : 0,
+            }""",
+
+            "signoffcheck__key": "",
+            "signoffcheck__key_type": "single",
+            "signoffcheck__key_exp_lst": [
+                r'',
+            ],
+            "signoffcheck__key_tpl": """{
+                "signoffcheck__category" : "",
+                "signoffcheck__item" : "",
+                "signoffcheck__description" : "",
+                "signoffcheck__report" : "{{path}}",
+                "signoffcheck__result" : {{violation}},
+                "signoffcheck__judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck__criteria" : {{criteria}},
+            }""",
+
+        },
+        "04_logs_signoff.csh": {
+
+            "signoffcheck_GE-02-04_key": "perl.check_netlist.log",
+            "signoffcheck_GE-02-04_key_type": "single",
+            "signoffcheck_GE-02-04_key_exp_lst": [
+                r'Number of 1\'b0\s*=\s*(?P<violation0>\d+)',
+                r'Number of 1\'b1\s*=\s*(?P<violation1>\d+)',
+            ],
+            "signoffcheck_GE-02-04_key_tpl": """{
+                "signoffcheck_GE-02-04_category" : "Netlist",
+                "signoffcheck_GE-02-04_item" : "Tie-low/high connection",
+                "signoffcheck_GE-02-04_description" : "Avoid direct connection to global power/ground nets",
+                "signoffcheck_GE-02-04_report" : "{{path}}",
+                "signoffcheck_GE-02-04_result" : {{violation0 or 0}} + {{violation1 or 0}},
+                "signoffcheck_GE-02-04_judge" : {% if violation0 == "0" and violation1 == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-02-04_criteria" : 0,
+            }""",
+
+            "signoffcheck_GE-02-05_key": "perl.check_netlist.log",
+            "signoffcheck_GE-02-05_key_type": "single",
+            "signoffcheck_GE-02-05_key_exp_lst": [
+                r'Number of assign\s*=\s*(?P<violation>\d+)',
+            ],
+            "signoffcheck_GE-02-05_key_tpl": """{
+                "signoffcheck_GE-02-05_category" : "Netlist",
+                "signoffcheck_GE-02-05_item" : "No assign statement",
+                "signoffcheck_GE-02-05_description" : "NO assign statement in netlist",
+                "signoffcheck_GE-02-05_report" : "{{path}}",
+                "signoffcheck_GE-02-05_result" : {{violation}},
+                "signoffcheck_GE-02-05_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-02-05_criteria" : 0,
+            }""",
+
+            "signoffcheck_GE-02-11_key": "perl.check_netlist.log",
+            "signoffcheck_GE-02-11_key_type": "single",
+            "signoffcheck_GE-02-11_key_exp_lst": [
+                r'Number of assign\s*=\s*(?P<violation>\d+)',
+            ],
+            "signoffcheck_GE-02-11_key_tpl": """{
+                "signoffcheck_GE-02-11_category" : "Netlist",
+                "signoffcheck_GE-02-11_item" : "No Back-slash",
+                "signoffcheck_GE-02-11_description" : "NO back-slash is allowed on netlist instance or port names",
+                "signoffcheck_GE-02-11_report" : "{{path}}",
+                "signoffcheck_GE-02-11_result" : {{violation}},
+                "signoffcheck_GE-02-11_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-02-11_criteria" : 0,
+            }""",
+
+            "signoffcheck_GE-02-09_key": "perl.check_cellsize.log",
+            "signoffcheck_GE-02-09_key_type": "single",
+            "signoffcheck_GE-02-09_key_exp_lst": [
+                r'Number of max-size-error =\s*(?P<violation>\d+)',
+            ],
+            "signoffcheck_GE-02-09_key_tpl": """{
+                "signoffcheck_GE-02-09_category" : "Netlist",
+                "signoffcheck_GE-02-09_item" : "No high-drive cell",
+                "signoffcheck_GE-02-09_description" : "Check the high-drive cell types (Except fishbone or intentional multi-drive nets)",
+                "signoffcheck_GE-02-09_report" : "{{path}}",
+                "signoffcheck_GE-02-09_result" : {{violation}},
+                "signoffcheck_GE-02-09_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-02-09_criteria" : 0,
+            }""",
+
+            "signoffcheck_GE-02-10_key": "perl.check_cellsize.log",
+            "signoffcheck_GE-02-10_key_type": "single",
+            "signoffcheck_GE-02-10_key_exp_lst": [
+                r'Number of min-size-error =\s*(?P<violation>\d+)',
+            ],
+            "signoffcheck_GE-02-10_key_tpl": """{
+                "signoffcheck_GE-02-10_category" : "Netlist",
+                "signoffcheck_GE-02-10_item" : "No weak-drive cell",
+                "signoffcheck_GE-02-10_description" : "Check the low-drive cell type",
+                "signoffcheck_GE-02-10_report" : "{{path}}",
+                "signoffcheck_GE-02-10_result" : {{violation}},
+                "signoffcheck_GE-02-10_judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck_GE-02-10_criteria" : 0,
+            }""",
+
+            "signoffcheck_GE-08-17_key": "perl.check_ip_cdl_bus_order.log",
+            "signoffcheck_GE-08-17_key_type": "single",
+            "signoffcheck_GE-08-17_key_exp_lst": [
+                r' have disordered bus\.',
+            ],
+            "signoffcheck_GE-08-17_key_tpl": """{
+                "signoffcheck_GE-08-17_category" : "PV/DFM",
+                "signoffcheck_GE-08-17_item" : "LVS netlist with IP",
+                "signoffcheck_GE-08-17_description" : "Include IP hard macro verilog model, to generate CDL by ver2lvs in Calibre",
+                "signoffcheck_GE-08-17_report" : "{{path}}",
+                "signoffcheck_GE-08-17_result" : "Error",
+                "signoffcheck_GE-08-17_judge" : "NG",
+                "signoffcheck_GE-08-17_criteria" : "No error",
+            }""",
+
+            "signoffcheck__key": "",
+            "signoffcheck__key_type": "single",
+            "signoffcheck__key_exp_lst": [
+                r'',
+            ],
+            "signoffcheck__key_tpl": """{
+                "signoffcheck__category" : "",
+                "signoffcheck__item" : "",
+                "signoffcheck__description" : "",
+                "signoffcheck__report" : "{{path}}",
+                "signoffcheck__result" : {{violation}},
+                "signoffcheck__judge" : {% if violation == "0" %} "OK" {% else %} "NG" {% endif %},
+                "signoffcheck__criteria" : {{criteria}},
+            }""",
+
+        },
+    },
 }
+
+PARSER_CFG_DIC["pricc2"] = PARSER_CFG_DIC["pr"]

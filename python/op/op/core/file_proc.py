@@ -9,10 +9,12 @@ import re
 import subprocess
 import json
 import datetime as dt
+from utils import settings
 from utils import pcom
 from utils import db_if
 from utils import log_parser_cfg
 from core import log_parser
+from core import json_converter as jc
 
 LOG = pcom.gen_logger(__name__)
 
@@ -76,6 +78,13 @@ class FileProc(object):
             self.log_dic["status"] = "failed"
             self.log_dic["err_lst"] = [
                 "job not finished due to finished string configured in proj.cfg missing"]
+        if settings.MAIL_ALERT:
+            fn_str = pcom.re_str(
+                f"{self.run_dic['jn_str']}_{self.db_stage_dic['f_created_time']}")
+            jc.JsonConverter(
+                [self.ced["USER"]],
+                f"[OP] {self.log_dic['status']} job {self.run_dic['jn_str']}",
+                os.linesep.join(self.log_dic["err_lst"]), fn_str).gen_json_file()
         return False
     def proc_logs(self):
         """to process all logs to dump database"""
@@ -83,13 +92,21 @@ class FileProc(object):
         stage_name = self.run_dic.get("stage", "")
         sub_stage_name = self.run_dic.get("sub_stage", "")
         inst_name = self.run_dic.get("multi_inst", "")
+        block = self.ced["BLK_NAME"]
         pcd = log_parser_cfg.PARSER_CFG_DIC.get(stage_name, {}).get(sub_stage_name, {})
         log_par = log_parser.LogParser()
         self.log_dic["data"] = {}
         for p_k, p_v in pcd.items():
+            b_p_v = f'{block}.{p_v}'
             if p_k.endswith("_key"):
-                key_path = os.path.join(
-                    flow_root_dir, "rpt", stage_name, inst_name, p_v)
+                c_paths = list()
+                c_paths.append(os.path.join("rpt", stage_name, inst_name, p_v))
+                c_paths.append(os.path.join("log", stage_name, inst_name, p_v))
+                c_paths.append(os.path.join("log", stage_name, inst_name, b_p_v))
+                for r_path in c_paths:
+                    key_path = os.path.join(flow_root_dir, r_path)
+                    if os.path.isfile(key_path):
+                        break
                 # key_path = f"{self.run_dic['file']}.log"
                 if not os.path.isfile(key_path):
                     LOG.warning(f"log file {key_path} to be parsed is NA")

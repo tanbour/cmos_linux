@@ -1,0 +1,8 @@
+#===================================================================
+#=================== tech setting ==================================
+#===================================================================
+TECH_FILES {
+#   /proj/Mars2_power/WORK/carls/Template/DATA/Tech/tech_ircx/1p11m_Rcworst/redhawk.tech
+/proj/FJR1300/WORK/simonz/ca53_cpu/block_common/redhawk/scripts/gsr/tech/CLN7_1p13m_1x1xa1ya5y2yy2z_ut-alrdl.tech
+}
+

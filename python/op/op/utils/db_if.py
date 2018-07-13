@@ -23,6 +23,12 @@ def w_flow(data_dic):
     rsp_dic = requests.post(url, json=data_dic).json() if settings.BACKEND else {}
     return rsp_dic
 
+def d_flow(data_dic):
+    """to delete flow table record"""
+    url = f"{BASE_URL}/flow_rpt/runner/flows/"
+    rsp_dic = requests.delete(url, json=data_dic).json() if settings.BACKEND else {}
+    return rsp_dic
+
 def w_file(data_dic, file_dic):
     """to write flow table record"""
     url = f"{BASE_URL}/flow_rpt/runner/upload/"

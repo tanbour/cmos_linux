@@ -1,0 +1,12 @@
+INSTANCE_TOGGLE_RATE {
+mcu_u/d_ram/ram 0.7
+mcu_u/i_ram/ram 0.7
+mcu_u/mcu_ctl/crc_retry_ram_0 0.7
+mcu_u/mcu_ctl/crc_retry_ram_1 0.7
+mcu_u/mcu_ctl/crc_retry_ram_2 0.7
+mcu_u/mcu_ctl/crc_retry_ram_3 0.7
+mcu_u/mcu_ctl/rrb_ram_0 0.7
+mcu_u/mcu_ctl/rrb_ram_1 0.7
+mcu_u/mcu_ctl/wdb_ram_0 0.7
+mcu_u/mcu_ctl/wdb_ram_1 0.7
+}

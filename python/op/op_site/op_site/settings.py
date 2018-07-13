@@ -33,7 +33,7 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     'flow_rpt.apps.FlowRptConfig',
     'proj_checker.apps.ProjCheckerConfig',
-    'user_auth.apps.UserAuthConfig',
+    'job_sum.apps.JobSumConfig',
     'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',

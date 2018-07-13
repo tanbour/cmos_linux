@@ -1,0 +1,69 @@
+#===================================================================
+#=================== dxe for power =================================
+#===================================================================
+
+POWER_ANALYSIS_MODE averaged
+DYNAMIC_SIMULATION_TIME 500000e-12
+VCD_FILE {
+ dxe /proj/Mars2_new/from_customer/20161205/VCD_for_chip_power/dxe_2.2Ghz_13000ns_13500ns.vcd.gz
+ FILE_TYPE       VCD
+# SELECT_RANGE    -1 -1
+ START_TIME      13000000
+ END_TIME        13500000
+ FRONT_PATH      "chip_tb/mars_u/panel_u0/dxe_u/"
+ SUBSTITUTE_PATH ""
+ TRUE_TIME       1
+}
+
+#===================================================================
+#=================== dxe new 1128 ==================================
+#===================================================================
+
+#POWER_ANALYSIS_MODE averaged
+#DYNAMIC_SIMULATION_TIME 400000e-12
+#VCD_FILE {
+# dxe /proj/Mars2/WORK/donid/from_customer/20161128/dxe_u_450ps_nosdf_4100_4500.vcd 
+# FILE_TYPE       VCD
+## SELECT_RANGE    -1 -1
+# START_TIME      4100000
+# END_TIME        4500000
+# FRONT_PATH      "chip_tb/mars_u/panel_u0/dxe_u/"
+# SUBSTITUTE_PATH ""
+# TRUE_TIME       1
+#}
+
+#===================================================================
+#=================== dxe new 1125 signoff ==========================
+#===================================================================
+
+#POWER_ANALYSIS_MODE averaged
+#DYNAMIC_SIMULATION_TIME 400000e-12
+#VCD_FILE {
+# dxe /proj/Mars2/WORK/donid/from_customer/20161125/dxe_u_450ps_4100_4500.vcd
+# FILE_TYPE       VCD
+## SELECT_RANGE    -1 -1
+# START_TIME      4100000
+# END_TIME        4500000
+# FRONT_PATH      "chip_tb/mars_u/panel_u0/dxe_u/"
+# SUBSTITUTE_PATH ""
+# TRUE_TIME       1
+#}
+
+#===================================================================
+#=================== dxe old =======================================
+#===================================================================
+
+#POWER_ANALYSIS_MODE averaged
+#DYNAMIC_SIMULATION_TIME 500000e-12
+#VCD_FILE {
+# dxe /proj/Mars2_new/from_customer/20161102/p0dxe_4500_5000_450ps.vcd.gz
+# FILE_TYPE       VCD
+## SELECT_RANGE    -1 -1
+# START_TIME      4500000
+# END_TIME        5000000
+# FRONT_PATH      "chip_tb/mars_u/panel_u0/dxe_u/"
+# SUBSTITUTE_PATH ""
+# TRUE_TIME       1
+#}
+
+

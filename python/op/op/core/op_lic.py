@@ -205,7 +205,7 @@ class OPClient:
         lsend(sock, cmd.encode())
         msg = lrecv(sock, 1024).decode()
         sock.close()
-        LOG.info(f'license check-in: {msg}')
+        LOG.debug(f'license check-in: {msg}')
 
 
 if __name__ == '__main__':

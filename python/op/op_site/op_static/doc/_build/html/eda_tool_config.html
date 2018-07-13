@@ -42,12 +42,12 @@
   <ul>
 <li><a class="reference internal" href="#">EDA Tool Config User Manual</a><ul>
 <li><a class="reference internal" href="#config-file-syn-cfg-and-plugins-dc-scripts">Config file syn.cfg and plugins/dc_scripts</a></li>
-<li><a class="reference internal" href="#config-file-pr-cfg-and-plugins-icc2-scripts">Config file pr.cfg and plugins/icc2_scripts</a></li>
+<li><a class="reference internal" href="#config-file-pricc2-cfg-and-plugins-icc2-scripts">Config file pricc2.cfg and plugins/icc2_scripts</a></li>
 <li><a class="reference internal" href="#config-file-ext-cfg">Config file ext.cfg</a></li>
 <li><a class="reference internal" href="#config-file-sta-cfg-and-plugins-pt-scripts">Config file sta.cfg and plugins/pt_scripts</a></li>
 <li><a class="reference internal" href="#config-file-fm-cfg">Config file fm.cfg</a></li>
-<li><a class="reference internal" href="#config-file-pv-cfg">Config file pv.cfg</a></li>
 <li><a class="reference internal" href="#config-file-ele-cfg">Config file ele.cfg</a></li>
+<li><a class="reference internal" href="#config-file-pv-cfg">Config file pv.cfg</a></li>
 </ul>
 </li>
 </ul>
@@ -88,14 +88,18 @@
   <div class="section" id="eda-tool-config-user-manual">
 <span id="eda-tool-config"></span><h1>EDA Tool Config User Manual<a class="headerlink" href="#eda-tool-config-user-manual" title="Permalink to this headline">¶</a></h1>
 <p>EDA tool config and plugin files are used to configurate tools run flow.</p>
+<p>EDA flow overview:</p>
+<div class="figure">
+<img alt="_images/op_flow_new.PNG" src="_images/op_flow_new.PNG" />
+</div>
 <p>User can change config and plugin files to customize a suitable block flow.</p>
 <ul>
-<li><p class="first">$PROJ_ROOT/share/config/flow/&lt;type&gt;.cfg (syn.cfg, pr.cfg, ext.cfg …)</p>
+<li><p class="first">$PROJ_ROOT/share/config/flow/&lt;type&gt;.cfg (syn.cfg, pricc2.cfg, prinvs.cfg, ext.cfg …)</p>
 <ul class="simple">
 <li>After PL initialize project, All EDA tool’s config files and plugin files are contain in this directory.</li>
 </ul>
 </li>
-<li><p class="first">$Block_root/run/$netlist_version/$flow_name/&lt;type&gt;.cfg (syn.cfg, pr.cfg, ext.cfg …)</p>
+<li><p class="first">$Block_root/run/$netlist_version/$flow_name/&lt;type&gt;.cfg (syn.cfg, pricc2.cfg, prinvs.cfg, ext.cfg …)</p>
 <ul class="simple">
 <li>By default, block config file are checkout from <code class="docutils literal notranslate"><span class="pre">share/</span></code>.</li>
 <li>By default, all variables in block config file are comment with “#”.</li>
@@ -112,7 +116,8 @@ even the value are different.</li>
 </ul>
 <p>EDA config file list:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>+ $PROJ_ROOT/share/config/flow/syn.cfg
-+ $PROJ_ROOT/share/config/flow/pr.cfg
++ $PROJ_ROOT/share/config/flow/pricc2.cfg
++ $PROJ_ROOT/share/config/flow/prinvs.cfg
 + $PROJ_ROOT/share/config/flow/ext.cfg
 + $PROJ_ROOT/share/config/flow/sta.cfg
 + $PROJ_ROOT/share/config/flow/fm.cfg
@@ -123,6 +128,7 @@ even the value are different.</li>
 </div>
 <p>EDA plugin directory list:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>+ $PROJ_ROOT/share/config/flow/plugins/icc2_scripts
++ $PROJ_ROOT/share/config/flow/plugins/invs_scripts
 + $PROJ_ROOT/share/config/flow/plugins/dc_scripts
 + $PROJ_ROOT/share/config/flow/plugins/spyglass_scripts
 + $PROJ_ROOT/share/config/flow/plugins/fm_scripts
@@ -210,14 +216,14 @@ We will plan to expend varaibles explication in this Manual in the future accrod
 <p class="last">In rendered syn.tcl scripts, _job_cpu_number is equal to “-n 8”</p>
 </div>
 </div>
-<div class="section" id="config-file-pr-cfg-and-plugins-icc2-scripts">
-<h2>Config file pr.cfg and plugins/icc2_scripts<a class="headerlink" href="#config-file-pr-cfg-and-plugins-icc2-scripts" title="Permalink to this headline">¶</a></h2>
-<p>The pr.cfg is used for P&amp;R stage (ICC2/Innovus) run control.</p>
+<div class="section" id="config-file-pricc2-cfg-and-plugins-icc2-scripts">
+<h2>Config file pricc2.cfg and plugins/icc2_scripts<a class="headerlink" href="#config-file-pricc2-cfg-and-plugins-icc2-scripts" title="Permalink to this headline">¶</a></h2>
+<p>The pricc2.cfg is used for P&amp;R stage (ICC2) run control.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">stage name:</th><td class="field-body">pr</td>
+<tr class="field-odd field"><th class="field-name">stage name:</th><td class="field-body">pricc2</td>
 </tr>
 <tr class="field-even field"><th class="field-name">sub stage name:</th><td class="field-body">01_fp.tcl, 02_place.tcl, 03_clock.tcl, 04_clock_opt.tcl, 05_route.tcl, 06_route_opt.tcl, 07_eco.tcl, 08_finish.tcl</td>
 </tr>
@@ -395,7 +401,7 @@ and source those file in plugin files.</p>
 </dd>
 <dt>Description:</dt>
 <dd><ul class="first last simple">
-<li>[DEFAULT] section is used to define common varaibles used for all tempaltes at syn stage.</li>
+<li>[DEFAULT] section is used to define common varaibles used for all tempaltes at RC-Extraction stage.</li>
 <li>[ext.csh] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">ext.csh</span></code> only.</li>
 </ul>
 </dd>
@@ -432,22 +438,258 @@ And the starting way is use “source ext.csh”, StarRC run command is pre-set 
 <div class="section" id="config-file-sta-cfg-and-plugins-pt-scripts">
 <h2>Config file sta.cfg and plugins/pt_scripts<a class="headerlink" href="#config-file-sta-cfg-and-plugins-pt-scripts" title="Permalink to this headline">¶</a></h2>
 <p>The sta.cfg is used for static timing analysis stage (Prime-Time) run control.</p>
-<p>TBD</p>
+<p>STA support multi-thread job run simultaneously base on scenairo defined in sta.config with <code class="docutils literal notranslate"><span class="pre">_multi_inst</span></code>.</p>
+<p><strong>sta.config + sta.tcl = &lt;scenario&gt;/sta.tcl</strong></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">stage name:</th><td class="field-body">sta</td>
+</tr>
+<tr class="field-even field"><th class="field-name">sub stage name:</th><td class="field-body">sta.tcl</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><dl class="first docutils">
+<dt>Sections</dt>
+<dd><dl class="first last docutils">
+<dt>Section:</dt>
+<dd><ul class="first last simple">
+<li>[DEFAULT]</li>
+<li>[sta.tcl]</li>
+</ul>
+</dd>
+<dt>Description:</dt>
+<dd><ul class="first last simple">
+<li>[DEFAULT] section is used to define common varaibles used for all tempaltes at STA stage.</li>
+<li>[sta.tcl] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">sta.tcl</span></code> only.</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Variables</dt>
+<dd><p class="first">Every substage can control it’s own job submit resource and cpu requiremenet as well as STA tool and version</p>
+<ul class="simple">
+<li>sta stage tool exection and version</li>
+</ul>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">_exec_cmd</span>       <span class="p">:</span> <span class="n">EDA</span> <span class="n">run</span> <span class="n">command</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span> <span class="n">pt_shell</span> <span class="o">-</span><span class="n">output_log_file</span> <span class="n">pt</span><span class="o">.</span><span class="n">log</span> <span class="o">-</span><span class="n">f</span>
+<span class="n">_exec_tool</span>      <span class="p">:</span> <span class="n">module</span> <span class="n">load</span> <span class="n">EDA</span> <span class="n">tool</span> <span class="n">version</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span> <span class="n">module</span> <span class="n">load</span> <span class="n">synopsys</span><span class="o">/</span><span class="n">pts_vM</span><span class="o">-</span><span class="mf">2016.12</span><span class="o">-</span><span class="n">SP3</span><span class="o">-</span><span class="mi">2</span>
+
+<span class="n">_multi_inst</span>     <span class="p">:</span> <span class="n">scenairos</span> <span class="k">for</span> <span class="n">STA</span> <span class="n">analysis</span><span class="p">,</span> <span class="n">OP</span> <span class="n">run</span> <span class="n">scenario</span> <span class="n">tasks</span> <span class="ow">in</span> <span class="n">parrallel</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Here is a document for PT template structrue <a class="reference download internal" href="_downloads/OP4-Hier-Primetime-Flow.pdf" download=""><code class="xref download docutils literal notranslate"><span class="pre">OP4-Hier-Primetime-Flow.pdf</span></code></a></p>
 </div>
 <div class="section" id="config-file-fm-cfg">
 <h2>Config file fm.cfg<a class="headerlink" href="#config-file-fm-cfg" title="Permalink to this headline">¶</a></h2>
 <p>The fm.cfg is used for formal stage (Formality/Conformal) run control.</p>
-<p>TBD</p>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>Sections</dt>
+<dd><dl class="first last docutils">
+<dt>Section:</dt>
+<dd><ul class="first last">
+<li>[DEFAULT]</li>
+<li>[fm.tcl]</li>
+</ul>
+</dd>
+<dt>Description:</dt>
+<dd><ul class="first last">
+<li>[DEFAULT] section is used to define common varaibles used for all tempaltes at formal(FM) stage.</li>
+<li>[sta.tcl] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">fm.tcl</span></code> only.</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Variables</dt>
+<dd>Every substage can control it’s own job submit resource and cpu requiremenet as well as formal tool and version<ul class="last">
+<li>fm stage tool exection and version</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">_exec_cmd</span>       <span class="p">:</span> <span class="n">EDA</span> <span class="n">run</span> <span class="n">command</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span> <span class="n">fm</span> <span class="o">-</span><span class="n">f</span>
+<span class="n">_exec_tool</span>      <span class="p">:</span> <span class="n">module</span> <span class="n">load</span> <span class="n">EDA</span> <span class="n">tool</span> <span class="n">version</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span> <span class="n">module</span> <span class="n">load</span> <span class="n">synopsys</span><span class="o">/</span><span class="n">fm_vM</span><span class="o">-</span><span class="mf">2016.12</span><span class="o">-</span><span class="n">SP4</span>
+
+<span class="n">fm_implementation_vnet_list</span> <span class="p">:</span> <span class="n">implementation</span> <span class="n">netlist</span> <span class="n">file</span><span class="p">,</span> <span class="k">if</span> <span class="n">leave</span> <span class="n">empty</span> <span class="k">for</span> <span class="n">this</span> <span class="n">variable</span> <span class="n">op</span> <span class="n">will</span> <span class="n">use</span> <span class="n">previous</span> <span class="n">stage</span><span class="s1">&#39;s netlist</span>
+<span class="n">fm_reference_vnet_list</span>      <span class="p">:</span> <span class="n">reference</span> <span class="n">netlist</span> <span class="n">file</span><span class="p">,</span> <span class="n">it</span> <span class="n">must</span> <span class="n">been</span> <span class="n">filled</span> <span class="k">with</span> <span class="k">as</span> <span class="n">reference</span> <span class="n">netlist</span>
+<span class="n">fm_save_session</span>             <span class="p">:</span> <span class="k">if</span> <span class="n">true</span><span class="p">,</span> <span class="n">fm</span> <span class="n">session</span> <span class="n">will</span> <span class="n">be</span> <span class="n">saved</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">flow</span><span class="o">&gt;/</span><span class="n">run</span><span class="o">/</span><span class="n">data</span> <span class="nb">dir</span>
+<span class="o">......</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="config-file-ele-cfg">
+<h2>Config file ele.cfg<a class="headerlink" href="#config-file-ele-cfg" title="Permalink to this headline">¶</a></h2>
+<p>The ele.cfg is used for electrical stage (PT-PX/Redhawk) run control.</p>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>Sections</dt>
+<dd><dl class="first last docutils">
+<dt>Section:</dt>
+<dd><ul class="first last">
+<li>[DEFAULT]</li>
+<li>[ptpx.tcl]</li>
+<li>[rh.csh]</li>
+</ul>
+</dd>
+<dt>Description:</dt>
+<dd><ul class="first last">
+<li>[DEFAULT] section is used to define common varaibles used for all tempaltes at electrical(ELE) stage.</li>
+<li>[ptpx.tcl] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">ptpx.tcl</span></code> only.</li>
+<li>[rh.csh] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">rh.csh</span></code> only.</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Variables for <code class="docutils literal notranslate"><span class="pre">PTPX</span></code></dt>
+<dd>Every substage can control it’s own job submit resource and cpu requiremenet as well as ptpx tool and version<ul class="last">
+<li>ptpx stage tool exection and version</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">_exec_cmd</span>       <span class="p">:</span> <span class="n">EDA</span> <span class="n">run</span> <span class="n">command</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span> <span class="n">pt_shell</span> <span class="o">-</span><span class="n">output_log_file</span> <span class="n">ptpx</span><span class="o">.</span><span class="n">log</span> <span class="o">-</span><span class="n">f</span>
+<span class="n">_exec_tool</span>      <span class="p">:</span> <span class="n">module</span> <span class="n">load</span> <span class="n">EDA</span> <span class="n">tool</span> <span class="n">version</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span> <span class="n">module</span> <span class="n">load</span> <span class="n">synopsys</span><span class="o">/</span><span class="n">pts_vM</span><span class="o">-</span><span class="mf">2016.12</span><span class="o">-</span><span class="n">SP3</span><span class="o">-</span><span class="mi">2</span>
+
+<span class="n">scenario</span>        <span class="p">:</span> <span class="n">specify</span> <span class="n">scenario</span> <span class="nb">list</span> <span class="k">for</span> <span class="n">PTPX</span><span class="p">,</span>
+                  <span class="nb">format</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">mode</span><span class="o">&gt;.&lt;</span><span class="n">lib_norminal_voltage</span><span class="o">&gt;.&lt;</span><span class="n">lib_corner</span><span class="o">&gt;.&lt;</span><span class="n">rc_corner_temprature</span><span class="o">&gt;.&lt;</span><span class="n">anaysis_type</span><span class="o">&gt;</span>
+
+<span class="o">......</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>Variables for <code class="docutils literal notranslate"><span class="pre">Redhawk</span></code></dt>
+<dd>Every substage can control it’s own job submit resource and cpu requiremenet as well as redhawk tool and version<ul class="last">
+<li>redhawk analysis stage tool exection and version</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">_exec_cmd</span>       <span class="p">:</span> <span class="n">EDA</span> <span class="n">run</span> <span class="n">command</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span> <span class="n">csh</span><span class="p">,</span> <span class="p">(</span><span class="n">redhawk</span> <span class="n">run</span> <span class="n">command</span> <span class="n">will</span> <span class="n">execute</span> <span class="n">within</span> <span class="n">c</span><span class="o">-</span><span class="n">shell</span> <span class="n">script</span><span class="p">)</span>
+<span class="n">_exec_tool</span>      <span class="p">:</span> <span class="n">module</span> <span class="n">load</span> <span class="n">EDA</span> <span class="n">tool</span> <span class="n">version</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span> <span class="n">module</span> <span class="n">load</span> <span class="n">redhawk</span><span class="o">/</span><span class="n">RedHawk_Linux64e5</span><span class="o">-</span><span class="n">int_V17</span><span class="o">.</span><span class="mf">1.6</span><span class="n">p1</span>
+
+<span class="n">scenario</span>        <span class="p">:</span> <span class="n">specify</span> <span class="n">scenario</span> <span class="nb">list</span> <span class="k">for</span> <span class="n">PTPX</span><span class="p">,</span>
+                  <span class="nb">format</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">mode</span><span class="o">&gt;.&lt;</span><span class="n">lib_norminal_voltage</span><span class="o">&gt;.&lt;</span><span class="n">lib_corner</span><span class="o">&gt;.&lt;</span><span class="n">rc_corner_temprature</span><span class="o">&gt;.&lt;</span><span class="n">anaysis_type</span><span class="o">&gt;</span>
+<span class="n">func</span>            <span class="p">:</span> <span class="n">specify</span> <span class="k">with</span> <span class="n">redhawk</span> <span class="n">analysis</span> <span class="nb">type</span>
+                  <span class="n">available</span> <span class="n">value</span> <span class="s2">&quot;power | static | dynamic | res | FP | CPM&quot;</span>
+<span class="o">......</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Redhawk scripts usage</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>block_info: fill block name in block_info file
+gsr files:
+            gsr
+            ├── apl
+            ├── assign
+            ├── basic
+            ├── design
+            ├── lef
+            ├── lib
+            ├── ploc
+            ├── tech
+            └── vcd
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>section <code class="docutils literal notranslate"><span class="pre">[rh.csh]</span></code> is used to generate redhawk run scripts and run redhawk in directory “&lt;flow_root&gt;/sum/ele/.trach”</p>
+<p>Redahwk gsr files can be find in “&lt;block_root&gt;/block_common/redhawk/scripts/gsr”.</p>
+<p>Redhawk cmd scripts can be find in “&lt;block_root&gt;/block_common/redhawk/scripts/cmd”.</p>
+<p>Redhawk setup scripts can be find in “&lt;block_root&gt;/block_common/redhawk/scripts/setup”.</p>
+<p class="last">Redahwk tcl files can be find in “&lt;block_root&gt;/block_common/redhawk/scripts/tcl”.</p>
+</div>
 </div>
 <div class="section" id="config-file-pv-cfg">
 <h2>Config file pv.cfg<a class="headerlink" href="#config-file-pv-cfg" title="Permalink to this headline">¶</a></h2>
 <p>The pv.cfg is used for pv stage (OPUS/Calibre) run control.</p>
-<p>TBD</p>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>Sections</dt>
+<dd><dl class="first last docutils">
+<dt>Section:</dt>
+<dd><ul class="first last">
+<li>[DEFAULT]</li>
+<li>[opus_oa.csh]</li>
+<li>[opus.csh]</li>
+<li>[opus_dummy.csh]</li>
+<li>[drc.csh]</li>
+<li>[ant.csh]</li>
+<li>[v2lvs.csh]</li>
+<li>[lvs.csh]</li>
+</ul>
+</dd>
+<dt>Description:</dt>
+<dd><ul class="first last">
+<li>[DEFAULT] section is used to define common varaibles used for all tempaltes at physical verification(PV) stage.</li>
+<li>[opus_oa.csh] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">opus_oa.csh</span></code> only.</li>
+<li>[opus.csh] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">opus.csh</span></code> only.</li>
+<li>[opus_dummy.csh] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">opus_dummy.csh</span></code> only.</li>
+<li>[drc.csh] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">drc.csh</span></code> only.</li>
+<li>[ant.csh] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">ant.csh</span></code> only.</li>
+<li>[v2lvs.csh] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">v2lvs.csh</span></code> only.</li>
+<li>[lvs.csh] section is used to define variables used for this tempalte <code class="docutils literal notranslate"><span class="pre">lvs.csh</span></code> only.</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Variables for <code class="docutils literal notranslate"><span class="pre">opus</span></code></dt>
+<dd>Every substage can control it’s own job submit resource and cpu requiremenet as well as gds merge tool and version<ul class="last">
+<li>opus stage tool exection and version</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">_exec_cmd</span>       <span class="p">:</span> <span class="n">EDA</span> <span class="n">run</span> <span class="n">command</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span> <span class="n">csh</span> <span class="p">(</span><span class="n">opus</span> <span class="n">gds</span> <span class="n">merge</span> <span class="n">streamin</span> <span class="ow">and</span> <span class="n">streamout</span> <span class="n">command</span> <span class="n">execute</span> <span class="k">with</span> <span class="ow">in</span> <span class="n">script</span><span class="p">)</span>
+<span class="n">_exec_tool</span>      <span class="p">:</span> <span class="n">module</span> <span class="n">load</span> <span class="n">EDA</span> <span class="n">tool</span> <span class="n">version</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span> <span class="n">module</span> <span class="n">load</span> <span class="n">cadence</span><span class="o">/</span><span class="n">IC06</span><span class="o">.</span><span class="mf">16.005</span>
+
+<span class="n">dummy_metal_creat</span> <span class="p">:</span> <span class="s2">&quot;true&quot;</span> <span class="n">mean</span> <span class="n">creat</span> <span class="n">dummy_metal</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span> <span class="ow">not</span>
+<span class="n">dummy_odpo_creat</span>  <span class="p">:</span> <span class="s2">&quot;true&quot;</span> <span class="n">mean</span> <span class="n">creat</span> <span class="n">dummy_odpo</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span> <span class="ow">not</span>
+<span class="n">dummy_cod_creat</span>   <span class="p">:</span> <span class="s2">&quot;true&quot;</span> <span class="n">mean</span> <span class="n">creat</span> <span class="n">dummy_cod</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span> <span class="ow">not</span>
+<span class="o">......</span>
+</pre></div>
 </div>
-<div class="section" id="config-file-ele-cfg">
-<h2>Config file ele.cfg<a class="headerlink" href="#config-file-ele-cfg" title="Permalink to this headline">¶</a></h2>
-<p>The ele.cfg is used for electrical stage (OPUS/Calibre) run control.</p>
-<p>TBD</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ol class="last arabic">
+<li><p class="first">section <code class="docutils literal notranslate"><span class="pre">[opus_oa.csh]</span></code> is used to convert library to oa library, if ao is already generated, please skip this stage.</p>
+</li>
+<li><p class="first">section <code class="docutils literal notranslate"><span class="pre">[opus_dummy.csh]</span></code> is used to merge dummy gds (metal/odpo/cod) with design gds.</p>
+<p>dummy merge can use <code class="docutils literal notranslate"><span class="pre">calibre</span></code> or <code class="docutils literal notranslate"><span class="pre">opus</span></code> by variable <code class="docutils literal notranslate"><span class="pre">tool_use_to_merge_dummy_gds</span></code>.</p>
+</li>
+<li><p class="first">OS version requirement for Calibre</p>
+<ul class="simple">
+<li>if $CALIBRE_HOME contain “ixl”,use the centos5 to run drc
+ex. _job_resource = -R “centos5 span[host=1] rusage[mem=5000]”</li>
+<li>if $CALIBRE_HOME contain “aoi”,use the centos6 to run drc
+ex. ex. _job_resource = -R “centos6 span[host=1] rusage[mem=5000]”</li>
+</ul>
+</li>
+</ol>
+</div>
 </div>
 </div>
 

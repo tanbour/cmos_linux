@@ -7,6 +7,10 @@ Description: flow related features
 import os
 import shutil
 import subprocess
+import json
+from fnmatch import fnmatch
+from difflib import unified_diff
+from filecmp import dircmp
 from multiprocessing import Pool
 from utils import pcom
 from utils import settings
@@ -35,9 +39,36 @@ def exp_stages(s_lst, cfg, sec, p_s=None):
     stage_lst.extend(s_lst)
     return exp_stages(stage_lst, cfg, pre_flow, pre_stage)
 
+def diff_files(dcmp):
+    """listing file diff"""
+    for left_only in dcmp.left_only:
+        LOG.info(f"only in block config dir.: {dcmp.left}{os.sep}{left_only}")
+    for right_only in dcmp.right_only:
+        LOG.info(f"only in proj config dir. : {dcmp.right}{os.sep}{right_only}")
+    for name in dcmp.diff_files:
+        proj_file = f"{dcmp.right}{os.sep}{name}"
+        blk_file = f"{dcmp.left}{os.sep}{name}"
+        LOG.info(f"diff {blk_file} ...")
+        with open(proj_file) as pff, open(blk_file) as bff:
+            if fnmatch(name, '*.cfg'):
+                proj_file_lines = pcom.gen_pcf_lst(pff)
+            else:
+                proj_file_lines = pff.readlines()
+            blk_file_lines = bff.readlines()
+            os.sys.stdout.writelines(
+                unified_diff(proj_file_lines, blk_file_lines, fromfile=proj_file, tofile=blk_file))
+    for sub_dcmp in dcmp.subdirs.values():
+        diff_files(sub_dcmp)
+
+def internal_diff_tool(blk_dir, proj_dir):
+    """ internal merging tool """
+    dcmp = dircmp(blk_dir, proj_dir)
+    diff_files(dcmp)
+
+
 class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
     """flow processor for blocks"""
-    def __init__(self):
+    def __init__(self, cfm_yes=False):
         super().__init__()
         self.boot_env()
         self.ver_dic = {}
@@ -51,6 +82,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         self.restore_dic = {}
         self.lib_flg = True
         self.comment = ""
+        self.cfm_yes = cfm_yes
     def list_env(self):
         """to list all current project or block op environment variables"""
         LOG.info(":: all op internal env variables")
@@ -65,6 +97,9 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         pcom.pp_list(tree_str, True)
     def list_flow(self):
         """to list all current block available flows"""
+        if not self.blk_flg:
+            LOG.error("it's not in a block directory, please cd into one")
+            raise SystemExit()
         LOG.info(":: all current available flows of block")
         lf_dic = {}
         for sec_k in self.cfg_dic.get("flow", {}):
@@ -74,8 +109,43 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                 stage_name = flow_dic.get("stage", "")
                 sub_stage_name = flow_dic.get("sub_stage", "")
                 lf_lst.append(f"{flow_name}::{stage_name}:{sub_stage_name}")
-            lf_dic[sec_k] = lf_lst
-        pcom.pp_list(lf_dic)
+            init_check_k = sec_k if os.path.isdir(
+                f"{self.ced['BLK_CFG_FLOW']}{os.sep}{sec_k}") else f"{sec_k} (X)"
+            lf_dic[init_check_k] = lf_lst
+        pcom.pp_list(lf_dic, False, True)
+    def list_diff(self, flow_name='DEFAULT'):
+        """toggle to demonstrate the diff between block level config/plugins
+           and proj level config/plugins"""
+        if not self.blk_flg:
+            LOG.error("it's not in a block directory, please cd into one")
+            raise SystemExit()
+        LOG.info(":: diff list for the flows ...")
+        proj_cfg_dir = self.ced["PROJ_SHARE_CFG"].rstrip(os.sep)
+        blk_cfg_dir = self.ced["BLK_CFG"].rstrip(os.sep)
+        LOG.info(f'proj config dir: {proj_cfg_dir}')
+        LOG.info(f'block config dir: {blk_cfg_dir}')
+        # diff listing for config files
+        for cfg_kw in self.cfg_dic:
+            if cfg_kw == "proj":
+                continue
+            proj_cfg = f"{proj_cfg_dir}{os.sep}{cfg_kw}.cfg"
+            blk_cfg = f"{blk_cfg_dir}{os.sep}{cfg_kw}.cfg"
+            with open(proj_cfg) as pcf, open(blk_cfg) as bcf:
+                proj_cfg_lines = pcom.gen_pcf_lst(pcf)
+                blk_cfg_lines = bcf.readlines()
+                LOG.info(f'diff {blk_cfg} ...')
+                os.sys.stdout.writelines(
+                    unified_diff(proj_cfg_lines, blk_cfg_lines, fromfile=proj_cfg, tofile=blk_cfg))
+        # diff listing for config dirs
+        for dir_cfg_kw in self.dir_cfg_dic:
+            if dir_cfg_kw == "lib":
+                continue
+            proj_dir_cfg = f"{proj_cfg_dir}{os.sep}{dir_cfg_kw}"
+            blk_dir_cfg = f"{blk_cfg_dir}{os.sep}{dir_cfg_kw}{os.sep}{flow_name}"
+            LOG.info(f"diff block config dir. {blk_dir_cfg}")
+            internal_diff_tool(blk_dir_cfg, proj_dir_cfg)
+        # from pprint import pprint
+        # pprint(self.dir_cfg_dic)
     def init(self, init_lst):
         """to perform flow initialization"""
         if not self.blk_flg:
@@ -86,20 +156,35 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                 continue
             LOG.info(f":: initializing flow {init_name} directories ...")
             parent_flow = pcom.rd_cfg(self.cfg_dic.get("flow", {}), init_name, "pre_flow", True)
-            if not parent_flow:
-                parent_flow = "DEFAULT"
-            src_dir = f"{self.ced['BLK_CFG_FLOW']}{os.sep}{parent_flow}"
+            if parent_flow:
+                src_dir = f"{self.ced['BLK_CFG_FLOW']}{os.sep}{parent_flow}"
+                LOG.info(f"inheriting from {parent_flow}")
+            else:
+                src_dir = f"{self.ced['PROJ_SHARE_CFG']}{os.sep}flow"
+                LOG.info(f"inheriting from project share")
             dst_dir = f"{self.ced['BLK_CFG_FLOW']}{os.sep}{init_name}"
             if not os.path.isdir(src_dir):
                 LOG.error(f"parent flow directory {src_dir} is NA")
                 raise SystemExit()
             if os.path.isdir(dst_dir):
-                LOG.info(
-                    f"initializing flow directory {dst_dir} already exists, "
-                    f"please confirm to overwrite the previous flow config and plugins")
-                pcom.cfm()
+                if self.cfm_yes:
+                    LOG.warning(
+                        f"initializing flow directory {dst_dir} already exists, "
+                        f"confirmed to overwrite the previous flow config and plugins")
+                else:
+                    LOG.info(
+                        f"initializing flow directory {dst_dir} already exists, "
+                        f"please confirm to overwrite the previous flow config and plugins")
+                    pcom.cfm()
                 shutil.rmtree(dst_dir, True)
             shutil.copytree(src_dir, dst_dir)
+            if not parent_flow:
+                for blk_cfg in pcom.find_iter(dst_dir, "*.cfg", cur_flg=True):
+                    with open(blk_cfg) as ocf:
+                        blk_lines = pcom.gen_pcf_lst(ocf)
+                    with open(blk_cfg, "w") as ncf:
+                        for line in blk_lines:
+                            ncf.write(line)
     def proc_ver(self):
         """to process class flow version directory"""
         for sec_k, sec_v in self.cfg_dic.get("flow", {}).items():
@@ -186,6 +271,45 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             LOG.error("restore flow and stage name is NA")
             raise SystemExit()
         return restore_flow
+    def proc_release(self, flow_release_lst):
+        """to process release info"""
+        relz_blk_json_dir = f"{self.ced['PROJ_RELEASE_TO_TOP']}{os.sep}.json"
+        pcom.mkdir(LOG, relz_blk_json_dir)
+        for flow_release in flow_release_lst:
+            flow_release = flow_release.strip("""'":""")
+            err_log_str = (
+                "begin sub-stage format is incorrect, "
+                "it should be <flow>::<stage>:<sub_stage>")
+            flow_relz_dic = {}
+            try:
+                flow_relz_dic["flow"], stage_str = flow_release.split("::")
+                flow_relz_dic["stage"], flow_relz_dic["sub_stage"] = stage_str.split(":")
+            except ValueError:
+                LOG.error(err_log_str)
+                raise SystemExit()
+            if not all([bool(c_c) for c_c in flow_relz_dic.values()]):
+                LOG.error(err_log_str)
+                raise SystemExit()
+            flow_relz_dic["user"] = self.ced["USER"]
+            flow_relz_dic["block"] = self.ced["BLK_NAME"]
+            flow_relz_dic["time"] = self.ced["DATETIME"].isoformat()
+            flow_relz_dic["rtl_netlist"] = self.ver_dic.get(
+                flow_relz_dic["flow"], {}).get("rtl_netlist", "")
+            flow_relz_dic["proj_root"] = self.ced["PROJ_ROOT"]
+            file_name = pcom.re_str("_".join(
+                [flow_relz_dic["user"], flow_relz_dic["block"], flow_release]))
+            relz_json_file = f"{relz_blk_json_dir}{os.sep}{file_name}.json"
+            if os.path.isfile(relz_json_file):
+                if self.cfm_yes:
+                    LOG.info(
+                        f"flow {flow_release} already released, confimed to overwrite")
+                else:
+                    LOG.info(
+                        f"flow {flow_release} already released, please confirm to overwrite")
+                    pcom.cfm()
+            with open(relz_json_file, "w") as rjf:
+                json.dump(flow_relz_dic, rjf)
+            LOG.info(f"flow {flow_release} released")
     def proc_flow_lst(self, flow_lst):
         """to process flow list from arguments"""
         if not self.blk_flg:
@@ -220,7 +344,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             self.ced["PROJ_LIB"], self.ced["BLK_RUN"],
             self.dir_cfg_dic["lib"]["DEFAULT"]["liblist"],
             self.cfg_dic["lib"][l_flow] if l_flow in self.cfg_dic["lib"]
-            else self.cfg_dic["lib"]["DEFAULT"], self.lib_flg)
+            else self.cfg_dic["lib"]["DEFAULT"], self.lib_flg) if self.ced["PROJ_LIB"] else {}
         pre_stage_dic = {}
         pre_file_mt = 0.0
         force_flg = False
@@ -274,8 +398,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                 {"local": local_dic, "cur": stage_dic, "pre": pre_stage_dic,
                  "ver": flow_ver_dic})
             tmp_dic = {
-                "global": pcom.ch_cfg(self.cfg_dic["proj"]), "env": self.ced,
-                "local": local_dic, "liblist": liblist_var_dic,
+                "env": self.ced, "local": local_dic, "liblist": liblist_var_dic,
                 "cur": stage_dic, "pre": pre_stage_dic, "ver": flow_ver_dic}
             pre_stage_dic = stage_dic
             if self.restore_dic and self.restore_dic != {
@@ -288,9 +411,10 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                 self.opvar_lst.pop()
                 continue
             self.begin_dic = {}
+            inst_str = "_restore_inst" if self.restore_dic else "_multi_inst"
             multi_inst_lst = [c_c.strip() for c_c in pcom.rd_cfg(
                 self.dir_cfg_dic.get("flow", {}).get(flow_name, {}).get(stage_name, {}),
-                sub_stage_name, "_multi_inst") if c_c.strip()]
+                sub_stage_name, inst_str) if c_c.strip()]
             if not multi_inst_lst:
                 multi_inst_lst = [""]
             inst_dic = {
@@ -311,10 +435,12 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                 except KeyboardInterrupt:
                     flow_if_dic["status"] = "failed"
                     db_if.w_flow(flow_if_dic)
+                    db_if.d_flow(flow_if_dic)
                     raise KeyboardInterrupt
                 if any([c_c is True for c_c in file_mt_lst if c_c]):
                     flow_if_dic["status"] = "failed"
                     db_if.w_flow(flow_if_dic)
+                    db_if.d_flow(flow_if_dic)
                     raise SystemExit()
                 pre_file_mt = max(file_mt_lst)
             else:
@@ -323,6 +449,12 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
         if self.run_flg:
             flow_if_dic["status"] = "passed"
             db_if.w_flow(flow_if_dic)
+    def _gen_job_tcl(self, dst_op_file, local_dic):
+        """to generate _job variable tcl file"""
+        with open(f"{dst_op_file}._job.tcl", "w") as dtf:
+            for var_k, var_v in local_dic.items():
+                if "_cpu_number" in var_k and isinstance(var_v, str):
+                    dtf.write(f'set {var_k} "{var_v}"{os.linesep}')
     def proc_inst(self, multi_inst, inst_dic):
         """to process particular inst"""
         flow_root_dir = inst_dic["stage_dic"]["flow_root_dir"]
@@ -355,6 +487,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             shutil.copyfile(dst_file, f"{dst_file}.pre")
         pcom.ren_tempfile(LOG, tmp_file, dst_file, tmp_dic)
         if "_exec_cmd" in local_dic:
+            self._gen_job_tcl(dst_op_file, local_dic)
             tool_str = local_dic.get("_exec_tool", "")
             jcn_str = (
                 local_dic.get("_job_restore_cpu_number", "") if self.restore_dic
@@ -362,12 +495,13 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             jr_str = (
                 local_dic.get("_job_restore_resource", "") if self.restore_dic
                 else local_dic.get("_job_resource", ""))
-            job_str = (
+            jc_str = (
                 f"{local_dic.get('_job_cmd', '')} {local_dic.get('_job_queue', '')} "
                 f"{jcn_str} {jr_str}" if "_job_cmd" in local_dic else "")
             jn_str = (
-                f"""{job_str} -J '{self.ced["USER"]}::{flow_name}::"""
-                f"""{stage_name}:{sub_stage_name}:{multi_inst}'""") if job_str else ""
+                f"{self.ced['USER']}:::{self.ced['PROJ_NAME']}:::{self.ced['BLK_NAME']}:::"
+                f"{flow_name}::{stage_name}:{sub_stage_name}:{multi_inst}")
+            job_str = f"{jc_str} -J '{jn_str}'" if jc_str else ""
             cmd_str = local_dic.get("_exec_cmd", "")
             with open(dst_op_file, "w") as drf:
                 drf.write(
@@ -376,7 +510,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
             pcom.mkdir(LOG, trash_dir)
             with open(dst_run_file, "w") as dbf:
                 dbf.write(
-                    f"{jn_str} xterm -title '{dst_file}' -e 'cd {trash_dir}; "
+                    f"{job_str} xterm -title '{dst_file}' -e 'cd {trash_dir}; "
                     f"source {dst_op_file} | tee {dst_run_file}.log; "
                     f"touch {dst_run_file}.stat'{os.linesep}")
             err_kw_lst = pcom.rd_cfg(
@@ -400,7 +534,7 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
                     {"src": dst_file, "file": dst_run_file, "l_flow": l_flow, "flow": flow_name,
                      "stage": stage_name, "sub_stage": sub_stage_name, "multi_inst": multi_inst,
                      "filter_dic": filter_dic, "flow_root_dir": flow_root_dir, "ced": self.ced,
-                     "ver_dic": self.ver_dic.get(flow_name, {})}, f_flg)
+                     "ver_dic": self.ver_dic.get(flow_name, {}), "jn_str": jn_str}, f_flg)
                 p_run = file_p.proc_run_file()
                 if p_run is True:
                     return p_run
@@ -415,13 +549,15 @@ class FlowProc(env_boot.EnvBoot, lib_map.LibMap):
 
 def run_flow(args):
     """to run flow sub cmd"""
-    f_p = FlowProc()
+    f_p = FlowProc(args.flow_cfm_yes)
     if args.flow_list_env:
         f_p.list_env()
     elif args.flow_list_blk:
         f_p.list_blk()
     elif args.flow_list_flow:
         f_p.list_flow()
+    elif args.flow_list_diff:
+        f_p.list_diff(args.flow_list_diff)
     elif args.flow_init_lst:
         f_p.init(args.flow_init_lst)
     elif args.flow_gen_lst is not None:
@@ -457,6 +593,10 @@ def run_flow(args):
         f_p.proc_ver()
         l_flow = f_p.proc_restore()
         f_p.proc_flow_lst([l_flow])
+    elif args.flow_release_lst:
+        f_p.lib_flg = False
+        f_p.proc_ver()
+        f_p.proc_release(args.flow_release_lst)
     else:
         LOG.critical("no actions specified in op flow sub cmd")
         raise SystemExit()

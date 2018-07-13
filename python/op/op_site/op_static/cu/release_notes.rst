@@ -27,8 +27,8 @@ Released on April 18, 2018
    
   + Electrical flow ready
   + PV flow ready
-  + P&R flow enhencement
-  + update P&R flow support 7nm
+  + P&R flow enhancement
+  + Update P&R flow support 7nm
 
 - Project
  
@@ -60,7 +60,7 @@ Released on March 23, 2018
 
   + Extraction and STA flow ready
   + update P&R flow support 16nm
-  + P&R flow enhencement
+  + P&R flow enhancement
 
 - Project
  

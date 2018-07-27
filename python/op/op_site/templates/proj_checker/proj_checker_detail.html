@@ -1,0 +1,160 @@
+{% load i18n %}
+{% load staticfiles %}
+
+<template id="proj_checker_detail">
+  <div>
+    {% verbatim %}
+    <div class="layout-breadcrumb">
+      <breadcrumb>
+        <breadcrumb-item v-if="'name' in rsp_data"><router-link title="go to project list" :to="{name: 'proj_checker_list'}">{{ rsp_data.name }}</router-link></breadcrumb-item>
+        <breadcrumb-item v-if="'id' in rsp_data"><router-link title="refresh detail page" :to="{name: 'proj_checker_detail', params: {p_id: rsp_data.id}}">details</router-link></breadcrumb-item>
+      </breadcrumb>
+    </div>
+    {% endverbatim %}
+    <div class="layout-content">
+      <div class="layout-content-main" style="background-image:url({% static 'images/background_1200x600.jpg' %})">
+        <Card :bordered="false" style="font-family:monospace; color:black">
+          {% verbatim %}
+          <p slot="title">{{ rsp_data.name }}</p>
+          <p v-if="rsp_data.lock || !edit_mode" v-html="rsp_data.text"></p>
+          <i-input v-else type="textarea" v-model="rsp_data.text" element-id="proj_editor"></i-input>
+          {% endverbatim %}
+        </Card>
+        <br>
+        <div style="float:right">
+          <i-button v-if="rsp_data.lock" disabled type="primary">Locked</i-button>
+          <div v-else-if="edit_mode">
+            <i-button type="primary" @click="action_cancel">Cancel</i-button>
+            <i-button type="primary" :loading="loading" icon="checkmark-round" @click="action_submit">
+              <span v-if="!loading">Submit</span>
+              <span v-else>Loading...</span>
+            </i-button>
+          </div>
+          <i-button v-else type="primary" @click="action_edit">Edit</i-button>
+        </div>
+      </div>
+    </div>
+    <!-- <div style="height:300px"></div> -->
+  </div>
+</template>
+
+<script>
+ const ProjCheckerDetail = {
+   template: "#proj_checker_detail",
+   beforeRouteUpdate (to, from, next) {
+     this.init(to.params.p_id)
+     next()
+   },
+   data: function () {
+     return {
+       rsp_data: {},
+       url: {
+         list: "{% url 'proj_checker:proj_list' %}",
+         detail: "{% url 'proj_checker:proj_detail' 'djst_var' %}"
+       },
+       edit_mode: false,
+       loading: false,
+       lock_id_ary: []
+     }
+   },
+   methods: {
+     init: function(p_id = "") {
+       axios({
+         method: "get", url: this.url.detail.replace('djst_var', p_id)
+       }).then((response) => {
+         this.rsp_data = response.data
+         for (var i = 0; i < this.lock_id_ary.length; i++) {
+           this.patch_unlock(this.lock_id_ary[i])
+         }
+         this.lock_id_ary = []
+         this.edit_mode = false
+         this.loading = false
+       }).catch((error) => {
+         console.log(error)
+       })
+     },
+     action_edit: function () {
+       var csrftoken = Cookies.get('csrftoken')
+       axios({
+         method: "get",
+         url: this.url.detail.replace("djst_var", this.rsp_data.id)
+       }).then((response) => {
+         this.rsp_data = response.data
+         if (!this.rsp_data.lock) {
+           axios({
+             method: "patch",
+             url: this.url.detail.replace("djst_var", this.rsp_data.id),
+             headers: {"X-CSRFToken": csrftoken},
+             data: {
+               lock: true
+             }
+           }).then((response) => {
+             this.lock_id_ary.push(this.rsp_data.id)
+             this.edit_mode = !this.edit_mode
+             if (this.edit_mode) {
+               this.$nextTick(function () {
+                 CKEDITOR.replace("proj_editor", {height: 450})
+               })
+             }
+           }).catch((error) => {
+             console.log(error)
+           })
+         }
+       }).catch((error) => {
+         console.log(error)
+       })
+     },
+     patch_unlock: function (proj_id) {
+       var csrftoken = Cookies.get('csrftoken')
+       axios({
+         method: "patch",
+         url: this.url.detail.replace("djst_var", proj_id),
+         headers: {"X-CSRFToken": csrftoken},
+         data: {
+           lock: false
+         }
+       }).then((response) => {
+       }).catch((error) => {
+         console.log(error)
+       })
+     },
+     action_cancel: function () {
+       this.edit_mode = false
+       this.patch_unlock(this.rsp_data.id)
+     },
+     action_submit: function () {
+       this.rsp_data.text = CKEDITOR.instances.proj_editor.getData()
+       this.loading = true
+       var csrftoken = Cookies.get('csrftoken')
+       axios({
+         method: "put",
+         url: this.url.detail.replace("djst_var", this.rsp_data.id),
+         headers: {"X-CSRFToken": csrftoken},
+         data: {
+           name: this.rsp_data.name,
+           data: this.rsp_data.data,
+           text: this.rsp_data.text
+         }
+       }).then((response) => {
+         this.$Message.success("Project " + this.rsp_data.name + " content submitted!")
+         this.loading = false
+         this.edit_mode = false
+         this.patch_unlock(this.rsp_data.id)
+       }).catch((error) => {
+         console.log(error)
+       })
+     }
+   },
+   /* created: function () {
+    * },*/
+   mounted: function () {
+     this.init(this.$route.params.p_id)
+   },
+   destroyed: function () {
+     for (var i = 0; i < this.lock_id_ary.length; i++) {
+       this.patch_unlock(this.lock_id_ary[i])
+     }
+     this.lock_id_ary = []
+   }
+ }
+</script>

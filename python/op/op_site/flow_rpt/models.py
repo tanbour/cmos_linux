@@ -68,4 +68,14 @@ class Stage(models.Model):
 
 class Signoff(models.Model):
     """signoff static info models"""
-    pass
+    name = models.CharField(max_length=200)
+    block = models.ForeignKey(Block, on_delete=models.CASCADE, related_name="signoff_block")
+    l_flow = models.ForeignKey(Flow, on_delete=models.CASCADE, related_name="signoff_l_flow")
+    l_stage = models.ForeignKey(Stage, on_delete=models.CASCADE, related_name="signoff_l_stage")
+    l_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="signoff_l_user")
+    updated_time = models.DateTimeField(auto_now=True)
+    data = JSONField(default=dict, blank=True)
+    def __str__(self):
+        return f"{self.name}__{self.block}"
+    class Meta:
+        unique_together = ("name", "block")

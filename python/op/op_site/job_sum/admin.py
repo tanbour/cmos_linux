@@ -6,51 +6,51 @@ class UserAdmin(admin.ModelAdmin):
     """user admin"""
     list_display = ("id", "name")
     list_filter = ["name"]
-    search_field = ["name", "data"]
+    search_fields = ["name", "data"]
 
 class QueueAdmin(admin.ModelAdmin):
     """queue admin"""
     list_display = ("id", "name")
     filter_horizontal = ("host",)
     list_filter = ["name"]
-    search_field = ["name", "data"]
+    search_fields = ["name", "data"]
 
 class JobAdmin(admin.ModelAdmin):
     """job admin"""
     list_display = ("id", "name", "owner", "queue", "status")
     list_filter = ["name"]
-    search_field = ["name", "owner", "queue", "status", "data"]
+    search_fields = ["name", "status", "data"]
 
 class ProjAdmin(admin.ModelAdmin):
     """proj admin"""
     list_display = ("id", "name")
     filter_horizontal = ("host",)
     list_filter = ["name"]
-    search_field = ["name", "data"]
+    search_fields = ["name", "data"]
 
 class CpuAdmin(admin.ModelAdmin):
     """cpu admin"""
     list_display = ("id", "value", "time", "host")
     list_filter = ["time"]
-    search_field = ["value"]
+    search_fields = ["value"]
 
 class SlotAdmin(admin.ModelAdmin):
     """slot admin"""
     list_display = ("id", "value", "time", "host")
     list_filter = ["time"]
-    search_field = ["value"]
+    search_fields = ["value"]
 
 class MemAdmin(admin.ModelAdmin):
     """mem admin"""
     list_display = ("id", "value", "time", "host")
     list_filter = ["time"]
-    search_field = ["value"]
+    search_fields = ["value"]
 
 class HostAdmin(admin.ModelAdmin):
     """host admin"""
     list_display = ("id", "name", "freq", "ram", "t_slot", "group", "status")
     list_filter = ["name"]
-    search_field = ["name", "freq", "ram", "t_slot", "group"]
+    search_fields = ["name", "freq", "ram", "t_slot", "group", "status"]
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Queue, QueueAdmin)

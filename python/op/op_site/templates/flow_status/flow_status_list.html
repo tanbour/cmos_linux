@@ -1,0 +1,283 @@
+{% load i18n %}
+{% load staticfiles %}
+
+<template id="flow_status_list">
+  <div>
+    {% verbatim %}
+    <div class="layout-breadcrumb">
+      <breadcrumb>
+        <breadcrumb-item><router-link title="go to flow list" :to="{name: 'flow_status_list'}">flows</router-link></breadcrumb-item>
+      </breadcrumb>
+    </div>
+    {% endverbatim %}
+    <div class="layout-content">
+      <div class="layout-content-main" style="background-image:url({% static 'images/background_1200x600.jpg' %})">
+        <div>
+          <i-input v-model="searchQuery" placeholder="Search" clearable style="width:200px"></i-input>
+          <br>
+          <i-table border stripe show-header :columns="table_col" :data="table_data" size="small" ref="table"></i-table>
+          <div style="margin:10px; overflow:hidden">
+            <div style="float:right">
+              <Page :total="dataCount" :page-size="pageSize" show-total @on-change="changePage"></Page>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- <div style="height:300px"></div> -->
+  </div>
+</template>
+
+<script>
+ const FlowStatusList = {
+   template: "#flow_status_list",
+   beforeRouteUpdate (to, from, next) {
+     this.init()
+     next()
+   },
+   data: function () {
+     return {
+       col_ary: [],
+       data_ary: [],
+       filter_ary_obj: {},
+       searchQuery: "",
+       dataCount: 0,
+       pageSize: 50,
+       pageIndex: 1,
+       rsp_data: {},
+       url: {
+         list: "{% url 'flow_rpt:flow_status_list' %}" + "?user=" + this.$pCookie().user,
+         detail: "{% url 'flow_rpt:flow_status_detail' 'djst_var' %}"
+       }
+     }
+   },
+   computed: {
+     table_col: function () {
+       var columns = []
+       for (var i = 0; i < this.col_ary.length; i++) {
+         columns.push(this.col_ary[i])
+       }
+       columns.push({
+         title: "Action",
+         key: "action",
+         width: 150,
+         align: "center",
+         fixed: "right",
+         render: (h, params) => {
+           return h("div", [
+             h("Button", {
+               props: {
+                 type: "primary",
+                 size: "small"
+               },
+               style: {
+                 marginRight: "5px"
+               },
+               on: {
+                 click: () => {
+                   this.show(params.index)
+                 }
+               }
+             }, "View")
+           ])
+         }
+       })
+       return columns
+     },
+     s_data_ary: function () {
+       var searchQuery = this.searchQuery && this.searchQuery.toLowerCase()
+       if (searchQuery) {
+         var data = this.data_ary.filter(function (row) {
+           return Object.keys(row).some(function (key) {
+             return String(row[key]).toLowerCase().indexOf(searchQuery) > -1
+           })
+         })
+       } else {
+         var data = this.data_ary
+       }
+       return data
+     },
+     table_data: function () {
+       this.dataCount = this.s_data_ary.length
+       if (this.s_data_ary.length < this.pageSize) {
+         var data = this.s_data_ary
+       } else {
+         var _start = (this.pageIndex - 1) * this.pageSize
+         var _end = this.pageIndex * this.pageSize
+         var data = this.s_data_ary.slice(_start, _end)
+       }
+       return data
+     }
+   },
+   methods: {
+     init: function() {
+       axios({
+         method: "get", url: this.url.list
+       }).then((response) => {
+         this.rsp_data = response.data
+         this.procDataAry()
+         this.procColAry()
+       }).catch((error) => {
+         console.log(error)
+       })
+     },
+     procColAry: function () {
+       this.col_ary = []
+       this.col_ary.push({
+         title: "flow name",
+         key: "obj_name",
+         fixed: "left",
+         width: 150,
+         sortable: true,
+         render: (h, params) => {
+           const row = params.row
+           const pk = row.obj_pk
+           const text = row.obj_name
+           return h("a", {
+             on: {
+               click: () => {
+                 this.$router.push({name: "flow_status_detail", params: {f_id: pk}})
+               }
+             }
+           }, text)
+         },
+         filters: this.filter_ary_obj.obj_name,
+         filterMultiple: true,
+         filterMethod: function (value, row) {
+           return row.obj_name === value
+         }
+       })
+       this.col_ary.push({
+         title: "Owner",
+         key: "owner",
+         width: 150,
+         sortable: true,
+         filters: this.filter_ary_obj.owner,
+         filterMultiple: true,
+         filterMethod: function (value, row) {
+           return row.owner === value
+         }
+       })
+       this.col_ary.push({
+         title: "Date",
+         key: "created_time",
+         width: 200,
+         sortable: true,
+         sortType: "desc"
+       })
+       this.col_ary.push({
+         title: "Status",
+         key: "status",
+         width: 150,
+         sortable: true,
+         filters: this.filter_ary_obj.status,
+         filterMultiple: true,
+         filterMethod: function (value, row) {
+           return row.status === value
+         },
+         render: (h, params) => {
+           const row = params.row
+           const color = row.status === "running" ? "yellow" : row.status === "passed" ? "green" : (row.status === undefined || row.status === "") ? "blue" : "red"
+           const text = row.status
+           return h("Tag", {
+             props: {
+               type: "dot",
+               color: color
+             }
+           }, text)
+         }
+       })
+       this.col_ary.push({
+         title: "Current Stage",
+         key: "cur_stage",
+         width: 200,
+         sortable: true,
+         filters: this.filter_ary_obj.cur_stage,
+         filterMultiple: true,
+         filterMethod: function (value, row) {
+           return row.cur_stage === value
+         }
+       })
+       this.col_ary.push({
+         title: "Comment",
+         key: "comment",
+         width: 200,
+         sortable: true
+       })
+       this.col_ary.push({
+         title: "Block",
+         key: "block",
+         width: 150,
+         sortable: true,
+         filters: this.filter_ary_obj.block,
+         filterMultiple: true,
+         filterMethod: function (value, row) {
+           return row.block === value
+         }
+       })
+       this.col_ary.push({
+         title: "Project",
+         key: "proj",
+         width: 150,
+         sortable: true,
+         filters: this.filter_ary_obj.proj,
+         filterMultiple: true,
+         filterMethod: function (value, row) {
+           return row.proj === value
+         }
+       })
+     },
+     procDataAry: function () {
+       this.data_ary = []
+       this.filter_ary_obj = {obj_name: [], owner: [], status: [], cur_stage: [], block: [], proj: []}
+       var unique_ary_obj = {obj_name: [], owner: [], status: [], cur_stage: [], block: [], proj: []}
+       for (var i = 0; i < this.rsp_data.length; i++) {
+         var qs_obj = this.rsp_data[i]
+         var data_obj = {
+           obj_pk: qs_obj.id,
+           obj_name: qs_obj.name,
+           created_time: qs_obj.created_time.slice(0, 19).replace("T", " "),
+           status: qs_obj.status,
+           cur_stage: qs_obj.cur_stage,
+           comment: qs_obj.comment,
+           block: qs_obj.block.name,
+           proj: qs_obj.block.proj.name
+         }
+         if (qs_obj.owner === null) {
+           data_obj.owner = "NA"
+         } else {
+           data_obj.owner = qs_obj.owner.name
+         }
+         for (var key in qs_obj.data) {
+           data_obj[key] = qs_obj.data[key]
+         }
+         this.data_ary.push(data_obj)
+         for (var key in this.filter_ary_obj) {
+           if (unique_ary_obj[key].indexOf(data_obj[key]) === -1) {
+             this.filter_ary_obj[key].push({"label": data_obj[key], "value": data_obj[key]})
+             unique_ary_obj[key].push(data_obj[key])
+           }
+         }
+       }
+     },
+     show: function (index) {
+       var content = ""
+       for (var td_key in this.table_data[index]) {
+         content += td_key + ": " + this.table_data[index][td_key] + "<br>"
+       }
+       this.$Modal.info({
+         title: "Detailed Info",
+         content: content
+       })
+     },
+     changePage: function (index) {
+       this.pageIndex = index
+     }
+   },
+   /* created: function () {
+    * },*/
+   mounted: function () {
+     this.init()
+   }
+ }
+</script>

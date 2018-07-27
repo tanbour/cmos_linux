@@ -8,10 +8,14 @@ op platform --- alchip
 
 {% block component %}
 {% include "home.html" %}
-{% include "flow_status.html" %}
-{% include "flow_rpt.html" %}
-{% include "proj_checker.html" %}
-{% include "proj_signoff.html" %}
-{% include "job_sum.html" %}
-{% include "server_sum.html" %}
+{% include "flow_status/flow_status_list.html" %}
+{% include "flow_status/flow_status_detail.html" %}
+{% include "flow_rpt/flow_rpt.html" %}
+{% include "proj_checker/proj_checker_list.html" %}
+{% include "proj_checker/proj_checker_detail.html" %}
+{% include "proj_signoff/proj_signoff_proj_list.html" %}
+{% include "proj_signoff/proj_signoff_block_list.html" %}
+{% include "proj_signoff/proj_signoff_block_detail.html" %}
+{% include "job_sum/job_sum.html" %}
+{% include "job_sum/server_sum.html" %}
 {% endblock %}

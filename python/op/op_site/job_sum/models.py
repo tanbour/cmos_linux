@@ -29,16 +29,6 @@ class Queue(models.Model):
     def __str__(self):
         return self.name
 
-class Job(models.Model):
-    """job models"""
-    name = models.CharField(max_length=50, unique=True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="job_owner")
-    queue = models.ForeignKey(Queue, on_delete=models.CASCADE, related_name="job_queue")
-    status = models.CharField(max_length=20)
-    data = JSONField(default=dict, blank=True)
-    def __str__(self):
-        return self.name
-
 class Proj(models.Model):
     """proj models"""
     name = models.CharField(max_length=50, unique=True)
@@ -68,3 +58,13 @@ class Mem(models.Model):
     host = models.ForeignKey(Host, on_delete=models.CASCADE, related_name="mem_host")
     def __str__(self):
         return f"{str(self.time)}__{self.host}"
+
+class Job(models.Model):
+    """job models"""
+    name = models.CharField(max_length=50, unique=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="job_owner")
+    queue = models.ForeignKey(Queue, on_delete=models.CASCADE, related_name="job_queue")
+    status = models.CharField(max_length=20)
+    data = JSONField(default=dict, blank=True)
+    def __str__(self):
+        return self.name

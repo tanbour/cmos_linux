@@ -5,6 +5,11 @@ from . import views
 
 app_name = "flow_rpt"
 urlpatterns = [
+    path("runner/projs/", views.RunnerProj.as_view(), name="runner_proj"),
+    path("runner/blocks/", views.RunnerBlock.as_view(), name="runner_block"),
+    path("runner/flows/", views.RunnerFlow.as_view(), name="runner_flow"),
+    path("runner/stages/", views.RunnerStage.as_view(), name="runner_stage"),
+    path("runner/upload/", views.RunnerUpload.as_view(), name="runner_upload"),
     path("user_check/", views.UserCheck.as_view(), name="user_check"),
     path("projs/", views.ProjList.as_view(), name="proj_list"),
     path("projs/<pk>", views.ProjDetail.as_view(), name="proj_detail"),
@@ -20,11 +25,7 @@ urlpatterns = [
     path("titles/<pk>", views.TitleDetail.as_view(), name="title_detail"),
     path("flows_status/", views.FlowStatusList.as_view(), name="flow_status_list"),
     path("flows_status/<pk>", views.FlowStatusDetail.as_view(), name="flow_status_detail"),
-    path("runner/projs/", views.RunnerProj.as_view(), name="runner_proj"),
-    path("runner/blocks/", views.RunnerBlock.as_view(), name="runner_block"),
-    path("runner/flows/", views.RunnerFlow.as_view(), name="runner_flow"),
-    path("runner/stages/", views.RunnerStage.as_view(), name="runner_stage"),
-    path("runner/upload/", views.RunnerUpload.as_view(), name="runner_upload")
+    path("proj_signoffs/", views.ProjSignoffList.as_view(), name="proj_signoff_list")
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

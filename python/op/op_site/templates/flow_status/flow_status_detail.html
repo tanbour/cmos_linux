@@ -1,13 +1,13 @@
 {% load i18n %}
 {% load staticfiles %}
 
-<template id="flow_status">
+<template id="flow_status_detail">
   <div>
     {% verbatim %}
     <div class="layout-breadcrumb">
       <breadcrumb>
-        <breadcrumb-item><router-link title="go to flow list" :to="{name: 'flow_status', params: {f_id: 'null'}}">{{cb_data.l0.text}}</router-link></breadcrumb-item>
-        <breadcrumb-item v-if="level === 'stage'"><a @click="init(cb_data.l1.url_id)" title="refresh stage page">{{cb_data.l1.text}}</a></breadcrumb-item>
+        <breadcrumb-item v-if="'block' in rsp_data && 'name' in rsp_data"><router-link title="go to flow list" :to="{name: 'flow_status_list'}">{{ rsp_data.block.proj.name + ":" + rsp_data.block.name + ":" + rsp_data.name }}</router-link></breadcrumb-item>
+        <breadcrumb-item v-if="'id' in rsp_data"><router-link title="refresh detail page" :to="{name: 'flow_status_detail', params: {f_id: rsp_data.id}}">stages</router-link></breadcrumb-item>
       </breadcrumb>
     </div>
     {% endverbatim %}
@@ -30,8 +30,8 @@
 </template>
 
 <script>
- const FlowStatus = {
-   template: "#flow_status",
+ const FlowStatusDetail = {
+   template: "#flow_status_detail",
    beforeRouteUpdate (to, from, next) {
      this.init(to.params.f_id)
      next()
@@ -46,15 +46,9 @@
        pageSize: 50,
        pageIndex: 1,
        rsp_data: {},
-       level: "",
-       level_url: {
-         index: "{% url 'flow_rpt:flow_status_list' %}" + "?user=" + this.$pCookie().user,
-         flow: "{% url 'flow_rpt:flow_status_detail' 'djst_var' %}"
-       },
-       cur_data: [],
-       cb_data: {
-         l0: {},
-         l1: {}
+       url: {
+         list: "{% url 'flow_rpt:flow_status_list' %}" + "?user=" + this.$pCookie().user,
+         detail: "{% url 'flow_rpt:flow_status_detail' 'djst_var' %}"
        }
      }
    },
@@ -117,76 +111,31 @@
      }
    },
    methods: {
-     init: function(f_id = "null") {
-       var ajax_cfg = {method: "get"}
-       if (f_id === "null") {
-         ajax_cfg.url = this.level_url.index
-         this.level = "flow"
-       } else {
-         ajax_cfg.url = this.level_url.flow.replace("djst_var", f_id)
-         this.level = "stage"
-       }
-       axios(ajax_cfg).then((response) => {
+     init: function(f_id = "") {
+       axios({
+         method: "get", url: this.url.detail.replace("djst_var", f_id)
+       }).then((response) => {
          this.rsp_data = response.data
-         this.procLevel()
          this.procDataAry()
          this.procColAry()
        }).catch((error) => {
          console.log(error)
        })
      },
-     procLevel: function () {
-       if (this.level === "flow") {
-         this.cur_data = this.rsp_data
-         this.cb_data.l0.text = "flows"
-       } else if (this.level === "stage") {
-         this.cur_data = this.rsp_data.stage_flow
-         this.cb_data.l0.text = this.rsp_data.block.proj.name + ":" + this.rsp_data.block.name + ":" + this.rsp_data.name
-         this.cb_data.l1.url_id = this.rsp_data.id
-         this.cb_data.l1.text = "stages"
-       }
-     },
      procColAry: function () {
        this.col_ary = []
-       if (this.level === "flow") {
-         this.col_ary.push({
-           title: this.level + " name",
-           key: "obj_name",
-           fixed: "left",
-           width: 150,
-           sortable: true,
-           render: (h, params) => {
-             const row = params.row
-             const pk = row.obj_pk
-             const text = row.obj_name
-             return h("a", {
-               on: {
-                 click: () => {
-                   this.$router.push({name: "flow_status", params: {f_id: pk}})
-                 }
-               }
-             }, text)
-           },
-           filters: this.filter_ary_obj.obj_name,
-           filterMultiple: true,
-           filterMethod: function (value, row) {
-             return row.obj_name === value
-           }
-         })
-       } else if (this.level === "stage") {
-         this.col_ary.push({
-           title: this.level + " name",
-           key: "obj_name",
-           /* "fixed": "left",*/
-           width: 150,
-           sortable: true,
-           filters: this.filter_ary_obj.obj_name,
-           filterMultiple: true,
-           filterMethod: function (value, row) {
-             return row.obj_name === value
-           }
-         })
-       }
+       this.col_ary.push({
+         title: "stage name",
+         key: "obj_name",
+         fixed: "left",
+         width: 150,
+         sortable: true,
+         filters: this.filter_ary_obj.obj_name,
+         filterMultiple: true,
+         filterMethod: function (value, row) {
+           return row.obj_name === value
+         }
+       })
        this.col_ary.push({
          title: "Owner",
          key: "owner",
@@ -227,90 +176,30 @@
            }, text)
          }
        })
-       if (this.level === "flow") {
-         this.col_ary.push({
-           title: "Current Stage",
-           key: "cur_stage",
-           width: 200,
-           sortable: true,
-           filters: this.filter_ary_obj.cur_stage,
-           filterMultiple: true,
-           filterMethod: function (value, row) {
-             return row.cur_stage === value
-           }
-         })
-         this.col_ary.push({
-           title: "Comment",
-           key: "comment",
-           width: 200,
-           sortable: true
-         })
-         this.col_ary.push({
-           title: "Block",
-           key: "block",
-           width: 150,
-           sortable: true,
-           filters: this.filter_ary_obj.block,
-           filterMultiple: true,
-           filterMethod: function (value, row) {
-             return row.block === value
-           }
-         })
-         this.col_ary.push({
-           title: "Project",
-           key: "proj",
-           width: 150,
-           sortable: true,
-           filters: this.filter_ary_obj.proj,
-           filterMultiple: true,
-           filterMethod: function (value, row) {
-             return row.proj === value
-           }
-         })
-       } else if (this.level === "stage") {
-         this.col_ary.push({
-           title: "Version",
-           key: "version",
-           width: 150,
-           sortable: true,
-           filters: this.filter_ary_obj.version,
-           filterMultiple: true,
-           filterMethod: function (value, row) {
-             return row.version === value
-           }
-         })
-       }
+       this.col_ary.push({
+         title: "Version",
+         key: "version",
+         width: 150,
+         sortable: true,
+         filters: this.filter_ary_obj.version,
+         filterMultiple: true,
+         filterMethod: function (value, row) {
+           return row.version === value
+         }
+       })
      },
      procDataAry: function () {
        this.data_ary = []
-       this.filter_ary_obj = {obj_name: [], owner: [], status: []}
-       var unique_ary_obj = {obj_name: [], owner: [], status: []}
-       if (this.level === "flow") {
-         this.filter_ary_obj.cur_stage = []
-         this.filter_ary_obj.block = []
-         this.filter_ary_obj.proj = []
-         unique_ary_obj.cur_stage = []
-         unique_ary_obj.block = []
-         unique_ary_obj.proj = []
-       } else if (this.level === "stage") {
-         this.filter_ary_obj.version = []
-         unique_ary_obj.version = []
-       }
-       for (var i = 0; i < this.cur_data.length; i++) {
-         var qs_obj = this.cur_data[i]
+       this.filter_ary_obj = {obj_name: [], owner: [], status: [], version: []}
+       var unique_ary_obj = {obj_name: [], owner: [], status: [], version: []}
+       for (var i = 0; i < this.rsp_data.stage_flow.length; i++) {
+         var qs_obj = this.rsp_data.stage_flow[i]
          var data_obj = {
            obj_pk: qs_obj.id,
            obj_name: qs_obj.name,
            created_time: qs_obj.created_time.slice(0, 19).replace("T", " "),
-           status: qs_obj.status
-         }
-         if (this.level === "flow") {
-           data_obj.cur_stage = qs_obj.cur_stage
-           data_obj.comment = qs_obj.comment
-           data_obj.block = qs_obj.block.name
-           data_obj.proj = qs_obj.block.proj.name
-         } else if (this.level === "stage") {
-           data_obj.version = qs_obj.version
+           status: qs_obj.status,
+           version: qs_obj.version
          }
          if (qs_obj.owner === null) {
            data_obj.owner = "NA"

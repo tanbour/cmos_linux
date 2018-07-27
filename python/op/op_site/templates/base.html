@@ -97,10 +97,14 @@
     <script>
      const routes = [
        {path: "/", name: "home", component: Home},
-       {path: "/v_flow_status/:f_id", name: "flow_status", component: FlowStatus},
+       {path: "/v_flow_status", name: "flow_status_list", component: FlowStatusList},
+       {path: "/v_flow_status/:f_id", name: "flow_status_detail", component: FlowStatusDetail},
        {path: "/v_flow_rpt/:p_id/:b_id/:f_id/:s_id", name: "flow_rpt", component: FlowRpt},
-       {path: "/v_proj_signoff/:p_id", name: "proj_signoff", component: ProjSignoff},
-       {path: "/v_proj_checker/:p_id", name: "proj_checker", component: ProjChecker},
+       {path: "/v_proj_signoff", name: "proj_signoff_proj_list", component: ProjSignoffProjList},
+       {path: "/v_proj_signoff/p/:p_id", name: "proj_signoff_block_list", component: ProjSignoffBlockList},
+       {path: "/v_proj_signoff/b/:b_id", name: "proj_signoff_block_detail", component: ProjSignoffBlockDetail},
+       {path: "/v_proj_checker", name: "proj_checker_list", component: ProjCheckerList},
+       {path: "/v_proj_checker/:p_id", name: "proj_checker_detail", component: ProjCheckerDetail},
        {path: "/v_job_sum", name: "job_sum", component: JobSum},
        {path: "/v_server_sum", name: "server_sum", component: ServerSum}
      ]
@@ -127,13 +131,17 @@
          changeContent: function (con) {
            if (this.ss_flg) {
              if (con === "flow_status") {
-               var params_obj = {f_id: "null"}
+               this.$router.push({name: "flow_status_list"})
              } else if (con === "flow_rpt") {
                var params_obj = {p_id: "null", b_id: "null", f_id: "null", s_id: "null"}
-             } else if (con === "proj_checker" || con === "proj_signoff") {
-               var params_obj = {p_id: "null"}
+               this.$router.push({name: con, params: params_obj})
+             } else if (con === "proj_checker") {
+               this.$router.push({name: "proj_checker_list"})
+             } else if (con === "proj_signoff") {
+               this.$router.push({name: "proj_signoff_proj_list"})
+             } else {
+               this.$router.push({name: con})
              }
-             this.$router.push({name: con, params: params_obj})
            } else {
              this.$Message.warning("Please log in first!")
            }

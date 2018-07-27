@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Title, Proj, Block, Flow, Stage
+from .models import User, Title, Proj, Block, Flow, Stage, Signoff
 from django.db.models import Q
 
 class UserSerializer(serializers.ModelSerializer):
@@ -30,10 +30,9 @@ class StageDetailSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "data")
 
 class FlowSerializer(serializers.ModelSerializer):
-    stage_flow = StageDetailSerializer(many=True, read_only=True)
     class Meta:
         model = Flow
-        fields = ("id", "name", "block", "owner", "created_time", "status", "comment", "data", "stage_flow")
+        fields = ("id", "name", "block", "owner", "created_time", "status", "comment", "data")
         depth = 1
 
 class StageSerializer(serializers.ModelSerializer):
@@ -48,6 +47,7 @@ class UserRelatedSerializer(serializers.ModelSerializer):
     block_owner = BlockSerializer(many=True, read_only=True)
     flow_owner = FlowSerializer(many=True, read_only=True)
     stage_owner = StageSerializer(many=True, read_only=True)
+    # mmm = BlockSerializer(many=True, read_only=True)
     class Meta:
         model = User
         fields = ("id", "name", "proj_owner", "block_owner", "flow_owner", "stage_owner")
@@ -119,3 +119,16 @@ class FlowStatusRelatedSerializer(serializers.ModelSerializer):
         model = Flow
         fields = ("id", "name", "block", "stage_flow")
         depth = 2
+
+class SignoffStageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Stage
+        fields = ("id", "name", "created_time", "status", "version")
+
+class SignoffSerializer(serializers.ModelSerializer):
+    block = BlockSerializer()
+    l_stage = SignoffStageSerializer()
+    class Meta:
+        model = Signoff
+        fields = ("id", "name", "block", "l_flow", "l_stage", "l_user", "updated_time", "data")
+        depth = 1

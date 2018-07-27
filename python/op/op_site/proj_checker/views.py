@@ -7,9 +7,6 @@ class ProjList(generics.ListCreateAPIView):
     """be report project list"""
     queryset = Proj.objects.all()
     serializer_class = ProjSerializer
-    def get_queryset(self, *args, **kwargs):
-        name = self.request.data.get("name")
-        return self.queryset.filter(name=name) if name else self.queryset.all()
 
 class ProjDetail(generics.RetrieveUpdateDestroyAPIView):
     """be report project detail"""

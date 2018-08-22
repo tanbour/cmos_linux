@@ -766,6 +766,10 @@ sed -i -E "s/<regex>/<string>/g" <files>
 * rsync
 rsync -avh --delete </src_dir/> </tar_dir/>
 
+* httpie
+http :8000/xiaoshi/post/read_list X-AccessToken:11111 sel==all offset==0 limit==4
+http -a guanyu_yi POST :8000/xcareer/runner/resumes/ <<< '[{}]'
+
 * xfreerdp
 xfreerdp -g 1920x960 --ignore-certificate -u <user> -p <passwd> --plugin rdpsnd <host>
 
@@ -801,6 +805,9 @@ flac --best <new_file_prefix>*
     user_pref("capability.policy.localfilelinks.checkloaduri.enabled", "allAccess");
     user_pref("browser.backspace_action", 0);
     user_pref("browser.startup.homepage", "<home_url>")
+** link real path to static path
+cp /home/cmos/log_file $SITE_ROOT/media/home/cmos/log_file
+<a href="/media/home/cmos/log_file">log_file_link</a>
 
 * thunderbird
 network.protocol-handler.warn-external.ftp = true

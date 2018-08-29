@@ -8,8 +8,10 @@ set sh_continue_on_error true
 ## SETUP                                                             ##
 ##===================================================================##
 source {{env.PROJ_SHARE_CMN}}/icc2_common_scripts/icc2_procs.tcl
-source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+source {{env.PROJ_LIB}}/liblist/{{ver.LIB}}.tcl
 source {{cur.cur_flow_sum_dir}}/{{cur.sub_stage}}.op._job.tcl
+# include 00_icc2_setup.tcl
+{% include 'icc2/00_icc2_setup.tcl' %}
 
 set pre_stage "{{pre.sub_stage}}"
 set cur_stage "{{cur.sub_stage}}"
@@ -59,7 +61,6 @@ set use_usr_common_scripts_connect_pg_net_tcl              "{{local.use_usr_comm
 set write_def_convert_icc2_site_to_lef_site_name_list      "{{local.write_def_convert_icc2_site_to_lef_site_name_list}}"
 set icc_icc2_gds_layer_mapping_file                        "${ICC_ICC2_GDS_LAYER_MAPPING_FILE}"
 
-{% include 'icc2/00_icc2_setup.tcl' %}
 ##===================================================================##
 ## back up database                                                  ##
 ## copy block and lib from previous stage                            ## 
@@ -83,6 +84,18 @@ link_block
 save_lib
 
 ###==================================================================##
+## source mcmm file setup timing constrains                          ##
+##===================================================================##
+{% if local.route_opt_load_mcmm == "true" %}
+{% include  'icc2/mcmm.tcl' %}
+foreach_in_collection scenario [all_scenarios] {
+	current_scenario $scenario
+	synthesize_clock_trees -propagate_only
+	compute_clock_latency
+}
+{%- endif %}
+
+###==================================================================##
 ## Timing constraints                                                ##
 ##===================================================================##
 {% if local.route_opt_active_scenario_list != "" %} 
@@ -92,20 +105,22 @@ set_scenario_status -active true $route_opt_active_scenario_list
 set_scenario_status -active true [all_scenarios]
 {% endif %}  
 
+foreach_in_collection scn [all_scenarios] {
+    current_scenario $scn
 {%- if local.setup_uncertainty %}
-set_clock_uncertainty {{local.setup_uncertainty}} -setup [all_clocks ] -scenarios [all_scenarios ]
+    set_clock_uncertainty {{local.setup_uncertainty}} -setup [all_clocks ] -scenarios $scn
 {%-  endif %}
 {%- if local.hold_uncertainty %}
-set_clock_uncertainty {{local.hold_uncertainty}} -hold  [all_clocks ] -scenarios [all_scenarios ]
+    set_clock_uncertainty {{local.hold_uncertainty}} -hold  [all_clocks ] -scenarios $scn
 {%-  endif %}
-
-
 {%- if local.data_transition %}
-set_max_transition -data_path {{local.data_transition}} [all_clocks] -scenarios [all_scenarios]
+    set_max_transition -data_path {{local.data_transition}} [all_clocks] -scenarios $scn
 {%- endif %}
 {%- if local.clock_transition %}
-set_max_transition -clock_path {{local.clock_transition}} [all_clocks] -scenarios [all_scenarios]
+    set_max_transition -clock_path {{local.clock_transition}} [all_clocks] -scenarios $scn
 {%- endif %}
+}
+
 
 ###==================================================================##
 ## route opt settings                                                ##

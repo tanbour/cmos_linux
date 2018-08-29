@@ -2,6 +2,30 @@
 ## NDR rule
 ## ----------------------------------------------------------------------------------
 
+set clock_routing_rule "NDR_TRUNK NDR_LEAF"
+remove_routing_rules $clock_routing_rule                                                                                     
+
+create_routing_rule NDR_TRUNK -default_reference_rule \
+-widths   { M4 0.28 M5 0.28 M6 0.28}  \
+-spacings { M4 0.28 M5 0.28 M6 0.28}  \
+-driver_taper_distance 0
+
+create_routing_rule NDR_INT -default_reference_rule \
+-widths   { M3 0.21 M4 0.21 M5 0.21 M6 0.21 }  \
+-spacings { M3 0.28 M4 0.28 M5 0.28 M6 0.28 }  \
+-driver_taper_distance 0 
+
+create_routing_rule NDR_LEAF -default_reference_rule \
+-widths   { M2 0.14 M3 0.14 M4 0.14 M5 0.14 M6 0.14}  \
+-spacings { M2 0.14 M3 0.14 M4 0.14 M5 0.14 M6 0.14} 
+
+set_clock_routing_rules -net_type root -rules NDR_TRUNK -min_routing_layer M4 -max_routing_layer M6
+
+set_clock_routing_rules -net_type internal -rules NDR_INT -min_routing_layer M3 -max_routing_layer M6
+
+set_clock_routing_rules -net_type sink -rules NDR_LEAF -min_routing_layer M2 -max_routing_layer M6
+
+
 #set clock_routing_rule "NDR_TRUNK NDR_LEAF"
 #remove_routing_rules $clock_routing_rule
 #
@@ -44,4 +68,4 @@
 #
 #set_clock_routing_rules -net_type sink -rules NDR_LEAF -min_routing_layer M4 -max_routing_layer M7
 
-
+mark_clock_trees -routing_rules

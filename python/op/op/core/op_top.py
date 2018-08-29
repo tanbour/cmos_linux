@@ -14,6 +14,7 @@ from core import runner_clean
 from core import runner_backup
 from core import runner_merge
 from core import runner_email
+from core import runner_signoff
 from core.op_lic import OPClient
 
 LOG = pcom.gen_logger(__name__)
@@ -114,8 +115,8 @@ def gen_flow_parser(subparsers):
         "-begin", dest="flow_begin", default="",
         help="input begin sub-stage to run")
     flow_parser.add_argument(
-        "-no_lib", dest="flow_no_lib", action="store_true",
-        help="toggle flows to run flow without liblist generation")
+        "-end", dest="flow_end", default="",
+        help="input end sub_stage to run")
     flow_parser.add_argument(
         "-c", dest="flow_comment", default="",
         help="input flow comments to be shown and distinguished with others")
@@ -176,11 +177,14 @@ def gen_merge_parser(subparsers):
         "merge",
         help="sub cmd about merging the generic scripts")
     merge_parser.add_argument(
-        "-refer", dest="refer_dir", required=True,
-        help="reference directory to merge")
+        "-src", dest="src_dir", metavar='<file or dir>',
+        help="merge source file or directory, default: share/config/flow")
     merge_parser.add_argument(
-        "-tool", dest="tool",
-        help="merge tool name")
+        "-dst", dest="dst_dir", metavar='<file or dir>',
+        help="merge destination file or directory, default: current dir")
+    merge_parser.add_argument(
+        "-tool", dest="tool", default="gvimdiff -f",
+        help="merge tool name and parameters, e.g. vimdiff, default: gvimdiff")
     merge_parser.set_defaults(func=main_merge)
 
 def main_merge(args):
@@ -201,6 +205,20 @@ def main_email(args):
     """email sub cmd top function"""
     runner_email.run_email(args)
 
+def gen_signoff_parser(subparsers):
+    """to generate signoff parser"""
+    signoff_parser = subparsers.add_parser(
+        "signoff",
+        help="sub cmd about signoffs actions")
+    signoff_parser.add_argument(
+        "-b", dest="signoff_block_lst", nargs="+",
+        help="initializing blocks signoff items in op database")
+    signoff_parser.set_defaults(func=main_signoff)
+
+def main_signoff(args):
+    """signoff sub cmd top function"""
+    runner_signoff.run_signoff(args)
+
 def gen_args_top():
     """to generate top args help for op"""
     parser = argparse.ArgumentParser()
@@ -215,6 +233,7 @@ def gen_args_top():
     gen_backup_parser(subparsers)
     gen_merge_parser(subparsers)
     gen_email_parser(subparsers)
+    gen_signoff_parser(subparsers)
     return parser.parse_args()
 
 def main():

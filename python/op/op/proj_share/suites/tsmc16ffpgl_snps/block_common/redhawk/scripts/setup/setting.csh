@@ -41,7 +41,7 @@ else
    set flag = 1
 endif
 if ($Redhawk_ploc == "MISS" ) then
-   set Redhawk_ploc = `ls -d $Redhawk_ploc_dir/${Redhawk_top}.ploc`
+   set Redhawk_ploc = `ls -d --file-type $Redhawk_ploc_dir/${Redhawk_top}.ploc`
 else if (! -e $Redhawk_ploc ) then
    echo "ERROR (redhawk) : Redhawk_ploc file not exists!"
    set flag = 1

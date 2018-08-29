@@ -17,3 +17,9 @@ while ( 1 )
    endif
 end
 {% endif %}
+
+if ( -e {{local._multi_inst}} ) then
+set bak_time = `date +%m_%d_%H_%M`
+echo " workspace {{local._multi_inst}} is alreay exist, will move to backup workspace {{local._multi_inst}}_${bak_time} "
+mv -f {{local._multi_inst}} {{local._multi_inst}}_${bak_time}
+endif

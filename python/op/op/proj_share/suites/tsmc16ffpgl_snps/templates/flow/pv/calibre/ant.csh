@@ -4,8 +4,10 @@ set pre_stage = "{{pre.sub_stage}}"
 set cur_stage = "{{cur.sub_stage}}"
 
 set pre_stage = `echo $pre_stage | cut -d . -f 1`
-set cur_stage = `echo $cur_stage | cut -d . -f 1`
 
+set design_style = "{{local.design_style}}"
+set pv_func      = "{{local._multi_inst}}"
+set cur_stage    = "{{local._multi_inst}}"
 set clbre_ant_CPU_NUMBER = `echo "{{local._job_cpu_number}}" | cut -d " " -f 2`
 
 #======================================================================
@@ -25,21 +27,36 @@ set plugin_file    = "{{cur.config_plugins_dir}}/calibre_scripts/clbre_ant_plugi
 {%- endif %}
 
 #----------------------- set input files ---------------------------------
+{% if local.design_style == "top" %}
+{% if local.cal_decks_ant_for_top %}
+set rule_deck     = "{{local.cal_decks_ant_for_top}}"
+{% else %}
 set rule_deck     = "{{liblist.CAL_DECKS_ANT}}"
+{% endif %}
+{% elif local.design_style == "block" %}
+{% if local.cal_decks_ant_for_block %}
+set rule_deck     = "{{local.cal_decks_ant_for_block}}"
+{% else %}
+set rule_deck     = "{{liblist.CAL_DECKS_ANT}}"
+{% endif %}
+{% endif %}
+
 set top_name      = "{{env.BLK_NAME}}"
 {%- if local.sourceme_14lpp_ant_file %}
 set sourceme_file = "{{local.sourceme_14lpp_ant_file}}"
 source ${sourceme_file}
 {%- endif %}
 set gds_file      = "{{pre.flow_data_dir}}/{{pre.stage}}/${input_file}.gds.gz" 
-set ant_run       = "{{cur.flow_scripts_dir}}/{{cur.stage}}/${output_file}.rule"
-set run_time      = "{{cur.cur_flow_rpt_dir}}/${cur_stage}.run_time"
+set ant_run       = "{{cur.flow_scripts_dir}}/{{cur.stage}}/${pv_func}/${output_file}.rule"
+set run_time      = "{{cur.cur_flow_rpt_dir}}/${pv_func}/${cur_stage}.run_time"
 
 #----------------------- delete exist rule deck file ---------------------
 if ( -e ${ant_run} ) then
 rm -rf ${ant_run}
 endif
-
+mkdir -p {{cur.cur_flow_rpt_dir}}/${pv_func}
+mkdir -p {{cur.cur_flow_data_dir}}/${pv_func}
+mkdir -p {{cur.cur_flow_log_dir}}/${pv_func}
 #======================================================================
 #================== generate antenna check script =====================
 #======================================================================
@@ -50,8 +67,8 @@ LAYOUT PRIMARY "${top_name}"
 LAYOUT PATH    "${gds_file}"
 LAYOUT SYSTEM GDSII
 
-DRC RESULTS DATABASE "{{cur.cur_flow_rpt_dir}}/${output_file}.db"
-DRC SUMMARY REPORT   "{{cur.cur_flow_rpt_dir}}/${output_file}.rpt"
+DRC RESULTS DATABASE "{{cur.cur_flow_rpt_dir}}/${pv_func}/${output_file}.db"
+DRC SUMMARY REPORT   "{{cur.cur_flow_rpt_dir}}/${pv_func}/${output_file}.rpt"
 
 DRC ICSTATION YES
 ant_setting
@@ -77,8 +94,8 @@ echo "finish" `date "+%F %T %a"` >> ${run_time}
 #==========================================================================
 #========= grep the report ================================================
 #==========================================================================
-grep -v "NOT EXECUTED" {{cur.cur_flow_rpt_dir}}/${output_file}.rpt | grep -v "TOTAL Result Count = 0" >! {{cur.cur_flow_rpt_dir}}/pv.ant.rpt.sum
-grep RULECHECK {{cur.cur_flow_rpt_dir}}/pv.ant.rpt.sum  >! {{cur.cur_flow_rpt_dir}}/pv.ant.CHECKRULE.rpt.sum.sort
+grep -v "NOT EXECUTED" {{cur.cur_flow_rpt_dir}}/${pv_func}/${output_file}.rpt | grep -v "TOTAL Result Count = 0" >! {{cur.cur_flow_rpt_dir}}/${pv_func}/pv.ant.rpt.sum
+grep RULECHECK {{cur.cur_flow_rpt_dir}}/${pv_func}/pv.ant.rpt.sum  >! {{cur.cur_flow_rpt_dir}}/${pv_func}/pv.ant.CHECKRULE.rpt.sum.sort
 
 echo "{{env.FIN_STR}}"
 

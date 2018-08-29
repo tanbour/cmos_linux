@@ -21,6 +21,7 @@ Contents:
    env_setup
    template
    openlava
+   git
 
 Indices and tables
 ==================

@@ -25,12 +25,12 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         lib_map.LibMap.__init__(self)
     def fill_proj(self):
         """to fill project config and template dir after initialization"""
-        LOG.info(f":: filling project {self.repo_dic['init_proj_name']} repo ...")
+        LOG.info(":: filling project %s repo ...", self.repo_dic["init_proj_name"])
         proj_gi_file = f"{self.repo_dic['repo_dir']}{os.sep}.gitignore"
         with open(proj_gi_file, "w") as g_f:
             g_f.write(settings.GITIGNORE)
         proj_flg_file = f"{self.repo_dic['repo_dir']}{os.sep}{settings.FLG_FILE}"
-        LOG.info(f"generating op project flag file {settings.FLG_FILE}")
+        LOG.info("generating op project flag file %s", settings.FLG_FILE)
         with open(proj_flg_file, "w") as f_f:
             f_f.write(self.repo_dic["init_proj_name"])
         LOG.info("generating op project level configs and templates")
@@ -48,8 +48,8 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         suite_dst_dir = os.path.expandvars(settings.PROJ_SHARE)
         if os.path.isdir(suite_dst_dir):
             LOG.info(
-                f"project share dir {suite_dst_dir} already exists, continue to initialize "
-                f"the project will overwrite the current project configs, templates and plugins")
+                "project share dir %s already exists, continue to initialize the project will "
+                "overwrite the current project configs, templates and plugins", suite_dst_dir)
             pcom.cfm()
             shutil.rmtree(suite_dst_dir, True)
         shutil.copytree(f"{settings.OP_PROJ}{os.sep}{suite_name}", suite_dst_dir)
@@ -60,8 +60,8 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
             raise SystemExit()
         if os.path.isdir(utils_dst_dir):
             LOG.info(
-                f"project utils dir {utils_dst_dir} already exists, continue to initialize "
-                f"the project will overwrite the current project utils")
+                "project utils dir %s already exists, continue to initialize the project will "
+                "overwrite the current project utils", utils_dst_dir)
             pcom.cfm()
             shutil.rmtree(utils_dst_dir, True)
         shutil.copytree(settings.OP_UTILS, utils_dst_dir)
@@ -69,7 +69,7 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                 self.cfg_dic["proj"]["prex_admin_dir"]
                 if "prex_admin_dir" in self.cfg_dic["proj"] else {}):
             prex_dir = pcom.rd_cfg(self.cfg_dic["proj"], "prex_admin_dir", prex_dir_k, True)
-            LOG.info(f"generating pre-set admin directory {prex_dir}")
+            LOG.info("generating pre-set admin directory %s", prex_dir)
             pcom.mkdir(LOG, prex_dir)
         LOG.info(
             "please perform the git commit and git push actions "
@@ -79,18 +79,18 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         env_boot.EnvBoot.__init__(self)
         self.boot_env()
         for blk_name in blk_lst:
-            LOG.info(f":: filling block {blk_name} ...")
+            LOG.info(":: filling block %s ...", blk_name)
             os.environ["BLK_NAME"] = blk_name
             os.environ["BLK_ROOT"] = blk_root_dir = f"{self.ced['PROJ_ROOT']}{os.sep}{blk_name}"
             pcom.mkdir(LOG, blk_root_dir)
             proj_cfg_dir = os.path.expandvars(settings.PROJ_CFG_DIR).rstrip(os.sep)
             blk_cfg_dir = os.path.expandvars(settings.BLK_CFG_DIR).rstrip(os.sep)
             for cfg_kw in self.cfg_dic:
-                if cfg_kw == "proj":
+                if cfg_kw in settings.BLK_CFG_UNFILL_LST:
                     continue
                 proj_cfg = f"{proj_cfg_dir}{os.sep}{cfg_kw}.cfg"
                 blk_cfg = f"{blk_cfg_dir}{os.sep}{cfg_kw}.cfg"
-                LOG.info(f"generating block config {blk_cfg}")
+                LOG.info("generating block config %s", blk_cfg)
                 pcom.mkdir(LOG, os.path.dirname(blk_cfg))
                 with open(proj_cfg) as pcf, open(blk_cfg, "w") as bcf:
                     for line in pcom.gen_pcf_lst(pcf):
@@ -100,11 +100,11 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                     continue
                 proj_dir_cfg = f"{proj_cfg_dir}{os.sep}{dir_cfg_kw}"
                 blk_dir_cfg = f"{blk_cfg_dir}{os.sep}{dir_cfg_kw}{os.sep}DEFAULT"
-                LOG.info(f"generating block config directory {blk_dir_cfg}")
+                LOG.info("generating block config directory %s", blk_dir_cfg)
                 if os.path.isdir(blk_dir_cfg):
                     LOG.info(
-                        f"block level config directory {blk_dir_cfg} already exists, "
-                        f"please confirm to overwrite it")
+                        "block level config directory %s already exists, "
+                        "please confirm to overwrite it", blk_dir_cfg)
                     pcom.cfm()
                 shutil.rmtree(blk_dir_cfg, True)
                 shutil.copytree(proj_dir_cfg, blk_dir_cfg)
@@ -121,8 +121,8 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                 continue
             if os.path.isdir(blk_cmn_dir):
                 LOG.info(
-                    f"block level common directory {blk_cmn_dir} already exists, "
-                    f"please confirm to overwrite it")
+                    "block level common directory %s already exists, "
+                    "please confirm to overwrite it", blk_cmn_dir)
                 pcom.cfm()
             shutil.rmtree(blk_cmn_dir, True)
             shutil.copytree(proj_blk_cmn_dir, blk_cmn_dir)
@@ -142,7 +142,7 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                     continue
             blk_tar = data_src.replace(
                 self.ced["PROJ_RELEASE_TO_BLK"], f"{self.ced['PROJ_ROOT']}{os.sep}{blk_name}")
-            LOG.info(f"linking block files {blk_tar} from {data_src}")
+            LOG.info("linking block files %s from %s", blk_tar, data_src)
             pcom.mkdir(LOG, os.path.dirname(blk_tar))
             if not os.path.exists(blk_tar):
                 os.symlink(data_src, blk_tar)
@@ -155,11 +155,7 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         self.boot_env()
         LOG.info(":: library mapping ...")
         pcom.mkdir(LOG, self.ced["PROJ_LIB"])
-        self.link_file(
-            self.ced["PROJ_LIB"], self.dir_cfg_dic["lib"]["DEFAULT"], self.cfg_dic)
-        self.gen_liblist(
-            self.ced["PROJ_LIB"], self.ced["PROJ_LIB"],
-            self.dir_cfg_dic["lib"]["DEFAULT"]["liblist"], self.cfg_dic["lib"]["DEFAULT"])
+        self.gen_link_liblist(self.ced["PROJ_LIB"], self.dir_cfg_dic["lib"]["DEFAULT"])
     def check_release(self):
         """to check all released information"""
         env_boot.EnvBoot.__init__(self)
@@ -190,7 +186,7 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         table.set_cols_width([30, 15, 15, 30])
         table.add_rows(table_rows)
         relz_table = table.draw()
-        LOG.info(f"release status table:{os.linesep}{relz_table}")
+        LOG.info("release status table:%s%s", os.linesep, relz_table)
     def release(self):
         """to generate release directory"""
         env_boot.EnvBoot.__init__(self)
@@ -198,7 +194,7 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
         LOG.info(":: release content generating ...")
         for relz_json_file in pcom.find_iter(
                 f"{self.ced['PROJ_RELEASE_TO_TOP']}{os.sep}.json", "*.json"):
-            LOG.info(f"generating release of {relz_json_file}")
+            LOG.info("generating release of %s", relz_json_file)
             with open(relz_json_file) as rjf:
                 relz_dic = json.load(rjf)
             relz_path = os.sep.join(
@@ -212,9 +208,9 @@ class AdminProc(env_boot.EnvBoot, proj_repo.ProjRepo, lib_map.LibMap):
                         f"{os.path.splitext(relz_dic['sub_stage'])[0]}*{relz_v}")
                     match_relz_lst = fnmatch.filter(relz_file_lst, relz_pattern)
                     if not match_relz_lst:
-                        LOG.warning(f"no {relz_k} {relz_v} files found")
+                        LOG.warning("no %s %s files found", relz_k, relz_v)
                     else:
-                        LOG.info(f"copying {relz_k} {relz_v} files")
+                        LOG.info("copying %s %s files", relz_k, relz_v)
                     for relz_file in match_relz_lst:
                         dst_dir = os.sep.join(
                             [self.ced["PROJ_RELEASE_TO_TOP"], relz_dic["block"],
@@ -245,8 +241,8 @@ def run_admin(args):
         admin_proc.fill_proj()
     elif args.admin_block_lst:
         LOG.info(
-            f"generating block level directories and configs of {args.admin_block_lst}, "
-            f"which will overwrite all the existed block level configs ...")
+            "generating block level directories and configs of %s, which will overwrite "
+            "all the existed block level configs ...", args.admin_block_lst)
         pcom.cfm()
         admin_proc.fill_blocks(args.admin_block_lst)
         admin_proc.update_blocks(args.admin_block_lst)

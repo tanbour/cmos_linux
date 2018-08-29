@@ -1,0 +1,4 @@
+tem_sensor_VDDA  AVDD 
+tem_sensor_VDDA1 AVDD
+tem_sensor_VDDA  AVSS
+tem_sensor_VDDA1 AVSS

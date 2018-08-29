@@ -1,0 +1,29 @@
+#===================================================================
+#=================== license setting ===============================
+#===================================================================
+
+rm ~/.flexlmrc
+source /apps/setenv_license.csh
+#setenv APACHEDA_LICENSE_FILE 1881@lic41
+#setenv APACHEROOT /tools_lib3/apps/redhawk/RedHawk_Linux64e5_V14.1.3p1
+setenv APACHEROOT /tools_lib3/apps/redhawk/RedHawk_Linux64e5_V15.2.4
+source $APACHEROOT/setup.csh
+
+#===================================================================
+#=================== run redhawk ===================================
+#===================================================================
+#we can use -f to call the redhawk window [-b]
+echo "time : start redhawk at `date`" >> ./info.txt
+redhawk -b ./scripts/cmd/redhawk.cmd -lmwait
+#redhawk
+echo "time : end redhawk at `date`"  >> ./info.txt
+echo "" >> ./info.txt
+
+#===================================================================
+#=================== get info ======================================
+#===================================================================
+
+#source /proj/Mars2_new/WORK/cheiik/TOOL/redhawk_new_tool/redhawk_env/mars2_final_env/scripts/scr/get_info.csh
+#perl /proj/Mars2_new/WORK/cheiik/TOOL/redhawk_new_tool/redhawk_env/mars2_final_env/scripts/scr/get_Static_violation.pl all IP_static_violation /proj/Mars2_new/WORK/cheiik/TOOL/redhawk_new_tool/redhawk_env/mars2_final_env/scripts/gsr/list/IP.list ./adsRpt/*.power.rpt ./adsRpt/Static/*.inst ./adsRpt/*.res_calc
+#perl /proj/Mars2_new/WORK/cheiik/TOOL/redhawk_new_tool/redhawk_env/mars2_final_env/scripts/scr/get_Static_violation.pl all MEMORY_static_violation /proj/Mars2_new/WORK/cheiik/TOOL/redhawk_new_tool/redhawk_env/mars2_final_env/scripts/gsr/list/mem.list ./adsRpt/*.power.rpt ./adsRpt/Static/*.inst ./adsRpt/*.res_calc
+#perl /proj/Mars2_new/WORK/cheiik/TOOL/redhawk_new_tool/redhawk_env/mars2_final_env/scripts/scr/get_Dynaimc_violation.pl /proj/Mars2_new/WORK/saberh/lmu_we/PT/dong_1102_f_region_201612280/normal/tt_cworst_ccworst_t_85c_max/lmu_we.timing ./adsRpt/Dynamic/*.dvd 15 20 25 > dynamic_IR_violation

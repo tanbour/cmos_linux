@@ -7,6 +7,8 @@ set clock_opt_ccd                    "{{local.clock_opt_ccd}}"
 # while in non-CCD flow, auto means none. 
 # available value auto/none/power/area
 set clock_opt_power_recovery         "{{local.clock_opt_power_recovery}}"
+set clock_opt_place_effort           "{{local.clock_opt_place_effort}}"
+set clock_opt_congestion_effort      "{{local.clock_opt_congestion_effort}}"
 
 ## PPA - Performance focused features--------------------------------------------
 {% if local.clock_opt_ccd == "true" %}
@@ -30,8 +32,8 @@ set_app_option -name cts.compile.enable_global_route -value true
 
 # Coarse placement effort for clock_opt final_opto phase, Enabled for better placement quality
 puts "RM-info: Setting clock_opt.place.effort to high (tool default medium)"
-set_app_option -name clock_opt.place.effort -value high
+set_app_option -name clock_opt.place.effort -value $clock_opt_place_effort
 
 # Congestion effort for clock_opt final_opto phase, Enabled for better congestion alleviation
 puts "RM-info: Setting clock_opt.congestion.effort to high (tool default medium)"
-set_app_option -name clock_opt.congestion.effort -value high
+set_app_option -name clock_opt.congestion.effort -value $clock_opt_congestion_effort

@@ -2,6 +2,55 @@
 ## NDR rule
 ## ----------------------------------------------------------------------------------
 
+set clock_routing_rule "NDR_TRUNK NDR_LEAF"
+remove_routing_rules $clock_routing_rule
+
+create_routing_rule NDR_TRUNK -default_reference_rule \
+-widths   { M4 0.15 M5 0.15 M6 0.15}  \
+-spacings { M4 0.15 M5 0.15 M6 0.15}  \
+-driver_taper_distance 0 
+
+#-vias { \
+#      {VIA34_LONG_V_BW20_UW76 1X1 NR} \
+#      {VIA45_LONG_H_BW76_UW114 1X1 NR} \
+#      {VIA56_LONG_H_BW114_UW76 1X1 NR} \
+#      {VIA56_LONG_V_BW76_UW114 1X1 NR} \
+#      {VIA67_LONG_H_BW76_UW114 1X1 NR} \
+#      {VIA67_LONG_V_BW114_UW76 1X1 NR} \
+#      {VIA78_LONG_H_BW114_UW76 1x1 NR } \
+#      {VIA78_LONG_V_BW76_UW114 1X1 NR} \
+#}
+
+
+create_routing_rule NDR_INT -default_reference_rule \
+-widths   { M3 0.1 M4 0.1 M5 0.1 M6 0.1 }  \
+-spacings { M3 0.15 M4 0.15 M5 0.15 M6 0.15 }  \
+-driver_taper_distance 0 
+
+#   -vias { \
+#      {VIA34_LONG_V_BW20_UW76 1X1 NR} \
+#      {VIA45_LONG_H_BW76_UW114 1X1 NR} \
+#      {VIA56_LONG_H_BW114_UW76 1X1 NR} \
+#      {VIA56_LONG_V_BW76_UW114 1X1 NR} \
+#      {VIA67_LONG_H_BW76_UW114 1X1 NR} \
+#      {VIA67_LONG_V_BW114_UW76 1X1 NR} \
+#      {VIA78_LONG_H_BW114_UW76 1x1 NR } \
+#      {VIA78_LONG_V_BW76_UW114 1X1 NR} \
+#}
+
+create_routing_rule NDR_LEAF -default_reference_rule \
+-widths   { M2 0.05 M3 0.05 M4 0.05 M5 0.05 M6 0.05}  \
+-spacings { M2 0.05 M3 0.05 M4 0.05 M5 0.05 M6 0.05} 
+
+set_clock_routing_rules -net_type root -rules NDR_TRUNK -min_routing_layer M4 -max_routing_layer M6
+
+set_clock_routing_rules -net_type internal -rules NDR_INT -min_routing_layer M3 -max_routing_layer M6
+
+set_clock_routing_rules -net_type sink -rules NDR_LEAF -min_routing_layer M2 -max_routing_layer M6
+
+
+
+##Referance NDR Definition
 #set clock_routing_rule "NDR_TRUNK NDR_LEAF"
 #remove_routing_rules $clock_routing_rule
 #

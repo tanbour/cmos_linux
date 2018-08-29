@@ -2,10 +2,10 @@ from rest_framework import serializers
 from .models import User, Title, Proj, Block, Flow, Stage, Signoff
 from django.db.models import Q
 
-class UserSerializer(serializers.ModelSerializer):
+class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("id", "name", "data")
+        fields = ("id", "name", "proj_admin", "data")
 
 class TitleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,90 +18,59 @@ class ProjSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "owner", "data")
         depth = 1
 
-class BlockSerializer(serializers.ModelSerializer):
+class BlockListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Block
+        fields = ("id", "name", "owner", "milestone", "data")
+        depth = 1
+
+class BlockDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Block
         fields = ("id", "name", "proj", "owner", "milestone", "data")
+        depth = 2
+
+class FlowListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Flow
+        fields = ("id", "name", "owner", "created_time", "status", "comment", "data")
+        depth = 1
+
+class FlowDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Flow
+        fields = ("id", "name", "block", "owner", "created_time", "status", "comment", "data")
+        depth = 3
+
+class StageListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Stage
+        fields = ("id", "name", "owner", "created_time", "status", "version", "data")
         depth = 1
 
 class StageDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stage
-        fields = ("id", "name", "data")
+        fields = ("id", "name", "flow", "data")
+        depth = 4
 
-class FlowSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Flow
-        fields = ("id", "name", "block", "owner", "created_time", "status", "comment", "data")
-        depth = 1
-
-class StageSerializer(serializers.ModelSerializer):
-    flow = FlowSerializer(many=True, read_only=True)
-    class Meta:
-        model = Stage
-        fields = ("id", "name", "flow", "owner", "created_time", "status", "version", "data")
-        depth = 1
-
-class UserRelatedSerializer(serializers.ModelSerializer):
+class UserDetailSerializer(serializers.ModelSerializer):
     proj_owner = ProjSerializer(many=True, read_only=True)
-    block_owner = BlockSerializer(many=True, read_only=True)
-    flow_owner = FlowSerializer(many=True, read_only=True)
-    stage_owner = StageSerializer(many=True, read_only=True)
-    # mmm = BlockSerializer(many=True, read_only=True)
+    block_owner = BlockListSerializer(many=True, read_only=True)
+    flow_owner = FlowListSerializer(many=True, read_only=True)
+    stage_owner = StageListSerializer(many=True, read_only=True)
     class Meta:
         model = User
         fields = ("id", "name", "proj_owner", "block_owner", "flow_owner", "stage_owner")
 
-# class ProjRelatedSerializer(serializers.ModelSerializer):
-#     block_proj = BlockSerializer(many=True, read_only=True)
-#     class Meta:
-#         model = Proj
-#         fields = ("id", "name", "block_proj")
-
-class ProjRelatedSerializer(serializers.ModelSerializer):
-    block_proj = serializers.SerializerMethodField()
-    class Meta:
-        model = Proj
-        fields = ("id", "name", "block_proj")
-    def get_block_proj(self, proj_obj):
-        queryset = Block.objects.filter(proj=proj_obj)
-        user = self.context["request"].GET.get("user")
-        if user:
-            user_obj = User.objects.filter(name=user).first()
-            if proj_obj not in user_obj.proj_admin.all():
-                q_filter = Q()
-                block_set = set()
-                for query_obj in Flow.objects.filter(block__proj=proj_obj, owner__name=user):
-                    block_name = query_obj.block.name
-                    if block_name in block_set:
-                        continue
-                    block_set.add(query_obj.block.name)
-                    q_filter = q_filter|Q(name=block_name)
-                queryset = queryset.filter(q_filter) if q_filter else queryset.none()
-        serializer = BlockSerializer(instance=queryset, many=True, read_only=True)
-        return serializer.data
-
-class BlockRelatedSerializer(serializers.ModelSerializer):
-    flow_block = serializers.SerializerMethodField()
-    class Meta:
-        model = Block
-        fields = ("id", "name", "flow_block")
-    def get_flow_block(self, block_obj):
-        queryset = Flow.objects.filter(block=block_obj)
-        user = self.context["request"].GET.get("user")
-        user_obj = User.objects.filter(name=user).first()
-        if block_obj.proj not in user_obj.proj_admin.all():
-            queryset = queryset.filter(owner__name=user)
-        serializer = FlowSerializer(instance=queryset, many=True, read_only=True)
-        return serializer.data
-
-class FlowRelatedSerializer(serializers.ModelSerializer):
-    stage_flow = StageSerializer(many=True, read_only=True)
+class FlowCmpListSerializer(serializers.ModelSerializer):
+    stage_flow = StageListSerializer(many=True, read_only=True)
     class Meta:
         model = Flow
-        fields = ("id", "name", "stage_flow")
+        fields = ("id", "name", "block", "owner", "created_time", "status", "comment", "data", "stage_flow")
+        depth = 1
 
-class FlowStatusSerializer(serializers.ModelSerializer):
+class FlowStatusListSerializer(serializers.ModelSerializer):
     cur_stage = serializers.SerializerMethodField()
     class Meta:
         model = Flow
@@ -113,22 +82,18 @@ class FlowStatusSerializer(serializers.ModelSerializer):
         cur_stage = obj.stage_flow.order_by("-created_time").first()
         return cur_stage.name if cur_stage else None
 
-class FlowStatusRelatedSerializer(serializers.ModelSerializer):
-    stage_flow = StageSerializer(many=True, read_only=True)
+class FlowStatusDetailSerializer(serializers.ModelSerializer):
+    stage_flow = StageListSerializer(many=True, read_only=True)
     class Meta:
         model = Flow
         fields = ("id", "name", "block", "stage_flow")
         depth = 2
 
-class SignoffStageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Stage
-        fields = ("id", "name", "created_time", "status", "version")
-
 class SignoffSerializer(serializers.ModelSerializer):
-    block = BlockSerializer()
-    l_stage = SignoffStageSerializer()
+    block = BlockDetailSerializer()
+    l_user_name = serializers.SerializerMethodField()
     class Meta:
         model = Signoff
-        fields = ("id", "name", "block", "l_flow", "l_stage", "l_user", "updated_time", "data")
-        depth = 1
+        fields = ("id", "name", "block", "l_flow", "l_stage", "l_user", "updated_time", "data", "l_user_name")
+    def get_l_user_name(self, obj):
+        return obj.l_user.name

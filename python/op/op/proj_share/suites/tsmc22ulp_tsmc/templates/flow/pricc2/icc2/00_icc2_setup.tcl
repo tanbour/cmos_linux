@@ -13,6 +13,7 @@ set common_report_mv_path                    "{{local.common_report_mv_path}}"
 set common_report_utilization                "{{local.common_report_utilization}}"
 set common_report_units                      "{{local.common_report_units}}"
 set common_report_detail_timing              "{{local.common_report_detail_timing}}"
+set common_analyze_design_violations	     "{{local.common_analyze_design_violations}}"
 set fp_report_zero_interconnect_delay_timing "{{local.fp_report_zero_interconnect_delay_timing}}"
 set cts_report_clock_tree_info               "{{local.cts_report_clock_tree_info}}"
 set route_no_si_timing_report                "{{local.route_no_si_timing_report}}"
@@ -21,6 +22,7 @@ set route_check_route                        "{{local.route_check_route}}"
 ###==================================================================##
 ## mcmm_setup                                                        ##
 ##===================================================================##
+set blk_sdc_dir       "{{env.BLK_SDC}}/{{ver.sdc}}"
 
 ## scenario settings---------------------------------------------------
 set tech_ndm                           "{{local.tech_ndm}}";# *fill tech_ndm name, example tech_only,remember it's not tech ndm library path! only tech ndm name is OK.

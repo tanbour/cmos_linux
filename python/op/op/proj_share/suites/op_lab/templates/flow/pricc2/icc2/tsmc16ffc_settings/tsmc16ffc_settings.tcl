@@ -23,8 +23,8 @@ set_app_options -list {opt.common.do_physical_checks legalize}
 ### placer
 {%- if cur.sub_stage == "02_place.tcl" %} 
 # placement abut rule (Only needed in place stage)
-create_abut_rules -number_of_references 4 -output {{cur.flow_scripts_dir}}/pr/lib_space_rule.tcl
-source {{cur.flow_scripts_dir}}/pr/lib_space_rule.tcl
+create_abut_rules -number_of_references 4 -output {{cur.flow_scripts_dir}}/pricc2/lib_space_rule.tcl
+source {{cur.flow_scripts_dir}}/pricc2/lib_space_rule.tcl
 {%- endif %}
 # general
 set_app_options -list {place.rules.min_od_filler_size 2}
@@ -69,3 +69,9 @@ set_app_options -list {route.global.pin_access_factor 5}
 # timing-driven routing
 set_app_options -list {route.common.high_resistance_flow true}
 set_app_options -list {route.common.threshold_noise_ratio 0.15}
+
+### -------------------------
+### legalize
+set_app_options -list {place.legalize.enable_advanced_legalizer true}
+set_app_options -list {place.legalize.optimize_pin_access_using_cell_spacing true}
+

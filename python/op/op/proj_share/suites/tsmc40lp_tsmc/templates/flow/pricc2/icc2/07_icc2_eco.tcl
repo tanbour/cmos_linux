@@ -8,8 +8,10 @@ set sh_continue_on_error true
 ## SETUP                                                             ##
 ##===================================================================##
 source {{env.PROJ_SHARE_CMN}}/icc2_common_scripts/icc2_procs.tcl
-source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+source {{env.PROJ_LIB}}/liblist/{{ver.LIB}}.tcl
 source {{cur.cur_flow_sum_dir}}/{{cur.sub_stage}}.op._job.tcl
+# include 00_icc2_setup.tcl
+{% include 'icc2/00_icc2_setup.tcl' %}
 
 set pre_stage "{{pre.sub_stage}}"
 set cur_stage "{{cur.sub_stage}}"
@@ -70,11 +72,15 @@ save_lib
 ## source eco cart from plugin directory                             ##
 ## change eco cart name or add more eco file if necessary.           ##
 ##===================================================================##
+{% if enable_manual_eco == "true" %} 
+puts "Alchip-info: manual eco is enabled, please start manual work and save block before exit icc2!"
+return 
+{% else %}
 source  -e -v  $blk_plugins_dir/eco_0.tcl
 source  -e -v  $blk_plugins_dir/eco_1.tcl
 source  -e -v  $blk_plugins_dir/eco_2.tcl
 source  -e -v  $blk_plugins_dir/eco_3.tcl
-
+{% endif %}
 ###==================================================================##
 ## save design                                                       ##
 ##===================================================================##

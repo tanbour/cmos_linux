@@ -59,10 +59,10 @@ class Stage(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="stage_owner")
     created_time = models.DateTimeField()
     status = models.CharField(max_length=20)
-    version = models.CharField(max_length=50)
+    version = models.CharField(max_length=200)
     data = JSONField(default=dict, blank=True)
     def __str__(self):
-        return f"{self.name}__{self.flow}"
+        return f"{self.name}"
     class Meta:
         ordering = ["-created_time"]
 
@@ -70,8 +70,8 @@ class Signoff(models.Model):
     """signoff static info models"""
     name = models.CharField(max_length=200)
     block = models.ForeignKey(Block, on_delete=models.CASCADE, related_name="signoff_block")
-    l_flow = models.ForeignKey(Flow, on_delete=models.CASCADE, related_name="signoff_l_flow")
-    l_stage = models.ForeignKey(Stage, on_delete=models.CASCADE, related_name="signoff_l_stage")
+    l_flow = models.ForeignKey(Flow, on_delete=models.CASCADE, related_name="signoff_l_flow", blank=True, null=True)
+    l_stage = models.ForeignKey(Stage, on_delete=models.CASCADE, related_name="signoff_l_stage", blank=True, null=True)
     l_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="signoff_l_user")
     updated_time = models.DateTimeField(auto_now=True)
     data = JSONField(default=dict, blank=True)

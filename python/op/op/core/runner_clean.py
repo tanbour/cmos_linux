@@ -21,13 +21,6 @@ class CleanProc(runner_flow.FlowProc):
         self.data_types = ('data', 'log', 'rpt', 'scripts', 'sum')
         self.excludes_lst = ['*.pass', '*.sum']
 
-    def list_clean_flow(self):
-        """to list all current block available flows"""
-        lf_dic = {}
-        for sec_k in self.cfg_dic.get("flow", {}):
-            lf_dic[sec_k] = runner_flow.exp_stages([], self.cfg_dic["flow"], sec_k)
-        return lf_dic
-
     def get_multi_inst_lst(self, flow_dic):
         """getting multi_inst_lst by reading config file"""
         flow_name = flow_dic.get('flow', '*')
@@ -38,13 +31,13 @@ class CleanProc(runner_flow.FlowProc):
             self.dir_cfg_dic.get("flow", {}).get(flow_name, {}).get(stage_name, {}),
             sub_stage_name, "_multi_inst"))
 
-    def get_clean_candidate(self, flow_dic, data_type):
+    def get_clean_candidate(self, flow_dic, ver_dic, data_type):
         """getting flow names to be clean candidate"""
         flow_name = flow_dic.get('flow', '*')
         stage_name = flow_dic.get('stage', '*')
         sub_stage_name = flow_dic.get('sub_stage', '*')
         inst_name = flow_dic.get('inst', {})
-        flow_ver = self.ver_dic.get(flow_name, {}).get('rtl_netlist', {})
+        flow_ver = ver_dic.get('rtl_netlist', {})
         # search candidate files
         base_dir = os.path.join(self.ced['BLK_RUN'], flow_ver, flow_name, data_type, stage_name)
         if inst_name:
@@ -75,15 +68,15 @@ class CleanProc(runner_flow.FlowProc):
         accum_size = 0
         if os.path.islink(path):
             if not dry_run:
-                LOG.info(f':: removing symlink {path}')
+                LOG.info(':: removing symlink %s', path)
             self.remove_path_aux(path, dry_run)
         elif os.path.isfile(path):
             if not dry_run:
-                LOG.info(f':: removing file {path}')
+                LOG.info(':: removing file %s', path)
             accum_size += self.remove_path_aux(path, dry_run)
         elif os.path.isdir(path):
             if not dry_run:
-                LOG.info(f':: removing dir {path}')
+                LOG.info(':: removing dir %s', path)
             for root, dirs, files in os.walk(path, topdown=False):
                 for name in files:
                     accum_size += self.remove_path_aux(os.path.join(root, name), dry_run)
@@ -112,7 +105,9 @@ class CleanProc(runner_flow.FlowProc):
         if clean_flow_lst:
             LOG.info("removing specified flows of block")
             dry_run = False
-            lf_dic = {}
+            lf_lst_dic = {}
+            ver_dic_dic = {}
+            err_lst_dic = {}
             for clean_flow in clean_flow_lst:
                 flow_tmp = clean_flow.split(':')
                 if len(flow_tmp) == 1 or len(flow_tmp) == 2:
@@ -125,16 +120,24 @@ class CleanProc(runner_flow.FlowProc):
                     flow_dic = {'flow':flow_tmp[0], 'stage':flow_tmp[2], 'sub_stage':flow_tmp[3],
                                 'inst':[flow_tmp[4],]}
                 else:
-                    LOG.error(f'invalid clean_flow name: {clean_flow}')
+                    LOG.error('invalid clean_flow name: %s', clean_flow)
                     raise SystemExit()
-                lf_lst = lf_dic.get(flow_tmp[0], [])
+                lf_lst = lf_lst_dic.get(flow_tmp[0], [])
                 lf_lst.append(flow_dic)
-                lf_dic[flow_tmp[0]] = lf_lst
+                lf_lst_dic[flow_tmp[0]] = lf_lst
+                _, ver_dic_dic[flow_tmp[0]], err_lst_dic[flow_tmp[0]] = self.exp_stages_misc(
+                    [], {}, [], self.cfg_dic.get("flow", {}), flow_tmp[0])
         else:
             LOG.info("current available flows of block")
             dry_run = True
-            lf_dic = self.list_clean_flow()
-        for _, lf_lst in lf_dic.items():
+            lf_lst_dic, ver_dic_dic, err_lst_dic = self.check_flow_config()
+        for l_flow_name, lf_lst in lf_lst_dic.items():
+            ver_dic = ver_dic_dic.get(l_flow_name, {})
+            err_lst = err_lst_dic.get(l_flow_name, [])
+            if err_lst:
+                LOG.error("flow %s has the following errors in flow.cfg", l_flow_name)
+                pcom.pp_list(err_lst)
+                raise SystemExit()
             for flow_dic in lf_lst:
                 flow_name = flow_dic.get('flow', '*')
                 stage_name = flow_dic.get('stage', '*')
@@ -148,34 +151,35 @@ class CleanProc(runner_flow.FlowProc):
                         flow_dic['inst'] = inst
                         files_lst = []
                         for data_type in self.data_types:
-                            files_lst.extend(self.get_clean_candidate(flow_dic, data_type))
+                            files_lst.extend(self.get_clean_candidate(flow_dic, ver_dic, data_type))
                         if files_lst:
                             clean_size = self.clean_files(files_lst, dry_run)
-                            LOG.info(f'- %s\t(Size: %.1f MiB)',
-                                     f'{flow_name}::{stage_name}:{sub_stage_name}:{inst}',
-                                     clean_size)
+                            LOG.info(
+                                '- %s::%s:%s:%s\t(Size: %.1f MiB)',
+                                flow_name, stage_name, sub_stage_name, inst, clean_size)
                         else:
-                            LOG.info(f'- %s\t(No data)',
-                                     f'{flow_name}::{stage_name}:{sub_stage_name}:{inst}')
+                            LOG.info(
+                                '- %s::%s:%s:%s\t(No data)',
+                                flow_name, stage_name, sub_stage_name, inst)
                 else:
                     files_lst = []
                     for data_type in self.data_types:
-                        files_lst.extend(self.get_clean_candidate(flow_dic, data_type))
+                        files_lst.extend(self.get_clean_candidate(flow_dic, ver_dic, data_type))
                     if files_lst:
                         clean_size = self.clean_files(files_lst, dry_run)
-                        LOG.info(f'- %s\t(Size: %.1f MiB)',
-                                 f'{flow_name}::{stage_name}:{sub_stage_name}', clean_size)
+                        LOG.info(
+                            '- %s::%s:%s\t(Size: %.1f MiB)',
+                            flow_name, stage_name, sub_stage_name, clean_size)
                     else:
-                        LOG.info(f'- %s\t(No data)',
-                                 f'{flow_name}::{stage_name}:{sub_stage_name}')
+                        LOG.info(
+                            '- %s::%s:%s\t(No data)',
+                            flow_name, stage_name, sub_stage_name)
 
 
 def run_clean(args):
     """to run clean sub cmd"""
 
     c_p = CleanProc()
-    c_p.lib_flg = False
-    c_p.proc_ver()
 
     if args.excludes_lst:
         c_p.excludes_lst.extend(args.excludes_lst)

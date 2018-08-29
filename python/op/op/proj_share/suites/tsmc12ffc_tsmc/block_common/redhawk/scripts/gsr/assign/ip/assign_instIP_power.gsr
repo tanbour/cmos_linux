@@ -1,0 +1,27 @@
+#INSTANCE_POWER_FILES /alchip/home/cheiikx/.linux/env/EDA/redhawk/MarsIIE/tt_0p8v/scripts/gsr/assign/ip/lmu_we_inst_power_remove_VDDQ.list
+BLOCK_POWER_FOR_SCALING {
+   CELLTYPE mr74116 1mW VDDA
+   CELLTYPE mr74116 1mW VDD
+   CELLTYPE PLLTS16GLLAFRAC1 12mW VDDHV
+   CELLTYPE PLLTS16GLLAFRAC1 2mW VDDPOST
+   CELLTYPE PLLTS16GLLAFRAC1 4mW VDDREF
+   CELLTYPE dwc_ddrphyacx4_top_ns 132mW VDDQ
+   CELLTYPE dwc_ddrphyacx4_top_ns 46mW VDD
+   CELLTYPE dwc_ddrphydbyte_top_ew 198mW VDDQ
+   CELLTYPE dwc_ddrphydbyte_top_ew 69mW VDD
+   CELLTYPE dwc_ddrphydbyte_top_ns 198mW VDDQ
+   CELLTYPE dwc_ddrphydbyte_top_ns 69mW VDD
+   CELLTYPE dwc_ddrphymaster_top 264mw VDDQ
+   CELLTYPE dwc_ddrphymaster_top 92mw VDD
+   CELLTYPE dwc_ddrphymaster_top 100mw VAA
+   CELLTYPE dwc_ddrphyacx4_top_ew 132mw VDDQ
+   CELLTYPE dwc_ddrphyacx4_top_ew 46mw VDD
+   CELLTYPE TEF16FPLLESD_P_H 2mW VQPS 
+   CELLTYPE TEF16FPLLESD_P_V 2mW VQPS
+   CELLTYPE TEF16FPGL256X32HD18_PHRM 2mW VQPS
+   CELLTYPE TEF16FPGL256X32HD18_PHRM 2mW VDD
+   CELLTYPE PMC_MINI_16PLVT 2mW VDD
+   CELLTYPE PMC_MINI_16PRVT 2mW VDD
+   CELLTYPE PMC_MINI_16PULVT 2mW VDD
+   CELLTYPE PULSE_LATCH_TOP 2mW VDD
+}

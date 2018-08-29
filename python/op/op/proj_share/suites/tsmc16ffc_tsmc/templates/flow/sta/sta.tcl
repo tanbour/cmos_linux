@@ -42,7 +42,11 @@ set PATH_TYPE                       "{{local.PATH_TYPE}}"
 set NWORST_NUM                      "{{local.NWORST_NUM}}"
 set PBA_PATH_NUM                    "{{local.PBA_PATH_NUM}}"
 set MAX_PATH_NUM                    "{{local.MAX_PATH_NUM}}"
-set SAVE_SESSION                    "{{local.SAVE_SESSION}}"
+{%- if local.SAVE_SESSION_LIST is string %}
+set SAVE_SESSION                    "{{local.SAVE_SESSION_LIST}}"
+{%- elif local.SAVE_SESSION_LIST is sequence %}
+set SAVE_SESSION                     "{{local.SAVE_SESSION_LIST|join (' ')}}";# *fill scenario table 
+{%- endif %}
 set GEN_SDF                         "{{local.GEN_SDF}}"
 set GEN_ETM                         "{{local.GEN_ETM}}"
 set GEN_ILM                         "{{local.GEN_ILM}}"
@@ -55,12 +59,12 @@ set ENABLE_POCV                     "{{local.ENABLE_POCV}}"
 ###===================================================================###
 ###  source liblist                                                   ###
 ###===================================================================###
-source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+source {{env.PROJ_LIB}}/liblist/{{ver.LIB}}.tcl
 sh mkdir -p {{cur.cur_flow_data_dir}}/{{local._multi_inst}}
 sh ln -sf $VNET {{cur.cur_flow_data_dir}}/{{local._multi_inst}}/${cur_stage}.{{env.BLK_NAME}}.pt.v.gz
 sh ln -sf $SPEF {{cur.cur_flow_data_dir}}/{{local._multi_inst}}/${cur_stage}.{{env.BLK_NAME}}.${RC_CORNER}.spef.gz
 sh ln -sf {{pre.flow_data_dir}}/{{pre.stage}}/${pre_stage}.{{env.BLK_NAME}}.def.gz {{cur.cur_flow_data_dir}}/{{local._multi_inst}}/${cur_stage}.{{env.BLK_NAME}}.def.gz
-
+{% include 'pt/tcl/custom_liblist.tcl' %}
 
 ###===================================================================###
 ###  run PT flow                                                      ###

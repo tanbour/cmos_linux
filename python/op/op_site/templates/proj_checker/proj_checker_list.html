@@ -6,7 +6,7 @@
     {% verbatim %}
     <div class="layout-breadcrumb">
       <breadcrumb>
-        <breadcrumb-item><router-link title="go to project list" :to="{name: 'proj_checker_list'}">projects</router-link></breadcrumb-item>
+        <breadcrumb-item>projects</breadcrumb-item>
       </breadcrumb>
     </div>
     {% endverbatim %}
@@ -14,17 +14,17 @@
       <div class="layout-content-main" style="background-image:url({% static 'images/background_1200x600.jpg' %})">
         <i-form :label-width="200">
           <form-item label="Input Project to be ADDED">
-            <i-input v-model="add_proj_name" placeholder="Enter project name" style="width:200px"></i-input>
+            <i-input v-model="add_proj_name" placeholder="Enter project name" class="search-box"></i-input>
             <i-button v-if="add_proj_name" type="success" @click="action_add(add_proj_name)">Add</i-button>
           </form-item>
           <form-item label="Select Project to be UPDATED">
-            <i-select v-model="up_proj_index" clearable style="width:200px">
+            <i-select v-model="up_proj_index" clearable class="search-box">
               {% verbatim %}
               <i-option v-for="(item, index) in rsp_data" :value="index" :key="index">{{ item.name }}</i-option>
               {% endverbatim %}
             </i-select>
-            <i-input v-if="up_proj_index in rsp_data" v-model="rsp_data[up_proj_index].data.owner" placeholder="Enter new owner name" style="width:200px"></i-input>
-            <i-select v-if="up_proj_index in rsp_data" v-model="rsp_data[up_proj_index].data.status" clearable placeholder="Select status" style="width:200px">
+            <i-input v-if="up_proj_index in rsp_data" v-model="rsp_data[up_proj_index].data.owner" placeholder="Enter new owner name" class="search-box"></i-input>
+            <i-select v-if="up_proj_index in rsp_data" v-model="rsp_data[up_proj_index].data.status" clearable placeholder="Select status" class="search-box">
               {% verbatim %}
               <i-option v-for="(item, index) in status_ary" :value="item" :key="index">{{ item }}</i-option>
               {% endverbatim %}
@@ -33,7 +33,7 @@
             <i-button v-else-if="up_proj_index in rsp_data" type="success" @click="action_up(up_proj_index)">Update</i-button>
           </form-item>
           <form-item label="Select Project to be DELETED">
-            <i-select v-model="del_proj_index" clearable style="width:200px">
+            <i-select v-model="del_proj_index" clearable class="search-box">
               {% verbatim %}
               <i-option v-for="(item, index) in rsp_data" :value="index" :key="index">{{ item.name }}</i-option>
               {% endverbatim %}
@@ -44,24 +44,24 @@
             <i-button v-else-if="del_proj_index in rsp_data" type="error" @click="action_del(del_proj_index)">Delete</i-button>
           </form-item>
         </i-form>
-        <i-input v-model="searchQuery" placeholder="Search" clearable style="width:200px"></i-input>
+        <i-input v-model="searchQuery" placeholder="Search" clearable class="search-box"></i-input>
         <br>
         <i-table border stripe show-header :columns="table_col" :data="table_data" size="small" ref="table"></i-table>
-        <div style="margin:10px; overflow:hidden">
-          <div style="float:right">
+        <div class="table-page">
+          <div>
             <Page :total="dataCount" :page-size="pageSize" show-total @on-change="changePage"></Page>
           </div>
         </div>
       </div>
     </div>
-    <!-- <div style="height:300px"></div> -->
   </div>
 </template>
 
 <script>
  const ProjCheckerList = {
    template: "#proj_checker_list",
-   beforeRouteUpdate (to, from, next) {
+   mixins: [mixin],
+   beforeRouteUpdate: (to, from, next) => {
      this.init()
      next()
    },
@@ -113,9 +113,11 @@
    },
    methods: {
      init: function() {
+       this.$Loading.start()
        axios({
          method: "get", url: this.url.list
        }).then((response) => {
+         this.$Loading.finish()
          this.rsp_data = response.data
          this.rsp_data.sort(function (a, b) {
            return (a.name < b.name) ? -1 : (a.name > b.name) ? 1 : 0
@@ -123,6 +125,7 @@
          this.procDataAry()
          this.procColAry()
        }).catch((error) => {
+         this.$Loading.error()
          console.log(error)
        })
      },
@@ -169,7 +172,7 @@
              const row = params.row
              const color = row.status === "on-going" ? "yellow" : row.status === "completed" ? "green" : (row.status === undefined || row.status === "") ? "blue" : "red"
              const text = row.status
-             return h("Tag", {
+             return h("tag", {
                props: {
                  type: "dot",
                  color: color
@@ -285,7 +288,8 @@
        this.$Modal.confirm({
          title: "Delete Confirm",
          content: content,
-         loading: true,
+         scrollable: true,
+         closable: true,
          onOk: () => {
            this.confirm_del(this.rsp_data[proj_index].id)
            this.$Modal.remove()
@@ -297,6 +301,7 @@
    /* created: function () {
     * },*/
    mounted: function () {
+     this.checkCookie()
      this.init()
    }
  }

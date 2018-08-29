@@ -4,6 +4,7 @@
 this is {{i}}
 {%- endfor %}
 {{liblist.o}}
+{{liblist.a}}
 
 This is place
 

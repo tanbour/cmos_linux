@@ -15,6 +15,7 @@ set preroute_buffer_area_effort                     "{{local.preroute_buffer_are
 set preroute_route_aware_estimation                 "{{local.preroute_route_aware_estimation}}"
 set preroute_placement_detect_channel               "{{local.preroute_placement_detect_channel}}"
 set preroute_placement_detect_detour                "{{local.preroute_placement_detect_detour}}"
+set preroute_cong_restruct_effort                   "{{local.preroute_cong_restruct_effort}}"
 #  - when the value is 0 (tool default) and
 #	- when place.coarse.auto_density_control is true, tool will auto determine an appropriate value;
 #	- when place.coarse.auto_density_control is false, tool will try to spread cells evenly
@@ -154,7 +155,7 @@ puts "RM-info: Setting place.coarse.pin_density_aware to $preroute_placement_pin
 set_app_option -name place.coarse.pin_density_aware -value $preroute_placement_pin_density_aware
 
 puts "RM-info: Setting place.coarse.cong_restruct_effort to ultra (tool default medium)"
-set_app_option -name place.coarse.cong_restruct_effort -value ultra
+set_app_option -name place.coarse.cong_restruct_effort -value $preroute_cong_restruct_effort 
 
 ## Lib cell usage restrictions (set_lib_cell_purpose)-------------------
 source $tcl_lib_cell_purpose_file
@@ -208,10 +209,10 @@ source $tcl_non_clock_ndr_rules_file
 set_app_options -name route.global.timing_driven -value true
 
 #  New PDC engine
-set_app_options -name place.legalize.enable_advanced_prerouted_net_check -value true ;# tool default false
-# resove H240.CM0B.W.4
-set_app_options -name place.legalize.enable_vertical_abutment_rules -value true ;# tool default false
-set_app_options -name place.rules.vertical_abutment_mode -value user ;# tool default user
+#set_app_options -name place.legalize.enable_advanced_prerouted_net_check -value true ;# tool default false
+## resove H240.CM0B.W.4
+#set_app_options -name place.legalize.enable_vertical_abutment_rules -value true ;# tool default false
+#set_app_options -name place.rules.vertical_abutment_mode -value user ;# tool default user
 
 {#  # Vertical abutment rules (optional as it is library specific)
     #	set_app_options -name place.legalize.enable_vertical_abutment_rules -value true ;# tool default false
@@ -275,13 +276,25 @@ redirect -file {{cur.cur_flow_rpt_dir}}/settings.common.cts.report_routing_rules
 redirect -file {{cur.cur_flow_rpt_dir}}/settings.common.cts.report_clock_routing_rules.rpt {report_clock_routing_rules}
 
 # vt control----------------------------------------------------------------------
-
+{% if local.hvt_lib_cells %}
+set_attribute -quiet [get_lib_cells -quiet {{local.hvt_lib_cells}}] threshold_voltage_group HVT
+set_threshold_voltage_group_type -type high_vt HVT 
+{% endif %}
+{% if local.svt_lib_cells %}
 set_attribute -quiet [get_lib_cells -quiet {{local.svt_lib_cells}}] threshold_voltage_group SVT
+set_threshold_voltage_group_type -type normal_vt SVT 
+{% endif %}
+{% if local.lvt_lib_cells %}
 set_attribute -quiet [get_lib_cells -quiet {{local.lvt_lib_cells}}] threshold_voltage_group LVT
-set_attribute -quiet [get_lib_cells -quiet {{local.ulvt_lib_cells}}] threshold_voltage_group ULVT
-
-set_threshold_voltage_group_type -type low_vt ULVT 
-set_threshold_voltage_group_type -type normal_vt LVT 
-set_threshold_voltage_group_type -type high_vt SVT 
+set_threshold_voltage_group_type -type low_vt LVT 
+{% endif %}
 
 set_max_lvth_percentage 90
+
+#simon added for icc2 updated features
+set_app_options -list {place.coarse.cong_restruct_strategy embed}
+set_app_options -list {place.coarse.cong_restruct_effort high}
+set_app_options -list {place.coarse.wide_cell_use_model true}
+set_app_options -list {place.coarse.congestion_layer_aware true}
+set_app_options -list {place.coarse.auto_timing_control true}
+set_app_options -list {place_opt.initial_place.buffering_aware true}

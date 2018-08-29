@@ -7,8 +7,11 @@ set sh_continue_on_error true
 ##===================================================================##
 ## SETUP                                                             ##
 ##===================================================================##
-source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+source {{env.PROJ_SHARE_CMN}}/icc2_common_scripts/icc2_procs.tcl
+source {{env.PROJ_LIB}}/liblist/{{ver.LIB}}.tcl
 source {{cur.cur_flow_sum_dir}}/{{cur.sub_stage}}.op._job.tcl
+# include 00_icc2_setup.tcl
+{% include 'icc2/00_icc2_setup.tcl' %}
 
 set pre_stage "{{pre.sub_stage}}"
 set cur_stage "{{cur.sub_stage}}"
@@ -16,55 +19,48 @@ set cur_stage "{{cur.sub_stage}}"
 set pre_stage [lindex [split $pre_stage .] 0]
 set cur_stage [lindex [split $cur_stage .] 0]
 
-set blk_name                                          "{{env.BLK_NAME}}"
-set blk_rpt_dir                                       "{{cur.cur_flow_rpt_dir}}"
-set blk_utils_dir                                     "{{env.PROJ_UTILS}}"
-set pre_flow_data_dir                                 "{{pre.flow_data_dir}}/{{pre.stage}}"
-set cur_design_library                                "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
-set icc2_cpu_number                                   "[lindex "${_job_cpu_number}" end]"
+set blk_name           "{{env.BLK_NAME}}"
+set blk_rpt_dir        "{{cur.cur_flow_rpt_dir}}"
+set blk_utils_dir      "{{env.PROJ_UTILS}}"
+set blk_proj_cmn       "{{env.PROJ_SHARE_CMN}}"
+set pre_flow_data_dir  "{{pre.flow_data_dir}}/{{pre.stage}}"
+set cur_design_library "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
+set icc2_cpu_number    "[lindex "${_job_cpu_number}" end]"
 set_host_option -max_cores $icc2_cpu_number
 
-set pre_design_library                                "$pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.nlib"
-set cur_design_library                                "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
+set pre_design_library  "$pre_flow_data_dir/$pre_stage.{{env.BLK_NAME}}.nlib"
+set cur_design_library  "{{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.nlib"
 
-set ocv_mode                                          "{{local.ocv_mode}}" 
-set optimization_flow                                 "{{local.optimization_flow}}"
-{%- if local.route_opt_active_scenario_list  is string %}
-set route_opt_active_scenario_list                    "{{local.route_opt_active_scenario_list}}"
+set ocv_mode                                               "{{local.ocv_mode}}" 
+set design_style                                           "{{local.design_style}}"
+set lib_cell_height                                         "{{local.lib_cell_height}}"
+{%- if local.route_opt_active_scenario_list is string %}
+set  route_opt_active_scenario_list                        "{{local.route_opt_active_scenario_list}}"
 {%- elif local.route_opt_active_scenario_list is sequence %}
-set route_opt_active_scenario_list                    "{{local.route_opt_active_scenario_list|join (' ')}}"
+set route_opt_active_scenario_list                         "{{local.route_opt_active_scenario_list|join (' ')}}"
 {%- endif %}
 
-set route_opt_enable_ccd                              "{{local.route_opt_enable_ccd}}"
-set tcl_user_icc2_format_redundant_via_mapping_file   "{{local.tcl_user_icc2_format_redundant_via_mapping_file}}"
-set tcl_user_icc_format_redundant_via_mapping_file    "{{local.tcl_user_icc_format_redundant_via_mapping_file}}"
-set route_opt_antenna_fixing                          "{{local.route_opt_antenna_fixing}}"
-set tcl_antenna_rule_file                             "{{local.tcl_antenna_rule_file}}"
-set icc2_route_opt_optimize_double_via                "{{local.icc2_route_opt_optimize_double_via}}"
-set concurrent_redundant_via_mode_reserve_space       "{{local.concurrent_redundant_via_mode_reserve_space}}"
-set si_enable_analysis                                "{{local.si_enable_analysis}}"
-set route_common_threshold_noise_ratio                "{{local.route_common_threshold_noise_ratio}}"
-set route_opt_use_usr_write_data_tcl                  "{{local.route_opt_use_usr_write_data_tcl}}"       
-set route_opt_write_data                              "{{local.route_opt_write_data}}"
-set route_opt_create_abstract                         "{{local.route_opt_create_abstract}}"
-set route_opt_name_prefix                             "{{local.route_opt_name_prefix}}"
-set route_opt_write_gds                               "{{local.route_opt_write_gds}}"
-set enable_route_opt_reporting                        "{{local.enable_route_opt_reporting}}"
-set use_usr_common_scripts_connect_pg_net_tcl         "{{local.use_usr_common_scripts_connect_pg_net_tcl}}"
-set write_def_convert_icc2_site_to_lef_site_name_list "{{local.write_def_convert_icc2_site_to_lef_site_name_list}}"
-set icc_icc2_gds_layer_mapping_file                   "{{local.icc_icc2_gds_layer_mapping_file}}"
+set route_opt_ccd                                          "{{local.route_opt_ccd}}"
+set redundant_via_insertion                                "{{local.redundant_via_insertion}}"
+set route_auto_antenna_fixing                              "{{local.route_auto_antenna_fixing}}"
+set tcl_antenna_rule_file                                  "{{local.tcl_antenna_rule_file}}"
+set route_opt_leakage_power_optimization                   "{{local.route_opt_leakage_power_optimization}}"
+set route_opt_power_recovery                               "{{local.route_opt_power_recovery}}"
+set route_auto_create_shields                              "{{local.route_auto_create_shields}}"
+set route_opt_reshield                                     "{{local.route_opt_reshield}}"
+set tcl_user_icc2_format_redundant_via_mapping_file        "{{local.tcl_user_icc2_format_redundant_via_mapping_file}}"
+set tcl_user_icc_format_redundant_via_mapping_file         "{{local.tcl_user_icc_format_redundant_via_mapping_file}}"
+set route_common_threshold_noise_ratio                     "{{local.route_common_threshold_noise_ratio}}"
+set route_opt_use_usr_write_data_tcl                       "{{local.route_opt_use_usr_write_data_tcl}}"       
+set route_opt_write_data                                   "{{local.route_opt_write_data}}"
+set route_opt_create_abstract                              "{{local.route_opt_create_abstract}}"
+set route_opt_name_prefix                                  "{{local.route_opt_name_prefix}}"
+set route_opt_write_gds                                    "{{local.route_opt_write_gds}}"
+set enable_route_opt_reporting                             "{{local.enable_route_opt_reporting}}"
+set use_usr_common_scripts_connect_pg_net_tcl              "{{local.use_usr_common_scripts_connect_pg_net_tcl}}"
+set write_def_convert_icc2_site_to_lef_site_name_list      "{{local.write_def_convert_icc2_site_to_lef_site_name_list}}"
+set icc_icc2_gds_layer_mapping_file                        "${ICC_ICC2_GDS_LAYER_MAPPING_FILE}"
 
-{%- if local.tcl_placement_spacing_label_rule_file %}
-set TCL_PLACEMENT_SPACING_LABEL_RULE_FILE             "{{local.tcl_placement_spacing_label_rule_file}}"
-{%- else %}
-set TCL_PLACEMENT_SPACING_LABEL_RULE_FILE             "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/placement_spacing_rule.tcl"
-{%- endif %}
-{%- if local.tcl_icc2_cts_ndr_rule_file %}
-set TCL_ICC2_CTS_NDR_RULE_FILE                        "{{local.tcl_icc2_cts_ndr_rule_file}}"
-{%- else %}
-set TCL_ICC2_CTS_NDR_RULE_FILE                        "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/icc2_cts_ndr_rule.tcl"
-{%- endif %}
-{% include 'icc2/00_icc2_setup.tcl' %}
 ##===================================================================##
 ## back up database                                                  ##
 ## copy block and lib from previous stage                            ## 
@@ -88,6 +84,18 @@ link_block
 save_lib
 
 ###==================================================================##
+## source mcmm file setup timing constrains                          ##
+##===================================================================##
+{% if local.route_opt_load_mcmm == "true" %}
+{% include  'icc2/mcmm.tcl' %}
+foreach_in_collection scenario [all_scenarios] {
+	current_scenario $scenario
+	synthesize_clock_trees -propagate_only
+	compute_clock_latency
+}
+{%- endif %}
+
+###==================================================================##
 ## Timing constraints                                                ##
 ##===================================================================##
 {% if local.route_opt_active_scenario_list != "" %} 
@@ -96,24 +104,25 @@ set_scenario_status -active true $route_opt_active_scenario_list
 {%- else %}
 set_scenario_status -active true [all_scenarios]
 {% endif %}  
+{%- if local.route_opt_leakage_power_optimization == "true" %}
+set_scenario_status -leakage_power true  [get_scenario $route_opt_active_scenario_list]
+{%- endif %}
 
-###==================================================================##
-## Additional timer related setups :postects uncertainty             ##
-##===================================================================##
+foreach_in_collection scn [all_scenarios] {
+    current_scenario $scn
 {%- if local.setup_uncertainty %}
-set_clock_uncertainty {{local.setup_uncertainty}} -setup [all_clocks ] -scenarios [all_scenarios ]
+    set_clock_uncertainty {{local.setup_uncertainty}} -setup [all_clocks ] -scenarios $scn
 {%-  endif %}
 {%- if local.hold_uncertainty %}
-set_clock_uncertainty {{local.hold_uncertainty}} -hold  [all_clocks ] -scenarios [all_scenarios ]
+    set_clock_uncertainty {{local.hold_uncertainty}} -hold  [all_clocks ] -scenarios $scn
 {%-  endif %}
-
-
 {%- if local.data_transition %}
-set_max_transition -data_path {{local.data_transition}} [all_clocks] -scenarios [all_scenarios]
+    set_max_transition -data_path {{local.data_transition}} [all_clocks] -scenarios $scn
 {%- endif %}
 {%- if local.clock_transition %}
-set_max_transition -clock_path {{local.clock_transition}} [all_clocks] -scenarios [all_scenarios]
+    set_max_transition -clock_path {{local.clock_transition}} [all_clocks] -scenarios $scn
 {%- endif %}
+}
 
 ###==================================================================##
 ## route opt settings                                                ##
@@ -127,15 +136,15 @@ puts "Alchip-info: settings icc2_settings/icc2_common.tcl"
 puts "Alchip-info: settings icc2_settings/icc2_route_opt.tcl "
 {% include  'icc2/icc2_settings/icc2_route_opt.tcl' %} 
 
-puts "Alchip-info: Sourcing  tsmc16ffc settings"
-{% include 'icc2/tsmc16ffc_settings/tsmc16ffc_settings.tcl'%} 
+puts "Alchip-info: tsmc16ffc_settings/tsmc16ffc_settings.tcl "
+{% include  'icc2/tsmc16ffc_settings/tsmc16ffc_settings.tcl' %} 
 
 puts "Alchip-info: Sourcing  set_lib_cell_purpose.tcl"
 source -e -v "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/set_lib_cell_purpose.tcl"
 
-if {$route_opt_name_prefix != ""} {
-	set_app_options -name opt.common.user_instance_name_prefix -value $route_opt_name_prefix
-}
+{%- if local.route_opt_name_prefix %}
+set_app_options -name opt.common.user_instance_name_prefix -value $route_opt_name_prefix
+{%- endif %}
 
 ###==================================================================##
 ## Enable AOCV or POCV                                               ##
@@ -145,6 +154,9 @@ if {$route_opt_name_prefix != ""} {
 set_app_options -name time.aocvm_enable_analysis -value true ;# default false
 {%- elif local.ocv_mode == "pocv" %} 
 set_app_options -name  time.pocvm_enable_analysis -value true ; ;# default false
+set_app_options -list {time.enable_slew_variation true}
+set_app_options -list {time.ocvm_enable_distance_analysis true}
+reset_app_options time.aocvm_enable_analysis 
 {%- else %}
 set_app_options -name time.aocvm_enable_analysis -value false ;# default false
 set_app_options -name  time.pocvm_enable_analysis -value false ; ;# default false
@@ -163,33 +175,26 @@ redirect -tee -file $blk_rpt_dir/$cur_stage.app_options.start.rpt {report_app_op
 ##===================================================================##
 compute_clock_latency
 
-{#- source usr route opt command file from plugins #}
+{%- if local.design_style == "top" %}
+set_timing_paths_disabled_blocks  -all_sub_blocks
+{%- endif %}
+
 {%- if local.use_usr_route_opt_cmd_tcl == "true" %}
+# source usr route opt command file from plugins-------------------------
 source {{cur.config_plugins_dir}}/icc2_scripts/06_route_opt/01_usr_route_opt_cmd.tcl
 save_block
 {%- else %}
-{%- if local.optimization_flow == "ttr" %}
-## OPTIMIZATION_FLOW: TTR------------------------------------------------
-
-puts "Alchip-info: Running route_opt"
-route_opt
-puts "Alchip-info: save first route_opt block"
-save_block
-{%- else %}
-## OPTIMIZATION_FLOW: QoR|HPLP|ARLP|HC-----------------------------------
-
 puts "Alchip-info: Running first route_opt"
 route_opt
 puts "Alchip-info: save first route_opt block"
 save_block
 
-{%- if local.optimization_flow == "hplp" or  local.optimization_flow == "arlp" %} 
-		# [FLOW] hplp and arlp : Additional route_opt is performed
-		puts "Alchip-info: Running second route_opt"
-		route_opt
-        puts "Alchip-info: save second route_opt block"
-        save_block
+puts "Alchip-info: Running second route_opt"
+route_opt
+puts "Alchip-info: save second route_opt block"
+save_block
 {%- endif %}
+
 ##  CCD is disabled for the last route_opt---------------------------------
 if {[get_app_option_value -name route_opt.flow.enable_ccd]} {
 	set_app_options -name route_opt.flow.enable_ccd -value false
@@ -198,18 +203,18 @@ if {[get_app_option_value -name route_opt.flow.enable_ccd]} {
 if {[get_app_option_value -name route_opt.flow.enable_cto]} {
 	set_app_options -name route_opt.flow.enable_cto -value false
 }
-## Leakage power optimization is disabled for the last route_opt-----------
-if {[get_app_option_value -name route_opt.flow.enable_power]} {
-	set_app_options -name route_opt.flow.enable_power -value false
+## power recovery from clock cells and registers during route_opt is disabled for the last route_opt
+if {[get_app_option_value -name route_opt.flow.enable_clock_power_recovery] != "none"} {
+	set_app_options -name route_opt.flow.enable_clock_power_recovery -value none
 }
+## Third route_opt, Size-only is recommended for the last route_opt in the flow
+## Size-only is recommended for the last route_opt in the flow
 
 set_app_options -name route_opt.flow.size_only_mode -value equal_or_smaller
-puts "Alchip-info: Running last route_opt"
+puts "RM-info: Running third route_opt"
 route_opt
 puts "Alchip-info: save size_only mode route_opt block"
 save_block
-{%- endif %}
-{%- endif %}
 
 ###==================================================================##
 ## Redundant via insertion                                           ##
@@ -219,6 +224,14 @@ save_block
 
 {%- if local.tcl_user_icc2_format_redundant_via_mapping_file or local.tcl_user_icc_format_redundant_via_mapping_file %}
 add_redundant_vias
+{%- endif %}
+
+###==================================================================##
+## Reshield after route_opt                                          ##
+##===================================================================##
+
+{%- if local.route_auto_create_shields != "none" and local.route_opt_reshield == "after_route_opt" %}
+create_shields ;# without specifying -nets option, all nets with shielding rules will be shielded 
 {%- endif %}
 
 ###==================================================================##
@@ -242,11 +255,6 @@ add_redundant_vias
 #	report_qor -summary ;# generate report without adjusted timing after route_opt
 
 ###==================================================================##
-## post route opt customizations                                     ##
-##===================================================================##
-source {{cur.config_plugins_dir}}/icc2_scripts/06_route_opt/00_usr_post_route_opt.tcl
-
-###==================================================================##
 ## detail route fix short                                            ##
 ##===================================================================##
 
@@ -268,12 +276,17 @@ source {{cur.config_plugins_dir}}/icc2_scripts/06_route_opt/00_usr_post_route_op
 ## If there are remaining routing DRCs, you can use the following :
 #  route_detail -incremental true -initial_drc_from_input true
 
+###==================================================================##
+## post route opt customizations                                     ##
+##===================================================================##
+source {{cur.config_plugins_dir}}/icc2_scripts/06_route_opt/00_usr_post_route_opt.tcl
+
 ## Connect pg net------------------------------------------------------
 {%- if local.use_usr_common_scripts_connect_pg_net_tcl == "true" %}
 source {{env.PROJ_SHARE_CMN}}/icc2_common_scripts/connect_pg_net.tcl
 {%- else %}
 puts "Alchip-info: Running connect_pg_net command"
-connect_pg_net -automatic
+connect_pg_net
 {%- endif %}
 
 ## save design-----------------------------------------------------------
@@ -283,33 +296,53 @@ save_block -as {{env.BLK_NAME}}
 ###==================================================================##
 ## output data                                                       ##
 ##===================================================================##
-## Write SPEF
-{%- if local.write_spef_by_tool  == "true" %}
-{% include 'icc2/icc2_write_spef.tcl' %}
-{%- endif %}
-
 {%- if local.route_opt_use_usr_write_data_tcl == "true" %}
 source {{cur.config_plugins_dir}}/icc2_scripts/06_route_opt/08_usr_write_data.tcl
 {%- else %}
 {%- if local.route_opt_write_data == "true" %} 
+set    no_ref           [get_attribute [get_lib_cell -quiet */PFILLER*/frame] full_name]
+append no_ref " "       [get_attribute [get_lib_cell -quiet */PENDCAP_V/frame] full_name]
+append no_ref " "       [get_attribute [get_lib_cell -quiet */PENDCAP_H/frame] full_name]
+append no_ref " "       [get_attribute [get_lib_cell -quiet */PAD95APB_LF_BU] full_name]
+append no_ref " "       [get_attribute [get_lib_cell -quiet */PAD80APB_LF_BU] full_name]
+append no_ref " " [join [get_attribute [get_lib_cell -quiet */FILL*/frame] full_name]]
+append no_ref " " [join [get_attribute [get_lib_cell -quiet */BOUNDARY*/frame] full_name]]
+append no_ref " " [join [get_attribute [get_lib_cell -quiet */TAPCELL*/frame] full_name]]
 # write_verilog (no pg, and no physical only cells)
 write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations pg_objects end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells} -hierarchy all {{cur.cur_flow_data_dir}}/$cur_stage.{{env.BLK_NAME}}.ori.v
 ## write_verilog for LVS (with pg, and with physical only cells)
-write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations empty_modules} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.lvs.v
+write_verilog -compress gzip -include {empty_modules pad_cells all_physical_cells pg_netlist}  -force_no_reference $no_ref  {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.lvs.v
 ## write_verilog for Formality (with pg, no physical only cells, and no supply statements)
 write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells supply_statements} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.fm.v
 ## write_verilog for PT (no pg, no physical only cells but with diodes and DCAP for leakage power analysis)
 write_verilog -compress gzip -exclude {scalar_wire_declarations leaf_module_declarations pg_objects end_cap_cells well_tap_cells filler_cells pad_spacer_cells physical_only_cells cover_cells} -hierarchy all {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.pt.v
 
 {% if local.write_def_convert_icc2_site_to_lef_site_name_list != "" %} 
-write_def -include_tech_via_definitions -convert_sites { $write_def_convert_icc2_site_to_lef_site_name_list } -compress gzip {{cur.cur_flow_data_dir}}/.${cur_stage}{{env.BLK_NAME}}.def
+write_def -include_tech_via_definitions -version 5.8 -convert_sites { $write_def_convert_icc2_site_to_lef_site_name_list } -compress gzip {{cur.cur_flow_data_dir}}/.${cur_stage}{{env.BLK_NAME}}.def
 {%- else %}
-write_def -include_tech_via_definitions -compress gzip {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.def
-{%- endif %}
+write_def -include_tech_via_definitions -version 5.8 -compress gzip {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.def
 {%- endif %}
 
 {%- if local.route_opt_write_gds == "true" %}
+set_app_options -name  file.gds.contact_prefix -value ${blk_name}_via_
+create_cut_metals
+write_gds \
+          -compress \
+          -long_names \
+          -unit 2000 \
+          -fill include \
+          -hierarchy design_lib \
+          -keep_data_type \
+          -output_pin all \
+          -layer_map $icc_icc2_gds_layer_mapping_file \
+          -lib_cell_view frame \
+          -connect_below_cut_metal \
+          -write_default_layers {VIA1 VIA2} \
+          -layer_map_format icc_extended \
+           {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.gds
+
 write_gds -compress -fill include -hierarchy top -keep_data_type -layer_map $icc_icc2_gds_layer_mapping_file -output_pin all   -long_names -layer_map_format icc2 {{cur.cur_flow_data_dir}}/$cur_stage.$blk_name.gds
+{%- endif %}
 {%- endif %}
 {%- endif %}
 
@@ -322,7 +355,7 @@ exec touch {{cur.cur_flow_sum_dir}}/${cur_stage}.{{env.BLK_NAME}}.early_complete
 ## create abstract---------------------------------------------------------
 {%- if local.route_opt_create_abstract == "true" %}
 open_block {{env.BLK_NAME}} 
-create_abstract
+create_abstract -read_only
 create_frame
 save_lib
 {%- endif %}

@@ -6,36 +6,53 @@
     {% verbatim %}
     <div class="layout-breadcrumb">
       <breadcrumb>
-        <breadcrumb-item><router-link title="go to project list" :to="{name: 'proj_signoff_block_detail'}">projects</router-link></breadcrumb-item>
+        <breadcrumb-item v-if="'proj' in rsp_detail_data"><router-link title="go to project list" :to="{name: 'proj_signoff_proj_list'}">{{ rsp_detail_data.proj.name }}</router-link></breadcrumb-item>
+        <breadcrumb-item v-if="'proj' in rsp_detail_data && 'name' in rsp_detail_data"><router-link title="go to block list" :to="{name: 'proj_signoff_block_list', params: {p_id: rsp_detail_data.proj.id}}">{{ rsp_detail_data.name }}</router-link></breadcrumb-item>
+        <breadcrumb-item>signoff items</breadcrumb-item>
       </breadcrumb>
     </div>
     {% endverbatim %}
     <div class="layout-content">
       <div class="layout-content-main" style="background-image:url({% static 'images/background_1200x600.jpg' %})">
         <div>
-          <i-input v-model="searchQuery" placeholder="Search" clearable style="width:200px"></i-input>
+          <i-select v-model="signoff_type_sel_ary" multiple placeholder="Select Signoff Sheet Type (Default: All)" class="search-box-b">
+            {% verbatim %}
+            <i-option v-for="(item, index) in signoff_type_ary" :value="item" :key="index">{{ item }}</i-option>
+            {% endverbatim %}
+          </i-select>
+          <i-select v-model="signoff_sup_sel_ary" multiple placeholder="Select Signoff Support Type (Default: All)" class="search-box-b">
+            {% verbatim %}
+            <i-option v-for="(item, index) in signoff_sup_ary" :value="item" :key="index">{{ item }}</i-option>
+            {% endverbatim %}
+          </i-select>
+          <i-button type="success" @click="selType">Filter</i-button>
+        </div>
+        <br>
+        <div>
+          <i-input v-model="searchQuery" placeholder="Search" clearable class="search-box"></i-input>
           <br>
-          <i-table border stripe show-header :columns="table_col" :data="table_data" size="small" ref="table"></i-table>
-          <div style="margin:10px; overflow:hidden">
-            <div style="float:right">
+          <i-table border stripe show-header :columns="table_col" :data="table_data" size="small" height="650" ref="table"></i-table>
+          <div class="table-page">
+            <div>
               <Page :total="dataCount" :page-size="pageSize" show-total @on-change="changePage"></Page>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- <div style="height:300px"></div> -->
   </div>
 </template>
 
 <script>
  const ProjSignoffBlockDetail = {
    template: "#proj_signoff_block_detail",
-   beforeRouteUpdate (to, from, next) {
-     this.init()
+   mixins: [mixin],
+   beforeRouteUpdate: (to, from, next) => {
+     this.init(to.params.b_id)
      next()
    },
    data: function () {
+     var url_qstr = "b_id=djst_var"
      return {
        col_ary: [],
        data_ary: [],
@@ -44,8 +61,34 @@
        dataCount: 0,
        pageSize: 50,
        pageIndex: 1,
-       rsp_data: {},
-       url: "{% url 'flow_rpt:proj_signoff_list' %}"
+       rsp_detail_data: {},
+       rsp_list_data: {},
+       url: {
+         block_detail: "{% url 'flow_rpt:block_detail' 'djst_var' %}",
+         signoff_list: "{% url 'flow_rpt:proj_signoff_list' %}" + "?" + url_qstr,
+         signoff_detail: "{% url 'flow_rpt:proj_signoff_detail' 'djst_var' %}"
+       },
+       signoff_type_ary: [],
+       signoff_type_sel_ary: [],
+       signoff_type_obj: {
+         "GE": "GE (Generic)",
+         "PD": "PD (Product)",
+         "SP": "SP (Spec&Plan)",
+         "FP": "FP (Floorplan)",
+         "IP": "IP (IP Integration)",
+         "IO": "IO (IO-Ring)",
+         "PW": "PW (Power)",
+         "CK": "CK (Clock)",
+         "DF": "DF (DFT)",
+         "ST": "ST (STA)",
+         "LP": "LP (Low Power)",
+         "SI": "SI (SIPI)",
+         "PG": "PG (Package)",
+         "TO": "TO (Tapeout)",
+         "OI": "OI (Open Items)"
+       },
+       signoff_sup_ary: [],
+       signoff_sup_sel_ary: []
      }
    },
    computed: {
@@ -61,21 +104,35 @@
          align: "center",
          fixed: "right",
          render: (h, params) => {
+           var submit_props_obj = {
+             type: "success",
+             size: "small",
+             disabled: true
+           }
+           if ("support" in params.row && params.row.support) {
+             submit_props_obj.disabled = false
+           }
            return h("div", [
-             h("Button", {
+             h("i-button", {
                props: {
                  type: "primary",
                  size: "small"
                },
-               style: {
-                 marginRight: "5px"
-               },
+               class: "table-button",
                on: {
                  click: () => {
                    this.show(params.index)
                  }
                }
-             }, "View")
+             }, "View"),
+             h("i-button", {
+               props: submit_props_obj,
+               on: {
+                 click: () => {
+                   this.submit(params.index)
+                 }
+               }
+             }, "Submit")
            ])
          }
        })
@@ -107,114 +164,217 @@
      }
    },
    methods: {
-     init: function() {
-       axios({
-         method: "get", url: this.url
-       }).then((response) => {
-         this.rsp_data = response.data
+     init: function(b_id = "") {
+       this.$Loading.start()
+       axios.all([axios({
+         method: "get", url: this.url.block_detail.replace("djst_var", b_id)
+       }), axios({
+         method: "get", url: this.url.signoff_list.replace("djst_var", b_id)
+       })]).then(axios.spread((rsp_detail, rsp_list) => {
+         this.$Loading.finish()
+         this.rsp_detail_data = rsp_detail.data
+         this.rsp_list_data = rsp_list.data
          this.procDataAry()
          this.procColAry()
-       }).catch((error) => {
+       })).catch((error) => {
+         this.$Loading.error()
          console.log(error)
        })
      },
      procColAry: function () {
-       this.col_ary = []
-       this.col_ary.push({
-         title: "project name",
-         key: "obj_name",
-         fixed: "left",
-         width: 150,
-         sortable: true,
-         sortType: "asc",
-         render: (h, params) => {
-           const row = params.row
-           const pk = row.obj_pk
-           const text = row.obj_name
-           return h("a", {
-             on: {
-               click: () => {
-                 this.$router.push({name: "proj_signoff_block_list", params: {p_id: pk}})
-               }
-             }
-           }, text)
+       this.col_ary = [
+         {
+           title: "ID",
+           key: "obj_name",
+           fixed: "left",
+           width: 150,
+           sortable: true,
+           sortType: "asc"
          },
-         filters: this.filter_ary_obj.obj_name,
-         filterMultiple: true,
-         filterMethod: function (value, row) {
-           return row.obj_name === value
-         }
-       })
-       this.col_ary.push({
-         title: "Status",
-         key: "status",
-         width: 150,
-         sortable: true,
-         filters: this.filter_ary_obj.status,
-         filterMultiple: true,
-         filterMethod: function (value, row) {
-           return row.status === value
-         },
-         render: (h, params) => {
-           const row = params.row
-           const color = row.status === "NG" ? "yellow" : row.status === "OK" ? "green" : (row.status === undefined || row.status === "") ? "blue" : "red"
-           const text = row.status
-           return h("Tag", {
-             props: {
-               type: "dot",
-               color: color
+         {
+           title: "Judge",
+           key: "judge",
+           width: 180,
+           sortable: true,
+           filters: this.filter_ary_obj.judge,
+           filterMultiple: true,
+           filterMethod: function (value, row) {
+             return row.judge === value
+           },
+           render: (h, params) => {
+             const row = params.row
+             const color = row.judge === "NG" ? "red" : (row.judge === "OK" || row.judge === "Waived") ? "green" : (row.judge === undefined || row.judge === "") ? "yellow" : "blue"
+             const text = row.judge
+             const opt_ary = ["Waived", "NG"]
+             if ("support" in row && row.support) {
+               return h("div", [
+                 h("div", {
+                   class: "float-left"
+                 }, [
+                   h("tag", {
+                     props: {
+                       type: "dot",
+                       color: color
+                     }
+                   })
+                 ]),
+                 h("div", {
+                   class: "float-l80"
+                 }, [
+                   h("i-select", {
+                     props: {
+                       value: text
+                     },
+                     on: {
+                       "on-change": (value) => {
+                         this.table_data[params.index].judge = value
+                       }
+                     }
+                   }, opt_ary.map(function(opt) {
+                     return h("i-option", {
+                       props: {value: opt}
+                     }, opt)
+                   })
+                   )
+                 ])
+               ])
+             } else {
+               return h("tag", {
+                 props: {
+                   type: "dot",
+                   color: color
+                 }
+               }, text)
              }
-           }, text)
+           }
+         },
+         {
+           title: "Support",
+           key: "support",
+           width: 150,
+           sortable: true,
+           filters: this.filter_ary_obj.support,
+           filterMultiple: true,
+           filterMethod: function (value, row) {
+             return row.support === value
+           }
+         },
+         {
+           title: "Category",
+           key: "category",
+           width: 150,
+           sortable: true,
+           filters: this.filter_ary_obj.category,
+           filterMultiple: true,
+           filterMethod: function (value, row) {
+             return row.category === value
+           }
+         },
+         {
+           title: "Item",
+           key: "item",
+           width: 200,
+           sortable: true
+         },
+         {
+           title: "Description",
+           key: "description",
+           width: 200,
+           sortable: true
+         },
+         {
+           title: "Criteria",
+           key: "criteria",
+           width: 120,
+           sortable: true
+         },
+         {
+           title: "Result",
+           key: "result",
+           width: 100,
+           sortable: true
+         },
+         {
+           title: "Report",
+           key: "report",
+           width: 400,
+           sortable: true
+         },
+         {
+           title: "Comment",
+           key: "comment",
+           width: 400,
+           render: (h, params) => {
+             const row = params.row
+             if ("support" in row && row.support) {
+               return h("i-input", {
+                 props: {
+                   autofocus: true,
+                   clearable: true,
+                   value: row.comment
+                 },
+                 on: {
+                   "on-blur": (event) => {
+                     this.table_data[params.index].comment = event.target.value
+                   }
+                 }
+               })
+             } else {
+               return h("p", row.comment)
+             }
+           }
+         },
+         {
+           title: "Latest Updater",
+           key: "l_user",
+           width: 160,
+           sortable: true
+         },
+         {
+           title: "Updated Time",
+           key: "updated_time",
+           width: 200,
+           sortable: true
          }
-       })
-       this.col_ary.push({
-         title: "Latest Updater",
-         key: "l_user",
-         width: 150,
-         sortable: true
-       })
-       this.col_ary.push({
-         title: "Updated Time",
-         key: "updated_time",
-         width: 200,
-         sortable: true
-       })
+       ]
      },
      procDataAry: function () {
-       var signoff_proj_obj = {}
-       for (var i = 0; i < this.rsp_data.length; i++) {
-         var qs_obj = this.rsp_data[i]
-         var proj_name = qs_obj.block.proj.name
-         if (proj_name in signoff_proj_obj) {
-           if (qs_obj.updated_time > signoff_proj_obj[proj_name].updated_time) {
-             signoff_proj_obj[proj_name].updated_time = qs_obj.updated_time
-             signoff_proj_obj[proj_name].l_user = qs_obj.l_user.name
-           }
-           if (qs_obj.data.judge === "OK" && signoff_proj_obj[proj_name].status === "OK") {
-             signoff_proj_obj[proj_name].status = "OK"
-           } else {
-             signoff_proj_obj[proj_name].status = "NG"
-           }
-         } else {
-           signoff_proj_obj[proj_name] = {
-             id: qs_obj.id,
-             updated_time: qs_obj.updated_time,
-             l_user: qs_obj.l_user.name,
-             status: qs_obj.data.judge
-           }
-         }
-       }
        this.data_ary = []
-       this.filter_ary_obj = {obj_name: [], status: []}
-       var unique_ary_obj = {obj_name: [], status: []}
-       for (var key in signoff_proj_obj) {
-         sp_obj = signoff_proj_obj[key]
+       this.filter_ary_obj = {judge: [], category: [], support: []}
+       var unique_ary_obj = {judge: [], category: [], support: []}
+       for (var i = 0; i < this.rsp_list_data.length; i++) {
+         var qs_obj = this.rsp_list_data[i]
+         var type_name = qs_obj.name.split("-")[0]
+         if (!(type_name in this.signoff_type_obj)) {
+           continue
+         }
+         var type_name_des = this.signoff_type_obj[type_name]
+         if (this.signoff_type_ary.indexOf(type_name_des) === -1) {
+           this.signoff_type_ary.push(this.signoff_type_obj[type_name])
+         }
+         if (this.signoff_type_sel_ary.length !== 0 && this.signoff_type_sel_ary.indexOf(type_name_des) === -1) {
+           continue
+         }
+         if ("support" in qs_obj.data && qs_obj.data.support) {
+           var sup_name = qs_obj.data.support
+         } else {
+           var sup_name = "auto"
+         }
+         if (this.signoff_sup_ary.indexOf(sup_name) === -1) {
+           this.signoff_sup_ary.push(sup_name)
+         }
+         if (this.signoff_sup_sel_ary.length !== 0 && this.signoff_sup_sel_ary.indexOf(sup_name) === -1) {
+           continue
+         }
          var data_obj = {
-           obj_pk: sp_obj.id,
-           obj_name: key,
-           updated_time: sp_obj.updated_time.slice(0, 19).replace("T", " "),
-           l_user: sp_obj.l_user,
-           status: sp_obj.status
+           obj_pk: qs_obj.id,
+           obj_name: qs_obj.name,
+           l_user: qs_obj.l_user_name,
+           updated_time: qs_obj.updated_time.slice(0, 19).replace("T", " "),
+           obj_index: i
+         }
+         for (var key in qs_obj.data) {
+           data_obj[key] = qs_obj.data[key]
          }
          this.data_ary.push(data_obj)
          for (var key in this.filter_ary_obj) {
@@ -224,6 +384,12 @@
            }
          }
        }
+       this.signoff_type_ary.sort(function (a, b) {
+         return (a < b) ? -1 : (a > b) ? 1 : 0
+       })
+       this.signoff_sup_ary.sort(function (a, b) {
+         return (a < b) ? -1 : (a > b) ? 1 : 0
+       })
      },
      show: function (index) {
        var content = ""
@@ -231,18 +397,61 @@
          content += td_key + ": " + this.table_data[index][td_key] + "<br>"
        }
        this.$Modal.info({
+         scrollable: true,
+         closable: true,
          title: "Detailed Info",
          content: content
        })
      },
+     submit: function (index) {
+       var signoff_obj = this.table_data[index]
+       var signoff_org_obj = this.rsp_list_data[signoff_obj.obj_index]
+       signoff_org_obj.data.judge = signoff_obj.judge
+       signoff_org_obj.data.comment = signoff_obj.comment
+       var csrftoken = Cookies.get("csrftoken")
+       axios({
+         method: "post",
+         url: "{% url 'flow_rpt:user_check' %}",
+         headers: {"X-CSRFToken": csrftoken},
+         data: {
+           "user": this.user,
+           "password": this.password
+         }
+       }).then((response) => {
+         var user_id = response.data.user_id
+         axios({
+           method: "patch",
+           url: this.url.signoff_detail.replace("djst_var", signoff_obj.obj_pk),
+           headers: {"X-CSRFToken": csrftoken},
+           data: {
+             l_user: user_id,
+             data: signoff_org_obj.data
+           }
+         }).then((response) => {
+           this.$Message.success("Signoff item " + signoff_obj.obj_name + " updated!")
+           var rsp_data = response.data
+           signoff_obj.l_user = rsp_data.l_user_name
+           signoff_obj.updated_time = rsp_data.updated_time.slice(0, 19).replace("T", " ")
+         }).catch((error) => {
+           console.log(error)
+         })
+       }).catch((error) => {
+         this.$Message.error("User " + this.user + " is unauthorized!")
+         console.log(error)
+       })
+     },
      changePage: function (index) {
        this.pageIndex = index
+     },
+     selType: function () {
+       this.procDataAry()
      }
    },
    /* created: function () {
-    * },*/
+    * }, */
    mounted: function () {
-     this.init()
+     this.checkCookie()
+     this.init(this.$route.params.b_id)
    }
  }
 </script>

@@ -16,4 +16,16 @@ while ( 1 )
     sleep 60
    endif
 end
+{%- if local._multi_inst == "lvs" %}
+while ( 1 )
+# waiting previous v2lvs stage "v2lvs.op.run.pass" finish--------------------------------------------------
+  if ( -e {{cur.flow_sum_dir}}/{{cur.stage}}/v2lvs/pv.csh.op.run.pass ) then
+          echo "Alchip-info: previous stage v2lvs is finish, will start lvs stage"
+         break
+  else 
+          echo "Alchip-info: previous stage v2lvs is not finish yet, will waiting for v2lvs to be finish"
+          sleep 60
+  endif
+end
+{%- endif %}
 {%- endif %}

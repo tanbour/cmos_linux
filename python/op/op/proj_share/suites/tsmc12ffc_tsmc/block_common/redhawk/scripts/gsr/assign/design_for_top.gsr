@@ -1,0 +1,146 @@
+#===================================================================
+#=================== desgin info ===================================
+#===================================================================
+
+TECHNOLOGY 16
+FREQUENCY 2200e06
+#===================================================================
+#=================== Voltage Setting ===============================
+#===================================================================
+
+#-- power setting ----------------------
+VDD_NETS {
+   VDD 0.8
+   VDD_PEU1_IOU1 0.8
+   VDDR 0.8
+   VAA 1.8
+   VDDQ 1.2
+   VDDPST_b 1.8
+   VDDPST_c 1.8
+   VDDPST_l 1.8
+   VDDPST_r 1.8
+   VDDPST_t 1.8
+   VDDA_ts 1.8
+   VQPS 1.8
+   AP_PLL_dmm_VDDPOST 0.8
+   AP_PLL_l0_VDDPOST 0.8
+   AP_PLL_l1_VDDPOST 0.8
+   AP_PLL_l2_VDDPOST 0.8
+   AP_PLL_l3_VDDPOST 0.8
+   AP_PLL_l4_VDDPOST 0.8
+   AP_PLL_l5_VDDPOST 0.8
+   AP_PLL_l6_VDDPOST 0.8
+   AP_PLL_l7_VDDPOST 0.8
+   AP_PLL_p0_VDDPOST 0.8
+   AP_PLL_p1_VDDPOST 0.8
+   AP_PLL_p2_VDDPOST 0.8
+   AP_PLL_p3_VDDPOST 0.8
+   AP_PLL_p4_VDDPOST 0.8
+   AP_PLL_p5_VDDPOST 0.8
+   AP_PLL_p6_VDDPOST 0.8
+   AP_PLL_p7_VDDPOST 0.8
+   AP_PLL_trace_VDDPOST 0.8
+   AP_PLL_wrap_VDDPOST 0.8
+   AP_PLL_dmm_VDDHV 1.8
+   AP_PLL_l0_VDDHV 1.8
+   AP_PLL_l1_VDDHV 1.8
+   AP_PLL_l2_VDDHV 1.8
+   AP_PLL_l3_VDDHV 1.8
+   AP_PLL_l4_VDDHV 1.8
+   AP_PLL_l5_VDDHV 1.8
+   AP_PLL_l6_VDDHV 1.8
+   AP_PLL_l7_VDDHV 1.8
+   AP_PLL_p0_VDDHV 1.8
+   AP_PLL_p1_VDDHV 1.8
+   AP_PLL_p2_VDDHV 1.8
+   AP_PLL_p3_VDDHV 1.8
+   AP_PLL_p4_VDDHV 1.8
+   AP_PLL_p5_VDDHV 1.8
+   AP_PLL_p6_VDDHV 1.8
+   AP_PLL_p7_VDDHV 1.8
+   AP_PLL_trace_VDDHV 1.8
+   AP_PLL_wrap_VDDHV 1.8
+}
+
+#-- ground setting ---------------------
+GND_NETS {
+   VSS 0
+   VSSPST_b 0
+   VSSPST_c 0
+   VSSPST_l 0
+   VSSPST_r 0
+   VSSPST_t 0
+   AP_PLL_dmm_VSS 0 
+   AP_PLL_dmm_VSS_H 0 
+   AP_PLL_l0_VSS 0 
+   AP_PLL_l0_VSS_H 0 
+   AP_PLL_l1_VSS 0 
+   AP_PLL_l1_VSS_H 0 
+   AP_PLL_l2_VSS 0 
+   AP_PLL_l2_VSS_H 0 
+   AP_PLL_l3_VSS 0 
+   AP_PLL_l3_VSS_H 0 
+   AP_PLL_l4_VSS 0 
+   AP_PLL_l4_VSS_H 0 
+   AP_PLL_l5_VSS 0 
+   AP_PLL_l5_VSS_H 0 
+   AP_PLL_l6_VSS 0 
+   AP_PLL_l6_VSS_H 0 
+   AP_PLL_l7_VSS 0 
+   AP_PLL_l7_VSS_H 0 
+   AP_PLL_p0_VSS 0 
+   AP_PLL_p0_VSS_H 0 
+   AP_PLL_p1_VSS 0 
+   AP_PLL_p1_VSS_H 0 
+   AP_PLL_p2_VSS 0 
+   AP_PLL_p2_VSS_H 0 
+   AP_PLL_p3_VSS 0 
+   AP_PLL_p3_VSS_H 0 
+   AP_PLL_p4_VSS 0 
+   AP_PLL_p4_VSS_H 0 
+   AP_PLL_p5_VSS 0 
+   AP_PLL_p5_VSS_H 0 
+   AP_PLL_p6_VSS 0 
+   AP_PLL_p6_VSS_H 0 
+   AP_PLL_p7_VSS 0 
+   AP_PLL_p7_VSS_H 0 
+   AP_PLL_trace_VSS 0 
+   AP_PLL_trace_VSS_H 0 
+   AP_PLL_wrap_VSS 0 
+   AP_PLL_wrap_VSS_H 0 
+}
+
+#===================================================================
+#=================== from carls ====================================
+#===================================================================
+
+##-- power setting ----------------------
+#VDD_NETS {
+#   VDD 0.8
+#   lmu_u0/VDDR 0.8
+#   lmu_u1/VDDR 0.8
+#   lmu_u2/VDDR 0.8
+#   lmu_u3/VDDR 0.8
+#   lmu_u4/VDDR 0.8
+#   lmu_u5/VDDR 0.8
+#   lmu_u6/VDDR 0.8
+#   lmu_u7/VDDR 0.8
+#   VDD_PEU1_IOU1 0.8
+#      peu_u1/VDD
+#      iou1_sys_u/VDD
+#}
+#
+##-- ground setting ---------------------
+#GND_NETS {
+#   VSS 0 {
+#      lmu_u0/VSS
+#      lmu_u1/VSS
+#      lmu_u2/VSS
+#      lmu_u3/VSS
+#      lmu_u4/VSS
+#      lmu_u5/VSS
+#      lmu_u6/VSS
+#      lmu_u7/VSS
+#}
+#
+

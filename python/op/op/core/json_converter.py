@@ -11,7 +11,7 @@ from utils import pcom
 
 LOG = pcom.gen_logger(__name__)
 
-class JsonConverter(object):
+class JsonConverter():
     """convert information into json for auto-send mail"""
     def __init__(self, user_lst, title, content, fn_str):
         """Initialization parameters"""

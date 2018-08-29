@@ -1,7 +1,7 @@
 """
 Author: Guanyu Yi @ OnePiece Platform Group
 Email: guanyu_yi@alchip.com
-Description: projects initialization and related features
+Description: sending email features
 """
 
 import os
@@ -12,9 +12,10 @@ from core import json_converter as jc
 
 LOG = pcom.gen_logger(__name__)
 
-class EmailProc(object):
+class EmailProc():
     """base class of email processor"""
-    def proc_local_rpt(self, local_rpt):
+    @classmethod
+    def proc_local_rpt(cls, local_rpt):
         """to process local report and send emails"""
         if not os.path.isfile(local_rpt):
             LOG.error("report file {local_rpt} is NA")

@@ -39,6 +39,8 @@ class JobList(generics.ListAPIView):
     serializer_class = JobSerializer
     def get_queryset(self, *args, **kwargs):
         queryset = self.queryset.order_by("-name")
+        if not queryset:
+            return queryset
         bt = self.request.GET.get("bt")
         et = self.request.GET.get("et")
         if not bt or not et:

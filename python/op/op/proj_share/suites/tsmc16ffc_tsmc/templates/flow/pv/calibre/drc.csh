@@ -4,8 +4,10 @@ set pre_stage = "{{pre.sub_stage}}"
 set cur_stage = "{{cur.sub_stage}}"
 
 set pre_stage = `echo $pre_stage | cut -d . -f 1`
-set cur_stage = `echo $cur_stage | cut -d . -f 1`
 
+set design_style = "{{local.design_style}}"
+set pv_func      = "{{local._multi_inst}}"
+set cur_stage    = "{{local._multi_inst}}"
 set clbre_drc_CPU_NUMBER = `echo "{{local._job_cpu_number}}" | cut -d " " -f 2`
 
 #========================================================================
@@ -25,20 +27,34 @@ set plugin_file    = "{{cur.config_plugins_dir}}/calibre_scripts/clbre_drc_plugi
 {%- endif %}
 
 #----------------------- set input files ---------------------------------
+{% if local.design_style == "top" %}
+{% if local.cal_decks_drc_for_top %}
+set rule_deck     = "{{local.cal_decks_drc_for_top}}"
+{% else %}
 set rule_deck     = "{{liblist.CAL_DECKS_DRC}}"
+{% endif %}
+{% elif local.design_style == "block" %}
+{% if local.cal_decks_drc_for_block %}
+set rule_deck     = "{{local.cal_decks_drc_for_block}}"
+{% else %}
+set rule_deck     = "{{liblist.CAL_DECKS_DRC}}"
+{% endif %}
+{% endif %}
 set top_name      = "{{env.BLK_NAME}}"
 {%- if sourceme_14lpp_drc_file %}
 set sourceme_file = "{{local.sourceme_14lpp_drc_file}}"
 source ${sourceme_file}
 {%- endif %}
 set gds_file      = "{{pre.flow_data_dir}}/{{pre.stage}}/${input_file}.gds.gz" 
-set drc_run       = "{{cur.flow_scripts_dir}}/{{cur.stage}}/${output_file}.rule"
-set run_time      = "{{cur.cur_flow_rpt_dir}}/${cur_stage}.run_time"
+set drc_run       = "{{cur.flow_scripts_dir}}/{{cur.stage}}/${pv_func}/${output_file}.rule"
+set run_time      = "{{cur.cur_flow_rpt_dir}}/${pv_func}/${cur_stage}.run_time"
 #----------------------- delete exist rule deck file ---------------------
 if ( -e ${drc_run} ) then
 rm -f ${drc_run}
 endif
-
+mkdir -p {{cur.cur_flow_rpt_dir}}/${pv_func}
+mkdir -p {{cur.cur_flow_data_dir}}/${pv_func}
+mkdir -p {{cur.cur_flow_log_dir}}/${pv_func}
 #==========================================================================
 #========= generate DRC check script ======================================
 #==========================================================================
@@ -49,8 +65,8 @@ LAYOUT PRIMARY "${top_name}"
 LAYOUT PATH    "${gds_file}"
 LAYOUT SYSTEM GDSII
 
-DRC RESULTS DATABASE "{{cur.cur_flow_rpt_dir}}/${output_file}.db"
-DRC SUMMARY REPORT   "{{cur.cur_flow_rpt_dir}}/${output_file}.drc.rpt"
+DRC RESULTS DATABASE "{{cur.cur_flow_rpt_dir}}/${pv_func}/${output_file}.db"
+DRC SUMMARY REPORT   "{{cur.cur_flow_rpt_dir}}/${pv_func}/${output_file}.drc.rpt"
 
 DRC ICSTATION YES
 drc_setting
@@ -78,14 +94,19 @@ eval "{{local.calibre_drc_user_run_cmd}} ${drc_run} "
 {%- else %} 
 #-- user command is not fill, will run pre-set calibre drc command -------------
 #calibre -drc -hier -turbo -hyper -64 -remotefile remote.$LSB_JOBID.conf  ${drc_run}  
+{%- if local.calibre_drc_absub_cmd  %}
+echo '''{{local.calibre_drc_absub_cmd}} "calibre -drc -hier -turbo ${clbre_drc_CPU_NUMBER} -hyper -64  ${drc_run}"'''
+eval '''{{local.calibre_drc_absub_cmd}} "calibre -drc -hier -turbo ${clbre_drc_CPU_NUMBER} -hyper -64  ${drc_run}"'''
+{%- else %}
 calibre -drc -hier -turbo ${clbre_drc_CPU_NUMBER} -hyper -64  ${drc_run}  
+{%- endif %}
 {%- endif %}
 echo "finish" `date "+%F %T %a"` >> $run_time
 #==========================================================================
 #========= grep the report ================================================
 #==========================================================================
-grep -v "NOT EXECUTED" {{cur.cur_flow_rpt_dir}}/${output_file}.drc.rpt | grep -v "TOTAL Result Count = 0" >! {{cur.cur_flow_rpt_dir}}/pv.drc.rpt.sum
-grep RULECHECK {{cur.cur_flow_rpt_dir}}/pv.drc.rpt.sum  >! {{cur.cur_flow_rpt_dir}}/pv.drc.CHECKRULE.sum.sort
+grep -v "NOT EXECUTED" {{cur.cur_flow_rpt_dir}}/${pv_func}/${output_file}.drc.rpt | grep -v "TOTAL Result Count = 0" >! {{cur.cur_flow_rpt_dir}}/${pv_func}/pv.drc.rpt.sum
+grep RULECHECK {{cur.cur_flow_rpt_dir}}/${pv_func}/pv.drc.rpt.sum  >! {{cur.cur_flow_rpt_dir}}/${pv_func}/pv.drc.CHECKRULE.sum.sort
 
 echo "{{env.FIN_STR}}"
 

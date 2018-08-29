@@ -1,31 +1,28 @@
-puts "this is icc2 finish settings"
-
-###==================================================================##
-## signoff_create_metal_fill settings                                ##
-##===================================================================##
-{%- if local.chip_finish_create_metal_fill == "true" %}
-if {[file exists $finish_create_metal_fill_runset]} {set_app_options -name signoff.create_metal_fill.runset -value $finish_create_metal_fill_runset}
-if {[file exists $finish_drc_icv_runset]} {set_app_options -name signoff.check_drc.runset -value $finish_drc_icv_runset} 
-set_app_options -name signoff.create_metal_fill.flat -value true ;# default false
-
-## Timing driven metal fill related settings---------------------------------------
-{%- if local.finish_create_metal_fill_timing_driven_threshold %}
-# Extraction options
-set_extraction_options -real_metalfill_extraction none
-# Optional app options to block fill creation on critical nets. Below are examples.
-# 	set_app_options -name signoff.create_metal_fill.space_to_nets -value { {M1 4x} {M2 4x} ... }
-# 	set_app_options -name signoff.create_metal_fill.space_to_clock_nets -value { {M1 5x} {M2 5x} ... }
-# 	set_app_options -name signoff.create_metal_fill.space_to_nets_on_adjacent_layer -value { {M1 3x} {M2 3x} ... }
-# 	set_app_options -name signoff.create_metal_fill.fix_density_error -value true
-# 	set_app_options -name signoff.create_metal_fill.apply_nondefault_rules -value true
-{%- endif %}
-{%- endif %}
-
-set_app_options -name time.si_enable_analysis -value true ;# default false
-
-## ECO route settings----------------------------------------------------------------------
-## Disable soft-rule-based timing optimization during ECO routing.
-#  This is to limit spreading which can touch multiple nets and impact convergence.
+##==================================================================##
+## settings.step.finish.tcl                                         ##
+##==================================================================##
+## ECO route----------------------------------------------------------------------
+# Disable soft-rule-based timing optimization during ECO routing. This is to limit spreading which can touch multiple nets and impact convergence.
 set_app_options -name route.detail.eco_route_use_soft_spacing_for_timing_optimization -value false
 
+## Timing----------------------------------------------------------------------
+## Enable crosstalk analysis and the extraction of the routed nets along with their coupling caps
+set_app_options -name time.si_enable_analysis -value true ;# default false
 
+## PPA - Performance focused features---------------------------------------------
+{#
+    # Uncomment below to enable route_opt CCD, if you enable route_opt in chip_finish
+    #	set_app_option -name route_opt.flow.enable_ccd -value true ;puts "RM-info: Setting route_opt.flow.enable_ccd to true"
+    #	set_app_option -name ccd.post_route_buffer_removal -value true ;puts "RM-info: Setting ccd.post_route_buffer_removal to true" ;# tool default false
+#}
+## PPA - Power focused features----------------------------------------------------------------------
+{#
+    # Uncomment to enable leakage optimization during route_opt
+    #	set_app_options -name route_opt.flow.enable_power -value true ;# default false; global-scoped and needs to be re-applied in a new session
+#}
+## CTO----------------------------------------------------------------------
+{#
+    # Uncomment to enable route_opt CTO
+    #  Note : this feature is only for non-CCD flow.
+    #	set_app_options -name route_opt.flow.enable_cto -value true ;# default false; global-scoped and needs to be re-applied in a new session
+#}

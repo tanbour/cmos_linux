@@ -21,6 +21,7 @@ set route_check_route                        "{{local.route_check_route}}"
 ###==================================================================##
 ## mcmm_setup                                                        ##
 ##===================================================================##
+set blk_sdc_dir       "{{env.BLK_SDC}}/{{ver.sdc}}"
 
 ## scenario settings---------------------------------------------------
 set tech_ndm                           "{{local.tech_ndm}}";# *fill tech_ndm name, example tech_only,remember it's not tech ndm library path! only tech ndm name is OK.
@@ -113,6 +114,49 @@ set clock_cell_late_derate_list        "{{local.clock_cell_late_derate_list}}" ;
 {%- elif local.clock_cell_late_derate_list is sequence %}
 set clock_cell_late_derate_list        "{{local.clock_cell_late_derate_list|join (' ')}}" ;# optional, late derate for data path cells
 {%- endif %}
+## timing incremental derate settings----------------------------------------------------
+{%- if local.data_net_early_derate_incr_list is string %}
+set data_net_early_derate_incr_list         "{{local.data_net_early_derate_incr_list}}" ;# optional,data net early derate for each corner
+{%- elif local.data_net_early_derate_incr_list is sequence %}
+set data_net_early_derate_incr_list         "{{local.data_net_early_derate_incr_list|join (' ')}}" ;# optional,data net early derate for each corner
+{%- endif %}
+{%- if local.data_net_late_derate_incr_list is string %}
+set data_net_late_derate_incr_list          "{{local.data_net_late_derate_incr_list}}" ;# optional,data net late derate for each corner
+{%- elif local.data_net_late_derate_incr_list is sequence %}
+set data_net_late_derate_incr_list          "{{local.data_net_late_derate_incr_list|join (' ')}}" ;# optional,data net late derate for each corner
+{%- endif %}
+{%- if local.clock_net_early_derate_incr_list is string %}
+set clock_net_early_derate_incr_list        "{{local.clock_net_early_derate_incr_list}}" ;# optional,clock net early derate for each corner
+{%- elif local.clock_net_early_derate_incr_list is sequence %}
+set clock_net_early_derate_incr_list        "{{local.clock_net_early_derate_incr_list|join (' ')}}" ;# optional,clock net early derate for each corner
+{%- endif %}
+{%- if local.clock_net_late_derate_incr_list is string %}
+set clock_net_late_derate_incr_list         "{{local.clock_net_late_derate_incr_list}}" ;# optional,clock net late derate for each corner
+{%- elif local.clock_net_late_derate_incr_list is sequence %}
+set clock_net_late_derate_incr_list         "{{local.clock_net_late_derate_incr_list|join (' ')}}" ;# optional,clock net late derate for each corner
+{%- endif %}
+##If your design is does not have aocv/pocv table, you can specify bellow table for clock/data path cell derating
+##If your design use aocv/pocv table, then you just leave bellow empty
+{%- if local.data_cell_early_derate_incr_list is string %}
+set data_cell_early_derate_incr_list        "{{local.data_cell_early_derate_incr_list}}" ;# optional, early derate for data path cells
+{%- elif local.data_cell_early_derate_incr_list is sequence %}
+set data_cell_early_derate_incr_list        "{{local.data_cell_early_derate_incr_list|join (' ')}}" ;# optional, early derate for data path cells
+{%- endif %}
+{%- if local.data_cell_late_derate_incr_list is string %}
+set data_cell_late_derate_incr_list         "{{local.data_cell_late_derate_incr_list}}" ;# optional, late derate for data path cells
+{%- elif local.data_cell_late_derate_incr_list is sequence %}
+set data_cell_late_derate_incr_list         "{{local.data_cell_late_derate_incr_list|join (' ')}}" ;# optional, late derate for data path cells
+{%- endif %}
+{%- if local.clock_cell_early_derate_incr_list is string %}
+set clock_cell_early_derate_incr_list       "{{local.clock_cell_early_derate_incr_list}}" ;# optional, early derate for clock path cells
+{%- elif local.clock_cell_early_derate_incr_list is sequence %}
+set clock_cell_early_derate_incr_list       "{{local.clock_cell_early_derate_incr_list|join (' ')}}" ;# optional, early derate for clock path cells
+{%- endif %}
+{%- if local.clock_cell_late_derate_incr_list is string %}
+set clock_cell_late_derate_incr_list        "{{local.clock_cell_late_derate_incr_list}}" ;# optional, late derate for data path cells
+{%- elif local.clock_cell_late_derate_incr_list is sequence %}
+set clock_cell_late_derate_incr_list        "{{local.clock_cell_late_derate_incr_list|join (' ')}}" ;# optional, late derate for data path cells
+{%- endif %}
 
 ## some memory cell may need timing derate--------------------------------------------------
 {%- if local.mem_list is string %}
@@ -130,3 +174,17 @@ set mem_late_derate_list               "{{local.mem_late_derate_list}}" ;# optio
 {%- elif local.mem_late_derate_list is sequence %}
 set mem_late_derate_list               "{{local.mem_late_derate_list|join (' ')}}" ;# optional, late derate for listed memories
 {%- endif %}
+
+# ICC2 AOCV table----------------------------------------------------------------------
+{%- if local.scenario_list is string %}
+{%- set sn = local.scenario_list.upper().split('.') %}
+{%- set sn_new = ['ICC2_AOCV', sn[1], sn[2], sn[4]]|join('_') %}
+set ICC2_AOCV_{{sn[1]}}_{{sn[2]}}_{{sn[4]}}  "{{liblist[sn_new]}}"
+{%- elif local.scenario_list is sequence %}
+{%- for scenario in local.scenario_list %}
+{%- set sn = scenario.upper().split('.') %}
+{%- set sn_new = ['ICC2_AOCV', sn[1], sn[2], sn[4]]|join('_') %}
+set ICC2_AOCV_{{sn[1]}}_{{sn[2]}}_{{sn[4]}}  "{{liblist[sn_new]}}"
+{%- endfor %}
+{%- endif %}
+

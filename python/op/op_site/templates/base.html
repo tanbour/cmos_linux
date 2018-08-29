@@ -58,7 +58,7 @@
                 <a v-if="ss_flg" @click="confirmLogout" href="#">Sign Out</a>
                 <a v-else @click="confirmLogin" href="#">Sign In</a>
                 {% verbatim %}
-                <span v-if="ss_flg" style="color:orange">  {{user}}</span>
+                <span v-if="ss_flg">  {{user}}</span>
                 {% endverbatim %}
               </div>
             </div>
@@ -89,6 +89,29 @@
          return {}
        }
      }
+     var mixin = {
+       data: function () {
+         return {
+           user: "",
+           password: "",
+           ss_flg: false
+         }
+       },
+       methods: {
+         checkCookie: function () {
+           var ops = Cookies.get("op_session")
+           if (ops) {
+             this.user = this.$pCookie().user
+             this.password = this.$pCookie().p_w
+             this.ss_flg = true
+           } else {
+             this.$Message.warning("Please log in first!")
+             this.$router.push({name: "home"})
+             this.ss_flg = false
+           }
+         }
+       }
+     }
     </script>
 
     {% block component %}
@@ -99,7 +122,11 @@
        {path: "/", name: "home", component: Home},
        {path: "/v_flow_status", name: "flow_status_list", component: FlowStatusList},
        {path: "/v_flow_status/:f_id", name: "flow_status_detail", component: FlowStatusDetail},
-       {path: "/v_flow_rpt/:p_id/:b_id/:f_id/:s_id", name: "flow_rpt", component: FlowRpt},
+       {path: "/v_flow_rpt", name: "flow_rpt_proj_list", component: FlowRptProjList},
+       {path: "/v_flow_rpt/p/:p_id", name: "flow_rpt_block_list", component: FlowRptBlockList},
+       {path: "/v_flow_rpt/b/:b_id", name: "flow_rpt_flow_list", component: FlowRptFlowList},
+       {path: "/v_flow_rpt/f/:f_id", name: "flow_rpt_stage_list", component: FlowRptStageList},
+       {path: "/v_flow_rpt/f/:f_id/s/:s_id", name: "flow_rpt_stage_detail", component: FlowRptStageDetail},
        {path: "/v_proj_signoff", name: "proj_signoff_proj_list", component: ProjSignoffProjList},
        {path: "/v_proj_signoff/p/:p_id", name: "proj_signoff_block_list", component: ProjSignoffBlockList},
        {path: "/v_proj_signoff/b/:b_id", name: "proj_signoff_block_detail", component: ProjSignoffBlockDetail},
@@ -111,15 +138,23 @@
      const router = new VueRouter({
        routes: routes
      })
+     iview.LoadingBar.config({
+       height: 5
+     })
+     /* router.beforeEach((to, from, next) => {
+      *   iview.LoadingBar.start();
+      *   next();
+      * })
+      * router.afterEach(route => {
+      *   iview.LoadingBar.finish();
+      * }) */
      var Main = {
-       router,
+       router: router,
+       mixins: [mixin],
        data: function () {
          return {
            spanLeft: 2,
-           spanRight: 22,
-           ss_flg: false,
-           user: "",
-           password: ""
+           spanRight: 22
          }
        },
        computed: {
@@ -133,8 +168,7 @@
              if (con === "flow_status") {
                this.$router.push({name: "flow_status_list"})
              } else if (con === "flow_rpt") {
-               var params_obj = {p_id: "null", b_id: "null", f_id: "null", s_id: "null"}
-               this.$router.push({name: con, params: params_obj})
+               this.$router.push({name: "flow_rpt_proj_list"})
              } else if (con === "proj_checker") {
                this.$router.push({name: "proj_checker_list"})
              } else if (con === "proj_signoff") {
@@ -175,17 +209,6 @@
              console.log(error)
            })
          },
-         checkCookie: function () {
-           var ops = Cookies.get("op_session")
-           if (ops) {
-             c_obj = this.$pCookie()
-             this.user = c_obj.user
-             this.password = c_obj.p_w
-             this.checkPW()
-           } else {
-             this.ss_flg = false
-           }
-         },
          removeCookie: function () {
            Cookies.remove("op_session")
            this.$Message.success("User " + this.user + " logged out!")
@@ -197,10 +220,11 @@
              title: "Logout Confirm",
              content: content,
              loading: true,
+             closable: true,
              onOk: () => {
-               this.$Modal.remove()
                this.removeCookie()
                this.$router.push({name: "home"})
+               this.$Modal.remove()
              }
            })
          },
@@ -216,7 +240,6 @@
                  }, [
                    h("i-input", {
                      props: {
-                       user: this.user,
                        autofocus: true,
                        placeholder: "Please enter your name..."
                      },
@@ -234,13 +257,16 @@
                  }, [
                    h("i-input", {
                      props: {
-                       password: this.password,
                        type: "password",
                        placeholder: "Please enter your password..."
                      },
                      on: {
                        input: (val) => {
                          this.password = val
+                       },
+                       "on-enter": () => {
+                         this.checkPW()
+                         this.$Modal.remove()
                        }
                      }
                    })
@@ -248,9 +274,10 @@
                ])
              },
              loading: true,
+             closable: true,
              onOk: () => {
-               this.$Modal.remove()
                this.checkPW()
+               this.$Modal.remove()
              }
            })
          },

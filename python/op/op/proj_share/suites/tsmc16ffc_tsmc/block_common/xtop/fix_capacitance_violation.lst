@@ -1,0 +1,1 @@
+#set capacitance_fix_pins [list U316/Z U498/A]

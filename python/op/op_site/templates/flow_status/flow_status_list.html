@@ -6,32 +6,32 @@
     {% verbatim %}
     <div class="layout-breadcrumb">
       <breadcrumb>
-        <breadcrumb-item><router-link title="go to flow list" :to="{name: 'flow_status_list'}">flows</router-link></breadcrumb-item>
+        <breadcrumb-item>flows</breadcrumb-item>
       </breadcrumb>
     </div>
     {% endverbatim %}
     <div class="layout-content">
       <div class="layout-content-main" style="background-image:url({% static 'images/background_1200x600.jpg' %})">
         <div>
-          <i-input v-model="searchQuery" placeholder="Search" clearable style="width:200px"></i-input>
+          <i-input v-model="searchQuery" placeholder="Search" clearable class="search-box"></i-input>
           <br>
-          <i-table border stripe show-header :columns="table_col" :data="table_data" size="small" ref="table"></i-table>
-          <div style="margin:10px; overflow:hidden">
-            <div style="float:right">
+          <i-table border stripe show-header :columns="table_col" :data="table_data" size="small" height="650" ref="table"></i-table>
+          <div class="table-page">
+            <div>
               <Page :total="dataCount" :page-size="pageSize" show-total @on-change="changePage"></Page>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- <div style="height:300px"></div> -->
   </div>
 </template>
 
 <script>
  const FlowStatusList = {
    template: "#flow_status_list",
-   beforeRouteUpdate (to, from, next) {
+   mixins: [mixin],
+   beforeRouteUpdate: (to, from, next) => {
      this.init()
      next()
    },
@@ -65,14 +65,12 @@
          fixed: "right",
          render: (h, params) => {
            return h("div", [
-             h("Button", {
+             h("i-button", {
                props: {
                  type: "primary",
                  size: "small"
                },
-               style: {
-                 marginRight: "5px"
-               },
+               class: "table-button",
                on: {
                  click: () => {
                    this.show(params.index)
@@ -111,121 +109,125 @@
    },
    methods: {
      init: function() {
+       this.$Loading.start()
        axios({
          method: "get", url: this.url.list
        }).then((response) => {
+         this.$Loading.finish()
          this.rsp_data = response.data
          this.procDataAry()
          this.procColAry()
        }).catch((error) => {
+         this.$Loading.error()
          console.log(error)
        })
      },
      procColAry: function () {
-       this.col_ary = []
-       this.col_ary.push({
-         title: "flow name",
-         key: "obj_name",
-         fixed: "left",
-         width: 150,
-         sortable: true,
-         render: (h, params) => {
-           const row = params.row
-           const pk = row.obj_pk
-           const text = row.obj_name
-           return h("a", {
-             on: {
-               click: () => {
-                 this.$router.push({name: "flow_status_detail", params: {f_id: pk}})
+       this.col_ary = [
+         {
+           title: "flow name",
+           key: "obj_name",
+           fixed: "left",
+           width: 150,
+           sortable: true,
+           render: (h, params) => {
+             const row = params.row
+             const pk = row.obj_pk
+             const text = row.obj_name
+             return h("a", {
+               on: {
+                 click: () => {
+                   this.$router.push({name: "flow_status_detail", params: {f_id: pk}})
+                 }
                }
-             }
-           }, text)
+             }, text)
+           },
+           filters: this.filter_ary_obj.obj_name,
+           filterMultiple: true,
+           filterMethod: function (value, row) {
+             return row.obj_name === value
+           }
          },
-         filters: this.filter_ary_obj.obj_name,
-         filterMultiple: true,
-         filterMethod: function (value, row) {
-           return row.obj_name === value
-         }
-       })
-       this.col_ary.push({
-         title: "Owner",
-         key: "owner",
-         width: 150,
-         sortable: true,
-         filters: this.filter_ary_obj.owner,
-         filterMultiple: true,
-         filterMethod: function (value, row) {
-           return row.owner === value
-         }
-       })
-       this.col_ary.push({
-         title: "Date",
-         key: "created_time",
-         width: 200,
-         sortable: true,
-         sortType: "desc"
-       })
-       this.col_ary.push({
-         title: "Status",
-         key: "status",
-         width: 150,
-         sortable: true,
-         filters: this.filter_ary_obj.status,
-         filterMultiple: true,
-         filterMethod: function (value, row) {
-           return row.status === value
+         {
+           title: "Owner",
+           key: "owner",
+           width: 150,
+           sortable: true,
+           filters: this.filter_ary_obj.owner,
+           filterMultiple: true,
+           filterMethod: function (value, row) {
+             return row.owner === value
+           }
          },
-         render: (h, params) => {
-           const row = params.row
-           const color = row.status === "running" ? "yellow" : row.status === "passed" ? "green" : (row.status === undefined || row.status === "") ? "blue" : "red"
-           const text = row.status
-           return h("Tag", {
-             props: {
-               type: "dot",
-               color: color
-             }
-           }, text)
+         {
+           title: "Date",
+           key: "created_time",
+           width: 200,
+           sortable: true,
+           sortType: "desc"
+         },
+         {
+           title: "Status",
+           key: "status",
+           width: 150,
+           sortable: true,
+           filters: this.filter_ary_obj.status,
+           filterMultiple: true,
+           filterMethod: function (value, row) {
+             return row.status === value
+           },
+           render: (h, params) => {
+             const row = params.row
+             const color = row.status === "running" ? "yellow" : row.status === "passed" ? "green" : (row.status === undefined || row.status === "") ? "blue" : "red"
+             const text = row.status
+             return h("tag", {
+               props: {
+                 type: "dot",
+                 color: color
+               }
+             }, text)
+           }
+         },
+         {
+           title: "Current Stage",
+           key: "cur_stage",
+           width: 200,
+           sortable: true,
+           filters: this.filter_ary_obj.cur_stage,
+           filterMultiple: true,
+           filterMethod: function (value, row) {
+             return row.cur_stage === value
+           }
+         },
+         {
+           title: "Comment",
+           key: "comment",
+           width: 200,
+           sortable: true
+         },
+         {
+           title: "Block",
+           key: "block",
+           width: 150,
+           sortable: true,
+           filters: this.filter_ary_obj.block,
+           filterMultiple: true,
+           filterMethod: function (value, row) {
+             return row.block === value
+           }
+         },
+         {
+           title: "Project",
+           key: "proj",
+           width: 150,
+           sortable: true,
+           filters: this.filter_ary_obj.proj,
+           filterMultiple: true,
+           filterMethod: function (value, row) {
+             return row.proj === value
+           }
          }
-       })
-       this.col_ary.push({
-         title: "Current Stage",
-         key: "cur_stage",
-         width: 200,
-         sortable: true,
-         filters: this.filter_ary_obj.cur_stage,
-         filterMultiple: true,
-         filterMethod: function (value, row) {
-           return row.cur_stage === value
-         }
-       })
-       this.col_ary.push({
-         title: "Comment",
-         key: "comment",
-         width: 200,
-         sortable: true
-       })
-       this.col_ary.push({
-         title: "Block",
-         key: "block",
-         width: 150,
-         sortable: true,
-         filters: this.filter_ary_obj.block,
-         filterMultiple: true,
-         filterMethod: function (value, row) {
-           return row.block === value
-         }
-       })
-       this.col_ary.push({
-         title: "Project",
-         key: "proj",
-         width: 150,
-         sortable: true,
-         filters: this.filter_ary_obj.proj,
-         filterMultiple: true,
-         filterMethod: function (value, row) {
-           return row.proj === value
-         }
-       })
+       ]
      },
      procDataAry: function () {
        this.data_ary = []
@@ -266,6 +268,8 @@
          content += td_key + ": " + this.table_data[index][td_key] + "<br>"
        }
        this.$Modal.info({
+         scrollable: true,
+         closable: true,
          title: "Detailed Info",
          content: content
        })
@@ -277,6 +281,7 @@
    /* created: function () {
     * },*/
    mounted: function () {
+     this.checkCookie()
      this.init()
    }
  }

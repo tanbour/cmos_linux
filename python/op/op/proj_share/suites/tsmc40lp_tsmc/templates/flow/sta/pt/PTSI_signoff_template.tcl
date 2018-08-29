@@ -26,7 +26,7 @@ if {[file isfile $flow_root_dir/${SESSION}.ready]} {file delete $flow_root_dir/$
 ########################################################################
 # PT SETUP
 ########################################################################
-{% include 'pt/setting/ALCHIP-PT-SignOff-CommonSetting.TSMC.N7.tcl' %} 
+{% include 'pt/setting/ALCHIP-PT-SignOff-CommonSetting.TSMC.tcl' %} 
 
 {%- if local.UseHyperScaleMode == "constrain_only" %} 
 ## UseHyperScaleMode == constrain_only

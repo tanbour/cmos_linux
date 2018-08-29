@@ -28,7 +28,16 @@ set cur_stage [lindex [split $cur_stage .] 0]
 ###==================================================================##
 ###  source liblist                                                  ##
 ###==================================================================##
-source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+source {{env.PROJ_LIB}}/liblist/{{ver.LIB}}.tcl
+{%- set sn = local.scenario.upper().split('.') %}
+{%- set sn_std_new = ['DB_STD', sn[1], sn[2]]|join('_') %}
+{%- set sn_mem_new = ['DB_MEM', sn[1], sn[2]]|join('_') %}
+{%- set sn_ip_new = ['DB_IP', sn[1], sn[2]]|join('_') %}
+{%- set sn_io_new = ['DB_IO', sn[1], sn[2]]|join('_') %}
+set DB_STD_{{sn[1]}}_{{sn[2]}}  "{{liblist[sn_std_new]}}"
+set DB_MEM_{{sn[1]}}_{{sn[2]}}  "{{liblist[sn_mem_new]}}"
+set DB_IP_{{sn[1]}}_{{sn[2]}}  "{{liblist[sn_ip_new]}}"
+set DB_IO_{{sn[1]}}_{{sn[2]}}  "{{liblist[sn_io_new]}}"
 
 ###==================================================================##
 ## Design Data Setting                                               ##

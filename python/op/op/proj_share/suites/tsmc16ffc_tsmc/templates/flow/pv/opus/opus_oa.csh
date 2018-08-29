@@ -21,14 +21,30 @@ touch {{cur.cur_flow_rpt_dir}}/$cur_stage.run_time
 #===================================================================
 #=================== set opus input files ==========================
 #===================================================================
-set gds_files                        = "{{liblist.GDS_STD}} {{liblist.GDS_MEM}} {{liblist.GDS_IP}} {{liblist.GDS_IO}}"
+{%- if local.skip_std_oa == "true" %} 
+set gds_files                        = "{{liblist.GDS_MEM}} \
+				                    	{{liblist.GDS_IP}}  \
+                                        {{liblist.GDS_IO}}"
+{%- elif local.skip_std_oa == "false" %} 
+set gds_files                        = "{{liblist.GDS_STD}} \
+                                        {{liblist.GDS_MEM}} \
+				                    	{{liblist.GDS_IP}}  \
+                                        {{liblist.GDS_IO}}"
+{%- endif %}
 set map_file                         = "{{liblist.OPUS_MAPPING_FILE}}" 
 set tech_file                        = "{{liblist.OPUS_TECH_FILE}}"
 set run_time                         = "{{cur.cur_flow_rpt_dir}}/$cur_stage.run_time"
 set gds_plugin_file                  = "{{cur.config_plugins_dir}}/opus_scripts/opus_oa_lib_plugin.list"
 set opus_skip_gen_standard_lib       = "{{local.opus_skip_gen_standard_lib}}"
-set opus_oa_output_path              = "{{local.opus_oa_output_path}}"
-set cds_lib                          = ""
+set skip_std_oa                      = "{{local.skip_std_oa}}"
+#set opus_oa_output_path              = "{{local.opus_oa_output_path}}"
+set std_oa_file                      = "{{local.std_oa_file}}"
+#set cds_lib                          = "{{local.cds_lib_path}}"
+{%- if local.cds_lib_path %}
+set cds_lib                          = "{{local.cds_lib_path}}"
+{%- else %}
+set cds_lib                          = "{{cur.cur_flow_data_dir}}/opus_oa_lib/cds.lib"
+{%- endif %}
 
 #===================================================================
 #=================== opus strmin setting    ========================
@@ -37,8 +53,8 @@ set display_drf                      = "{{liblist.OPUS_DISPLAY_DRF}}"
 set log_file                         = "{{cur.cur_flow_log_dir}}/${cur_stage}.{{env.BLK_NAME}}.log"
 set sum_file                         = "{{cur.cur_flow_rpt_dir}}/${cur_stage}.{{env.BLK_NAME}}.rpt"
 set scr_file                         = "{{cur.flow_scripts_dir}}/{{cur.stage}}/${cur_stage}.lib_stream_in.run"
-{%- if local.opus_oa_output_path %}
-set run_dir                          = "{{local.opus_oa_output_path}}"
+{%- if local.cds_lib_path %}
+set run_dir                          = `dirname $cds_lib`
 {%- else %}
 set run_dir                          = "{{cur.cur_flow_data_dir}}/opus_oa_lib"
 {%- endif %}
@@ -46,15 +62,25 @@ set run_dir                          = "{{cur.cur_flow_data_dir}}/opus_oa_lib"
 #===================================================================
 #==================  transfer STD/MEM/IO/IP gds to OA ==============
 #===================================================================
-{%- if  local.opus_skip_gen_standard_lib == true %} 
+
+{%- if  local.opus_skip_gen_standard_lib == "true" %} 
 echo "Alchip-info:the lib of STD/MEM/IP/IO is already exist,and this step will be skipped!"
 {%- else %}
-mkdir -p ${run_dir} 
+
+mkdir -p ${run_dir}
+{%- if  local.skip_std_oa == "true" %}
+echo "Alchip-info:use the foundary provide SC oa lib.so it will not generate again!"
+touch $cds_lib
+echo "INCLUDE $std_oa_file" >! $cds_lib
+{%- endif %}
+
 {%- if liblist.OPUS_DISPLAY_DRF %}
 cp $display_drf  ${run_dir} -f
 {%- endif %}
 cd ${run_dir}
 foreach gds_file  ( $gds_files )
+if ($gds_file == "") then
+else 
 echo $gds_file
 set lib_name         = `basename ${gds_file} | sed "s#.gds.*##"`
 
@@ -90,6 +116,7 @@ strmin_setting
 echo "opus_oa" >> ${run_time}
 echo "start " `date "+%F %T %a"` >> ${run_time}
 strmin -templateFile ${scr_file}   
+endif
 end
 echo "finish" `date "+%F %T %a"` >> ${run_time}
 cd ..
@@ -107,7 +134,7 @@ else
  cp -rf $cds_lib ${run_dir}
  endif
 cd ${run_dir}
-foreach gds_file (`cat .${gds_plugin_file}`)
+foreach gds_file (`cat ${gds_plugin_file}`)
 echo $gds_file
 set lib_name         = `basename ${gds_file} | cut -d . -f1`
 #=================== generate plugin strmin script ==================

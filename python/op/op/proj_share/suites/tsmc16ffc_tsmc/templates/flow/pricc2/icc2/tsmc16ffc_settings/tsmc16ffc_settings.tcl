@@ -23,13 +23,18 @@ set_app_options -list {opt.common.do_physical_checks legalize}
 ### placer
 {%- if cur.sub_stage == "02_place.tcl" %} 
 # placement abut rule (Only needed in place stage)
-create_abut_rules -number_of_references 4 -output {{cur.flow_scripts_dir}}/pr/lib_space_rule.tcl
-source {{cur.flow_scripts_dir}}/pr/lib_space_rule.tcl
+create_abut_rules -number_of_references 4 -output {{cur.flow_scripts_dir}}/pricc2/lib_space_rule.tcl
+source {{cur.flow_scripts_dir}}/pricc2/lib_space_rule.tcl
 {%- endif %}
 # general
 set_app_options -list {place.rules.min_od_filler_size 2}
 set_app_options -list {place.coarse.enable_enhanced_soft_blockages true}
 set_app_options -list {place.coarse.tns_driven_placement true}
+set_app_options -list {place.coarse.cong_restruct_strategy embed}
+set_app_options -list {place.coarse.cong_restruct_effort high}
+set_app_options -list {place.coarse.wide_cell_use_model true}
+set_app_options -list {place.coarse.congestion_layer_aware true}
+set_app_options -list {place.coarse.auto_timing_control true}
 # congestion
 set_app_options -list {place.coarse.pin_density_aware true}
 set_app_options -list {place.coarse.max_pins_per_square_micron 10}
@@ -39,6 +44,7 @@ set_app_options -list {place.coarse.icg_auto_bound_fanout_limit 40}
 # opt
 set_app_options -list {place_opt.initial_drc.global_route_based 1}
 set_app_options -list {place_opt.flow.optimize_layers true}
+set_app_options -list {place_opt.initial_place.buffering_aware true}
 
 ### -------------------------
 ### refine_opt
@@ -69,3 +75,9 @@ set_app_options -list {route.global.pin_access_factor 5}
 # timing-driven routing
 set_app_options -list {route.common.high_resistance_flow true}
 set_app_options -list {route.common.threshold_noise_ratio 0.15}
+
+### -------------------------
+### legalize
+set_app_options -list {place.legalize.enable_advanced_legalizer true}
+set_app_options -list {place.legalize.optimize_pin_access_using_cell_spacing true}
+

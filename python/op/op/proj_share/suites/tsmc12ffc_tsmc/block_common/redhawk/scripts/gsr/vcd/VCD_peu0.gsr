@@ -1,0 +1,16 @@
+#===================================================================
+#=================== peu0 1213 =====================================
+#===================================================================
+
+POWER_ANALYSIS_MODE averaged
+DYNAMIC_SIMULATION_TIME 400000e-12
+VCD_FILE {
+ peu0 /proj/Mars2_new/from_customer/20161212/peu0.vcd.gz
+ FILE_TYPE       VCD
+ SELECT_RANGE    -1 -1
+# START_TIME      4100000
+# END_TIME        4500000
+ FRONT_PATH      "test_top/dut_top/peu0/"
+ SUBSTITUTE_PATH ""
+ TRUE_TIME       1
+}

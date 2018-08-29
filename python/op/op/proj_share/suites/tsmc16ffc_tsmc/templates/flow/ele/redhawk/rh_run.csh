@@ -8,7 +8,7 @@
 #===================================================================
 #=================== run redhawk ===================================
 #===================================================================
-cd {{local.func}}
+cd {{local._multi_inst}}
 echo "time : start redhawk at `date`" >> ./info.txt
 #bsub {{local._job_queue}} -P FJR1300 -Is {{local._job_cpu_number}}  {{local._job_resource}} "redhawk -b ./scripts/redhawk.cmd -lmwait"
 redhawk -b ./scripts/redhawk.cmd -lmwait

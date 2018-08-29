@@ -11,7 +11,6 @@ import fnmatch
 import configparser
 import itertools
 import json
-import pprint
 import signal
 import psutil
 import jinja2
@@ -162,16 +161,14 @@ def cfm(exit_str="action aborted"):
     if apply_rsp.strip() not in ("yes", "ye", "y"):
         raise SystemExit(exit_str)
 
-def pp_list(pp_obj, str_flg=False, json_flg=False):
+def pp_list(pp_obj, str_flg=False):
     """to pretty print list infomation"""
     appfix_str = '*'*30
     print(appfix_str)
     if str_flg:
         print(pp_obj)
-    elif json_flg:
-        print(json.dumps(pp_obj, indent=4))
     else:
-        pprint.pprint(pp_obj, width=-1)
+        print(json.dumps(pp_obj, indent=4, default=str))
     print(appfix_str)
 
 def pterminate(proc_pid):
@@ -269,7 +266,7 @@ class ColoredFormatter(logging.Formatter):
         msg = logging.Formatter.format(self, record)
         return msg.replace(level_name, log_colors.get(level_name, level_name))
 
-class REOpter(object):
+class REOpter():
     """customized class for reusing regex matching pattern groups"""
     def __init__(self, i_str):
         self.i_str = i_str

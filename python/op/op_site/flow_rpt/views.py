@@ -4,9 +4,12 @@ from rest_framework import status
 from rest_framework import generics
 from rest_framework import permissions
 from .models import User, Title, Proj, Block, Flow, Stage, Signoff
-from .serializers import UserSerializer, TitleSerializer, ProjSerializer, BlockSerializer, FlowSerializer, StageSerializer, SignoffSerializer
-from .serializers import UserRelatedSerializer, ProjRelatedSerializer, BlockRelatedSerializer, FlowRelatedSerializer, StageDetailSerializer
-from .serializers import FlowStatusSerializer, FlowStatusRelatedSerializer
+from .serializers import TitleSerializer, ProjSerializer
+from .serializers import UserListSerializer, BlockListSerializer, FlowListSerializer, StageListSerializer
+from .serializers import UserDetailSerializer, BlockDetailSerializer, FlowDetailSerializer, StageDetailSerializer
+from .serializers import FlowCmpListSerializer
+from .serializers import FlowStatusListSerializer, FlowStatusDetailSerializer
+from .serializers import SignoffSerializer
 from django.db.models import Q
 from django.utils import timezone as tz
 from django.conf import settings
@@ -23,11 +26,13 @@ class UserCheck(views.APIView):
     def post(self, request):
         user = request.data.get("user")
         password = request.data.get("password")
+        if not user or not password:
+            return Response({"message": f"user name is NA"}, status=status.HTTP_401_UNAUTHORIZED)
         pam_p = pam.pam()
         if not pam_p.authenticate(user, password):
             return Response({"message": f"user {user} is unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
-        User.objects.get_or_create({"name": user}, name=user)
-        return Response({"check_flg": True})
+        user_obj, _ = User.objects.get_or_create({"name": user}, name=user)
+        return Response({"check_flg": True, "user_id": user_obj.pk})
 
 # flow_rpt app
 class RunnerProj(views.APIView):
@@ -173,19 +178,18 @@ class RunnerStage(views.APIView):
              "created_time": created_time, "status": status, "version": version,
              "data": request.data.get("data", {})},
             name=stage_name, owner=owner_obj, created_time=created_time)
-        if "signoff" in stage_name:
-            signoff_dic_dic = collections.defaultdict(dict)
-            for so_k, so_v in request.data.get("data", {}).items():
-                if so_k.endswith("_raw"):
-                    continue
-                so_k_lst = so_k.split("_")
-                signoff_dic_dic[so_k_lst[1]][so_k_lst[2]] = so_v
-            for signoff_dic_k, signoff_dic_v in signoff_dic_dic.items():
-                signoff_obj, so_created_flg = Signoff.objects.update_or_create(
-                    {"name": signoff_dic_k, "block": block_obj, "l_flow": flow_obj,
-                     "l_stage": stage_obj, "l_user": owner_obj, "data": signoff_dic_v},
-                    name=signoff_dic_k, block=block_obj)
         stage_obj.flow.add(flow_obj)
+        signoff_dic_dic = collections.defaultdict(dict)
+        for so_k, so_v in request.data.get("data", {}).items():
+            if not so_k.startswith("signoffcheck_"):
+                continue
+            so_k_lst = so_k.split("_")
+            signoff_dic_dic[so_k_lst[1]][so_k_lst[2]] = so_v
+        for signoff_dic_k, signoff_dic_v in signoff_dic_dic.items():
+            signoff_obj, so_created_flg = Signoff.objects.update_or_create(
+                {"name": signoff_dic_k, "block": block_obj, "l_flow": flow_obj,
+                 "l_stage": stage_obj, "l_user": owner_obj, "data": signoff_dic_v},
+                name=signoff_dic_k, block=block_obj)
         return Response({"stage_name": stage_obj.name, "created_flg": created_flg})
 
 class RunnerUpload(views.APIView):
@@ -220,6 +224,42 @@ class RunnerUpload(views.APIView):
             shutil.copyfileobj(file_obj, r_f)
         return Response({"file_url": os.path.join(url_tar_dir, ts_file_name)})
 
+class RunnerSignoff(views.APIView):
+    """runner platform post signoff info"""
+    def post(self, request, format=None):
+        for data_dic in request.data:
+            l_user_name = data_dic.get("l_user")
+            signoff_name = data_dic.get("name")
+            proj_name = data_dic.get("proj")
+            block_name = data_dic.get("block")
+            signoff_data = data_dic.get("data", {})
+            if not signoff_name:
+                return Response({"message": "signoff item name is NA"}, status=status.HTTP_400_BAD_REQUEST)
+            if not proj_name:
+                return Response({"message": "proj name is NA"}, status=status.HTTP_400_BAD_REQUEST)
+            if not block_name:
+                return Response({"message": "block name is NA"}, status=status.HTTP_400_BAD_REQUEST)
+            if not l_user_name:
+                return Response({"message": "latest user name is NA"}, status=status.HTTP_400_BAD_REQUEST)
+            l_user_obj, _ = User.objects.get_or_create({"name": l_user_name}, name=l_user_name)
+            proj_obj, _ = Proj.objects.get_or_create({"name": proj_name}, name=proj_name)
+            block_obj, _ = Block.objects.get_or_create(
+                {"name": block_name, "proj": proj_obj}, name=block_name, proj=proj_obj)
+            signoff_qs = Signoff.objects.filter(block=block_obj, name=signoff_name)
+            if not signoff_qs:
+                if not signoff_data.get("judge"):
+                    signoff_data["judge"] = "NG"
+                Signoff.objects.create(name=signoff_name, block=block_obj, l_user=l_user_obj, data=signoff_data)
+            elif signoff_data.get("support"):
+                signoff_obj = signoff_qs.first()
+                signoff_judge = signoff_obj.data.get("judge")
+                signoff_comment = signoff_obj.data.get("comment")
+                signoff_obj.data.update(signoff_data)
+                signoff_obj.data["judge"] = signoff_judge
+                signoff_obj.data["comment"] = signoff_comment
+                signoff_obj.save()
+        return Response({"message": "filling db with signoff items done"})
+
 class TitleList(generics.ListAPIView):
     """flow report title list"""
     queryset = Title.objects.all()
@@ -229,16 +269,6 @@ class TitleDetail(generics.RetrieveAPIView):
     """flow report title detail"""
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-
-class SignoffList(generics.ListAPIView):
-    """flow report signoff list"""
-    queryset = Signoff.objects.all()
-    serializer_class = SignoffSerializer
-
-class SignoffDetail(generics.RetrieveAPIView):
-    """flow report signoff detail"""
-    queryset = Signoff.objects.all()
-    serializer_class = SignoffSerializer
 
 class ProjList(generics.ListAPIView):
     """flow report project list"""
@@ -269,70 +299,84 @@ class ProjList(generics.ListAPIView):
 class ProjDetail(generics.RetrieveAPIView):
     """flow report project detail"""
     queryset = Proj.objects.all()
-    serializer_class = ProjRelatedSerializer
+    serializer_class = ProjSerializer
 
 class BlockList(generics.ListAPIView):
     """flow report block list"""
     queryset = Block.objects.all()
-    serializer_class = BlockSerializer
+    serializer_class = BlockListSerializer
     def get_queryset(self, *args, **kwargs):
-        name = self.request.GET.get("block")
-        proj = self.request.GET.get("proj")
-        queryset = self.queryset.filter(name=name) if name else self.queryset.all()
-        queryset = queryset.filter(proj__name=proj) if proj else queryset
+        p_id = self.request.GET.get("p_id")
+        user = self.request.GET.get("user")
+        queryset = self.queryset.filter(proj=p_id) if p_id else self.queryset.all()
+        if user:
+            q_filter = Q()
+            block_set = set()
+            user_obj = User.objects.filter(name=user).first()
+            proj_obj = Proj.objects.filter(pk=p_id).first()
+            if proj_obj not in user_obj.proj_admin.all():
+                for query_obj in Flow.objects.filter(owner__name=user):
+                    block_name = query_obj.block.name
+                    if block_name in block_set:
+                        continue
+                    block_set.add(query_obj.block.name)
+                    q_filter = q_filter|Q(name=block_name)
+                queryset = queryset.filter(q_filter) if q_filter else queryset.none()
         return queryset
 
 class BlockDetail(generics.RetrieveAPIView):
     """flow report block detail"""
     queryset = Block.objects.all()
-    serializer_class = BlockRelatedSerializer
+    serializer_class = BlockDetailSerializer
 
 class FlowList(generics.ListAPIView):
     """flow report flow list"""
     queryset = Flow.objects.all()
-    serializer_class = FlowSerializer
+    serializer_class = FlowListSerializer
     def get_queryset(self, *args, **kwargs):
-        name = self.request.GET.get("flow")
-        block = self.request.GET.get("block")
-        proj = self.request.GET.get("proj")
-        owner = self.request.GET.get("owner")
-        queryset = self.queryset.filter(name=name) if name else self.queryset.all()
-        queryset = queryset.filter(block__name=block) if block else queryset
-        queryset = queryset.filter(block__proj__name=proj) if proj else queryset
-        queryset = queryset.filter(owner__name=owner) if owner else queryset
+        b_id = self.request.GET.get("b_id")
+        user = self.request.GET.get("user")
+        queryset = self.queryset.filter(block=b_id) if b_id else self.queryset.all()
+        if user:
+            user_obj = User.objects.filter(name=user).first()
+            block_obj = Block.objects.filter(pk=b_id).first()
+            if block_obj and block_obj.proj not in user_obj.proj_admin.all():
+                queryset = queryset.filter(owner__name=user)
+        return queryset
+
+class FlowCmpList(generics.ListAPIView):
+    """flow report flow list"""
+    queryset = Flow.objects.all()
+    serializer_class = FlowCmpListSerializer
+    def get_queryset(self, *args, **kwargs):
+        id_lst_str = self.request.GET.get("id_lst_str", "")
+        user = self.request.GET.get("user")
+        queryset = self.queryset.filter(pk__in=id_lst_str.split(",")) if id_lst_str else self.queryset.all()
+        if user:
+            user_obj = User.objects.filter(name=user).first()
+            block_obj = Block.objects.filter(pk=b_id).first()
+            if block_obj.proj not in user_obj.proj_admin.all():
+                queryset = queryset.filter(owner__name=user)
         return queryset
 
 class FlowDetail(generics.RetrieveAPIView):
     """flow report flow detail"""
     queryset = Flow.objects.all()
-    serializer_class = FlowRelatedSerializer
-
-class ProjSignoffBlockDetail(generics.ListAPIView):
-    """proj signoff block detail"""
-    queryset = Signoff.objects.all()
-    serializer_class = SignoffSerializer
-    def get_queryset(self, *args, **kwargs):
-        queryset = self.queryset.all()
-        block_id = kwargs.get("pk", None)
-        if block_id:
-            queryset = queryset.filter(block__id=block_id)
-        return queryset
+    serializer_class = FlowDetailSerializer
 
 class StageList(generics.ListAPIView):
     """flow report stage list"""
     queryset = Stage.objects.all()
-    serializer_class = StageSerializer
+    serializer_class = StageListSerializer
     def get_queryset(self, *args, **kwargs):
-        name = self.request.GET.get("stage")
-        flow = self.request.GET.get("flow")
-        block = self.request.GET.get("block")
-        proj = self.request.GET.get("proj")
-        owner = self.request.GET.get("owner")
-        queryset = self.queryset.filter(name=name) if name else self.queryset.all()
-        queryset = queryset.filter(flow__name=flow) if flow else queryset
-        queryset = queryset.filter(flow__block__name=block) if block else queryset
-        queryset = queryset.filter(flow__block__proj__name=proj) if proj else queryset
-        queryset = queryset.filter(owner__name=owner) if owner else queryset
+        f_id = self.request.GET.get("f_id")
+        user = self.request.GET.get("user")
+        queryset = self.queryset.filter(flow=f_id) if f_id else self.queryset.all()
+        if user:
+            user_obj = User.objects.filter(name=user).first()
+            flow_obj = Flow.objects.filter(pk=f_id).first()
+            if flow_obj.block.proj not in user_obj.proj_admin.all():
+                queryset = queryset.filter(owner__name=user)
         return queryset
 
 class StageDetail(generics.RetrieveAPIView):
@@ -343,27 +387,21 @@ class StageDetail(generics.RetrieveAPIView):
 class UserList(generics.ListCreateAPIView):
     """flow report user list"""
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserListSerializer
     def get_queryset(self, *args, **kwargs):
-        name = self.request.GET.get("user")
-        return self.queryset.filter(name=name) if name else self.queryset.all()
+        user = self.request.GET.get("user")
+        return self.queryset.filter(name=user) if user else self.queryset.all()
 
 class UserDetail(generics.RetrieveAPIView):
     """flow report user detail"""
     queryset = User.objects.all()
-    serializer_class = UserRelatedSerializer
-    def get_queryset(self, *args, **kwargs):
-        # qs_lst = []
-        # for qs_obj in self.queryset.all():
-        #     # qs_obj.mmm = qs_obj.block_owner.first()
-        #     qs_lst.append(qs_obj)
-        return self.queryset
+    serializer_class = UserDetailSerializer
 
 # flow_status app
 class FlowStatusList(generics.ListAPIView):
     """flow report flow status list"""
     queryset = Flow.objects.all()
-    serializer_class = FlowStatusSerializer
+    serializer_class = FlowStatusListSerializer
     def get_queryset(self, *args, **kwargs):
         queryset = self.queryset.all()
         user = self.request.GET.get("user")
@@ -381,7 +419,7 @@ class FlowStatusList(generics.ListAPIView):
 class FlowStatusDetail(generics.RetrieveAPIView):
     """flow report flow status detail"""
     queryset = Flow.objects.all()
-    serializer_class = FlowStatusRelatedSerializer
+    serializer_class = FlowStatusDetailSerializer
 
 # proj_signoff app
 class ProjSignoffList(generics.ListAPIView):
@@ -389,9 +427,14 @@ class ProjSignoffList(generics.ListAPIView):
     queryset = Signoff.objects.all()
     serializer_class = SignoffSerializer
     def get_queryset(self, *args, **kwargs):
-        # p_id = kwargs.get("pk", None)
+        # p_id = kwargs.get("id", None)
         p_id = self.request.GET.get("p_id")
         b_id = self.request.GET.get("b_id")
-        queryset = self.queryset.filter(block__proj__id=p_id) if p_id else self.queryset.all()
-        queryset = queryset.filter(block__id=b_id) if b_id else queryset
+        queryset = self.queryset.filter(block__proj=p_id) if p_id else self.queryset.all()
+        queryset = queryset.filter(block=b_id) if b_id else queryset
         return queryset
+
+class ProjSignoffDetail(generics.RetrieveUpdateDestroyAPIView):
+    """be report project detail"""
+    queryset = Signoff.objects.all()
+    serializer_class = SignoffSerializer

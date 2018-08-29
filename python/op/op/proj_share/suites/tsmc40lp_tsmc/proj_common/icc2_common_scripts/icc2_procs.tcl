@@ -1544,18 +1544,171 @@ proc swap_300_tapcell {} {
 }	
 
 ### for 22nm ULP
-proc add_DCAP {} {
+proc add_22nm_DCAP {} {
 echo "need to be complete add_DCAP"
-}
+	set DCAP {\
+	}
+	create_stdcell_fillers \
+		-lib_cells $DCAP \
+		-prefix fillerstddcap
+    connect_pg_net -net VDD [get_pins -phy */VDD]
+    connect_pg_net -net VDD [get_pins -phy */VPP]
+    connect_pg_net -net VSS [get_pins -phy */VSS]
+    connect_pg_net -net VSS [get_pins -phy */VBB]
 
-proc add_GDCAP {} {
+}
+proc add_22nm_GDCAP {} {
 echo "need to be complete add_GDCAP"
+	set GDCAP {\
+}
+	create_stdcell_fillers \
+		-lib_cells $GDCAP \
+		-prefix fillerstdgdcap
+    connect_pg_net -net VDD [get_pins -phy */VDD]
+    connect_pg_net -net VDD [get_pins -phy */VPP]
+    connect_pg_net -net VSS [get_pins -phy */VSS]
+    connect_pg_net -net VSS [get_pins -phy */VBB]
 }
 
-proc add_Fillers {} {
+proc add_22nm_Fillers {} {
 echo "need to be complete add_fillers"
+	set FILL {\
+}
+	create_stdcell_fillers \
+		-lib_cells $FILL \
+		-prefix fillerstdfiller
+    connect_pg_net -net VDD [get_pins -phy */VDD]
+    connect_pg_net -net VDD [get_pins -phy */VPP]
+    connect_pg_net -net VSS [get_pins -phy */VSS]
+    connect_pg_net -net VSS [get_pins -phy */VBB]
+}
+
+### for 40nm LP
+proc add_40nm_9T_DCAP {} {
+echo "need to be complete add_DCAP"
+set DCAP {\
+           */DCAP64BWPHVT \
+           */DCAP32BWPHVT \
+           */DCAP16BWPHVT \
+           */DCAP8BWPHVT \
+           */DCAP4BWPHVT \
+           }
+        create_stdcell_fillers \
+                -lib_cells [get_lib_cells $DCAP] \
+                -prefix fillerstddcap \
+		-rules no_1x
+
+remove_stdcell_fillers_with_violation
+#    connect_pg_net -net VDD [get_pins -phy */VDD]
+#    connect_pg_net -net VDD [get_pins -phy */VPP]
+#    connect_pg_net -net VSS [get_pins -phy */VSS]
+#    connect_pg_net -net VSS [get_pins -phy */VBB]
+}
+
+proc add_40nm_9T_GDCAP {} {
+echo "need to be complete add_GDCAP"
+set GDCAP {\
+          */GDCAP10BWP \
+          */GDCAP4BWP \
+          */GDCAP3BWP \
+          */GDCAP2BWP \
+          */GDCAPBWP \
+          }
+          create_stdcell_fillers \
+                -lib_cells [get_lib_cells $GDCAP] \
+                -prefix fillerstddcap \
+		-rule no_1x
+
+remove_stdcell_fillers_with_violation
+#    connect_pg_net -net VDD [get_pins -phy */VDD]
+#    connect_pg_net -net VDD [get_pins -phy */VPP]
+#    connect_pg_net -net VSS [get_pins -phy */VSS]
+#    connect_pg_net -net VSS [get_pins -phy */VBB]
+}
+
+proc add_40nm_9T_Fillers {} {
+echo "need to be complete add_fillers"
+set FILL {\
+          */FILL64BWPHVT \
+          */FILL32BWPHVT \
+          */FILL16BWPHVT \
+          */FILL8BWPHVT \
+          */FILL4BWPHVT \
+          */FILL3BWPHVT \
+          */FILL2BWPHVT \
+          */FILL1BWPHVT \
+          }
+        create_stdcell_fillers \
+                -lib_cells [get_lib_cells $FILL] \
+                -prefix fillerstdfiller
+#    connect_pg_net -net VDD [get_pins -phy */VDD]
+#    connect_pg_net -net VDD [get_pins -phy */VPP]
+#    connect_pg_net -net VSS [get_pins -phy */VSS]
+#    connect_pg_net -net VSS [get_pins -phy */VBB]
 }
 
 
+proc add_40nm_12T_DCAP {} {
+echo "need to be complete add_DCAP"
+set DCAP {\
+           */DCAP64BWP12TM1PHVT \
+           */DCAP32BWP12TM1PHVT \
+           */DCAP16BWP12TM1PHVT \
+           */DCAP8BWP12TM1PHVT \
+           */DCAP4BWP12TM1PHVT \
+           }
+        create_stdcell_fillers \
+                -lib_cells [get_lib_cells $DCAP] \
+                -prefix fillerstddcap \
+		-rules no_1x
+
+remove_stdcell_fillers_with_violation
+#    connect_pg_net -net VDD [get_pins -phy */VDD]
+#    connect_pg_net -net VDD [get_pins -phy */VPP]
+#    connect_pg_net -net VSS [get_pins -phy */VSS]
+#    connect_pg_net -net VSS [get_pins -phy */VBB]
+}
+
+proc add_40nm_12T_GDCAP {} {
+echo "need to be complete add_GDCAP"
+set GDCAP {\
+          */GDCAP10BWP12TM1P \
+          */GDCAP4BWP12TM1P \
+          */GDCAP3BWP12TM1P \
+          */GDCAP2BWP12TM1P \
+          */GDCAPBWP12TM1P \
+          }
+          create_stdcell_fillers \
+                -lib_cells [get_lib_cells $GDCAP] \
+                -prefix fillerstddcap \
+		-rule no_1x
+
+remove_stdcell_fillers_with_violation
+#    connect_pg_net -net VDD [get_pins -phy */VDD]
+#    connect_pg_net -net VDD [get_pins -phy */VPP]
+#    connect_pg_net -net VSS [get_pins -phy */VSS]
+#    connect_pg_net -net VSS [get_pins -phy */VBB]
+}
+
+proc add_40nm_12T_Fillers {} {
+echo "need to be complete add_fillers"
+set FILL {\
+          */FILL64BWP12TM1PHVT \
+          */FILL32BWP12TM1PHVT \
+          */FILL16BWP12TM1PHVT \
+          */FILL8BWP12TM1PHVT \
+          */FILL4BWP12TM1PHVT \
+          */FILL3BWP12TM1PHVT \
+          */FILL2BWP12TM1PHVT \
+          */FILL1BWP12TM1PHVT \
+          }
+        create_stdcell_fillers \
+                -lib_cells [get_lib_cells $FILL] \
+                -prefix fillerstdfiller
+#    connect_pg_net -net VDD [get_pins -phy */VDD]
+#    connect_pg_net -net VDD [get_pins -phy */VPP]
+#    connect_pg_net -net VSS [get_pins -phy */VSS]
+#    connect_pg_net -net VSS [get_pins -phy */VBB]
+}
 
 

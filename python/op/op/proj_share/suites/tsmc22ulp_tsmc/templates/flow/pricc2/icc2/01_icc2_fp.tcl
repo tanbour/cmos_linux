@@ -15,11 +15,12 @@ set cur_stage [lindex [split $cur_stage .] 0]
 set pre_flow_data_dir "{{pre.flow_data_dir}}/{{pre.stage}}"
 
 source {{env.PROJ_SHARE_CMN}}/icc2_common_scripts/icc2_procs.tcl
-source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+source {{env.PROJ_LIB}}/liblist/{{ver.LIB}}.tcl
 source {{cur.cur_flow_sum_dir}}/{{cur.sub_stage}}.op._job.tcl
+# include 00_icc2_setup.tcl
+{% include 'icc2/00_icc2_setup.tcl' %}
 
 set blk_name          "{{env.BLK_NAME}}"
-set blk_sdc_dir       "{{env.BLK_SDC}}/{{ver.sdc}}"
 set blk_rpt_dir       "{{cur.cur_flow_rpt_dir}}"
 set blk_proj_cmn      "{{env.PROJ_SHARE_CMN}}"
 set blk_utils_dir     "{{env.PROJ_UTILS}}"
@@ -35,13 +36,16 @@ set enable_fp_reporting                                 "{{local.enable_fp_repor
 set use_usr_common_scripts_connect_pg_net_tcl           "{{local.use_usr_common_scripts_connect_pg_net_tcl}}"
 set tcl_mv_setup_file                                   "{{local.tcl_mv_setup_file}}"
 set write_def_convert_icc2_site_to_lef_site_name_list   "{{local.write_def_convert_icc2_site_to_lef_site_name_list}}"
-set icc_icc2_gds_layer_mapping_file                     "{{local.icc_icc2_gds_layer_mapping_file}}"
 {%- if local.lib_cell_height == "240" %}
 set n07_wire_pocvm                                      "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/n7_wire_pocv/6T/n07_wire.pocvm"
 {%- elif local.lib_cell_height == "300" %}
 set n07_wire_pocvm                                      "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/n7_wire_pocv/7d5T/n07_wire.pocvm"
 {%- endif %}
-set icc_icc2_gds_layer_mapping_file                     "${ICC_ICC2_GDS_LAYER_MAPPING_FILE}"
+{%- if local.icc_icc2_gds_layer_mapping_file %}
+set icc_icc2_gds_layer_mapping_file                     "{{local.icc_icc2_gds_layer_mapping_file}}"
+{%- else %}
+set icc_icc2_gds_layer_mapping_file                     "{{liblist.ICC_ICC2_GDS_LAYER_MAPPING_FILE}}"
+{%- endif %}
 {%- if local.use_dc_output_netlist == "true" %}
 set blk_netlist_list  "$pre_flow_data_dir/{{env.BLK_NAME}}.v"
 {%- else %}
@@ -64,11 +68,26 @@ set scandef_file "{{env.BLK_SCANDEF}}/{{ver.scandef}}/{{env.BLK_NAME}}.scandef"
 {%- else %}
 set scandef_file ""
 {%- endif %}
-set ndm_tech          "${NDM_TECH}" 
-set ndm_std           "[glob ${NDM_STD}]"
-set ndm_mem           "[glob ${NDM_MEM}]"
-set ndm_ip            "[glob ${NDM_IP}]"
-set ndm_io            "[glob ${NDM_IO}]"                                                                                                    
+
+# ICC2 AOCV table----------------------------------------------------------------------
+{%- if local.scenario_list is string %}
+{%- set sn = local.scenario_list.upper().split('.') %}
+{%- set sn_new = ['ICC2_AOCV', sn[1], sn[2], sn[4]]|join('_') %}
+set ICC2_AOCV_{{sn[1]}}_{{sn[2]}}_{{sn[4]}}  "{{liblist[sn_new]}}"
+{%- elif local.scenario_list is sequence %}
+{%- for scenario in local.scenario_list %}
+{%- set sn = scenario.upper().split('.') %}
+{%- set sn_new = ['ICC2_AOCV', sn[1], sn[2], sn[4]]|join('_') %}
+set ICC2_AOCV_{{sn[1]}}_{{sn[2]}}_{{sn[4]}}  "{{liblist[sn_new]}}"
+{%- endfor %}
+{%- endif %}
+ 
+# ICC2 ndm list----------------------------------------------------------------------
+set ndm_tech          "{{liblist.NDM_TECH}}" 
+set ndm_std           "[glob {{liblist.NDM_STD}}]"
+set ndm_mem           "[glob {{liblist.NDM_MEM}}]"
+set ndm_ip            "[glob {{liblist.NDM_IP}}]"
+set ndm_io            "[glob {{liblist.NDM_IO}}]"                                                                                                    
 
 {#-  #backup
  if { ${NDM_MEM} != ""  } { 
@@ -87,7 +106,6 @@ set reference_library "$ndm_tech $ndm_std $ndm_mem $ndm_ip $ndm_io"
 set sub_block_refs                  "{{local.sub_block_refs}}" 
 set release_dir_pnr                 "{{local.release_dir_pnr}}"
 set use_abstracts_for_sub_blocks    "{{local.use_abstracts_for_sub_blocks}}"
-{% include 'icc2/00_icc2_setup.tcl' %}
 
 set_host_option -max_cores $icc2_cpu_number
 
@@ -111,7 +129,7 @@ source {{cur.config_plugins_dir}}/icc2_scripts/01_fp/00_usr_pre_create_lib.tcl
 file copy $blk_netlist_list  $cur_design_library
 {%- else %}
 create_lib \
-    -use_technology_lib ${NDM_TECH} \
+    -use_technology_lib ${ndm_tech} \
     -ref_libs $reference_library \
     $cur_design_library
 {%- endif %}
@@ -241,7 +259,7 @@ read_def -add_def_only_objects all {{env.BLK_FP}}/{{ver.fp}}/{{env.BLK_NAME}}.de
 {%- endif %}
 {%- endif %}
 {%- elif local.enable_manual_floorplan == "true" %}
-puts  "Alchip-info: manual floorplan is enabled, please start manual work and save block before exit icc2! remember to source init_design.tcl.7nm_t.floorplan_settings in {{env.PROJ_SHARE_CMN}}/icc2_common_scripts"
+puts  "Alchip-info: manual floorplan is enabled, please start manual work and save block before exit icc2! "
 return
 {%- endif %}
 

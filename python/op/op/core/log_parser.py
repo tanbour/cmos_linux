@@ -6,25 +6,32 @@ Description: log & report parser
 
 import os
 import re
+import copy
 import collections
 from jinja2 import Template
 from utils import pcom
 
 LOG = pcom.gen_logger(__name__)
 
-class LogParser(object):
+class LogParser():
     """log & report parser"""
+    parser_env_dic = {}
 
     def __init__(self):
         self.parser_dic = {}
         self.parser = collections.namedtuple(
             'parser', ['path', 'multiline', 'recomp_lst', 'template'])
 
+    @classmethod
+    def set_environment(cls, env_dic):
+        """store the environment which the log parser is running on"""
+        LogParser.parser_env_dic.update(env_dic)
+
     def add_parser(self, path, typ, reg_lst, tpl):
         ''' add parser specification '''
         realpath = os.path.realpath(path)
         if not os.path.isfile(realpath):
-            LOG.error(f"parsing log file {realpath} is NA")
+            LOG.error("parsing log file %s is NA", realpath)
             raise SystemExit()
         if realpath not in self.parser_dic:
             self.parser_dic[realpath] = []
@@ -38,8 +45,10 @@ class LogParser(object):
     @classmethod
     def _run_template(cls, tpl_text, raw_dic):
         ''' evaluate template with extracted env '''
+        env_dic = copy.copy(LogParser.parser_env_dic)
+        env_dic.update(raw_dic)
         template = Template(tpl_text)
-        eval_text = template.render(raw_dic)
+        eval_text = template.render(env_dic)
         return eval(eval_text)
 
     @classmethod
@@ -49,7 +58,7 @@ class LogParser(object):
 
     def _search_file(self, path, parser_single_lst, parser_multi_lst):
         ''' search pattern for file '''
-        LOG.info(f"parsing log file {path}")
+        LOG.info("parsing log file %s", path)
         ext_dic = {}
         raw_dic = {"path": path}
         with open(path, 'r') as p_f:
@@ -61,7 +70,7 @@ class LogParser(object):
                     for recomp in parser.recomp_lst:
                         l_m = recomp.search(line)
                         if l_m:
-                            LOG.debug(f"Match: {line}")
+                            LOG.debug("Match: %s", line)
                             raw_dic.update(l_m.groupdict())
                             if parser.template:
                                 data = self._run_template(parser.template, raw_dic)
@@ -81,7 +90,7 @@ class LogParser(object):
                     for recomp in parser.recomp_lst:
                         l_m = recomp.search(multi_line)
                         if l_m:
-                            LOG.debug(f"Match: {multi_line}")
+                            LOG.debug("Match: %s", multi_line)
                             raw_dic.update(l_m.groupdict())
                             if parser.template:
                                 data = self._run_template(parser.template, raw_dic)

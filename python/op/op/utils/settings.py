@@ -7,7 +7,7 @@ Description: op settings
 import os
 
 # op related settings
-DEBUG = True
+DEBUG = False
 
 BACKEND = True if not DEBUG else False
 MAIL_ALERT = True if not DEBUG else False
@@ -23,6 +23,7 @@ OP_UTILS = f"{OP_ROOT}{os.sep}proj_share{os.sep}utils"
 # project related settings
 FLG_FILE = ".alchip_proj_root_flg"
 BLK_IGNORE_LST = ["share"]
+BLK_CFG_UNFILL_LST = ["proj", "signoff"]
 GITIGNORE = f"run/{os.linesep}*.sw[op]{os.linesep}"
 
 BOOT_CFG = f"$PROJ_ROOT{os.sep}share{os.sep}config{os.sep}proj.cfg"
@@ -35,9 +36,11 @@ PROJ_REPO = "git"
 PROJ_URL = "http://cnshscmserver.alchip.com/CN/SoC/api/rest/repositories.json"
 Q_U = "op_query"
 REPO_AUTH_ERR_STR_LST = ["Authentication failed", "401 while accessing"]
-REPO_BRANCH_ERR_STR = "Couldn't find remote ref master"
+REPO_BRANCH_ERR_STR_LST = [
+    "Couldn't find remote ref master",
+    "error: pathspec 'master' did not match any file"]
 
-MP_POOL = 8
+MP_POOL = 48
 
 # json proc
 MAIL_DOMAIN_LST = ['@alchip.com']

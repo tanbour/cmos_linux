@@ -8,8 +8,10 @@ set sh_continue_on_error true
 ## SETUP                                                             ##
 ##===================================================================##
 source {{env.PROJ_SHARE_CMN}}/icc2_common_scripts/icc2_procs.tcl
-source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+source {{env.PROJ_LIB}}/liblist/{{ver.LIB}}.tcl
 source {{cur.cur_flow_sum_dir}}/{{cur.sub_stage}}.op._job.tcl
+# include 00_icc2_setup.tcl
+{% include 'icc2/00_icc2_setup.tcl' %}
 
 set pre_stage "{{pre.sub_stage}}"
 set cur_stage "{{cur.sub_stage}}"
@@ -47,9 +49,21 @@ set clock_opt_write_data                              "{{local.clock_opt_write_d
 set enable_clock_opt_reporting                        "{{local.enable_clock_opt_reporting}}"
 set use_usr_common_scripts_connect_pg_net_tcl         "{{local.use_usr_common_scripts_connect_pg_net_tcl}}"
 set write_def_convert_icc2_site_to_lef_site_name_list "{{local.write_def_convert_icc2_site_to_lef_site_name_list}}"
-set icc_icc2_gds_layer_mapping_file                   "${ICC_ICC2_GDS_LAYER_MAPPING_FILE}"
+set icc_icc2_gds_layer_mapping_file                   "{{liblist.ICC_ICC2_GDS_LAYER_MAPPING_FILE}}"
 
-{% include 'icc2/00_icc2_setup.tcl' %}
+# ICC2 AOCV table----------------------------------------------------------------------
+{%- if local.scenario_list is string %}
+{%- set sn = local.scenario_list.upper().split('.') %}
+{%- set sn_new = ['ICC2_AOCV', sn[1], sn[2], sn[4]]|join('_') %}
+set ICC2_AOCV_{{sn[1]}}_{{sn[2]}}_{{sn[4]}}  "{{liblist[sn_new]}}"
+{%- elif local.scenario_list is sequence %}
+{%- for scenario in local.scenario_list %}
+{%- set sn = scenario.upper().split('.') %}
+{%- set sn_new = ['ICC2_AOCV', sn[1], sn[2], sn[4]]|join('_') %}
+set ICC2_AOCV_{{sn[1]}}_{{sn[2]}}_{{sn[4]}}  "{{liblist[sn_new]}}"
+{%- endfor %}
+{%- endif %}
+set ndm_tech          "{{liblist.NDM_TECH}}" 
 
 ##===================================================================##
 ## back up database                                                  ##
@@ -98,20 +112,21 @@ compute_clock_latency
 set_scenario_status -active true [all_scenarios]
 {% endif %}  
 
+foreach_in_collection scn [all_scenarios] {
+    current_scenario $scn
 {%- if local.setup_uncertainty %}
-set_clock_uncertainty {{local.setup_uncertainty}} -setup [all_clocks ] -scenarios [all_scenarios ]
+    set_clock_uncertainty {{local.setup_uncertainty}} -setup [all_clocks ] -scenarios $scn
 {%-  endif %}
 {%- if local.hold_uncertainty %}
-set_clock_uncertainty {{local.hold_uncertainty}} -hold  [all_clocks ] -scenarios [all_scenarios ]
+    set_clock_uncertainty {{local.hold_uncertainty}} -hold  [all_clocks ] -scenarios $scn
 {%-  endif %}
-
-
 {%- if local.data_transition %}
-set_max_transition -data_path {{local.data_transition}} [all_clocks] -scenarios [all_scenarios]
+    set_max_transition -data_path {{local.data_transition}} [all_clocks] -scenarios $scn
 {%- endif %}
 {%- if local.clock_transition %}
-set_max_transition -clock_path {{local.clock_transition}} [all_clocks] -scenarios [all_scenarios]
+    set_max_transition -clock_path {{local.clock_transition}} [all_clocks] -scenarios $scn
 {%- endif %}
+}
 
 ###==================================================================##
 ## clock settings                                                    ##

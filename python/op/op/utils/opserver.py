@@ -43,7 +43,7 @@ class OPServerHandler(socketserver.BaseRequestHandler):
     def handle_co(self, request):
         ''' Check-out command handler '''
         if len(request) == 4:
-            cmd, user, host, feature = request
+            _, user, host, feature = request
             self.mysend(SRV.checkout(user, host, feature))
             if self.myrecv() == 'ack':
                 self.mysend(pack('i', SRV.rowsize))
@@ -55,7 +55,7 @@ class OPServerHandler(socketserver.BaseRequestHandler):
     def handle_ci(self, request):
         ''' Check-in command handler '''
         if len(request) == 2:
-            cmd, sid = request
+            _, sid = request
             self.mysend(SRV.checkin(sid))
         else:
             self.mysend('parse failed')
@@ -72,7 +72,7 @@ class OPServerHandler(socketserver.BaseRequestHandler):
             SRV.logger.warning('Unknown command')
 
 
-def sigterm_handler(signo, frame):
+def sigterm_handler(signo, _):
     ''' signal (SIGTERM) handler '''
     SRV.logger.debug('caught signal: %d', signo)
     sys.exit(0)
@@ -169,8 +169,6 @@ class OPServer:
         #
         for feat, cnt in self.feats.items():
             self.logger.info('    Feature: %s (%d)', feat, cnt)
-
-        return
 
 
     def start(self, port_number):

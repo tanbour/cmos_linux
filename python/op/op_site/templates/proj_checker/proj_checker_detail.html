@@ -7,13 +7,13 @@
     <div class="layout-breadcrumb">
       <breadcrumb>
         <breadcrumb-item v-if="'name' in rsp_data"><router-link title="go to project list" :to="{name: 'proj_checker_list'}">{{ rsp_data.name }}</router-link></breadcrumb-item>
-        <breadcrumb-item v-if="'id' in rsp_data"><router-link title="refresh detail page" :to="{name: 'proj_checker_detail', params: {p_id: rsp_data.id}}">details</router-link></breadcrumb-item>
+        <breadcrumb-item>details</breadcrumb-item>
       </breadcrumb>
     </div>
     {% endverbatim %}
     <div class="layout-content">
       <div class="layout-content-main" style="background-image:url({% static 'images/background_1200x600.jpg' %})">
-        <Card :bordered="false" style="font-family:monospace; color:black">
+        <Card :bordered="false" class="card-main">
           {% verbatim %}
           <p slot="title">{{ rsp_data.name }}</p>
           <p v-if="rsp_data.lock || !edit_mode" v-html="rsp_data.text"></p>
@@ -21,27 +21,29 @@
           {% endverbatim %}
         </Card>
         <br>
-        <div style="float:right">
-          <i-button v-if="rsp_data.lock" disabled type="primary">Locked</i-button>
-          <div v-else-if="edit_mode">
-            <i-button type="primary" @click="action_cancel">Cancel</i-button>
-            <i-button type="primary" :loading="loading" icon="checkmark-round" @click="action_submit">
-              <span v-if="!loading">Submit</span>
-              <span v-else>Loading...</span>
-            </i-button>
+        <div class="table-page">
+          <div>
+            <i-button v-if="rsp_data.lock" disabled type="primary">Locked</i-button>
+            <div v-else-if="edit_mode">
+              <i-button type="primary" @click="action_cancel">Cancel</i-button>
+              <i-button type="primary" :loading="loading" icon="checkmark-round" @click="action_submit">
+                <span v-if="!loading">Submit</span>
+                <span v-else>Loading...</span>
+              </i-button>
+            </div>
+            <i-button v-else type="primary" @click="action_edit">Edit</i-button>
           </div>
-          <i-button v-else type="primary" @click="action_edit">Edit</i-button>
         </div>
       </div>
     </div>
-    <!-- <div style="height:300px"></div> -->
   </div>
 </template>
 
 <script>
  const ProjCheckerDetail = {
    template: "#proj_checker_detail",
-   beforeRouteUpdate (to, from, next) {
+   mixins: [mixin],
+   beforeRouteUpdate: (to, from, next) => {
      this.init(to.params.p_id)
      next()
    },
@@ -59,9 +61,11 @@
    },
    methods: {
      init: function(p_id = "") {
+       this.$Loading.start()
        axios({
          method: "get", url: this.url.detail.replace('djst_var', p_id)
        }).then((response) => {
+         this.$Loading.finish()
          this.rsp_data = response.data
          for (var i = 0; i < this.lock_id_ary.length; i++) {
            this.patch_unlock(this.lock_id_ary[i])
@@ -70,6 +74,7 @@
          this.edit_mode = false
          this.loading = false
        }).catch((error) => {
+         this.$Loading.error()
          console.log(error)
        })
      },
@@ -148,6 +153,7 @@
    /* created: function () {
     * },*/
    mounted: function () {
+     this.checkCookie()
      this.init(this.$route.params.p_id)
    },
    destroyed: function () {

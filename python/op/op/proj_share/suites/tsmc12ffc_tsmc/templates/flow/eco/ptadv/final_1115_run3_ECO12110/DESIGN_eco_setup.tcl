@@ -1,0 +1,17 @@
+set TOP pcie_wrapper
+set MODULES {pcie_wrapper}
+set DEF_OF(pcie_wrapper) {/proj/IPU-A_new/RELEASE/FORECO/cindyw/pcie_wrapper/release/201712110/pcie_wrapper.def.gz}
+set DONT_TOUCH_MODULE {}
+set DMSA_MODES {normal shift}
+set DMSA_CORNERS {ml_rcworst_ccworst_125c_min tt_cworst_ccworst_t_85c_max wc_cworst_ccworst_t_125c_max wcz_cworst_ccworst_t_0c_max}
+set SESSION(normal_ml_rcworst_ccworst_125c_min) {/space/cindyw/ipu/pt/final_1115_run3_ECO12110/normal/ml_rcworst_ccworst_125c_min/PT_pcie_wrapper_normal_ml_rcworst_ccworst_125c_min.w_io_session}
+set SESSION(normal_tt_cworst_ccworst_t_85c_max) {/space/cindyw/ipu/pt/final_1115_run3_ECO12110/normal/tt_cworst_ccworst_t_85c_max/PT_pcie_wrapper_normal_tt_cworst_ccworst_t_85c_max.w_io_session}
+set SESSION(normal_wc_cworst_ccworst_t_125c_max) {/space/cindyw/ipu/pt/final_1115_run3_ECO12110/normal/wc_cworst_ccworst_t_125c_max/PT_pcie_wrapper_normal_wc_cworst_ccworst_t_125c_max.w_io_session}
+set SESSION(normal_wcz_cworst_ccworst_t_0c_max) {/space/cindyw/ipu/pt/final_1115_run3_ECO12110/normal/wcz_cworst_ccworst_t_0c_max/PT_pcie_wrapper_normal_wcz_cworst_ccworst_t_0c_max.w_io_session}
+set SESSION(shift_ml_rcworst_ccworst_125c_min) {/space/cindyw/ipu/pt/final_1115_run3_ECO12110/shift/ml_rcworst_ccworst_125c_min/PT_pcie_wrapper_shift_ml_rcworst_ccworst_125c_min.w_io_session}
+#set SESSION(shift_tt_cworst_ccworst_t_85c_max) {}
+#set SESSION(shift_wc_cworst_ccworst_t_125c_max) {}
+set SESSION(shift_wcz_cworst_ccworst_t_0c_max) {/space/cindyw/ipu/pt/final_1115_run3_ECO12110/shift/wcz_cworst_ccworst_t_0c_max/PT_pcie_wrapper_shift_wcz_cworst_ccworst_t_0c_max.w_io_session}
+set ECO_dir Physical_ECO
+set PROCESS_NUM 6
+set MAX_CORE 4

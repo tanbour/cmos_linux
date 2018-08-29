@@ -1544,16 +1544,56 @@ proc swap_300_tapcell {} {
 }	
 
 ### for 22nm ULP
-proc add_DCAP {} {
+proc add_22nm_DCAP {} {
 echo "need to be complete add_DCAP"
+set DCAP {\
+           */DCAP64BWP7T35P140HVT \
+           */DCAP32BWP7T35P140HVT \
+           */DCAP16BWP7T35P140HVT \
+           */DCAP8BWP7T35P140HVT \
+           */DCAP4BWP7T35P140HVT \
+           }
+        create_stdcell_fillers \
+                -lib_cells [get_lib_cells $DCAP] \
+                -prefix fillerstddcap \
+		-rules no_1x
+
+remove_stdcell_fillers_with_violation
 }
 
-proc add_GDCAP {} {
+proc add_22nm_GDCAP {} {
 echo "need to be complete add_GDCAP"
+echo "need to be complete add_GDCAP"
+set GDCAP {\
+          */GDCAP10BWP7T30P140 \
+          */GDCAP4BWP7T30P140 \
+          */GDCAP3BWP7T30P140 \
+          */GDCAP2BWP7T30P140 \
+          */GDCAPBWP7T30P140 \
+          }
+          create_stdcell_fillers \
+                -lib_cells [get_lib_cells $GDCAP] \
+                -prefix fillerstddcap \
+		-rule no_1x
+
+remove_stdcell_fillers_with_violation
 }
 
-proc add_Fillers {} {
+proc add_22nm_Fillers {} {
 echo "need to be complete add_fillers"
+set FILL {\
+          */FILL64BWP7T35P140HVT \
+          */FILL32BWP7T35P140HVT \
+          */FILL16BWP7T35P140HVT \
+          */FILL8BWP7T35P140HVT \
+          */FILL4BWP7T35P140HVT \
+          */FILL3BWP7T35P140HVT \
+          */FILL2BWP7T35P140HVT \
+          */FILL1BWP7T35P140HVT \
+          }
+        create_stdcell_fillers \
+                -lib_cells [get_lib_cells $FILL] \
+                -prefix fillerstdfiller
 }
 
 

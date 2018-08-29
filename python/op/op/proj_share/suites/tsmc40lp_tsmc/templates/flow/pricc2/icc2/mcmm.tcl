@@ -86,6 +86,11 @@ puts "INFO: Setting voltage $volt"
   if {$volt_l != ""} {
   set voltage_name  [ lindex [ split $volt_l "-" ] 0 ]
   set voltage_value [ lindex [ split $volt_l "-" ] 1 ]
+  redirect -var x {get_nets $voltage_name}
+  if {[regexp "Error" $x]} {
+  puts "Warning: voltage net $voltage_name does not exit. will been created automatically"
+  create_net $voltage_name
+  }
   set_voltage $voltage_value -object_list $voltage_name
   } else {
   puts "Warning: Voltage $voltage_name for scenario $scenario is not set, please fill voltage list table"
@@ -151,12 +156,12 @@ puts "INFO: Reading tlupus for lib_corner $lib_corner"
 
 puts "Alchip-info : Completed MCMM setup\n"
 
-foreach_in_collection mode [all_modes] {
-	current_mode $mode
-	remove_propagated_clocks [all_clocks]
-	remove_propagated_clocks [get_ports]
-	remove_propagated_clocks [get_pins -hierarchical]
-}
+#foreach_in_collection mode [all_modes] {
+#	current_mode $mode
+#	remove_propagated_clocks [all_clocks]
+#	remove_propagated_clocks [get_ports]
+#	remove_propagated_clocks [get_pins -hierarchical]
+#}
 current_mode 
 
 report_mode

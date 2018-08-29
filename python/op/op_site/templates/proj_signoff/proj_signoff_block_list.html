@@ -6,36 +6,38 @@
     {% verbatim %}
     <div class="layout-breadcrumb">
       <breadcrumb>
-        <breadcrumb-item><router-link title="go to project list" :to="{name: 'proj_signoff_block_list'}">projects</router-link></breadcrumb-item>
+        <breadcrumb-item v-if="'name' in rsp_detail_data"><router-link title="go to project list" :to="{name: 'proj_signoff_proj_list'}">{{ rsp_detail_data.name }}</router-link></breadcrumb-item>
+        <breadcrumb-item>blocks</breadcrumb-item>
       </breadcrumb>
     </div>
     {% endverbatim %}
     <div class="layout-content">
       <div class="layout-content-main" style="background-image:url({% static 'images/background_1200x600.jpg' %})">
         <div>
-          <i-input v-model="searchQuery" placeholder="Search" clearable style="width:200px"></i-input>
+          <i-input v-model="searchQuery" placeholder="Search" clearable class="search-box"></i-input>
           <br>
           <i-table border stripe show-header :columns="table_col" :data="table_data" size="small" ref="table"></i-table>
-          <div style="margin:10px; overflow:hidden">
-            <div style="float:right">
+          <div class="table-page">
+            <div>
               <Page :total="dataCount" :page-size="pageSize" show-total @on-change="changePage"></Page>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- <div style="height:300px"></div> -->
   </div>
 </template>
 
 <script>
  const ProjSignoffBlockList = {
    template: "#proj_signoff_block_list",
-   beforeRouteUpdate (to, from, next) {
+   mixins: [mixin],
+   beforeRouteUpdate: (to, from, next) => {
      this.init(to.params.p_id)
      next()
    },
    data: function () {
+     var url_qstr = "p_id=djst_var"
      return {
        col_ary: [],
        data_ary: [],
@@ -44,8 +46,12 @@
        dataCount: 0,
        pageSize: 50,
        pageIndex: 1,
-       rsp_data: {},
-       url: "{% url 'flow_rpt:proj_signoff_list' %}" + "?p_id=" + this.$route.params.p_id
+       rsp_detail_data: {},
+       rsp_list_data: {},
+       url: {
+         signoff_list: "{% url 'flow_rpt:proj_signoff_list' %}" + "?" + url_qstr,
+         proj_detail: "{% url 'flow_rpt:proj_detail' 'djst_var' %}"
+       }
      }
    },
    computed: {
@@ -62,14 +68,12 @@
          fixed: "right",
          render: (h, params) => {
            return h("div", [
-             h("Button", {
+             h("i-button", {
                props: {
                  type: "primary",
                  size: "small"
                },
-               style: {
-                 marginRight: "5px"
-               },
+               class: "table-button",
                on: {
                  click: () => {
                    this.show(params.index)
@@ -107,108 +111,110 @@
      }
    },
    methods: {
-     init: function() {
-       axios({
-         method: "get", url: this.url
-       }).then((response) => {
-         this.rsp_data = response.data
+     init: function(p_id = "") {
+       this.$Loading.start()
+       axios.all([axios({
+         method: "get", url: this.url.proj_detail.replace("djst_var", p_id)
+       }), axios({
+         method: "get", url: this.url.signoff_list.replace("djst_var", p_id)
+       })]).then(axios.spread((rsp_detail, rsp_list) => {
+         this.$Loading.finish()
+         this.rsp_detail_data = rsp_detail.data
+         this.rsp_list_data = rsp_list.data
          this.procDataAry()
          this.procColAry()
-       }).catch((error) => {
+       })).catch((error) => {
+         this.$Loading.error()
          console.log(error)
        })
      },
      procColAry: function () {
-       this.col_ary = []
-       this.col_ary.push({
-         title: "project name",
-         key: "obj_name",
-         fixed: "left",
-         width: 150,
-         sortable: true,
-         sortType: "asc",
-         render: (h, params) => {
-           const row = params.row
-           const pk = row.obj_pk
-           const text = row.obj_name
-           return h("a", {
-             on: {
-               click: () => {
-                 this.$router.push({name: "proj_signoff_block_list", params: {p_id: pk}})
+       this.col_ary = [
+         {
+           title: "block name",
+           key: "obj_name",
+           fixed: "left",
+           width: 150,
+           sortable: true,
+           sortType: "asc",
+           render: (h, params) => {
+             const row = params.row
+             const pk = row.obj_pk
+             const text = row.obj_name
+             return h("a", {
+               on: {
+                 click: () => {
+                   this.$router.push({name: "proj_signoff_block_detail", params: {b_id: pk}})
+                 }
                }
-             }
-           }, text)
+             }, text)
+           }
          },
-         filters: this.filter_ary_obj.obj_name,
-         filterMultiple: true,
-         filterMethod: function (value, row) {
-           return row.obj_name === value
-         }
-       })
-       this.col_ary.push({
-         title: "Status",
-         key: "status",
-         width: 150,
-         sortable: true,
-         filters: this.filter_ary_obj.status,
-         filterMultiple: true,
-         filterMethod: function (value, row) {
-           return row.status === value
+         {
+           title: "Status",
+           key: "status",
+           width: 120,
+           sortable: true,
+           filters: this.filter_ary_obj.status,
+           filterMultiple: true,
+           filterMethod: function (value, row) {
+             return row.status === value
+           },
+           render: (h, params) => {
+             const row = params.row
+             const color = row.status === "NG" ? "red" : row.status === "OK" ? "green" : (row.status === undefined || row.status === "") ? "blue" : "yellow"
+             const text = row.status
+             return h("tag", {
+               props: {
+                 type: "dot",
+                 color: color
+               }
+             }, text)
+           }
          },
-         render: (h, params) => {
-           const row = params.row
-           const color = row.status === "NG" ? "yellow" : row.status === "OK" ? "green" : (row.status === undefined || row.status === "") ? "blue" : "red"
-           const text = row.status
-           return h("Tag", {
-             props: {
-               type: "dot",
-               color: color
-             }
-           }, text)
+         {
+           title: "Latest Updater",
+           key: "l_user",
+           width: 160,
+           sortable: true
+         },
+         {
+           title: "Updated Time",
+           key: "updated_time",
+           width: 200,
+           sortable: true
          }
-       })
-       this.col_ary.push({
-         title: "Latest Updater",
-         key: "l_user",
-         width: 150,
-         sortable: true
-       })
-       this.col_ary.push({
-         title: "Updated Time",
-         key: "updated_time",
-         width: 200,
-         sortable: true
-       })
+       ]
      },
      procDataAry: function () {
-       var signoff_proj_obj = {}
-       for (var i = 0; i < this.rsp_data.length; i++) {
-         var qs_obj = this.rsp_data[i]
-         var proj_name = qs_obj.block.proj.name
-         if (proj_name in signoff_proj_obj) {
-           if (qs_obj.updated_time > signoff_proj_obj[proj_name].updated_time) {
-             signoff_proj_obj[proj_name].updated_time = qs_obj.updated_time
-             signoff_proj_obj[proj_name].l_user = qs_obj.l_user.name
+       var signoff_block_obj = {}
+       for (var i = 0; i < this.rsp_list_data.length; i++) {
+         var qs_obj = this.rsp_list_data[i]
+         var block_name = qs_obj.block.name
+         if (block_name in signoff_block_obj) {
+           if (qs_obj.updated_time > signoff_block_obj[block_name].updated_time) {
+             signoff_block_obj[block_name].updated_time = qs_obj.updated_time
+             signoff_block_obj[block_name].l_user = qs_obj.l_user_name
            }
-           if (qs_obj.data.judge === "OK" && signoff_proj_obj[proj_name].status === "OK") {
-             signoff_proj_obj[proj_name].status = "OK"
+           if ((qs_obj.data.judge === "OK" || qs_obj.data.judge === "Waived") && signoff_block_obj[block_name].status === "OK") {
+             signoff_block_obj[block_name].status = "OK"
            } else {
-             signoff_proj_obj[proj_name].status = "NG"
+             signoff_block_obj[block_name].status = "NG"
            }
          } else {
-           signoff_proj_obj[proj_name] = {
-             id: qs_obj.id,
+           signoff_block_obj[block_name] = {
+             id: qs_obj.block.id,
              updated_time: qs_obj.updated_time,
-             l_user: qs_obj.l_user.name,
+             l_user: qs_obj.l_user_name,
              status: qs_obj.data.judge
            }
          }
        }
        this.data_ary = []
-       this.filter_ary_obj = {obj_name: [], status: []}
-       var unique_ary_obj = {obj_name: [], status: []}
-       for (var key in signoff_proj_obj) {
-         sp_obj = signoff_proj_obj[key]
+       this.filter_ary_obj = {status: []}
+       var unique_ary_obj = {status: []}
+       for (var key in signoff_block_obj) {
+         sp_obj = signoff_block_obj[key]
          var data_obj = {
            obj_pk: sp_obj.id,
            obj_name: key,
@@ -231,6 +237,8 @@
          content += td_key + ": " + this.table_data[index][td_key] + "<br>"
        }
        this.$Modal.info({
+         scrollable: true,
+         closable: true,
          title: "Detailed Info",
          content: content
        })
@@ -242,6 +250,7 @@
    /* created: function () {
     * },*/
    mounted: function () {
+     this.checkCookie()
      this.init(this.$route.params.p_id)
    }
  }

@@ -1,0 +1,13 @@
+### Python ###
+# Byte-compiled / optimized / DLL files
+*.py[cod]
+*$py.class
+
+# test
+/tests/LIB/
+/tests/proj/**/run/
+/tests/RELEASE/to_top/
+
+# vim
+*.sw[op]
+

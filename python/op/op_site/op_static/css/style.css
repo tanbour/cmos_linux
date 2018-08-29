@@ -62,9 +62,84 @@
 .layout-ceiling-main a{
     color: #9ba7b5;
 }
+.layout-ceiling-main span{
+    color: orange;
+}
 .layout-hide-text .layout-text{
     display: none;
 }
 .ivu-col{
     transition: width .2s ease-in-out;
+}
+.404-main{
+    padding-top: 40px;
+    text-align: center;
+    height: 400px;
+}
+.404-font{
+    font-size: 60px;
+}
+.home-main{
+    padding-top: 40px;
+    text-align: center;
+    height: 400px;
+}
+.home-name{
+    font-size: 30px;
+    color: #205081;
+}
+.home-name-left{
+    color: #1162a5;
+}
+.home-name-right{
+    color: #1574c4;
+}
+.home-slog{
+    font-size: 20px;
+}
+.home-slog-left{
+    color: darkgray;
+}
+.home-slog-right{
+    color: gray;
+}
+.search-box{
+    width: 200px;
+}
+.table-head{
+    margin: 10px;
+}
+.table-head span{
+    margin-right: 5px;
+}
+.table-page{
+    margin: 10px;
+    overflow: hidden;
+}
+.table-page div{
+    float: right;
+}
+.card-set{
+    background: #eee;
+    padding: 20px;
+}
+.card-main{
+    font-family: monospace;
+    color: black;
+}
+.search-box-b{
+    width: 350px;
+}
+.table-button{
+    margin-right: 5px;
+}
+.float-left{
+    float: left;
+}
+.float-right{
+    float: right;
+}
+.float-l80{
+    float: left;
+    width: 80px;
 }

@@ -1,0 +1,13 @@
+#blockname dataTR clockTR TRratio memTR_assign ip_assign istop
+orange 0.02 0.46 1 1 0 0
+dxe 0.02 0.46 1 1 0 0
+xm_noncpu 0.02 0.65 1 0 0
+xm_cpu 0.041 0.46 1 1 0 0
+lmu_we 0.07 1.2 1 1 0 0
+lmu_ne 0.07 1.2 1 1 0 0
+lmu_ns 0.07 1.2 1 1 0 0
+iou0_sys 0.07 1.2 1 1 0 0
+iou1_sys 0.07 1.2 1 1 0 0
+peu1 0.07 1.2 1 1 0 0
+peu0 0.07 1.2 1 1 0 0
+mars 0.2 2 1 0 0 0 

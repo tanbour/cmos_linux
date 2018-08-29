@@ -34,3 +34,9 @@ def w_file(data_dic, file_dic):
     url = f"{BASE_URL}/flow_rpt/runner/upload/"
     rsp_dic = requests.post(url, data=data_dic, files=file_dic).json() if settings.BACKEND else {}
     return rsp_dic
+
+def w_signoff(data_dic_lst):
+    """to write signoff table record"""
+    url = f"{BASE_URL}/flow_rpt/runner/signoffs/"
+    rsp_dic = requests.post(url, json=data_dic_lst).json() if settings.BACKEND else {}
+    return rsp_dic

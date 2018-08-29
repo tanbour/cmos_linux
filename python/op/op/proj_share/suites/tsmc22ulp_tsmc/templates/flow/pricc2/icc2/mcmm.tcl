@@ -101,7 +101,7 @@ puts "INFO: Reading tlupus for lib_corner $lib_corner"
   ##read sdc/aocv/pocv
   set sdc_file_name  "${blk_sdc_dir}/$blk_name.$mode.sdc"
 
-  if {$ocv_mode == "aocv"} {set aocv_file_name [set [join "AOCV [string toupper $lib_tt_volt]  [string toupper $lib_corner] [string toupper $analysis_type]" "_"]]} else {set aocv_file_name ""}
+  if {$ocv_mode == "aocv"} {set aocv_file_name [set [join "ICC2 AOCV [string toupper $lib_tt_volt]  [string toupper $lib_corner] [string toupper $analysis_type]" "_"]]} else {set aocv_file_name ""}
   if {$ocv_mode == "pocv"} {set pocv_file_name [set [join "POCV [string toupper $lib_tt_volt]  [string toupper $lib_corner]" "_"]]} else {set pocv_file_name ""}
 
   if { [file exist $sdc_file_name] } {

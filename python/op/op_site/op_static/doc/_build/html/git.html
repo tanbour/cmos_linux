@@ -1,0 +1,168 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Git User Reference &#8212; OP Platform 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Openlava User Reference" href="openlava.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="openlava.html" title="Openlava User Reference"
+             accesskey="P">previous</a> |</li>
+<li><a href="http://op.alchip.com.cn:8000">HOME</a> &raquo;</li>
+
+        <li class="nav-item nav-item-0"><a href="index.html">OP Platform 1.0 documentation</a> &#187;</li>
+ 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Git User Reference</a><ul>
+<li><a class="reference internal" href="#common-issues">Common Issues</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="openlava.html"
+                        title="previous chapter">Openlava User Reference</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/git.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="git-user-reference">
+<span id="git"></span><h1>Git User Reference<a class="headerlink" href="#git-user-reference" title="Permalink to this headline">¶</a></h1>
+<p>Git is an open source version controlling software for users cooperation on code management.</p>
+<div class="section" id="common-issues">
+<h2>Common Issues<a class="headerlink" href="#common-issues" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>make sure your git version is correct.
+source /proj/onepiece4/op_env.csh</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[guanyu_yi@utah: /proj/OP4/SOFTWARE/WORK/guanyu_yi/ws]$ which git
+/proj/onepiece4/Tools/git_2.16.2/bin/git
+</pre></div>
+</div>
+<ul>
+<li><p class="first">git pull origin master</p>
+<ul>
+<li><p class="first">fatal: Authentication failed:</p>
+<div class="figure">
+<img alt="_images/git_issue_1.png" src="_images/git_issue_1.png" />
+</div>
+<ol class="arabic simple">
+<li>** Please confirm that you have entered the correct Windows AD password ! **</li>
+</ol>
+</li>
+<li><p class="first">error: Automatic merge failed</p>
+<div class="figure">
+<img alt="_images/git_issue_2.png" src="_images/git_issue_2.png" />
+</div>
+<ul>
+<li><p class="first">normal solution:</p>
+<ol class="arabic simple">
+<li>Fix conflicts manually</li>
+<li>Commit the fixed file</li>
+<li>Re-pull</li>
+</ol>
+<ul class="simple">
+<li>The content of the conflict is located between “&lt;&lt;&lt;&lt;&lt;&lt;” and “&gt;&gt;&gt;&gt;&gt;&gt;&gt;”, separated by “=======”. Keep the correct parts and remove the delimiters and unwanted content.</li>
+</ul>
+<div class="figure">
+<img alt="_images/git_issue_3.png" src="_images/git_issue_3.png" />
+</div>
+<div class="figure">
+<img alt="_images/git_issue_4.png" src="_images/git_issue_4.png" />
+</div>
+</li>
+<li><p class="first">optional solution: git stash</p>
+<ol class="arabic simple">
+<li>Before pull, stash all change: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">stash</span></code></li>
+<li>Git pull origin master: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">pull</span> <span class="pre">origin</span> <span class="pre">master</span></code></li>
+<li>Fix conflicts manually: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">stash</span> <span class="pre">pop</span></code></li>
+</ol>
+</li>
+<li><p class="first">Force overwrite modified content !!! (carefully used)</p>
+<ol class="arabic simple">
+<li><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">fetch</span> <span class="pre">--all</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">reset</span> <span class="pre">--hard</span> <span class="pre">origin/master</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">pull</span></code></li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="openlava.html" title="Openlava User Reference"
+             >previous</a> |</li>
+<li><a href="http://op.alchip.com.cn:8000">HOME</a> &raquo;</li>
+
+        <li class="nav-item nav-item-0"><a href="index.html">OP Platform 1.0 documentation</a> &#187;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Guanyu Yi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.
+    </div>
+  </body>
+</html>

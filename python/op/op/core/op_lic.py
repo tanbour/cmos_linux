@@ -117,10 +117,9 @@ class OPClient:
                 raise SystemExit(-1)
         mat = re.match(r'^(\d+)@([.\w]+)$', op_license)
         if not mat:
-            LOG.error(f'invalid server specification: {op_license}')
+            LOG.error('invalid server specification: %s', op_license)
             raise SystemExit(-1)
         self.license_server = (mat[2], int(mat[1]))
-        return
 
 
     def _connect(self):
@@ -131,7 +130,7 @@ class OPClient:
         try:
             sock.connect(self.license_server)
         except:
-            LOG.error(f'connection refused by the license server: {self.license_server}')
+            LOG.error('connection refused by the license server: %s', self.license_server)
             raise SystemExit(-1)
         return sock
 
@@ -205,7 +204,7 @@ class OPClient:
         lsend(sock, cmd.encode())
         msg = lrecv(sock, 1024).decode()
         sock.close()
-        LOG.debug(f'license check-in: {msg}')
+        LOG.debug('license check-in: %s', msg)
 
 
 if __name__ == '__main__':

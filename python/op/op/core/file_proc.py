@@ -18,7 +18,7 @@ from core import json_converter as jc
 
 LOG = pcom.gen_logger(__name__)
 
-class FileProc(object):
+class FileProc():
     """base class of log processor"""
     def __init__(self, run_dic, f_flg=True):
         self.run_dic = run_dic
@@ -40,14 +40,18 @@ class FileProc(object):
             "f_created_time": ced["DATETIME"].isoformat()}
         self.f_flg = f_flg
         self.log_dic = {}
+        self.log_par_env_dic = {}
+    def proc_set_log_par_env(self, env_dic):
+        """store the environment which the log parser is running on"""
+        self.log_par_env_dic.update(env_dic)
     def proc_run_log(self):
         """to process sub stage run log"""
         run_log = f"{self.run_dic['file']}.log"
         if not os.path.isfile(run_log):
-            LOG.error(f"log {run_log} to be processed is NA")
+            LOG.error("log %s to be processed is NA", run_log)
             return True
         run_filter_dic = self.run_dic.get("filter_dic", {})
-        LOG.info(f"parsing log file {run_log}")
+        LOG.info("parsing log file %s", run_log)
         fin_str = run_filter_dic.get("fin_str", "")
         err_kw_lst = run_filter_dic.get("err_kw_lst", [])
         wav_kw_lst = run_filter_dic.get("wav_kw_lst", [])
@@ -109,7 +113,7 @@ class FileProc(object):
                         break
                 # key_path = f"{self.run_dic['file']}.log"
                 if not os.path.isfile(key_path):
-                    LOG.warning(f"log file {key_path} to be parsed is NA")
+                    LOG.warning("rpt/log file related with %s to be parsed is NA", p_v)
                     continue
                 log_par.add_parser(
                     key_path, pcd.get(f"{p_k}_type", ""),
@@ -118,7 +122,7 @@ class FileProc(object):
                 file_path = os.path.join(
                     flow_root_dir, "rpt", stage_name, inst_name, p_v)
                 if not os.path.isfile(file_path):
-                    LOG.warning(f"file {file_path} to be uploaded is NA")
+                    LOG.warning("file %s to be uploaded is NA", file_path)
                     continue
                 with open(file_path, "rb") as f_p:
                     file_url = db_if.w_file(
@@ -126,20 +130,20 @@ class FileProc(object):
                 if not file_url:
                     continue
                 self.log_dic["data"][f"{p_k}_raw"] = f"<img src='{file_url}'>"
+        log_par.set_environment(self.log_par_env_dic)
         self.log_dic["data"].update(log_par.run_parser())
-        return False
     def proc_run_file(self):
         """to process generated oprun files for running flows"""
         file_mt = os.path.getmtime(self.run_src_file)
         if not os.path.isfile(self.run_src_file):
-            LOG.error(f"run src file {self.run_src_file} is NA")
+            LOG.error("run src file %s is NA", self.run_src_file)
             return True
         if not os.path.isfile(self.run_file):
-            LOG.error(f"run file {self.run_file} is NA")
+            LOG.error("run file %s is NA", self.run_file)
             return True
         LOG.info(
-            f":: running flow {self.run_dic['flow']}::{self.db_stage}, "
-            f"op log {self.run_file}.log ...")
+            ":: running flow %s::%s, op log %s.log ...",
+            self.run_dic["flow"], self.db_stage, self.run_file)
         if not self.f_flg and os.path.isfile(self.file_dic["pass"]) and os.path.getmtime(
                 self.file_dic["pass"]) > file_mt:
             LOG.info("passed and re-run skipped")
@@ -154,17 +158,35 @@ class FileProc(object):
         db_if.w_stage(self.db_stage_dic)
         if self.f_flg or not os.path.isfile(self.file_dic["fin"]) or os.path.getmtime(
                 self.file_dic["fin"]) <= file_mt:
+            rfl_str, rfe_str = '', ''
+            subproc_info = subprocess.Popen(
+                f"source {self.run_file}", shell=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            while subproc_info.poll() is None:
+                rfl_str_part = subproc_info.stdout.readline().decode()
+                rfe_str_part = subproc_info.stderr.readline().decode()
+                if rfl_str_part.strip():
+                    LOG.info(rfl_str_part.strip(os.linesep))
+                if rfe_str_part.strip():
+                    LOG.info(rfe_str_part.strip(os.linesep))
+                rfl_str += rfl_str_part
+                rfe_str += rfe_str_part
             with open(f"{self.run_file}.blog", "w") as rfl, \
                  open(f"{self.run_file}.beer", "w") as rfe:
-                subprocess.run(f"source {self.run_file}", shell=True, stdout=rfl, stderr=rfe)
+                rfl.write(rfl_str)
+                rfe.write(rfe_str)
         if not os.path.isfile(self.file_dic["stat"]) or os.path.getmtime(
                 self.file_dic["stat"]) <= file_mt:
-            LOG.error(f"sub process {self.run_file} is terminated")
+            LOG.error("sub process %s is terminated", self.run_file)
             self.db_stage_dic["status"] = "failed"
             db_if.w_stage(self.db_stage_dic)
             return True
-        if self.proc_run_log() is True or self.proc_logs() is True:
+        if self.proc_run_log() is True:
             return True
+        try:
+            self.proc_logs()
+        except Exception as err:
+            LOG.error("op log parser internal error: %s", err)
         self.db_stage_dic.update(self.log_dic)
         db_if.w_stage(self.db_stage_dic)
         with open(self.file_dic["json"], "w") as j_f:
@@ -180,6 +202,6 @@ class FileProc(object):
         else:
             if os.path.isfile(self.file_dic["pass"]):
                 os.remove(self.file_dic["pass"])
-            LOG.error(f"failed lines: {os.linesep}{os.linesep.join(self.log_dic['err_lst'])}")
+            LOG.error("failed lines: %s%s", os.linesep, os.linesep.join(self.log_dic["err_lst"]))
             return True
         return False

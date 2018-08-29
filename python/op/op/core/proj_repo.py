@@ -12,7 +12,7 @@ from utils import settings
 
 LOG = pcom.gen_logger(__name__)
 
-class ProjRepo(object):
+class ProjRepo():
     """base calss of projects from code repo"""
     def __init__(self):
         self.all_proj_dic = {}
@@ -45,8 +45,8 @@ class ProjRepo(object):
         rmt = repo.remote() if repo.remotes else repo.create_remote(
             "origin", os.path.expandvars(self.repo_dic["repo_url"]))
         LOG.info(
-            f"git pulling project {self.repo_dic['init_proj_name']} "
-            f"from repository to {self.repo_dic['repo_dir']}")
+            "git pulling project %s from repository to %s",
+            self.repo_dic["init_proj_name"], self.repo_dic["repo_dir"])
         pcom.cfm()
         rmt.fetch()
         sc_file = os.sep.join([self.repo_dic["repo_dir"], ".git", "info", "sparse-checkout"])
@@ -64,24 +64,24 @@ class ProjRepo(object):
             if any([c_c in str(err) for c_c in settings.REPO_AUTH_ERR_STR_LST]):
                 LOG.error("password (AD pwd) incorrect")
                 raise SystemExit()
-            elif settings.REPO_BRANCH_ERR_STR in str(err):
+            elif any([c_c in str(err) for c_c in settings.REPO_BRANCH_ERR_STR_LST]):
                 pass
             else:
                 LOG.error(err)
                 raise SystemExit()
-        LOG.info(f"please run op cmds under the project dir {self.repo_dic['repo_dir']}")
+        LOG.info("please run op cmds under the project dir %s", self.repo_dic["repo_dir"])
     def svn_proj(self):
         """to check out project by using svn"""
         pass
     def repo_proj(self, init_proj_name, init_block_name_lst=None):
         """to operate project from code repo"""
         self.repo_dic["init_proj_name"] = init_proj_name
-        LOG.info(f":: initializing project {init_proj_name} ...")
+        LOG.info(":: initializing project %s ...", init_proj_name)
         try:
             self.repo_dic["repo_url"] = self.all_proj_dic[init_proj_name]
         except KeyError:
-            LOG.error(f"project name must be one of {self.proj_normal_lst}")
-            LOG.error(f"lab project name must be one of {self.proj_lab_lst}")
+            LOG.error("project name must be one of %s", self.proj_normal_lst)
+            LOG.error("lab project name must be one of %s", self.proj_lab_lst)
             raise SystemExit()
         self.repo_dic["repo_dir"] = os.getcwd()
         if settings.PROJ_REPO == "git":

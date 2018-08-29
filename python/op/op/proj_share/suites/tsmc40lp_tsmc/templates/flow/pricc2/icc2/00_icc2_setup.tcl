@@ -1,3 +1,5 @@
+set common_track 	"{{local.track}}"
+
 ###==================================================================##
 ## reporting items                                                   ##
 ##===================================================================##
@@ -21,6 +23,7 @@ set route_check_route                        "{{local.route_check_route}}"
 ###==================================================================##
 ## mcmm_setup                                                        ##
 ##===================================================================##
+set blk_sdc_dir       "{{env.BLK_SDC}}/{{ver.sdc}}"
 
 ## scenario settings---------------------------------------------------
 set tech_ndm                           "{{local.tech_ndm}}";# *fill tech_ndm name, example tech_only,remember it's not tech ndm library path! only tech ndm name is OK.
@@ -147,7 +150,6 @@ set clock_cell_late_derate_incr_list        "{{local.clock_cell_late_derate_incr
 {%- elif local.clock_cell_late_derate_incr_list is sequence %}
 set clock_cell_late_derate_incr_list        "{{local.clock_cell_late_derate_incr_list|join (' ')}}" ;# optional, late derate for data path cells
 {%- endif %}
-
 ## some memory cell may need timing derate--------------------------------------------------
 {%- if local.mem_list is string %}
 set mem_list                           "{{local.mem_list}}" ;# optional, memory's lib cells for derate, example */*RAM64x128*

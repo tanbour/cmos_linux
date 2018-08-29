@@ -13,10 +13,26 @@ set cur_stage = "{{cur.sub_stage}}"
 set pre_stage = `echo $pre_stage | cut -d . -f 1`
 set cur_stage = `echo $cur_stage | cut -d . -f 1`
 
+set design_style = "{{local.design_style}}"
+
 set clbre_drc_CPU_NUMBER = `echo "{{local._job_cpu_number}}" | cut -d " " -f 2`
 
 ln -sf {{pre.flow_data_dir}}/{{pre.stage}}/${pre_stage}.{{env.BLK_NAME}}.gds.gz {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.gds.gz
 ln -sf {{pre.flow_data_dir}}/{{pre.stage}}/${pre_stage}.{{env.BLK_NAME}}.lvs.v.gz {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.lvs.v.gz
+
+if ( -d {{cur.cur_flow_sum_dir}}/.trash/DVIA_{{env.BLK_NAME}}) then
+echo "Alchip-Info:DVIA_{{env.BLK_NAME}} already exist,it will be delete automatically!"
+rm -rf {{cur.cur_flow_sum_dir}}/.trash/DVIA_{{env.BLK_NAME}}
+endif
+if ( -d {{cur.cur_flow_sum_dir}}/.trash/DODPO_{{env.BLK_NAME}}) then
+echo "Alchip-Info:DODPO_{{env.BLK_NAME}} already exist,it will be delete automatically!"
+rm -rf {{cur.cur_flow_sum_dir}}/.trash/DODPO_{{env.BLK_NAME}}
+endif
+if ( -d {{cur.cur_flow_sum_dir}}/.trash/DCOD_{{env.BLK_NAME}}) then
+echo "Alchip-Info:DCOD_{{env.BLK_NAME}} already exist,it will be delete automatically!"
+rm -rf {{cur.cur_flow_sum_dir}}/.trash/DCOD_{{env.BLK_NAME}}
+endif
+
 
 #===================================================================
 #====  delete existing tmp file and backup the gds file ============
@@ -46,9 +62,39 @@ set dummy_odpo_creat      = "{{local.dummy_odpo_creat}}"
 set dummy_cod_creat       = "{{local.dummy_cod_creat}}"
 
 #------------------ rule deck file name-----------------------
+{% if local.design_style == "top" %} 
+{% if local.cal_decks_metal_for_top %}
+set CAL_DECKS_METAL       = "{{local.cal_decks_metal_for_top}}"
+{%- else %}
 set CAL_DECKS_METAL       = "{{liblist.CAL_DECKS_METAL}}"
+{%- endif %}
+{%- if local.cal_decks_odpo_for_top %}
+set CAL_DECKS_ODPO        = "{{local.cal_decks_odpo_for_top}}"
+{%- else %}
 set CAL_DECKS_ODPO        = "{{liblist.CAL_DECKS_ODPO}}"
+{%- endif %}
+{%- if local.cal_decks_cod_for_top %}
+set CAL_DECKS_COD         = "{{local.cal_decks_cod_for_top}}"
+{%- else %}
 set CAL_DECKS_COD         = "{{liblist.CAL_DECKS_COD}}"
+{%- endif %}
+{% elif local.design_style == "block" %}
+{% if local.cal_decks_metal_for_block %}
+set CAL_DECKS_METAL       = "{{local.cal_decks_metal_for_block}}"
+{%- else %}
+set CAL_DECKS_METAL       = "{{liblist.CAL_DECKS_METAL}}"
+{%- endif %}
+{%- if local.cal_decks_odpo_for_block %}
+set CAL_DECKS_ODPO        = "{{local.cal_decks_odpo_for_block}}"
+{%- else %}
+set CAL_DECKS_ODPO        = "{{liblist.CAL_DECKS_ODPO}}"
+{%- endif %}
+{%- if local.cal_decks_cod_for_block %}
+set CAL_DECKS_COD         = "{{local.cal_decks_cod_for_block}}"
+{%- else %}
+set CAL_DECKS_COD         = "{{liblist.CAL_DECKS_COD}}"
+{%- endif %}
+{% endif %}
 
 {%- if local.dummy_metal_creat == "true" or local.dummy_odpo_creat == "true" or local.dummy_cod_creat == "true" %}
 #===================================================================
@@ -217,7 +263,7 @@ source /proj/onepiece4/op_env.csh
 set run_dir               = "./"
 set map_file              = "{{liblist.OPUS_MAPPING_FILE}}" 
 set tech_file             = "{{liblist.OPUS_TECH_FILE}}"
-set cds_lib               = "{{local.cds_lib_path}}"                     
+set cds_lib               = "{{env.BLK_MISC}}/CDS_FILE/cds.lib"                     
 set display_drf           = "{{liblist.OPUS_DISPLAY_DRF}}"
 
 cp -f $cds_lib  ${run_dir}
@@ -273,6 +319,7 @@ if (-e ${scr_merge_file} ) then
 rm -f ${scr_merge_file}
 endif
 
+echo "Alchip-Info:create instance ${dummy_name}!"
 #================== generate dummy metal merge script ===================
 cat <<gds_merge >! ${scr_merge_file}
 cv = dbOpenCellViewByType("${top_name}" "${top_name}" "layout" "" "a")
@@ -288,7 +335,7 @@ gds_merge
 #==================== run dummy metal merge =============================
 echo "create_${dummy_topCell_name} " >> ${run_time}
 echo "  start " `date "+%F %T %a"` >> ${run_time}
-layout -64  -nograph -log ${log_merge_file} -replay ${scr_merge_file} 
+layout -64  -nograph -log ${log_merge_file}  -replay ${scr_merge_file} 
 end
 #************* end of use opus to transfer dummy gds to OA *****************
 

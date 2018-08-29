@@ -40,7 +40,9 @@ set Virage_cells_num [sizeof $Virage_cells]
 if {$Virage_cells_num} {
   switch $LIB_CORNER {
     "wc"  {set delta_incr_derate4IRdrop 0.025}
+    "wcl" {set delta_incr_derate4IRdrop 0.025}
     "wcz" {set delta_incr_derate4IRdrop 0.025}
+    "lt"  {set delta_incr_derate4IRdrop 0.05}
     "ml"  {set delta_incr_derate4IRdrop 0.05}
     "bc"  {set delta_incr_derate4IRdrop 0.05}
     default {set delta_incr_derate4IRdrop 0}
@@ -65,7 +67,9 @@ if {$need_add_derate_ips_num} {
   set cmds_info ""
   switch $LIB_CORNER {
     "wc"  {set Tcq_derate_delta 0.05}
+    "wcl" {set Tcq_derate_delta 0.05}
     "wcz" {set Tcq_derate_delta 0.05}
+    "lt"  {set Tcq_derate_delta 0.08}
     "ml"  {set Tcq_derate_delta 0.08}
     "bc"  {set Tcq_derate_delta 0.08}
     default {set Tcq_derate_delta 0}

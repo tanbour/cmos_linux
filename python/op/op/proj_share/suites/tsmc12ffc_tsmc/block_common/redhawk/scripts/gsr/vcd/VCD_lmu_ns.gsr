@@ -1,0 +1,17 @@
+#===================================================================
+#=================== lmu_ns 1208 ===================================
+#===================================================================
+
+POWER_ANALYSIS_MODE averaged
+DYNAMIC_SIMULATION_TIME 500000e-12
+VCD_FILE {
+ lmu_ns /proj/Mars2_new/WORK/donid/from_customer/20161208/simvision558655_558701.vcd.gz
+ FILE_TYPE       VCD
+ SELECT_RANGE    -1 -1
+# START_TIME      4000000
+# END_TIME        4500000
+ FRONT_PATH      "lmu_tb/lmu/"
+ SUBSTITUTE_PATH ""
+ TRUE_TIME       1
+}
+

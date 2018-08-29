@@ -8,7 +8,7 @@ set sh_continue_on_error true
 ## SETUP                                                             ##
 ##===================================================================##
 source {{env.PROJ_SHARE_CMN}}/icc2_common_scripts/icc2_procs.tcl
-source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+source {{env.PROJ_LIB}}/liblist/{{ver.LIB}}.tcl
 source {{cur.cur_flow_sum_dir}}/{{cur.sub_stage}}.op._job.tcl
 
 set pre_stage "{{pre.sub_stage}}"
@@ -137,12 +137,19 @@ set_timing_paths_disabled_blocks  -all_sub_blocks
 {%- if local.use_usr_filler_cell_insertion_cmd_file == "true" %} 
 source -v {{cur.config_plugins_dir}}/icc2_scripts/08_finish/01_usr_finish_filler_cell_insertion_cmd.tcl
 {%- else %}
-remove_placement_blockages -all
-add_GDCAP
-add_DCAP
-add_Fillers
+#remove_placement_blockages -all
+{%- if local.track == "12T" %}
+add_40nm_12T_GDCAP
+add_40nm_12T_DCAP
+add_40nm_12T_Fillers
+{%- else %}
+add_40nm_9T_GDCAP
+add_40nm_9T_DCAP
+add_40nm_9T_Fillers
+{%- endif %}
 # To remove filler cells in the design :
 # remove_fillers 
+#connect_pg_net -automatic
 connect_pg_net -net VDD [get_pins -phy */VDD]
 #connect_pg_net -net VDD [get_pins -phy */VPP]
 connect_pg_net -net VSS [get_pins -phy */VSS]
@@ -170,6 +177,7 @@ set_app_options -name signoff.create_metal_fill.flat -value true ;# default fals
 set_app_options -name signoff.create_metal_fill.user_defined_options -value "-dp8 -turbo -D USE_ICC2"
 
 signoff_create_metal_fill -select_layers { {{local.metal_fill_insertion_select_layers}} } 
+signoff_create_metal_fill -select_layers { M1 } 
 
 save_block -as dummy_done 
 
@@ -224,21 +232,21 @@ write_def -include_tech_via_definitions -version 5.8 -compress gzip {{cur.cur_fl
 
 {%- if local.finish_write_gds == "true" %}
 set_app_options -name  file.gds.contact_prefix -value ${blk_name}_via_
-create_cut_metals
-write_gds \
-          -compress \
-          -long_names \
-          -unit 2000 \
-          -fill include \
-          -hierarchy design_lib \
-          -keep_data_type \
-          -output_pin all \
-          -layer_map $icc_icc2_gds_layer_mapping_file \
-          -lib_cell_view frame \
-          -connect_below_cut_metal \
-          -write_default_layers {VIA1 VIA2} \
-          -layer_map_format icc_extended \
-           {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.gds
+#create_cut_metals
+#write_gds \
+#          -compress \
+#          -long_names \
+#          -unit 2000 \
+#          -fill include \
+#          -hierarchy design_lib \
+#          -keep_data_type \
+#          -output_pin all \
+#          -layer_map $icc_icc2_gds_layer_mapping_file \
+#          -lib_cell_view frame \
+#          -connect_below_cut_metal \
+#          -write_default_layers {VIA1 VIA2} \
+#          -layer_map_format icc_extended \
+#           {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.gds
 
 write_gds -compress -fill include -hierarchy top -keep_data_type -layer_map $icc_icc2_gds_layer_mapping_file -output_pin all   -long_names -layer_map_format icc2 {{cur.cur_flow_data_dir}}/$cur_stage.$blk_name.gds
 {%- endif %}

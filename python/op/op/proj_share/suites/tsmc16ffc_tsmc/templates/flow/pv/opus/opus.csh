@@ -11,15 +11,27 @@ set cur_stage = `echo $cur_stage | cut -d . -f 1`
 ln -sf {{pre.flow_data_dir}}/{{pre.stage}}/${pre_stage}.{{env.BLK_NAME}}.gds.gz {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.gds.gz
 ln -sf {{pre.flow_data_dir}}/{{pre.stage}}/${pre_stage}.{{env.BLK_NAME}}.lvs.v.gz {{cur.cur_flow_data_dir}}/${cur_stage}.{{env.BLK_NAME}}.lvs.v.gz
 
+if ( -d {{cur.cur_flow_sum_dir}}/.trash/{{env.BLK_NAME}}) then
+echo "Alchip-Info:{{env.BLK_NAME}} already exist,it will be delete automatically!"
+rm -rf {{cur.cur_flow_sum_dir}}/.trash/{{env.BLK_NAME}}
+endif
+
 #===================================================================
 #===============  set opus common input files    ===================
 #===================================================================
 set map_file                        = "{{liblist.OPUS_MAPPING_FILE}}" 
 set tech_file                       = "{{liblist.OPUS_TECH_FILE}}"
 set display_drf                     = "{{liblist.OPUS_DISPLAY_DRF}}"
-set cds_lib                         = "{{local.cds_lib_path}}"                     
+#set cds_lib                         = "{{local.cds_lib_path}}"                     
 set run_time                        = "{{cur.cur_flow_rpt_dir}}/$cur_stage.run_time"
 set run_dir                         = "./"
+
+{%- if local.cds_lib_path %}
+set cds_lib                          = "{{local.cds_lib_path}}"
+{%- else %}
+set cds_lib                          = "{{cur.cur_flow_data_dir}}/opus_oa_lib/cds.lib"
+{%- endif %}
+
 
 cp -rf $cds_lib  ${run_dir}
 if ( $display_drf != "" ) then
@@ -37,6 +49,12 @@ set block_topcell_name                     = `basename ${block_gds_file} | cut -
 set block_log_file                         = "{{cur.cur_flow_log_dir}}/sub_block.strmin.log"
 set block_sum_file                         = "{{cur.cur_flow_rpt_dir}}/sub_clock.strmin.rpt"
 set block_scr_file                         = "{{cur.flow_scripts_dir}}/{{cur.stage}}/${cur_stage}.sub_block.strmin.run"
+
+if ( -d {{cur.cur_flow_sum_dir}}/.trash/$block_topcell_name) then
+echo "Alchip-Info:$block_topcell_name already exist,it will be delete automatically!"
+rm -rf {{cur.cur_flow_sum_dir}}/.trash/$block_topcell_name
+endif
+
 
 #=================== generate plugin strmin script ==================
 cat <<block_strmin_setting >! ${block_scr_file}
@@ -178,8 +196,11 @@ strmout -templateFile ${scr_strmout_file}
 echo "  finish" `date "+%F %T %a"` >> ${run_time}
 
 #-- copy cds.lib from run dir to cds.lib source dir -------------------------
+mkdir -p {{env.BLK_MISC}}
+mkdir -p {{env.BLK_MISC}}/CDS_FILE
 if (-e cds.lib ) then
-cp -f cds.lib {{local.cds_lib_path}}
+#cp -f cds.lib {{local.cds_lib_path}}
+cp -f cds.lib {{env.BLK_MISC}}/CDS_FILE/cds.lib
 endif
 echo "{{env.FIN_STR}}"
 

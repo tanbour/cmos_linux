@@ -52,7 +52,7 @@ set POCV_WIRE                       "{{local.POCV_WIRE}}"
 ###  source liblist                                                   ###
 ###===================================================================###
 
-source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+source {{env.PROJ_LIB}}/liblist/{{ver.LIB}}.tcl
 sh mkdir -p {{cur.cur_flow_data_dir}}/{{local._multi_inst}}
 sh ln -sf $VNET {{cur.cur_flow_data_dir}}/{{local._multi_inst}}/${cur_stage}.{{env.BLK_NAME}}.pt.v.gz
 sh ln -sf $SPEF {{cur.cur_flow_data_dir}}/{{local._multi_inst}}/${cur_stage}.{{env.BLK_NAME}}.${RC_CORNER}.spef.gz

@@ -1,26 +1,28 @@
 #####################################
 ## dont_use_cells                  ## 
 #####################################
-# set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*D24*]  ;  # big cell
-# set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*D28*]  ;  # big cell
-# set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*D32*]  ;  # big cell
-# set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*D36*]  ;  # big cell
-# set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*DEL*]  ;  # delay cell
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*D0*]  ;  # weak cell
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*D20*]  ;  # big cell
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*D24*]  ;  # big cell
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*D28*]  ;  # big cell
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*D32*]  ;  # big cell
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*D36*]  ;  # big cell
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*DEL*]  ;  # delay cell
 # #set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*TIE*]  ;  # tie cell
-# set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */BHD*]   ;  # bhd cell
-# set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */BUFT*]  ;  # tri buffer
-# set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*LHQ*]  ;  # Latch
-# set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*ANT*]  ;  # antenna cell
-# set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*DCAP*] ;  # decap cell
-# set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */G*]     ;  # ECO cell
-# set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */DCC*]   ;  # balance cell
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */BHD*]   ;  # bhd cell
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */BUFT*]  ;  # tri buffer
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*LHQ*]  ;  # Latch
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*ANT*]  ;  # antenna cell
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*DCAP*] ;  # decap cell
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */G*]     ;  # ECO cell
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */DCC*]   ;  # balance cell
 # set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */CMP*]   ;  # Comparator
 # set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */DFN*]   ;  # negative / mux input reg 
 # set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */EDF*]   ;  # negative / mux input reg 
 # set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */SDFN*]   ;  # negative / mux input reg 
 # set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */SEDF*]   ;  # negative / mux input reg 
-# set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */CK*]    ;  # clock cell
-# set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*SK*]    ;  # SK cell
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */CK*]    ;  # clock cell
+ set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*SK*]    ;  # SK cell
 # set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */MAOI*]
 # set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */MOAI*]
 # set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */*AOI*D1*]
@@ -57,46 +59,27 @@
 #   set_lib_cell_purpose -exclude all  [get_lib_cells -quiet  */${libcell}*]
 # }
 
+
 #####################################
 ## cts cells                       ## 
 #####################################
 # List of CTS lib cell patterns to be used by CTS 
-#set CTS_LIB_CELL_PATTERN_LIST [list \
-#   */CKBD2BWP240H8P57PDULVT \
-#   */CKBD3BWP240H8P57PDULVT \
-#   */DCCKBD4BWP240H8P57PDULVT \
-#   */DCCKBD5BWP240H8P57PDULVT \
-#   */DCCKBD6BWP240H8P57PDULVT \
-#   */DCCKBD8BWP240H8P57PDULVT \
-#   */DCCKBD10BWP240H8P57PDULVT \
-#   */DCCKBD12BWP240H8P57PDULVT \
-#   */DCCKBD14BWP240H8P57PDULVT \
-#   */DCCKBD16BWP240H8P57PDULVT \
-#   */CKLNQD2BWP240H8P57PDULVT \
-#   */CKLNQD3BWP240H8P57PDULVT \
-#   */CKLNQD4BWP240H8P57PDULVT \
-#   */CKLNQD5BWP240H8P57PDULVT \
-#   */CKLNQD6BWP240H8P57PDULVT \
-#   */CKLNQD8BWP240H8P57PDULVT \
-#   */CKLNQD10BWP240H8P57PDULVT \
-#   */CKLNQD12BWP240H8P57PDULVT \
-#   */CKLNQD14BWP240H8P57PDULVT \
-#   */CKLNQD16BWP240H8P57PDULVT \
-#   */CKND2BWP240H8P57PDULVT \
-#   */CKND3BWP240H8P57PDULVT \
-#   */DCCKND4BWP240H8P57PDULVT \
-#   */DCCKND5BWP240H8P57PDULVT \
-#   */DCCKND6BWP240H8P57PDULVT \
-#   */DCCKND8BWP240H8P57PDULVT \
-#   */DCCKND10BWP240H8P57PDULVT \
-#   */DCCKND12BWP240H8P57PDULVT \
-#   */DCCKND14BWP240H8P57PDULVT \
-#   */DCCKND16BWP240H8P57PDULVT \
-#   */DCCKND18BWP240H8P57PDULVT \
-#]
-#
-#set_lib_cell_purpose -exclude cts [get_lib_cells -quiet  */*]
-#set_lib_cell_purpose -include cts [get_lib_cells -quiet  $CTS_LIB_CELL_PATTERN_LIST]
+set CTS_LIB_CELL_PATTERN_LIST [list \
+   */DCCKND16BWP12TM1PLVT\
+   */DCCKND12BWP12TM1PLVT\
+   */DCCKND8BWP12TM1PLVT\
+   */DCCKND4BWP12TM1PLVT\
+   */CKLNQD16BWP12TM1PLVT \
+   */CKLNQD12BWP12TM1PLVT \
+   */CKLNQD8BWP12TM1PLVT \
+   */CKLNQD6BWP12TM1PLVT \
+   */CKLNQD4BWP12TM1PLVT \
+   */CKMUX2D4BWP12TM1PLVT\
+   */CKMUX2D2BWP12TM1PLVT\
+]
+
+set_lib_cell_purpose -exclude cts [get_lib_cells -quiet  */*]
+set_lib_cell_purpose -include cts [get_lib_cells -quiet  $CTS_LIB_CELL_PATTERN_LIST]
 
 #####################################
 ## tie cells                       ## 

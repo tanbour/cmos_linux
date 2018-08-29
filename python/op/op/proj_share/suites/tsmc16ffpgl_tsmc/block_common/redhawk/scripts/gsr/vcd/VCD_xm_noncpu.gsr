@@ -1,0 +1,102 @@
+#===================================================================
+#=================== xm_noncpu new 1206 ============================
+#===================================================================
+
+#POWER_ANALYSIS_MODE averaged
+#DYNAMIC_SIMULATION_TIME 500000e-12
+#VCD_FILE {
+# xm_noncpu /proj/Mars2_new/from_customer/20161206/xm_noncpu_vcd/l2c_4000ns_4500ns_450ps_tt.vcd.gz
+# FILE_TYPE       VCD
+## SELECT_RANGE    -1 -1
+# START_TIME      4000000
+# END_TIME        4500000
+# FRONT_PATH      "chip_tb/mars_u/panel_u0/mpc0_l2cache/"
+# SUBSTITUTE_PATH ""
+# TRUE_TIME       1
+#}
+
+#===================================================================
+#=================== xm_noncpu new 1206 ============================
+#===================================================================
+
+#POWER_ANALYSIS_MODE averaged
+#DYNAMIC_SIMULATION_TIME 500000e-12
+#VCD_FILE {
+# xm_noncpu /proj/Mars2_new/from_customer/20161206/xm_noncpu_vcd/l2c_4000ns_4500ns_450ps.vcd.gz
+# FILE_TYPE       VCD
+## SELECT_RANGE    -1 -1
+# START_TIME      4000000
+# END_TIME        4500000
+# FRONT_PATH      "chip_tb/mars_u/panel_u0/mpc0_l2cache/"
+# SUBSTITUTE_PATH ""
+# TRUE_TIME       1
+#}
+
+#===================================================================
+#=================== xm_noncpu for power ===========================
+#===================================================================
+
+POWER_ANALYSIS_MODE averaged
+DYNAMIC_SIMULATION_TIME 500000e-12
+VCD_FILE {
+ xm_noncpu /proj/Mars2_new/from_customer/20161205/VCD_for_chip_power/l2cache_2.2Ghz_13000ns_13500ns.vcd.gz
+ FILE_TYPE       VCD
+# SELECT_RANGE    -1 -1
+ START_TIME      13000000
+ END_TIME        13500000
+ FRONT_PATH      "chip_tb/mars_u/panel_u0/mpc0_l2cache/"
+ SUBSTITUTE_PATH ""
+ TRUE_TIME       1
+}
+
+#===================================================================
+#=================== xm_noncpu new 1115 ============================
+#===================================================================
+
+#POWER_ANALYSIS_MODE averaged
+#DYNAMIC_SIMULATION_TIME 500000e-12
+#VCD_FILE {
+# xm_noncpu /proj/Mars2_new/from_customer/20161115/xm_noncpu_vcd/l2c_netlist_3800ns_4300ns.vcd.gz
+# FILE_TYPE       VCD
+## SELECT_RANGE    -1 -1
+# START_TIME      3800000
+# END_TIME        4300000
+# FRONT_PATH      "chip_tb/mars_u/panel_u0/mpc0_l2cache/"
+# SUBSTITUTE_PATH ""
+# TRUE_TIME       1
+#}
+
+#===================================================================
+#=================== xm_noncpu new 1115 signoff ====================
+#===================================================================
+
+#POWER_ANALYSIS_MODE averaged
+#DYNAMIC_SIMULATION_TIME 400000e-12
+#VCD_FILE {
+# xm_noncpu /proj/Mars2_new/from_customer/20161115/xm_noncpu_vcd/l2c_netlist_3800ns_4200ns_tt_450ps.vcd.gz
+# FILE_TYPE       VCD
+## SELECT_RANGE    -1 -1
+# START_TIME      3800000
+# END_TIME        4200000
+# FRONT_PATH      "chip_tb/mars_u/panel_u0/mpc0_l2cache/"
+# SUBSTITUTE_PATH ""
+# TRUE_TIME       1
+#}
+
+#===================================================================
+#=================== xm_noncpu new 1115 ============================
+#===================================================================
+
+#POWER_ANALYSIS_MODE averaged
+#DYNAMIC_SIMULATION_TIME 400000e-12
+#VCD_FILE {
+# xm_noncpu /proj/Mars2_new/from_customer/20161115/xm_noncpu_vcd/l2c_netlist_3800ns_4200ns_ml_450ps.vcd.gz
+# FILE_TYPE       VCD
+## SELECT_RANGE    -1 -1
+# START_TIME      3800000
+# END_TIME        4200000
+# FRONT_PATH      "chip_tb/mars_u/panel_u0/mpc0_l2cache/"
+# SUBSTITUTE_PATH ""
+# TRUE_TIME       1
+#}
+

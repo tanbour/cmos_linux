@@ -15,7 +15,7 @@ from utils import backup_cfg
 
 LOG = pcom.gen_logger(__name__)
 
-class BackupProc(object):
+class BackupProc():
     """backup processor for super user"""
     def __init__(self, proj_name):
         self.src_root = os.path.join(backup_cfg.BACKUP_SRC_ROOT, proj_name)
@@ -31,7 +31,7 @@ class BackupProc(object):
             LOG.critical("Sorry, you are not in the host which could run project backup")
             raise SystemExit()
         if not os.path.isdir(self.src_root):
-            LOG.error(f"backup source directory {self.src_root} is NA")
+            LOG.error("backup source directory %s is NA", self.src_root)
             raise SystemExit()
         pcom.mkdir(LOG, self.dst_root)
     def backup_sync(self):
@@ -41,9 +41,9 @@ class BackupProc(object):
             sync_src = os.path.join(self.src_root, sync_name)
             sync_dst = os.path.join(self.dst_root, sync_name)
             if not os.path.exists(sync_src):
-                LOG.error(f"sync source {sync_src} is NA")
+                LOG.error("sync source %s is NA", sync_src)
                 raise SystemExit()
-            LOG.info(f"rsync from {sync_src} to {sync_dst}")
+            LOG.info("rsync from %s to %s", sync_src, sync_dst)
             rsync_str = f"rsync -a --delete {sync_src} {sync_dst}"
             subprocess.run(rsync_str, shell=True, check=True, stdout=subprocess.PIPE)
     def backup_date(self):
@@ -62,7 +62,7 @@ class BackupProc(object):
                         glob_max_tup = max(glob_tup_lst)
                         src_file = glob_max_tup[-1]
                         dst_file = src_file.replace(self.src_root, date_root)
-                        LOG.info(f"backup from {src_file} to {dst_file}")
+                        LOG.info("backup from %s to %s", src_file, dst_file)
                         pcom.mkdir(LOG, os.path.dirname(dst_file))
                         shutil.copyfile(src_file, dst_file)
     def backup_proj(self):

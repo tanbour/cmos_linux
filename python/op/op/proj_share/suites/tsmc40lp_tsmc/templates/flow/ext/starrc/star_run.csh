@@ -44,23 +44,32 @@ set GDS_LAYER_MAP_FILE          = "{{liblist.STAR_METAL_FILL_MAPPING_FILE}}"
 set COUPLING_ABS_THRESHOLD      = "{{local.coupling_abs_threshold}}"
 set COUPLING_REL_THRESHOLD      = "{{local.coupling_rel_threshold}}"
 
-set NDM_TECH                    = "`ls {{liblist.NDM_TECH}}`"
-set NDM_STD                     = "`ls {{liblist.NDM_STD}}`"
+set NDM_TECH                    = "`ls -d --indicator-style=none {{liblist.NDM_TECH}}`"
+set NDM_STD                     = "`ls -d --indicator-style=none {{liblist.NDM_STD}}`"
+
 {%- if liblist.NDM_MEM %}
-set NDM_MEM                     = "`ls {{liblist.NDM_MEM}}`"
+set NDM_MEM                     = "`ls -d --indicator-style=none {{liblist.NDM_MEM}}`"
+{%- else %}
+set NDM_MEM                     = ""
 {%- endif %}
+
 {%- if liblist.NDM_IP %}
-set NDM_IP                     = "`ls {{liblist.NDM_IP}}`"
+set NDM_IP                     = "`ls -d --indicator-style=none {{liblist.NDM_IP}}`"
+{%- else %}
+set NDM_IP                     = ""
 {%- endif %}
+
 {%- if liblist.NDM_IO %}
-set NDM_IO                     = "`ls {{liblist.NDM_IO}}`"
+set NDM_IO                     = "`ls -d --indicator-style=none {{liblist.NDM_IO}}`"
+{%- else %}
+set NDM_IO                     = ""
 {%- endif %}
 
 {%- if local.star_flow_type == "ndm" %} 
-{%- if local.ndm_block_name ==  "" %}
-set BLK_NAME           =  {{env.BLK_NAME}}/$pre_stage 
-{%- else %}
+{%- if local.ndm_block_name %}
 set BLK_NAME           = $ndm_block_name
+{%- else %}
+set BLK_NAME           =  {{env.BLK_NAME}}/$pre_stage 
 {%- endif %}
 {%- elif local.star_flow_type == "deflef" %} 
 set BLK_NAME                    =	 $BLK_NAME
@@ -74,15 +83,7 @@ set NDM_DATABASE                 = "$pre_flow_data_dir/${pre_stage}.{{env.BLK_NA
 
 {%- if local.star_flow_type == "ndm" %}
 # define ndm search path
-{%- if liblist.NDM_MEM %}
-set NDM_SEARCH_PATH              = "$NDM_TECH $NDM_STD $NDM_MEM"
-{%- elif liblist.NDM_IP %}
-set NDM_SEARCH_PATH              = "$NDM_TECH $NDM_STD $NDM_IP"
-{%- elif liblist.NDM_IP and liblist.NDM_MEM %}
-set NDM_SEARCH_PATH              = "$NDM_TECH $NDM_STD $NDM_MEM $NDM_IP"
-{%- else %}
-set NDM_SEARCH_PATH              = "$NDM_TECH $NDM_STD"
-{%- endif %}
+set NDM_SEARCH_PATH              = "$NDM_TECH $NDM_STD $NDM_MEM $NDM_IP $NDM_IO"
 {%- endif %}
 
 {%- if local.star_flow_type == "deflef" %}
@@ -98,8 +99,8 @@ set LEF_FILE              = "$LEF_TECH $LEF_STD"
 {%- endif %}
 {%- endif %}
 
-if ( -e `find $pre_flow_data_dir/* -name DVIA_${pre_stage}.${BLK_NAME}.gds.gz` ) then
-set METAL_FILL_GDS_FILE          = `find {{pre.flow_data_dir}}/* -name DVIA_${pre_stage}.${BLK_NAME}.gds.gz` 
+if ( -e `find -wholename $pre_flow_data_dir/* -name DVIA_${pre_stage}.${BLK_NAME}.gds.gz` ) then
+set METAL_FILL_GDS_FILE          = `find -wholename {{pre.flow_data_dir}}/* -name DVIA_${pre_stage}.${BLK_NAME}.gds.gz` 
 else
 set METAL_FILL_GDS_FILE          = ""
 endif
@@ -244,7 +245,7 @@ RUN_end
 
 cat << RUN_all  >! {{cur.flow_scripts_dir}}/{{cur.stage}}/${SESSION}.cmd.run_all.csh
 /bin/csh -v {{cur.flow_scripts_dir}}/{{cur.stage}}/${SESSION}.runt_start.csh
-StarXtract {{cur.flow_scripts_dir}}/{{cur.stage}}/${SESSION}.cmd
+/apps/synopsys/starrc_vM-2017.06/bin/StarXtract {{cur.flow_scripts_dir}}/{{cur.stage}}/${SESSION}.cmd
 /bin/csh -v {{cur.flow_scripts_dir}}/{{cur.stage}}/${SESSION}.runt_end.csh
 RUN_all
 absub -r "q:{{local.openlava_batch_queue}} os:6 M:$star_mem_requirement star:true n:$star_cpu_number" -c "/bin/csh -v {{cur.flow_scripts_dir}}/{{cur.stage}}/${SESSION}.cmd.run_all.csh"

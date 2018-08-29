@@ -3,11 +3,36 @@
 ######################################################################
   puts "Alchip-info : Running script [info script]\n"
 
+###==================================================================##
+###  source liblist                                                  ##
+###==================================================================##
+source {{env.PROJ_LIB}}/liblist/{{ver.LIB}}.tcl
+{%- set sn = local.fm_scenario.upper().split('.') %}
+{%- set sn_std_new = ['DB_STD', sn[1], sn[2]]|join('_') %}
+{%- set sn_mem_new = ['DB_MEM', sn[1], sn[2]]|join('_') %}
+{%- set sn_ip_new = ['DB_IP', sn[1], sn[2]]|join('_') %}
+{%- set sn_io_new = ['DB_IO', sn[1], sn[2]]|join('_') %}
+set DB_STD_{{sn[1]}}_{{sn[2]}}  "{{liblist[sn_std_new]}}"
+set DB_MEM_{{sn[1]}}_{{sn[2]}}  "{{liblist[sn_mem_new]}}"
+set DB_IP_{{sn[1]}}_{{sn[2]}}  "{{liblist[sn_ip_new]}}"
+set DB_IO_{{sn[1]}}_{{sn[2]}}  "{{liblist[sn_io_new]}}"
+
+##==================================================================##
+##  Session Setting                                                 ##
+##==================================================================##
+ set SESSION                         "{{local.fm_scenario}}"
+ set VOLT                            "[lindex [split $SESSION .] 1]"
+ set LIB_CORNER                      "[lindex [split $SESSION .] 2]"
+
+ set std_lib_name [set [join "DB STD [string toupper $VOLT] [string toupper $LIB_CORNER]" "_"]]
+ set mem_lib_name [set [join "DB MEM [string toupper $VOLT] [string toupper $LIB_CORNER]" "_"]]
+ set ip_lib_name  [set [join "DB IP  [string toupper $VOLT] [string toupper $LIB_CORNER]" "_"]]
+ set io_lib_name  [set [join "DB IO  [string toupper $VOLT] [string toupper $LIB_CORNER]" "_"]]
+ set lib_name "$std_lib_name $mem_lib_name $ip_lib_name $io_lib_name"
+
 ##===================================================================##
 ## SETUP                                                             ##
 ##===================================================================##
-  source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
-  
   set pre_stage "{{pre.sub_stage}}"
   set cur_stage "{{cur.sub_stage}}"
   
@@ -28,12 +53,12 @@
 ######################################################################################################################
 # implementation and reference netilst setting
 ######################################################################################################################
-{%- if local.fm_implementation_vnet_list is string %}
+{%- if local.fm_implementation_vnet_list is string and local.fm_implementation_vnet_list %}
   set FM_IMPLEMENTATION_VNET_LIST     "{{local.fm_implementation_vnet_list}}"
-{%- elif fm_implementation_vnet_list is sequence %}
+{%- elif fm_implementation_vnet_list is sequence and local.fm_implementation_vnet_list %}
   set FM_IMPLEMENTATION_VNET_LIST     "{{local.fm_implementation_vnet_list|join(' ') }}"
 {%- else %}
-  set FM_IMPLEMENTATION_VNET_LIST     "${pre_flow_data_dir}/${pre_stage}.{{env.BLK_NAME}}.v.gz" 
+  set FM_IMPLEMENTATION_VNET_LIST     "${pre_flow_data_dir}/${pre_stage}.{{env.BLK_NAME}}.fm.v.gz" 
 {%- endif %}
 {%- if local.fm_reference_vnet_list is string %}
   set FM_REFERENCE_VNET_LIST          "{{local.fm_reference_vnet_list}}"
@@ -46,7 +71,7 @@
   set FM_SAVE_SESSION		          "{{local.fm_save_session}}"
   set PROBE_LIST		              "{{cur.config_plugins_dir}}/fm_scripts/probe_list.tcl" 
   set PROBE_POINTS_LIST               "{{cur.config_plugins_dir}}/fm_scripts/probe_points_list.tcl"
-  set FM_DB                           "{{local.fm_db}}"
+  set FM_DB                           "$lib_name"
 ######################################################################################################################
 # option setting 
 ######################################################################################################################

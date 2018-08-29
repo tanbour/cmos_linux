@@ -27,7 +27,19 @@ Welcome to try our OP platform LAB, and any questions or suggestions about platf
 
 please contact **guanyu_yi@alchip.com** , **simonz@alchip.com**
 
-You can also download OP lab guide here :download:`op_lab_guide_v3.0.2.pdf <_static/op_lab_guide_v3.0.2.pdf>`
+You can download OP lab guide here :download:`op_lab_guide_v3.0.4.pdf <_static/op_lab_guide_v3.0.4.pdf>`
+
+You can download OP update features doc here :download:`op_v4_update_training_01.pdf <_static/op_v4_update_training_01.pdf>`
+
+You can download OP Traning Videos here
+
+    :download:`op_software_introduction.avi <_static/video/op_software_introduction.avi>`
+
+    :download:`OP_LAB-PART1-overview.avi <_static/video/OP_LAB-PART1-overview.avi>`
+
+    :download:`OP_LAB-PART2-PL.avi <_static/video/OP_LAB-PART2-PL.avi>`
+
+    :download:`OP_LAB-PART3-BO.avi <_static/video/OP_LAB-PART3-BO.avi>`
 
 .. _ref_op_lab_overview:
 

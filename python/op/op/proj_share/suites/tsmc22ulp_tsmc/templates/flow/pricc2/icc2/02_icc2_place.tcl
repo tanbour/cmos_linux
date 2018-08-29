@@ -8,8 +8,10 @@ set sh_continue_on_error true
 ## SETUP                                                             ##
 ##===================================================================##
 source {{env.PROJ_SHARE_CMN}}/icc2_common_scripts/icc2_procs.tcl
-source {{cur.flow_liblist_dir}}/liblist/liblist.tcl
+source {{env.PROJ_LIB}}/liblist/{{ver.LIB}}.tcl
 source {{cur.cur_flow_sum_dir}}/{{cur.sub_stage}}.op._job.tcl
+# include 00_icc2_setup.tcl
+{% include 'icc2/00_icc2_setup.tcl' %}
 
 set pre_stage "{{pre.sub_stage}}"
 set cur_stage "{{cur.sub_stage}}"
@@ -33,7 +35,12 @@ set ocv_mode                                             "{{local.ocv_mode}}"
 set design_style                                         "{{local.design_style}}"
 set lib_cell_height                                       "{{local.lib_cell_height}}"
 set use_abstracts_for_sub_blocks                         "{{local.use_abstracts_for_sub_blocks}}"
-set place_opt_active_scenario_list                       "{{local.place_opt_active_scenario_list}}"
+{%- if local.place_opt_active_scenario_list is string %}
+set  place_opt_active_scenario_list                       "{{local.place_opt_active_scenario_list}}"
+{%- elif local.place_opt_active_scenario_list is sequence %}
+set place_opt_active_scenario_list                        "{{local.place_opt_active_scenario_list|join (' ')}}"
+{%- endif %}
+set place_opt_name_prefix                                "{{local.place_opt_name_prefix}}"
 set place_opt_optimize_icgs_critical_range               "{{local.place_opt_optimize_icgs_critical_range}}"
 set place_opt_refine_opt                                 "{{local.place_opt_refine_op}}"
 set place_opt_multibit_banking                           "{{local.place_opt_multibit_banking}}"
@@ -47,9 +54,21 @@ set switch_activity_file_power_scenario                  "{{local.switch_activit
 set enable_place_reporting                               "{{local.enable_place_reporting}}"
 set use_usr_common_scripts_connect_pg_net_tcl            "{{local.use_usr_common_scripts_connect_pg_net_tcl}}"
 set write_def_convert_icc2_site_to_lef_site_name_list    "{{local.write_def_convert_icc2_site_to_lef_site_name_list}}"
-set icc_icc2_gds_layer_mapping_file                      "${ICC_ICC2_GDS_LAYER_MAPPING_FILE}"
+set icc_icc2_gds_layer_mapping_file                      "{{liblist.ICC_ICC2_GDS_LAYER_MAPPING_FILE}}"
 
-{% include 'icc2/00_icc2_setup.tcl' %}
+# ICC2 AOCV table----------------------------------------------------------------------
+{%- if local.scenario_list is string %}
+{%- set sn = local.scenario_list.upper().split('.') %}
+{%- set sn_new = ['ICC2_AOCV', sn[1], sn[2], sn[4]]|join('_') %}
+set ICC2_AOCV_{{sn[1]}}_{{sn[2]}}_{{sn[4]}}  "{{liblist[sn_new]}}"
+{%- elif local.scenario_list is sequence %}
+{%- for scenario in local.scenario_list %}
+{%- set sn = scenario.upper().split('.') %}
+{%- set sn_new = ['ICC2_AOCV', sn[1], sn[2], sn[4]]|join('_') %}
+set ICC2_AOCV_{{sn[1]}}_{{sn[2]}}_{{sn[4]}}  "{{liblist[sn_new]}}"
+{%- endfor %}
+{%- endif %}
+set ndm_tech          "{{liblist.NDM_TECH}}" 
 
 ###==================================================================##
 ##  back up database                                                 ##
@@ -106,20 +125,21 @@ set_scenario_status -active true $place_opt_active_scenario_list
 set_scenario_status -active true [all_scenarios]
 {% endif %}  
 
+foreach_in_collection scn [all_scenarios] {
+    current_scenario $scn
 {%- if local.setup_uncertainty %}
-set_clock_uncertainty {{local.setup_uncertainty}} -setup [all_clocks ] -scenarios [all_scenarios ]
+    set_clock_uncertainty {{local.setup_uncertainty}} -setup [all_clocks ] -scenarios $scn
 {%-  endif %}
 {%- if local.hold_uncertainty %}
-set_clock_uncertainty {{local.hold_uncertainty}} -hold  [all_clocks ] -scenarios [all_scenarios ]
+    set_clock_uncertainty {{local.hold_uncertainty}} -hold  [all_clocks ] -scenarios $scn
 {%-  endif %}
-
-
 {%- if local.data_transition %}
-set_max_transition -data_path {{local.data_transition}} [all_clocks] -scenarios [all_scenarios]
+    set_max_transition -data_path {{local.data_transition}} [all_clocks] -scenarios $scn
 {%- endif %}
 {%- if local.clock_transition %}
-set_max_transition -clock_path {{local.clock_transition}} [all_clocks] -scenarios [all_scenarios]
+    set_max_transition -clock_path {{local.clock_transition}} [all_clocks] -scenarios $scn
 {%- endif %}
+}
 
 ###==================================================================##
 ## place_opt settings                                                ##
@@ -135,6 +155,12 @@ puts "Alchip-info: settings icc2_settings/icc2_place.tcl "
 
 puts "Alchip-info: Sourcing  set_lib_cell_purpose.tcl"
 source -e -v "{{env.PROJ_SHARE_CMN}}/icc2_common_scripts/set_lib_cell_purpose.tcl"
+
+## place opt  name prefix-------------------------------------------
+
+{%- if local.place_opt_name_prefix %}
+set_app_options -name cts.common.user_instance_name_prefix -value $place_opt_name_prefix
+{%- endif %}
 
 ###==================================================================##
 ## Enable AOCV or POCV                                               ##
@@ -229,12 +255,16 @@ create_placement -incremental ;# runs embedded CDR
 ## Flow with non-SPG inputs (use_spg_flow set to false)
 puts "RM-info: Running create_placement"
 create_placement
+save_block
 puts "RM-info: Running create_placement -buffering_aware_timing_driven"
 create_placement -buffering_aware_timing_driven
+save_block
 puts "RM-info: Running place_opt -from initial_drc -to initial_drc"
 place_opt -from initial_drc -to initial_drc
 puts "RM-info: Running update_timing -full"
 update_timing -full
+
+save_block
 {%- endif %}
 
 ## Second pass: by using create_placement -incremental and place_opt -from initial_drc--------
@@ -256,10 +286,11 @@ set_app_options -name place_opt.flow.optimize_icgs_critical_range -value {{local
 puts "RM-info: Running create_placement -incremental -timing_driven -congestion"
 {# Note: to increase the congestion alleviation effort, add -congestion_effort high #}
 create_placement -incremental -timing_driven -congestion
-save_block 
 
 puts "RM-info: Running place_opt -from initial_drc -to initial_opto"
 place_opt -from initial_drc -to initial_opto
+
+save_block
 
 {%- if local.place_opt_multibit_banking == "true" %}
 ## Multi-bit banking (optional) ---------------------------------------------------------------
@@ -276,6 +307,8 @@ eval $identify_multibit_cmd
 
 puts "RM-info: Running place_opt -from final_place"
 place_opt -from final_place
+
+save_block
 
 {%- if local.place_opt_multibit_debanking == "true" %}
 ## Multi-bit de-banking (optional) ------------------------------------------------------------

@@ -6,33 +6,33 @@
     {% verbatim %}
     <div class="layout-breadcrumb">
       <breadcrumb>
-        <breadcrumb-item><a @click="jobSumRefresh" title="refresh">Server Summary</a></breadcrumb-item>
+        <breadcrumb-item>Server Summary</breadcrumb-item>
       </breadcrumb>
     </div>
     {% endverbatim %}
     <div class="layout-content">
       <div class="layout-content-main" style="background-image:url({% static 'images/background_1200x600.jpg' %})">
         <div>
-          <date-picker :value="date_range" @on-change="datePick" type="daterange" placement="top-start" placeholder="Select date" style="width: 200px"></date-picker>
+          <date-picker :value="date_range" @on-change="datePick" type="daterange" placement="top-start" placeholder="Select date" class="search-box"></date-picker>
           <br>
-          <i-input v-model="searchQuery" placeholder="Search" clearable style="width:200px"></i-input>
+          <i-input v-model="searchQuery" placeholder="Search" clearable class="search-box"></i-input>
           <br>
-          <i-table border stripe show-header :columns="table_col" :data="table_data" size="small" ref="table"></i-table>
-          <div style="margin:10px; overflow:hidden">
-            <div style="float:right">
+          <i-table border stripe show-header :columns="table_col" :data="table_data" size="small" height="650" ref="table"></i-table>
+          <div class="table-page">
+            <div>
               <Page :total="dataCount" :page-size="pageSize" show-total @on-change="changePage"></Page>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- <div style="height:300px"></div> -->
   </div>
 </template>
 
 <script>
  const ServerSum = {
    template: "#server_sum",
+   mixins: [mixin],
    data: function () {
      return {
        col_ary: [],
@@ -63,14 +63,12 @@
          fixed: "right",
          render: (h, params) => {
            return h("div", [
-             h("Button", {
+             h("i-button", {
                props: {
                  type: "primary",
                  size: "small"
                },
-               style: {
-                 marginRight: "5px"
-               },
+               class: "table-button",
                on: {
                  click: () => {
                    this.show(params.index)
@@ -109,11 +107,14 @@
    },
    methods: {
      init: function(ajax_cfg = {method: "get", url: this.url}) {
+       this.$Loading.start()
        axios(ajax_cfg).then((response) => {
+         this.$Loading.finish()
          this.rsp_data = response.data
          this.procDataAry()
          this.procColAry()
        }).catch((error) => {
+         this.$Loading.error()
          console.log(error)
        })
      },
@@ -171,7 +172,7 @@
              const row = params.row
              const color = row.status === "-ok" ? "yellow" : row.status === "ok" ? "green" : (row.status === undefined || row.status === "") ? "blue" : "red"
              const text = row.status
-             return h("Tag", {
+             return h("tag", {
                props: {
                  type: "dot",
                  color: color
@@ -291,6 +292,8 @@
          content += td_key + ": " + this.table_data[index][td_key] + "<br>"
        }
        this.$Modal.info({
+         scrollable: true,
+         closable: true,
          title: "Detailed Info",
          content: content
        })
@@ -315,6 +318,7 @@
    /* created: function () {
     * },*/
    mounted: function () {
+     this.checkCookie()
      this.init()
    }
  }

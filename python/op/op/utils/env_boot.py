@@ -37,7 +37,7 @@ def find_blk_root(path_str, proj_root):
         return ""
     return f"{proj_root}{os.sep}{blk_name}"
 
-class EnvBoot(object):
+class EnvBoot():
     """a base class to boot project environments used only by op"""
     def __init__(self):
         env_path = os.getcwd()
@@ -67,7 +67,7 @@ class EnvBoot(object):
         """to process project and block global env dic used only by op"""
         boot_cfg = os.path.expandvars(settings.BOOT_CFG)
         if not os.path.isfile(boot_cfg):
-            LOG.error(f"boot config file {boot_cfg} is NA")
+            LOG.error("boot config file %s is NA", boot_cfg)
             raise SystemExit()
         self.cfg_dic = {"proj": pcom.gen_cfg([boot_cfg])}
         for proj_sec_k, proj_sec_v in self.cfg_dic["proj"].items():
@@ -87,10 +87,10 @@ class EnvBoot(object):
             cfg_kw = os.path.splitext(os.path.basename(proj_cfg))[0]
             if cfg_kw == "proj":
                 continue
-            if self.blk_flg:
+            if self.blk_flg and cfg_kw not in settings.BLK_CFG_UNFILL_LST:
                 blk_cfg = proj_cfg.replace(base_proj_cfg_dir, base_blk_cfg_dir)
                 if not os.path.isfile(blk_cfg):
-                    LOG.warning(f"block config file {blk_cfg} is NA")
+                    LOG.warning("block config file %s is NA", blk_cfg)
                 self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg, blk_cfg])
             else:
                 self.cfg_dic[cfg_kw] = pcom.gen_cfg([proj_cfg])

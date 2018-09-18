@@ -173,6 +173,10 @@ format = columns
 # cert generation
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out certificate.pem -days 3565
 to embed content of certificate.pem to core/op_lic.py
+# mac addr
+ip addr show
+ifconfig
+cat /sys/class/net/*/address
 # license service kick off
 op_license -k key.pem -c certificate.pem -f license_2018.key -I 005056ADB9A1 -e 2018/12/31
 op_server -f license_2018.key
@@ -481,7 +485,7 @@ make install
 * other lib version local installation
 export LD_LIBRARY_PATH
 export LD_RUN_PATH
-./configure LDFLAGS="-L<path>" CPPFLAGS="-I<include_path>" --prefix=<local_path>
+./configure LDFLAGS="-L<path1> -L<path2>" CPPFLAGS="-I<include_path>" --prefix=<local_path>
 
 * pacman
 pacman -Syu

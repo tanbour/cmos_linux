@@ -1,0 +1,268 @@
+% BP
+% 1.项目概况
+% 2.产品及服务
+% 3.行业竞争及市场渠道
+% 4.技术特点和核心竞争力
+% 5.团队介绍
+% 6.融资计划和未来规划
+
+% 商业计划书要素提示
+% 01．公司概况
+% 公司的成立背景及历史沿革、公司的主要产品/服务及业务发展状况、公司发展的里程碑或大事记等。（让阅读者对公司的关键信息有初步了解）
+% 02．市场分析
+% 市场细分及市场定位、用户购买特征及关键购买因素、市场规模及增长率等。
+% 03．产品(服务)
+% 核心技术、产品研发策略等。
+% 04．营销策略
+% 产品的价格策略、渠道策略、市场推广策略等。
+% 05．竞争分析
+% 对行业的分析、对国内外主要竞争对手的分析、对自身的分析和竞争策略等。
+% 06．业务模式
+% 价值定位分析（能给用户带来怎样的使用价值，解决用户的哪些关键需求）、产业价值链分析（根据本行业特征做行业价值链分析）、价值链定位及组合（公司选择做价值链的哪些环节并形成怎样的组合）、收入模式分析等。
+% 07．业务发展状况
+% 在技术/产品研发方面取得的成绩、在市场拓展方面取得的成绩等。
+% 08．公司股权结构
+% 公司的股权结构及历次变更情况、公司股东的背景情况及对股东的评价等。
+% 09．公司治理结构
+% 公司股东会和董事会的组成、公司股东会和董事会的运作状况、管理者对股东会和董事会的评价等。
+% 10．管理团队
+% 管理团队主要成员的简历、对管理团队成员的评价等。
+% 11．公司组织结构
+% 公司的组织结构及职能分工、公司组织运作的基本状况及评价等。
+% 12．公司战略规划
+% 公司的宗旨与使命、价值观与核心理念、近期/中期/远期目标、发展策略及实施步骤、三年内的业务规划等。
+% 13．融资计划
+% 公司的融资规模及准备出让的股权比例、资金使用计划、对投资人的退出计划等。
+% 14．财务分析
+% 公司的历史财务报表、未来三年的财务预测、公司的价值评估、投资人可能获得的收益预测等。
+% 15．风险分析
+% 市场风险、产品/技术风险、经营风险、管理风险、财务风险等。
+% 16．其它信息
+% 创业者认为需要披露的对投资人有价值的信息。
+\documentclass[a4paper,11pt]{article}
+\usepackage{xeCJK}
+\setCJKmainfont{SourceHanSansCN-Regular}
+\usepackage{graphicx}       % front image
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}       % links and email
+\usepackage[english]{babel} % linebreaks for english words
+\usepackage{eurosym}
+\usepackage{pbox}           % linebreaks in tables
+
+% footnotes in tables
+\usepackage{footnote}
+\makesavenoteenv{tabular}
+
+% auto update years
+\usepackage{datenumber}
+\newcounter{dateone}
+\newcounter{datetwo}
+\newcommand{\difftoday}[3]{%
+  \setmydatenumber{dateone}{\the\year}{\the\month}{\the\day}%
+  \setmydatenumber{datetwo}{#1}{#2}{#3}%
+  \addtocounter{datetwo}{-\thedateone}%
+  \the\numexpr-\thedatetwo/365\relax
+}
+
+% opening
+\title{商业计划书\\NB}
+\author{Guanyu Yi}
+
+\begin{document}
+\begin{titlepage}
+  \centering
+  \maketitle
+  \thispagestyle{empty}   % discard page number
+  \includegraphics[width=2cm]{images/logo.png}
+  \vfill
+  {\raggedright
+    衣冠宇(CEO)\\
+    地址\\
+    \href{mailto:gary3511@gmail.com}{gary3511@gmail.com}\\
+  }
+\end{titlepage}
+
+\renewcommand{\abstractname}{摘要}
+\begin{abstract}
+  据全球半导体贸易协会（WSTS）统计，2016年全球半导体市场规模达到3,389亿美元，2017年有望突破4,000亿美元大关。其中，英特尔做为芯片产业龙头，自1993年发布的第一个代奔腾CPU以来一直保持世界芯片供应商第一的位置，2016年市场份额占比约15.7\%，无论是从PC、数据中心服务器，还是从物联网芯片等方面均持续增长。三星也借助于存储芯片以及手机销售的优势紧随其后，拥有11.7\%市场份额；高通、海力士、德州 仪器等公司也分别拥有不到5\%的市场份额。
+  
+  中国半导体产业产值从2015年开始呈现爆发性成长，这一次由中国政府大力主导推动整体产业发展，其原因正是在于，目前核心处理器及内存等IC基本上皆仰赖进口，相关IC产品的进口额已连续四年超过2,000亿美元，提升国产化率成为重要课题。从半导体产品的应用市场来看，过去智能手机、平板电脑等智能终端是主要需求，未来的应用则将扩展至物联网、AI、5G、车联网等创新应用，对于正全力冲刺的中国半导体而言，未来的应用将更多元，商机也将更显著。中国最新的工业政策《中国制造2025》将半导体列为需要提升的关键领域。基于上述背景，国内半导体行业会有一批创业公司如雨后春笋般出现，同时传统半导体企业也需要根据创新应用开发新品芯片。
+\end{abstract}
+
+\pagebreak
+\tableofcontents
+\pagebreak
+
+\section{项目概况}
+半导体行业在1987年台积电成立之前只有垂直整合的运营（简称IDM，Integrated Device Manufacture）一种模式，该模式包含了半导体的设计、制造、封装测试以及投向消费市场的全部环节。传统的半导体巨头如Intel、三星、德州仪器等均采用的是IDM模式。由于IDM模式贯穿半导体生产流程的始终，因而不存在流程的对接环节，新半导体产品从研发到面市周期较短，且因为覆盖前端的IC设计和末端的品牌营销环节，具有较高的利润率水平。
+
+随着半导体行业的发展，行业内的分工逐步深化，很多半导体公司都以技术含量及利润较高的IC设计、产品销售等环节作为主业，EDA等半导体辅助工具类业务率先从IDM模式中独立，随后台积电的成立则标示了IC设计及IC制造业务相分离的晶圆代工厂（Foundry）模式正式诞生，从而进一步深化了半导体行业的垂直分工。Foundry模式指的是专门负责半导体芯片的生产制造，并不涉及设计、封测的其他领域。与此同时，Fabless模式也同时诞生，即专业从事IC芯片设计的公司，自此IP商以及封测商也同时壮大，半导体产业的垂直分工模式从而逐步细化。
+
+目前，半导体产业中数字电路的后端物理设计部分已经有较为明显的细化分离趋势，依托于比特币矿机芯片与AI芯片在2016-2017年的快速增长，一些后端设计服务公司如芯原微电子、世芯电子都有较为明显业绩增长<数据>，后端部分的独立性比较强，而且后端部分对工程师的数量与经验都有一定要求，所以后端会有比较明显的细化分离趋势。
+
+半导体数字电路的前端设计部分由于是Fabless公司的核心部分，基本无法进行分离，但是前端验证部分近些年随着创业公司数量的增长与产业转移，已经开始有供不应求的趋势，我们的主营业务便是这一块业务的细化分离。
+
+\section{MVP}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\linewidth]{images/wilson1.png}
+  \caption{ASIC/IC项目中验证时间资源消耗统计}
+  \label{fig:wilson_1}
+\end{figure}
+
+图\ref{fig:wilson_1}是来自Mentor的统计，展示了大部分的项目的验证时间均多于50\%，至于总体平均时间的略略缩短主要得益于近些年UVM技术的完善与成熟，这一点也是我们看中验证部分可以独立剥离的原因之一。
+
+\begin{figure}
+\centering
+\begin{minipage}[t]{.45\textwidth}
+  \centering
+  \includegraphics[width=.95\linewidth]{images/wilson2.png}
+  \captionof{figure}{ASIC/IC设计/验证工程师增长}
+  \label{fig:wilson_2}
+\end{minipage}%
+\begin{minipage}[t]{.45\textwidth}
+  \centering
+  \includegraphics[width=.95\linewidth]{images/wilson3.png}
+  \captionof{figure}{ASIC/IC设计/验证工程师增长对比}
+  \label{fig:wilson_3}
+\end{minipage}
+\end{figure}
+
+图\ref{fig:wilson_2}与\ref{fig:wilson_3}展示了ASIC/IC设计与验证工程师的增长与对比，根据统计，项目中的验证需求明显愈发旺盛。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\linewidth]{images/wilson4.png}
+  \caption{ASIC/IC项目中设计人员的时间消耗统计}
+  \label{fig:wilson_4}
+\end{figure}
+
+图\ref{fig:wilson_4}说明，其实大部分设计人员也是有大概一半的时间在完成验证工作。
+
+根据上图的统计，数字电路验证的需求是逐年不断增加的，主要原因有固化IP部分的复用导致设计人员的缩减，更主要的是ASIC工艺进步带来的SoC复杂性增加，为了减少流片风险，需要投入大量人力进入验证方向保证RTL的正确性（功能/行为/时序），在小公司火速增长的时代，芯片的生产周期缩短会带来抢占用户的先机，所以可以比竞争对手更快出芯片并且降低风险是所有芯片公司的目标，未来可预见fabless公司除了保留核心的算法之外，会将数字电路验证部分剥离出去，将主要资源集中在核心业务上，避免重复造轮子。
+
+我们看到的是为所有半导体公司提供一个优质轮子的前景。
+
+这一块业务在ASIC/IC领域起步较晚，在软件领域类比软件测试部分，已经有比较成熟的产业链，软件测试是一块比较特殊的软件项目过程，如果对软件要求比较高，则需要有软件测试部门控制质量，但是软件测试部门也有绩效，如果建在内部可能会在一些特定的质量问题上产生“纠缠”，如不客观、难以控制、测试人员与研发人员推诿责任的问题。最好的方法是委托专业的企业来负责测试部分，这样测试结果也客观，成本也得到控制，组织结构和决策方式也相对简单一点，一举多得。
+
+ASIC数字验证有其相应的特点，知识体系范围较广，除了ASIC design相关知识之外，还需要UVM验证环境、SystemVerilog、OOP思想、linux、scripts、EDA仿真工具、常见的协议如AMBA、PCIE、USE、DDRARM/X86架构、低功耗UPF、混合仿真等等技术，相对于设计部分相对需要深度的技术面来说跨领域性较强、专业性要求更高，优秀的验证工程师更像是ASIC领域的软件工程师。对于fabless公司来说培养一个优秀的验证工程师的成本很高，但是同时需求又是如此强烈，所以类似软件测试的问题在ASIC部门也或多或少的存在，软件测试的独立委托需求的存在的合理性也同样适用在ASIC验证方向。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\linewidth]{images/wilson5.png}
+  \caption{ASIC/IC项目中验证人员的时间消耗统计}
+  \label{fig:wilson_5}
+\end{figure}
+
+图\ref{fig:wilson_5}展示了验证人员大部分的时间消耗在debug上面，其次是搭建TB与写case。Debug的时间消耗是根据case的情况决定的，基本无法提升效率，但是搭建TB与case的生成其实是可以实现自动化的，从AMD验证工作开始到现在服务过4家公司，我一直致力于ASIC平台搭建，对于验证平台的搭建与架构有自己的心得与成型产品。平台本质上是一个供ASIC流程运行的通用软件平台，基于B/S与C/S架构，在验证部分的应用是提供case生成、运行、coverage收集、regression等一系列流程的自动化，同时还可以将期间解析到的信息送到后台数据库，保留全部历史数据供后续的分析以及挖掘。平台的开发更偏软件一些，需要掌握数据库、client端开发、web端开发、browser端开发等互联网领域的知识，还需要掌握相应流程部分的知识，例如验证部分就是UVM、EDA仿真工具、混合仿真、c++/java/python软件开发等，对于知识体系的广度要求更高。利用上述平台，验证工程师的搭建TB与写case的工作可以实现复用，总体效率可以得到大幅度提升，预计在40\%左右。
+
+那么我们利用“复用”的思路将验证需求独立出来，成立一个ASIC领域专业的第三方验证公司，统一由一批优秀的验证工程完成各个fabless公司委托。在公司内部，利用平台实现通用模块验证case的复用与数据统计，大幅提升效率，实现对ASIC验证产业的分工细化。
+
+对于公司的服务模式类比软件测试服务模式，基于项目验证部分的一站式（turn key）服务。项目规模不同，服务周期也不同，同时验证的milestone会跟随客户的milestone，所以按照目前市场的需求，预估大概服务费用会在50k/ppm，即每人每个月每个项目服务费用在50000￥左右，以年薪500000￥的验证工程师的能力，平均可以并行服务2-3个项目，再计算上平台的40\%的效率提升，平均每人每年的服务费用在2100000￥左右。
+
+\section{Market and competition}
+将ASIC验证独立出来是一块新兴业务，目前做这类业务的公司比较少：
+\begin{enumerate}
+\item 摩尔精英
+  \begin{enumerate}
+  \item 优点：
+    \begin{enumerate}
+    \item 初创公司更友好的服务
+    \item 进入ASIC服务市场较早，已经有一定规模效应
+    \end{enumerate}
+  \item 缺点：
+    \begin{enumerate}
+    \item 经营业务过广
+    \item 目的不明确
+    \end{enumerate}
+  \end{enumerate}
+\end{enumerate}
+
+摩尔精英：不够专注
+这一块进入较早，竞争对手比较少
+渠道主要面向初创小公司（service/platform）、发展中公司（service）、大公司（block service）
+一年接了三四家，市场很明显
+基本每家初创小公司都有验证需求、初始需求
+无需直接承担流片风险
+快速的even break
+
+\section{Strategy}
+独立性/可复用性较高/平台提高效率
+OBTB、interface、protocal、regressin、coverage、jenkins、database（platform）
+SoC/Block(W)/Block(B)
+跟进项目整合ip资源、提供后端备选服务
+服务方面：大公司模块众多、业务面广，小公司缺少人手、时效要求
+平台方面：大公司的平台复杂，小公司平台缺失
+平台后续加密推广，可以形成平台效应
+
+\section{Qualifications of founders}
+Guanyu（platform \& verification）、Gang、Feng（verificaiton）
+
+\section{Financial planning}
+20\%-30\% 10 million
+15\% employee stock pool (new company)
+51\% CEO
+43\%/21\%/21\%/15\%
+
+\section{misc}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=5cm]{images/chart.png}
+  \caption{A chart}
+  \label{fig:chart}
+\end{figure}
+In Image \ref{fig:chart} you can see a chart.
+
+Operating figures of competition:
+\begin{center}
+  \begin{tabular}{l|l|r|r}
+    Company & Product & Price (\$) & \pbox{20cm}{Sales\\(Mio. \$)}\\
+    \hline
+    A & 1 & 100 & 1000\\
+    B\footnote{A footnote about B} & 2 & 100 & 1000\\
+    C & 3 & 100 & 1000\\
+  \end{tabular}
+\end{center}
+
+\begin{figure}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.4\linewidth]{images/logo.png}
+  \caption{A subfigure}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.4\linewidth]{images/logo.png}
+  \caption{A subfigure}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{A figure with two subfigures}
+\label{fig:test}
+\end{figure}
+
+\begin{figure}
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.4\linewidth]{images/logo.png}
+  \captionof{figure}{A figure}
+  \label{fig:test1}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.4\linewidth]{images/logo.png}
+  \captionof{figure}{Another figure}
+  \label{fig:test2}
+\end{minipage}
+\end{figure}
+
+\clearpage
+\end{document}
+
+%%% Local Variables:
+%%% mode: xetex
+%%% TeX-master: t
+%%% End:

@@ -24,7 +24,7 @@ gparted, nvidia, icedtea-web, pepper-flash, filezilla, tcsh, mksh, zsh, texlive-
 *** multimedia
 blender, cinelerra-cv, subtitleeditor, audacity, puddletag
 ** chinese and ibus
-adobe-source-han-sans-cn-fonts
+adobe-source-han-sans-cn-fonts, adobe-source-han-serif-cn-fonts
 ibus, ibus-sunpinyin
 ** python
 beautifulsoup4, diff-match-patch, Django, djangorestframework, httpie, django-reversion, ipython, jupyter, Jinja2, matplotlib, networkx, nltk, numpy, openpyxl, cython, pandas, Pillow, pip, psycopg2, mysqlclient, pytz, pyverilog, scikit-learn, scipy, setuptools, sympy, uwsgi, xlrd, xlutils, xlwt, sphinx, jieba, SQLAlchemy, texttable, nested-dict, gitpython, line_profiler, memory_profiler, pycurl, flask, paramiko, psutil, virtualenv, tox, pylint, pylint-django, nose, truepy, python-pam, pymupdf
@@ -253,7 +253,11 @@ mktexlsr
 \end{document}
 ** xecjk
 \usepackage{xeCJK}
-\setCJKmainfont{SourceHanSansCN-Regular}
+\defaultCJKfontfeatures{Scale=1.15}
+\setCJKmainfont{SourceHanSerifCN-Regular}
+\setCJKmonofont{SourceHanSerifCN-Regular}
+\setmainfont{SourceHanSerifCN-Regular}
+\renewcommand{\baselinestretch}{1.7}
 \begin{document}
 你好，\XeTeX
 \end{document}

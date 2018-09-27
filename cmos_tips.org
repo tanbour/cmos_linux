@@ -363,6 +363,7 @@ set extra linux kernel parameter "iommu=pt" to make iommu work in pass through m
 ** efibootmgr
 efibootmgr --create --disk /dev/sda --part 1 --gpt --label "Arch Linux" --loader /vmlinuz-linux --unicode "root=/dev/sda2 rw initrd=/initramfs-linux.img iommu=pt"
 efibootmgr --create --disk /dev/sda --part 1 --gpt --label "Arch Linux" --loader /vmlinuz-linux --unicode "root=/dev/sda2 rw initrd=/initramfs-linux.img iommu=pt drm.edid_firmware=edid/1920x1080.bin"
+efibootmgr --create --disk /dev/sda --part 1 --gpt --label "Arch Linux" --loader /vmlinuz-linux --unicode "root=/dev/sda2 rw initrd=/initramfs-linux.img iommu=pt drm.edid_firmware=edid/ZMI0015.bin"
 efibootmgr --verbose
 efibootmgr -b 0000 -B
 # rm /sys/firmware/efi/efivars/dump-*

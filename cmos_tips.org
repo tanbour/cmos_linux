@@ -288,6 +288,15 @@ vim .git/info/sparse-checkout
 /core/
 git checkout master
 
+undoing a "git push"
+git push -f origin last_known_good_commit:branch_name
+
+undoing a "git commit"
+git reset --hard
+
+undoing a "modification"
+git checkout -- .
+
 * cleartool
 cleartool ci \!:1 \!:2 `cleartool lsco -cview -me -short -r`
 cleartool find . -type f -branch "brtype(<branch>)" -print
@@ -829,3 +838,6 @@ mail.biff.use_system_alert = true
 * android
 ** nexus
 sed -i 's/ro.setupwizard.network_required=true/ro.setupwizard.network_required=false/g' /system/build.prop
+* openfortivpn
+** connection
+sudo openfortivpn 116.228.193.14:5550 -u ss -p ss@1234 --trusted-cert a6cdc5b1bef884b26c94e4851d9b6185df70f3a53e3f124ed87b8acbf7c47614

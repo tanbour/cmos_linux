@@ -841,3 +841,23 @@ sed -i 's/ro.setupwizard.network_required=true/ro.setupwizard.network_required=f
 * openfortivpn
 ** connection
 sudo openfortivpn 116.228.193.14:5550 -u ss -p ss@1234 --trusted-cert a6cdc5b1bef884b26c94e4851d9b6185df70f3a53e3f124ed87b8acbf7c47614
+* deff
+module DEFF (
+  input clock, reset, in,
+  output out
+);
+
+  reg trig1, trig2;
+
+  assign out = trig1^trig2;
+
+  always @(posedge clock, posedge reset) begin
+    if (reset)  trig1 <= 0;
+    else  trig1 <= in^trig2;
+  end
+
+  always @(negedge clock, posedge reset) begin
+    if (reset)  trig2 <= 0;
+    else  trig2 <= in^trig1;
+  end
+endmodule

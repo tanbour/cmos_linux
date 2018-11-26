@@ -24,8 +24,10 @@ xorg-server, xorg-xinit, xorg-xrandr, xorg-xprop, xautolock, xterm, i3-wm, i3sta
 *** program
 feh, mupdf, udevil
 ** client only
+*** de and exts
+gnome, EasyScreenCast, Screenshot Tool, system-monitor
 *** program
-gnome, gparted, nvidia, icedtea-web, pepper-flash, filezilla, tcsh, mksh, zsh, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, gv, xchm, gnuplot, graphviz, cups-pdf, bchunk, aspell-en, hunspell-en, tigervnc, freerdp, celestia, gnugo, libreoffice, android-tools, read-edid
+gparted, nvidia, icedtea-web, pepper-flash, filezilla, tcsh, mksh, zsh, texlive-most, texlive-langchinese, imagemagick, gimp, dia, inkscape, gv, xchm, gnuplot, graphviz, cups-pdf, bchunk, aspell-en, hunspell-en, tigervnc, freerdp, celestia, gnugo, libreoffice, android-tools, read-edid
 *** multimedia
 blender, cinelerra-cv, subtitleeditor, audacity, picard
 ** chinese and ibus
@@ -843,9 +845,15 @@ mail.biff.use_system_alert = true
 * android
 ** nexus
 sed -i 's/ro.setupwizard.network_required=true/ro.setupwizard.network_required=false/g' /system/build.prop
+
 * openfortivpn
 ** connection
 sudo openfortivpn 116.228.193.14:5550 -u ss -p ss@1234 --trusted-cert a6cdc5b1bef884b26c94e4851d9b6185df70f3a53e3f124ed87b8acbf7c47614
+
+* teamviewer
+** init
+sudo systemctl start teamviewerd
+
 * deff
 module DEFF (
   input clock, reset, in,
